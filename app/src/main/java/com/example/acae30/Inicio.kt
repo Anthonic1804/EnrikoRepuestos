@@ -114,7 +114,7 @@ class Inicio : AppCompatActivity() {
         super.onResume()
         menu() //llama los botones de menu
         funciones!!.VendedorVerific(this) //valida que haya sesion
-        mostrarFecha() //MOSTRANDOLA FECHA DEL INVENTARIO
+        mostrarFecha() //MOSTRANDOLA FECHA DEL INVENTARIOS
     }
 
     //FUNCION PARA OBTENER LA FECHA DE INVENTARIO
