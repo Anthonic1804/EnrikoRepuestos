@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="350dp"
+    android:layout_height="wrap_content"
+    android:animationCache="?android:attr/windowOverscan"
+    android:background="#FFFFFF"
+    android:backgroundTint="@color/colorAccent"
+    android:padding="50dp">
+
+    <TextView
+        android:id="@+id/txtprecionuevo"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="PRECIO $:"
+        android:textAlignment="center"
+        android:textColor="@color/colorPrimaryDark"
+        android:textSize="18sp"
+        android:textStyle="bold"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        tools:ignore="MissingConstraints" />
+
+    <EditText
+        android:id="@+id/nuevoprecio"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="25dp"
+        android:layout_marginBottom="155dp"
+        android:padding="5dp"
+        android:ems="10"
+        android:text="0"
+        android:background="#F5F5DC"
+        android:textAlignment="center"
+        android:textColor="@color/colordark"
+        android:textCursorDrawable="@drawable/black_cursor"
+        android:textSize="25sp"
+        android:inputType="numberDecimal"
+        tools:layout_editor_absoluteX="40dp"
+        tools:layout_editor_absoluteY="61dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/txtprecionuevo" />
+
+    <Button
+        android:id="@+id/btnguardarnuevoprecio"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="15dp"
+        android:text="AGREGAR"
+        android:backgroundTint="#43A047"
+        android:textColor="@color/colorAccent"
+        android:textStyle="bold"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/nuevoprecio"/>
+
+
+</androidx.constraintlayout.widget.ConstraintLayout>

@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="com.example.acae30">
+
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.CAMERA" />
+    <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.READ_PRIVILEGED_PHONE_STATE" />
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />
+
+    <application
+        android:allowBackup="false"
+        android:icon="@mipmap/ic_main_round"
+        android:label="ACAE"
+        android:largeHeap="true"
+        android:roundIcon="@mipmap/ic_main_round"
+        android:supportsRtl="true"
+        android:theme="@style/AppTheme"
+        android:hardwareAccelerated="true"
+        android:usesCleartextTraffic="true">
+        <activity
+            android:name=".activity_editCliente"
+            android:exported="false" />
+        <activity
+            android:name=".Visita"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".CuentasDetalle"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".Cuentas_list"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".Inventariodetalle"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".ClientesDetalle"
+            android:parentActivityName=".Clientes"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".Producto_agregar"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".Detallepedido"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".Pedido"
+            android:label="@string/title_activity_pedido"
+            android:parentActivityName=".Inicio"
+            android:screenOrientation="portrait"
+            android:theme="@style/AppTheme.NoActionBar" />
+        <activity
+            android:name=".Producto_detalle"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".Inventario"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".Clientes"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".Configuracion"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".carga_datos"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".Inicio"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".Login"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".MainActivity"
+            android:screenOrientation="portrait"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+    </application>
+
+</manifest>

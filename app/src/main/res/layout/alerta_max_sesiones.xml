@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="350dp"
+    android:layout_height="wrap_content"
+    android:animationCache="?android:attr/windowOverscan"
+    android:background="#FFFFFF"
+    android:backgroundTint="@color/colorAccent"
+    android:padding="50dp">
+
+    <TextView
+        android:id="@+id/txtmensaje"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="NO SE PUEDE CONTINUAR POR QUE SE HA LLEGADO AL MÁXIMO DE SESIONES"
+        android:textAlignment="center"
+        android:textColor="@android:color/holo_red_light"
+        android:textSize="24sp"
+        android:textStyle="bold"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        tools:ignore="MissingConstraints"
+        tools:layout_editor_absoluteY="50dp" />
+
+    <Button
+        android:id="@+id/btnok"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="25dp"
+        android:backgroundTint="@android:color/holo_red_light"
+        android:text="OK"
+        android:textColor="@color/colorAccent"
+        android:textStyle="bold"
+        android:textSize="20sp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/txtmensaje"
+        tools:layout_editor_absoluteY="159dp" />
+
+
+</androidx.constraintlayout.widget.ConstraintLayout>

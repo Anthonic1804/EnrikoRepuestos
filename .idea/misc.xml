@@ -1,0 +1,166 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="DesignSurface">
+    <option name="filePathToZoomLevelMap">
+      <map>
+        <entry key="..\:/Drive/SISTEMAS/App_aguila_existencias/APP/Codigo/app/src/main/res/layout/activity_carga_datos.xml" value="0.25" />
+        <entry key="..\:/Drive/SISTEMAS/App_aguila_existencias/APP/Codigo/app/src/main/res/layout/activity_inicio.xml" value="0.25905797101449274" />
+        <entry key="..\:/Drive/SISTEMAS/App_aguila_existencias/APP/Codigo/app/src/main/res/layout/activity_login.xml" value="0.25905797101449274" />
+        <entry key="..\:/Users/DELL/.gradle/caches/transforms-3/c640667067def1d5a0fc222772cb46ab/transformed/appcompat-1.1.0/res/layout/support_simple_spinner_dropdown_item.xml" value="0.2" />
+        <entry key="..\:/Users/DELL/AppData/Local/Android/Sdk/sources/android-30/com/android/settingslib/license/platforms/android-30/data/res/layout/simple_spinner_item.xml" value="0.17831813576494426" />
+        <entry key="..\:/Users/DELLI3/Documents/Desarrollo/APP_Codigo/ACAE_DM/app/src/main/res/layout/activity_carga_datos.xml" value="0.36666666666666664" />
+        <entry key="..\:/Users/DELLI3/Documents/Desarrollo/APP_Codigo/ACAE_DM/app/src/main/res/layout/activity_clientes.xml" value="0.18614130434782608" />
+        <entry key="..\:/Users/DELLI3/Documents/Desarrollo/APP_Codigo/ACAE_DM/app/src/main/res/layout/activity_clientes_detalle.xml" value="0.33" />
+        <entry key="..\:/Users/DELLI3/Documents/Desarrollo/APP_Codigo/ACAE_DM/app/src/main/res/layout/activity_cuentas_detalle.xml" value="0.36666666666666664" />
+        <entry key="..\:/Users/DELLI3/Documents/Desarrollo/APP_Codigo/ACAE_DM/app/src/main/res/layout/activity_cuentas_list.xml" value="0.36666666666666664" />
+        <entry key="..\:/Users/DELLI3/Documents/Desarrollo/APP_Codigo/ACAE_DM/app/src/main/res/layout/activity_inicio.xml" value="0.19021739130434784" />
+        <entry key="..\:/Users/DELLI3/Documents/Desarrollo/APP_Codigo/ACAE_DM/app/src/main/res/layout/activity_inventario.xml" value="0.36666666666666664" />
+        <entry key="..\:/Users/DELLI3/Documents/Desarrollo/APP_Codigo/ACAE_DM/app/src/main/res/layout/activity_inventariodetalle.xml" value="0.36666666666666664" />
+        <entry key="..\:/Users/DELLI3/Documents/Desarrollo/APP_Codigo/ACAE_DM/app/src/main/res/layout/activity_main.xml" value="0.19021739130434784" />
+        <entry key="..\:/Users/DELLI3/Documents/Desarrollo/APP_Codigo/ACAE_DM/app/src/main/res/layout/activity_pedido.xml" value="0.1816123188405797" />
+        <entry key="..\:/Users/DELLI3/Documents/Desarrollo/APP_Codigo/ACAE_DM/app/src/main/res/layout/activity_producto_agregar.xml" value="0.36666666666666664" />
+        <entry key="..\:/Users/DELLI3/Documents/Desarrollo/APP_Codigo/ACAE_DM/app/src/main/res/layout/activity_producto_detalle.xml" value="0.36666666666666664" />
+        <entry key="..\:/Users/DELLI3/Documents/Desarrollo/APP_Codigo/ACAE_DM/app/src/main/res/layout/activity_visita.xml" value="0.33" />
+        <entry key="..\:/Users/DELLI3/Documents/Desarrollo/APP_Codigo/ACAE_DM/app/src/main/res/layout/carta_detalle_cuentas.xml" value="0.36666666666666664" />
+        <entry key="..\:/Users/DELLI3/Documents/Desarrollo/APP_Codigo/ACAE_DM/app/src/main/res/layout/carta_inventario.xml" value="0.36666666666666664" />
+        <entry key="..\:/Users/DELLI3/Documents/Desarrollo/APP_Codigo/ACAE_DM/app/src/main/res/layout/carta_pedidos.xml" value="0.33" />
+        <entry key="..\:/Users/DELLI3/Documents/Desarrollo/APP_Codigo/ACAE_DM/app/src/main/res/layout/cartaproducto.xml" value="0.1546875" />
+        <entry key="..\:/Users/DELLI3/Documents/Desarrollo/APP_Codigo/ACAE_DM/app/src/main/res/layout/content_pedido.xml" value="0.25" />
+        <entry key="..\:/Users/DELLI3/Documents/Desarrollo/APP_Codigo/ACAE_DM/app/src/main/res/layout/detalle_pedido.xml" value="0.33" />
+        <entry key="..\:/Users/DELLI3/Documents/Desarrollo/APP_Codigo/ACAE_DM/app/src/main/res/layout/precios_detalle.xml" value="0.36666666666666664" />
+        <entry key="..\:/aguila2/APP ACTUALIZADA/Codigo 06-09-2022/app/src/main/res/layout/activity_carga_datos.xml" value="0.14402173913043478" />
+        <entry key="..\:/aguila2/APP ACTUALIZADA/Codigo 06-09-2022/app/src/main/res/layout/activity_clientes.xml" value="0.14402173913043478" />
+        <entry key="..\:/aguila2/APP ACTUALIZADA/Codigo 06-09-2022/app/src/main/res/layout/activity_configuracion.xml" value="0.25" />
+        <entry key="..\:/aguila2/APP ACTUALIZADA/Codigo 06-09-2022/app/src/main/res/layout/activity_cuentas_detalle.xml" value="0.25" />
+        <entry key="..\:/aguila2/APP ACTUALIZADA/Codigo 06-09-2022/app/src/main/res/layout/activity_cuentas_list.xml" value="0.25" />
+        <entry key="..\:/aguila2/APP ACTUALIZADA/Codigo 06-09-2022/app/src/main/res/layout/activity_detallepedido.xml" value="0.25" />
+        <entry key="..\:/aguila2/APP ACTUALIZADA/Codigo 06-09-2022/app/src/main/res/layout/activity_inicio.xml" value="0.20416666666666666" />
+        <entry key="..\:/aguila2/APP ACTUALIZADA/Codigo 06-09-2022/app/src/main/res/layout/activity_inventario.xml" value="0.25" />
+        <entry key="..\:/aguila2/APP ACTUALIZADA/Codigo 06-09-2022/app/src/main/res/layout/activity_inventariodetalle.xml" value="0.25" />
+        <entry key="..\:/aguila2/APP ACTUALIZADA/Codigo 06-09-2022/app/src/main/res/layout/activity_login.xml" value="0.20416666666666666" />
+        <entry key="..\:/aguila2/APP ACTUALIZADA/Codigo 06-09-2022/app/src/main/res/layout/activity_main.xml" value="0.25" />
+        <entry key="..\:/aguila2/APP ACTUALIZADA/Codigo 06-09-2022/app/src/main/res/layout/activity_pedido.xml" value="0.25" />
+        <entry key="..\:/aguila2/APP ACTUALIZADA/Codigo 06-09-2022/app/src/main/res/layout/activity_producto_agregar.xml" value="0.25" />
+        <entry key="..\:/aguila2/APP ACTUALIZADA/Codigo 06-09-2022/app/src/main/res/layout/activity_producto_detalle.xml" value="0.14402173913043478" />
+        <entry key="..\:/aguila2/APP ACTUALIZADA/Codigo 06-09-2022/app/src/main/res/layout/activity_visita.xml" value="0.14402173913043478" />
+        <entry key="..\:/aguila2/APP ACTUALIZADA/Codigo 06-09-2022/app/src/main/res/layout/alert_cerrar_sesion_dispositivos.xml" value="0.14402173913043478" />
+        <entry key="..\:/aguila2/APP ACTUALIZADA/Codigo 06-09-2022/app/src/main/res/layout/alert_eliminar.xml" value="0.14402173913043478" />
+        <entry key="..\:/aguila2/APP ACTUALIZADA/Codigo 06-09-2022/app/src/main/res/layout/alerta_carga.xml" value="0.14402173913043478" />
+        <entry key="..\:/aguila2/APP ACTUALIZADA/Codigo 06-09-2022/app/src/main/res/layout/alerta_gps.xml" value="0.14402173913043478" />
+        <entry key="..\:/aguila2/APP ACTUALIZADA/Codigo 06-09-2022/app/src/main/res/layout/alerta_max_sesiones.xml" value="0.14402173913043478" />
+        <entry key="..\:/aguila2/APP ACTUALIZADA/Codigo 06-09-2022/app/src/main/res/layout/alerta_precio.xml" value="0.14402173913043478" />
+        <entry key="..\:/aguila2/APP ACTUALIZADA/Codigo 06-09-2022/app/src/main/res/layout/carta_detalle_cuentas.xml" value="0.14402173913043478" />
+        <entry key="..\:/aguila2/APP ACTUALIZADA/Codigo 06-09-2022/app/src/main/res/layout/carta_inventario.xml" value="0.20212765957446807" />
+        <entry key="..\:/aguila2/APP ACTUALIZADA/Codigo 06-09-2022/app/src/main/res/layout/carta_pedidos.xml" value="0.14402173913043478" />
+        <entry key="..\:/aguila2/APP ACTUALIZADA/Codigo 06-09-2022/app/src/main/res/layout/cartaproducto.xml" value="0.14402173913043478" />
+        <entry key="..\:/aguila2/APP ACTUALIZADA/Codigo 06-09-2022/app/src/main/res/layout/content_pedido.xml" value="0.14402173913043478" />
+        <entry key="..\:/aguila2/APP ACTUALIZADA/Codigo 06-09-2022/app/src/main/res/layout/detalle_pedido.xml" value="0.14402173913043478" />
+        <entry key="..\:/aguila2/APP ACTUALIZADA/Codigo 06-09-2022/app/src/main/res/layout/precios_detalle.xml" value="0.14402173913043478" />
+        <entry key="..\:/aguila2/App_aguila_existencias/APP/Codigo/app/src/main/res/layout/activity_clientes.xml" value="0.1796875" />
+        <entry key="..\:/aguila2/App_aguila_existencias/APP/Codigo/app/src/main/res/layout/activity_clientes_detalle.xml" value="0.25" />
+        <entry key="..\:/aguila2/App_aguila_existencias/APP/Codigo/app/src/main/res/layout/activity_configuracion.xml" value="0.1796875" />
+        <entry key="..\:/aguila2/App_aguila_existencias/APP/Codigo/app/src/main/res/layout/activity_cuentas_detalle.xml" value="0.1796875" />
+        <entry key="..\:/aguila2/App_aguila_existencias/APP/Codigo/app/src/main/res/layout/activity_cuentas_list.xml" value="0.1796875" />
+        <entry key="..\:/aguila2/App_aguila_existencias/APP/Codigo/app/src/main/res/layout/activity_detallepedido.xml" value="0.22" />
+        <entry key="..\:/aguila2/App_aguila_existencias/APP/Codigo/app/src/main/res/layout/activity_inicio.xml" value="0.1796875" />
+        <entry key="..\:/aguila2/App_aguila_existencias/APP/Codigo/app/src/main/res/layout/activity_inventario.xml" value="0.3365036231884058" />
+        <entry key="..\:/aguila2/App_aguila_existencias/APP/Codigo/app/src/main/res/layout/activity_inventariodetalle.xml" value="0.3365036231884058" />
+        <entry key="..\:/aguila2/App_aguila_existencias/APP/Codigo/app/src/main/res/layout/activity_main.xml" value="0.1796875" />
+        <entry key="..\:/aguila2/App_aguila_existencias/APP/Codigo/app/src/main/res/layout/activity_pedido.xml" value="0.13949275362318841" />
+        <entry key="..\:/aguila2/App_aguila_existencias/APP/Codigo/app/src/main/res/layout/activity_producto_agregar.xml" value="0.3365036231884058" />
+        <entry key="..\:/aguila2/App_aguila_existencias/APP/Codigo/app/src/main/res/layout/activity_producto_detalle.xml" value="0.3365036231884058" />
+        <entry key="..\:/aguila2/App_aguila_existencias/APP/Codigo/app/src/main/res/layout/alerta_max_sesiones.xml" value="0.1796875" />
+        <entry key="..\:/aguila2/App_aguila_existencias/APP/Codigo/app/src/main/res/layout/alerta_precio.xml" value="0.1796875" />
+        <entry key="..\:/aguila2/App_aguila_existencias/APP/Codigo/app/src/main/res/layout/carta_detalle_cuentas.xml" value="0.1796875" />
+        <entry key="..\:/aguila2/App_aguila_existencias/APP/Codigo/app/src/main/res/layout/carta_inventario.xml" value="0.1796875" />
+        <entry key="..\:/aguila2/App_aguila_existencias/APP/Codigo/app/src/main/res/layout/carta_pedidos.xml" value="0.3333333333333333" />
+        <entry key="..\:/aguila2/App_aguila_existencias/APP/Codigo/app/src/main/res/layout/cartaproducto.xml" value="0.1796875" />
+        <entry key="..\:/aguila2/App_aguila_existencias/APP/Codigo/app/src/main/res/layout/content_pedido.xml" value="0.13949275362318841" />
+        <entry key="..\:/aguila2/App_aguila_existencias/APP/Codigo/app/src/main/res/layout/detalle_pedido.xml" value="0.22" />
+        <entry key="..\:/aguila2/App_aguila_existencias/APP/Codigo/app/src/main/res/layout/escalas.xml" value="0.3365036231884058" />
+        <entry key="..\:/aguila2/App_aguila_existencias/APP/Codigo/app/src/main/res/layout/precios_detalle.xml" value="0.1796875" />
+        <entry key="..\:/aguila2/App_aguila_existencias/Codigo 07-09-2022/app/src/main/res/drawable/border_description.xml" value="0.3665" />
+        <entry key="..\:/aguila2/App_aguila_existencias/Codigo 07-09-2022/app/src/main/res/drawable/border_description_2.xml" value="0.3675" />
+        <entry key="..\:/aguila2/App_aguila_existencias/Codigo 07-09-2022/app/src/main/res/drawable/border_textbox.xml" value="0.325" />
+        <entry key="..\:/aguila2/App_aguila_existencias/Codigo 07-09-2022/app/src/main/res/drawable/ic_add.xml" value="0.3675" />
+        <entry key="..\:/aguila2/App_aguila_existencias/Codigo 07-09-2022/app/src/main/res/drawable/ic_dolar.xml" value="0.3675" />
+        <entry key="..\:/aguila2/App_aguila_existencias/Codigo 07-09-2022/app/src/main/res/drawable/ic_pass.xml" value="0.3275" />
+        <entry key="..\:/aguila2/App_aguila_existencias/Codigo 07-09-2022/app/src/main/res/drawable/ic_user.xml" value="0.3275" />
+        <entry key="..\:/aguila2/App_aguila_existencias/Codigo 07-09-2022/app/src/main/res/layout/activity_carga_datos.xml" value="0.36666666666666664" />
+        <entry key="..\:/aguila2/App_aguila_existencias/Codigo 07-09-2022/app/src/main/res/layout/activity_clientes.xml" value="0.36666666666666664" />
+        <entry key="..\:/aguila2/App_aguila_existencias/Codigo 07-09-2022/app/src/main/res/layout/activity_clientes_detalle.xml" value="0.5" />
+        <entry key="..\:/aguila2/App_aguila_existencias/Codigo 07-09-2022/app/src/main/res/layout/activity_clientes_detalle_2.xml" value="0.5" />
+        <entry key="..\:/aguila2/App_aguila_existencias/Codigo 07-09-2022/app/src/main/res/layout/activity_clientes_detalle_22.xml" value="0.36666666666666664" />
+        <entry key="..\:/aguila2/App_aguila_existencias/Codigo 07-09-2022/app/src/main/res/layout/activity_cuentas_detalle.xml" value="0.36666666666666664" />
+        <entry key="..\:/aguila2/App_aguila_existencias/Codigo 07-09-2022/app/src/main/res/layout/activity_cuentas_detalle_2.xml" value="0.36666666666666664" />
+        <entry key="..\:/aguila2/App_aguila_existencias/Codigo 07-09-2022/app/src/main/res/layout/activity_cuentas_detalle_22.xml" value="0.36666666666666664" />
+        <entry key="..\:/aguila2/App_aguila_existencias/Codigo 07-09-2022/app/src/main/res/layout/activity_cuentas_list.xml" value="0.36666666666666664" />
+        <entry key="..\:/aguila2/App_aguila_existencias/Codigo 07-09-2022/app/src/main/res/layout/activity_detallepedido.xml" value="0.36666666666666664" />
+        <entry key="..\:/aguila2/App_aguila_existencias/Codigo 07-09-2022/app/src/main/res/layout/activity_inicio.xml" value="0.36666666666666664" />
+        <entry key="..\:/aguila2/App_aguila_existencias/Codigo 07-09-2022/app/src/main/res/layout/activity_inventario.xml" value="0.36666666666666664" />
+        <entry key="..\:/aguila2/App_aguila_existencias/Codigo 07-09-2022/app/src/main/res/layout/activity_inventariodetalle.xml" value="0.33" />
+        <entry key="..\:/aguila2/App_aguila_existencias/Codigo 07-09-2022/app/src/main/res/layout/activity_inventariodetalle_2.xml" value="0.33" />
+        <entry key="..\:/aguila2/App_aguila_existencias/Codigo 07-09-2022/app/src/main/res/layout/activity_inventariodetalle_22.xml" value="0.33" />
+        <entry key="..\:/aguila2/App_aguila_existencias/Codigo 07-09-2022/app/src/main/res/layout/activity_login.xml" value="0.33" />
+        <entry key="..\:/aguila2/App_aguila_existencias/Codigo 07-09-2022/app/src/main/res/layout/activity_main.xml" value="0.28804347826086957" />
+        <entry key="..\:/aguila2/App_aguila_existencias/Codigo 07-09-2022/app/src/main/res/layout/activity_producto_agregar.xml" value="0.36666666666666664" />
+        <entry key="..\:/aguila2/App_aguila_existencias/Codigo 07-09-2022/app/src/main/res/layout/activity_producto_detalle.xml" value="0.36666666666666664" />
+        <entry key="..\:/aguila2/App_aguila_existencias/Codigo 07-09-2022/app/src/main/res/layout/activity_visita.xml" value="0.36666666666666664" />
+        <entry key="..\:/aguila2/App_aguila_existencias/Codigo 07-09-2022/app/src/main/res/layout/alerta_costo.xml" value="0.36666666666666664" />
+        <entry key="..\:/aguila2/App_aguila_existencias/Codigo 07-09-2022/app/src/main/res/layout/alerta_gps.xml" value="0.36666666666666664" />
+        <entry key="..\:/aguila2/App_aguila_existencias/Codigo 07-09-2022/app/src/main/res/layout/alerta_precio.xml" value="0.36666666666666664" />
+        <entry key="..\:/aguila2/App_aguila_existencias/Codigo 07-09-2022/app/src/main/res/layout/carta_detalle_cuentas.xml" value="0.36666666666666664" />
+        <entry key="..\:/aguila2/App_aguila_existencias/Codigo 07-09-2022/app/src/main/res/layout/carta_inventario.xml" value="0.36666666666666664" />
+        <entry key="..\:/aguila2/App_aguila_existencias/Codigo 07-09-2022/app/src/main/res/layout/carta_pedidos.xml" value="0.32360742705570295" />
+        <entry key="..\:/aguila2/App_aguila_existencias/Codigo 07-09-2022/app/src/main/res/layout/cartaproducto.xml" value="0.32707774798927614" />
+        <entry key="..\:/aguila2/App_aguila_existencias/Codigo 07-09-2022/app/src/main/res/layout/detalle_pedido.xml" value="0.36666666666666664" />
+        <entry key="..\:/aguila2/App_aguila_existencias/Codigo 07-09-2022/app/src/main/res/layout/escalas.xml" value="0.33" />
+        <entry key="..\:/aguila2/App_aguila_existencias/Codigo 17-09-2022/app/src/main/res/drawable/ic_bedit.xml" value="0.3075" />
+        <entry key="..\:/aguila2/App_aguila_existencias/Codigo 17-09-2022/app/src/main/res/drawable/ic_editperson.xml" value="0.3075" />
+        <entry key="..\:/aguila2/App_aguila_existencias/Codigo 17-09-2022/app/src/main/res/layout/activity_clientes.xml" value="0.36666666666666664" />
+        <entry key="..\:/aguila2/App_aguila_existencias/Codigo 17-09-2022/app/src/main/res/layout/activity_clientes_detalle.xml" value="0.36666666666666664" />
+        <entry key="..\:/aguila2/App_aguila_existencias/Codigo 17-09-2022/app/src/main/res/layout/activity_cuentas_detalle.xml" value="0.36666666666666664" />
+        <entry key="..\:/aguila2/App_aguila_existencias/Codigo 17-09-2022/app/src/main/res/layout/activity_edit_cliente.xml" value="0.33" />
+        <entry key="..\:/aguila2/App_aguila_existencias/Codigo 17-09-2022/app/src/main/res/layout/activity_inicio.xml" value="0.36666666666666664" />
+        <entry key="..\:/aguila2/App_aguila_existencias/Codigo 17-09-2022/app/src/main/res/layout/activity_inventario.xml" value="0.36666666666666664" />
+        <entry key="..\:/aguila2/App_aguila_existencias/Codigo 17-09-2022/app/src/main/res/layout/activity_inventariodetalle.xml" value="0.36666666666666664" />
+        <entry key="..\:/aguila2/App_aguila_existencias/Codigo 17-09-2022/app/src/main/res/layout/activity_producto_agregar.xml" value="0.36666666666666664" />
+        <entry key="..\:/aguila2/App_aguila_existencias/Codigo 17-09-2022/app/src/main/res/layout/activity_producto_detalle.xml" value="0.36666666666666664" />
+        <entry key="..\:/aguila2/App_aguila_existencias/Codigo 17-09-2022/app/src/main/res/layout/alerta_precio.xml" value="0.36666666666666664" />
+        <entry key="..\:/aguila2/App_aguila_existencias/Codigo 17-09-2022/app/src/main/res/layout/carta_inventario.xml" value="0.36666666666666664" />
+        <entry key="..\:/aguila2/App_aguila_existencias/Codigo 24-08-2022/app/src/main/res/drawable/boton_redondeado.xml" value="0.3675" />
+        <entry key="..\:/aguila2/App_aguila_existencias/Codigo 24-08-2022/app/src/main/res/layout/activity_clientes.xml" value="0.36666666666666664" />
+        <entry key="..\:/aguila2/App_aguila_existencias/Codigo 24-08-2022/app/src/main/res/layout/activity_clientes_detalle.xml" value="0.5794238683127572" />
+        <entry key="..\:/aguila2/App_aguila_existencias/Codigo 24-08-2022/app/src/main/res/layout/activity_cuentas_list.xml" value="0.36666666666666664" />
+        <entry key="..\:/aguila2/App_aguila_existencias/Codigo 24-08-2022/app/src/main/res/layout/activity_detallepedido.xml" value="0.36666666666666664" />
+        <entry key="..\:/aguila2/App_aguila_existencias/Codigo 24-08-2022/app/src/main/res/layout/activity_inicio.xml" value="0.33" />
+        <entry key="..\:/aguila2/App_aguila_existencias/Codigo 24-08-2022/app/src/main/res/layout/activity_inventariodetalle.xml" value="0.36666666666666664" />
+        <entry key="..\:/aguila2/App_aguila_existencias/Codigo 24-08-2022/app/src/main/res/layout/activity_pedido.xml" value="0.36666666666666664" />
+        <entry key="..\:/aguila2/App_aguila_existencias/Codigo 24-08-2022/app/src/main/res/layout/activity_producto_agregar.xml" value="0.36666666666666664" />
+        <entry key="..\:/aguila2/App_aguila_existencias/Codigo 24-08-2022/app/src/main/res/layout/activity_producto_detalle.xml" value="0.36666666666666664" />
+        <entry key="..\:/aguila2/App_aguila_existencias/Codigo 24-08-2022/app/src/main/res/layout/alerta_precio.xml" value="0.36666666666666664" />
+        <entry key="..\:/aguila2/App_aguila_existencias/Codigo 24-08-2022/app/src/main/res/layout/carta_detalle_cuentas.xml" value="0.36666666666666664" />
+        <entry key="..\:/aguila2/App_aguila_existencias/Codigo 24-08-2022/app/src/main/res/layout/carta_pedidos.xml" value="0.36666666666666664" />
+        <entry key="..\:/aguila2/App_aguila_existencias/Codigo 24-08-2022/app/src/main/res/layout/content_pedido.xml" value="0.36666666666666664" />
+        <entry key="..\:/aguila2/App_aguila_existencias/Codigo 24-08-2022/app/src/main/res/layout/detalle_pedido.xml" value="0.36666666666666664" />
+        <entry key="..\:/aguila2/App_aguila_existencias/Codigo 24-08-2022/app/src/main/res/layout/fragment_second.xml" value="0.75" />
+        <entry key="..\:/aguila2/App_aguila_existencias/Codigo 24-08-2022/app/src/main/res/layout/precios_detalle.xml" value="0.36666666666666664" />
+        <entry key="..\:/aguila2/App_aguila_existencias/Codigo 27-09-2022/app/src/main/res/layout/activity_configuracion.xml" value="0.27291666666666664" />
+        <entry key="..\:/aguila2/App_aguila_existencias/Codigo 31-08-2022/app/src/main/res/layout/activity_carga_datos.xml" value="0.33" />
+        <entry key="..\:/aguila2/App_aguila_existencias/Codigo 31-08-2022/app/src/main/res/layout/activity_clientes.xml" value="0.5" />
+        <entry key="..\:/aguila2/App_aguila_existencias/Codigo 31-08-2022/app/src/main/res/layout/activity_inicio.xml" value="0.33" />
+        <entry key="..\:/aguila2/App_aguila_existencias/Codigo 31-08-2022/app/src/main/res/layout/activity_inventariodetalle.xml" value="0.33" />
+        <entry key="..\:/aguila2/App_aguila_existencias/Codigo 31-08-2022/app/src/main/res/layout/activity_main.xml" value="0.36666666666666664" />
+        <entry key="..\:/aguila2/App_aguila_existencias/Codigo 31-08-2022/app/src/main/res/layout/alerta_carga.xml" value="0.36666666666666664" />
+        <entry key="..\:/aguila2/App_aguila_existencias/Codigo 31-08-2022/app/src/main/res/layout/carta_inventario.xml" value="0.36666666666666664" />
+        <entry key="..\:/aguila2/App_aguila_existencias/Codigo 31-08-2022/app/src/main/res/layout/cartaproducto.xml" value="0.33" />
+      </map>
+    </option>
+  </component>
+  <component name="ProjectRootManager" version="2" languageLevel="JDK_11" project-jdk-name="1.8" project-jdk-type="JavaSDK">
+    <output url="file://$PROJECT_DIR$/build/classes" />
+  </component>
+  <component name="ProjectType">
+    <option name="id" value="Android" />
+  </component>
+</project>

@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="350dp"
+    android:layout_height="wrap_content"
+    android:animationCache="?android:attr/windowOverscan"
+    android:background="#FFFFFF"
+    android:backgroundTint="@color/colorAccent"
+    android:padding="50dp">
+
+    <TextView
+        android:id="@+id/txtvercosto"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="COSTO $:"
+        android:textAlignment="center"
+        android:textColor="@color/colorPrimaryDark"
+        android:textSize="18sp"
+        android:textStyle="bold"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        tools:ignore="MissingConstraints" />
+
+    <TextView
+        android:id="@+id/txtcosto"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:background="#F5F5DC"
+        android:ems="10"
+        android:inputType="numberDecimal"
+        android:padding="5dp"
+        android:text="0"
+        android:textAlignment="center"
+        android:textColor="@color/colordark"
+        android:textCursorDrawable="@drawable/black_cursor"
+        android:textSize="25sp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/txtvercosto" />
+
+
+</androidx.constraintlayout.widget.ConstraintLayout>

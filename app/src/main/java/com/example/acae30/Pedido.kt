@@ -1,0 +1,958 @@
+package com.example.acae30
+
+import android.Manifest
+import android.app.Dialog
+import android.content.ContentValues
+import android.content.Intent
+import android.content.SharedPreferences
+import android.net.ConnectivityManager
+import android.os.Build
+import android.os.Bundle
+import android.os.StrictMode
+import android.text.Editable
+import android.text.InputFilter
+import android.text.Spanned
+import android.text.TextWatcher
+import android.widget.ArrayAdapter
+import android.widget.Button
+import android.widget.EditText
+import android.widget.ImageButton
+import androidx.appcompat.app.AppCompatActivity
+import androidx.constraintlayout.widget.ConstraintLayout
+import androidx.core.app.ActivityCompat
+import androidx.core.content.ContextCompat
+import androidx.lifecycle.lifecycleScope
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
+import com.example.acae30.database.Database
+import com.example.acae30.listas.PedidosAdapter
+import com.example.acae30.modelos.DetallePedido
+import com.example.acae30.modelos.JSONmodels.CabezeraPedidoSend
+import com.example.acae30.modelos.Pedidos
+import com.example.acae30.modelos.Visitas
+import com.google.android.material.floatingactionbutton.FloatingActionButton
+import com.google.android.material.snackbar.Snackbar
+import com.google.gson.JsonArray
+import com.google.gson.JsonObject
+import kotlinx.android.synthetic.main.activity_producto_agregar.*
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.cancel
+import kotlinx.coroutines.launch
+import org.json.JSONObject
+import java.io.BufferedReader
+import java.io.InputStreamReader
+import java.io.OutputStreamWriter
+import java.io.Reader
+import java.net.HttpURLConnection
+import java.net.URL
+import java.nio.charset.StandardCharsets
+import java.text.DecimalFormatSymbols
+import java.util.*
+import kotlin.collections.ArrayList
+
+class Pedido : AppCompatActivity() {
+
+    private var funciones: Funciones? = null
+    private var bd: Database? = null
+    private var reciclado: RecyclerView? = null
+    private var lienzo: ConstraintLayout? = null
+    private var btnsincronizar: Button? = null
+    lateinit var preferencias: SharedPreferences
+    private val instancia = "CONFIG_SERVIDOR"
+    private var idvendedor = 0
+    private var btnatras: ImageButton? = null
+    private var vendedor = ""
+    private var ip = ""
+    private var puerto = 0
+    private var proviene: String? = ""
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setContentView(R.layout.activity_pedido)
+        btnsincronizar = findViewById(R.id.btnsincronizar)
+        preferencias = getSharedPreferences(this.instancia, MODE_PRIVATE)
+        idvendedor = preferencias.getInt("Idvendedor", 0)
+        vendedor = preferencias.getString("Vendedor", "").toString()
+        ip = preferencias.getString("ip", "").toString()
+        puerto = preferencias.getInt("puerto", 0)
+        proviene = intent.getStringExtra("proviene")
+
+        btnatras = findViewById(R.id.imbtnatras)
+
+        val policy = StrictMode.ThreadPolicy.Builder().permitAll().build()
+        StrictMode.setThreadPolicy(policy)
+
+        funciones = Funciones()
+        bd = Database(this)
+        reciclado = findViewById(R.id.recicler)
+        val list_temp = ArrayList<Pedidos>()
+
+        ShowList(list_temp)
+
+        lienzo = findViewById(R.id.lienzo)
+        findViewById<FloatingActionButton>(R.id.fab).setOnClickListener { view ->
+            val intento = Intent(this, Clientes::class.java)
+            intento.putExtra("busqueda", true)
+            intento.putExtra("visita", true)
+            startActivity(intento)
+            finish()
+        }
+
+        //sincronizar los datos que no se han enviado
+        btnsincronizar!!.setOnClickListener {
+            btnsincronizar!!.isEnabled = false
+            if (isConnected()) {
+
+                var alert: Snackbar =
+                    Snackbar.make(
+                        lienzo!!,
+                        "Sincronizando datos...",
+                        Snackbar.LENGTH_LONG
+                    )
+                alert.view.setBackgroundColor(ContextCompat.getColor(this, R.color.moderado))
+                alert.show()
+
+                var error = false
+
+
+                //ENVIAR VISITAS QUE NO SE HAN ENVIADO
+
+                var list = ArrayList<Visitas>() //lista donde se guardara las visitas
+
+                val base = bd!!.readableDatabase
+                try {
+                    var visitas = base!!.rawQuery("SELECT * FROM visitas WHERE enviado=0", null)
+
+                    if (visitas.count > 0) {
+                        visitas.moveToFirst()
+                        do {
+                            val datos = Visitas(
+                                visitas.getInt(0),
+                                visitas.getInt(1),
+                                visitas.getString(2),
+                                visitas.getString(3),
+                                visitas.getString(4),
+                                visitas.getString(5),
+                                visitas.getString(6),
+                                visitas.getInt(7),
+                                visitas.getString(8),
+                                visitas.getString(9),
+                                visitas.getString(10),
+                                visitas.getInt(11) == 1,
+                                visitas.getInt(12) == 1,
+                                visitas.getInt(13) == 1
+                            )
+
+                            print("Nombre del cliente 0: " + datos.Nombre_cliente)
+
+                            list.add(datos)
+
+                        } while (visitas.moveToNext())
+
+                        visitas.close()
+                    }
+                } catch (e: Exception) {
+                    val alert: Snackbar =
+                        Snackbar.make(
+                            lienzo!!,
+                            "Ha ocurrido un error al sincronizar.",
+                            Snackbar.LENGTH_LONG
+                        )
+                    alert.view.setBackgroundColor(ContextCompat.getColor(this, R.color.moderado))
+                    alert.show()
+
+                    error = true
+
+                    println("Error 11: " + e.message)
+                } finally {
+                    base.close()
+                }
+
+                try {
+
+                    list.forEach { visita ->
+                        val datos_enviar = JSONObject()
+
+                        val gpsdata_in = visita.Gps_in.split(",")
+                        val gpsdata_out = visita.Gps_out.split(",")
+                        val id_vendedor = preferencias.getInt("Idvendedor", 0)
+
+                        datos_enviar.put("Id_app_visita", 0)
+                        datos_enviar.put("Fecha_hora_checkin", visita.Fecha_inicial)
+                        datos_enviar.put("Latitud_checkin", gpsdata_in.get(0))
+                        datos_enviar.put("Longitud_checkin", gpsdata_in.get(1))
+                        datos_enviar.put("Id_cliente", visita.Id_cliente)
+                        datos_enviar.put("Cliente", visita.Nombre_cliente)
+                        datos_enviar.put("Fecha_hora_checkout", visita.Fecha_final)
+                        datos_enviar.put("Latitud_checkout", gpsdata_out.get(0))
+                        datos_enviar.put("Longitud_checkout", gpsdata_out.get(1))
+                        datos_enviar.put("comentarios", "")
+                        datos_enviar.put("Id_vendedor", id_vendedor)
+
+                        enviarVisita(datos_enviar, visita.Id)
+                    }
+
+                } catch (e: Exception) {
+                    val alert: Snackbar =
+                        Snackbar.make(
+                            lienzo!!,
+                            "Ha ocurrido un error al sincronizar.",
+                            Snackbar.LENGTH_LONG
+                        )
+                    alert.view.setBackgroundColor(ContextCompat.getColor(this, R.color.moderado))
+                    alert.show()
+
+                    error = true
+
+                    println("Error 12: " + e.message)
+                }
+
+                //ENVIAR VISITAS QUE NO SE HA ENVIADO LOS DATOS DEL FINAL DE LA VISITA
+
+                var list_visita_final = ArrayList<Visitas>() //lista donde se guardara las visitas
+
+                val base_v_final = bd!!.readableDatabase
+                try {
+                    var visitas =
+                        base_v_final!!.rawQuery("SELECT * FROM visitas WHERE enviado_final=0", null)
+
+                    if (visitas.count > 0) {
+                        visitas.moveToFirst()
+                        do {
+                            val datos = Visitas(
+                                visitas.getInt(0),
+                                visitas.getInt(1),
+                                visitas.getString(2),
+                                visitas.getString(3),
+                                visitas.getString(4),
+                                visitas.getString(5),
+                                visitas.getString(6),
+                                visitas.getInt(7),
+                                visitas.getString(8),
+                                visitas.getString(9),
+                                visitas.getString(10),
+                                visitas.getInt(11) == 1,
+                                visitas.getInt(12) == 1,
+                                visitas.getInt(13) == 1
+                            )
+
+                            list_visita_final.add(datos)
+
+                        } while (visitas.moveToNext())
+
+                        visitas.close()
+                    }
+                } catch (e: Exception) {
+                    val alert: Snackbar =
+                        Snackbar.make(
+                            lienzo!!,
+                            "Ha ocurrido un error al sincronizar.",
+                            Snackbar.LENGTH_LONG
+                        )
+                    alert.view.setBackgroundColor(ContextCompat.getColor(this, R.color.moderado))
+                    alert.show()
+
+                    error = true
+
+                    println("Error 13: " + e.message)
+                } finally {
+                    base.close()
+                }
+
+                try {
+
+                    list_visita_final.forEach { visita ->
+                        var finVisita = JSONObject()
+
+                        val gpsdata_out = visita.Gps_out.split(",")
+
+                        finVisita.put("idvisita", visita.Idvisita)
+                        finVisita.put("fecha", visita.Fecha_final)
+                        finVisita.put("comentarios", "")
+                        finVisita.put("nombreimagen", "")
+                        finVisita.put("imagen", "")
+                        finVisita.put("latitud", gpsdata_out.get(0))
+                        finVisita.put("longitud", gpsdata_out.get(1))
+
+                        Sendfinal(finVisita, visita.Id)
+                    }
+
+                } catch (e: Exception) {
+                    val alert: Snackbar =
+                        Snackbar.make(
+                            lienzo!!,
+                            "Ha ocurrido un error al sincronizar.",
+                            Snackbar.LENGTH_LONG
+                        )
+                    alert.view.setBackgroundColor(ContextCompat.getColor(this, R.color.moderado))
+                    alert.show()
+
+                    error = true
+
+                    println("Error 14: " + e.message)
+                }
+
+                //ENVIAR PEDIDOS QUE NO SE HAN ENVIADO
+
+                var listPedidos = ArrayList<Pedidos>() //lista donde se guardara las visitas
+
+                val base_p = bd!!.readableDatabase
+
+                try {
+
+                    var pedidos =
+                        base_p!!.rawQuery("SELECT * FROM pedidos WHERE enviado=0", null)
+
+                    if (pedidos.count > 0) {
+                        pedidos.moveToFirst()
+                        do {
+                            val datos = Pedidos(
+                                pedidos.getInt(0),
+                                pedidos.getInt(1),
+                                pedidos.getString(2),
+                                pedidos.getFloat(3),
+                                pedidos.getFloat(4),
+                                pedidos.getInt(5) == 1,
+                                pedidos.getString(6),
+                                pedidos.getInt(7),
+                                pedidos.getString(8),
+                                pedidos.getInt(9),
+                                pedidos.getInt(10),
+                                pedidos.getString(11)
+                            )
+
+                            listPedidos.add(datos)
+
+                        } while (pedidos.moveToNext())
+
+                        pedidos.close()
+                    }
+                } catch (e: Exception) {
+                    val alert: Snackbar =
+                        Snackbar.make(
+                            lienzo!!,
+                            "Ha ocurrido un error al sincronizar.",
+                            Snackbar.LENGTH_LONG
+                        )
+                    alert.view.setBackgroundColor(ContextCompat.getColor(this, R.color.moderado))
+                    alert.show()
+
+                    error = true
+
+                    println("Error 15: " + e.message)
+                } finally {
+                    base_p.close()
+                }
+
+                try {
+
+                    listPedidos.forEach { pedido_l ->
+
+                        try {
+                            var pedido = getPedidoSend(pedido_l.Id) //retorna el pedido
+                            pedido!!.Idvendedor = idvendedor
+                            pedido.Vendedor = vendedor
+                            SendPedido(pedido, pedido_l.Id)
+
+                        } catch (e: Exception) {
+                            val alert: Snackbar =
+                                Snackbar.make(
+                                    lienzo!!,
+                                    "Ha ocurrido un error al sincronizar.",
+                                    Snackbar.LENGTH_LONG
+                                )
+                            alert.view.setBackgroundColor(
+                                ContextCompat.getColor(
+                                    this,
+                                    R.color.moderado
+                                )
+                            )
+                            alert.show()
+
+                            println("Mensaje de error: " + e.message)
+                        }
+
+                    }
+
+                } catch (e: Exception) {
+                    val alert: Snackbar =
+                        Snackbar.make(
+                            lienzo!!,
+                            "Ha ocurrido un error al sincronizar.",
+                            Snackbar.LENGTH_LONG
+                        )
+                    alert.view.setBackgroundColor(ContextCompat.getColor(this, R.color.moderado))
+                    alert.show()
+
+                    error = true
+
+                    println("Error 16: " + e.message)
+                }
+
+                try {
+                    val lista = GetPedido()
+                    if (lista.size > 0) {
+                        ShowList(lista)
+                    }
+                } catch (e: Exception) {
+                    runOnUiThread {
+                        val alert: Snackbar = Snackbar.make(
+                            lienzo!!,
+                            e.message.toString(),
+                            Snackbar.LENGTH_LONG
+                        )
+                        alert.view.setBackgroundColor(resources.getColor(R.color.moderado))
+                        alert.show()
+
+                        error = true
+
+                        println("Error 17: " + e.message.toString())
+                    }
+
+                }
+
+                if (error) {
+                    alert =
+                        Snackbar.make(
+                            lienzo!!,
+                            "No se han podido sincronizar los datos.",
+                            Snackbar.LENGTH_LONG
+                        )
+                    alert.view.setBackgroundColor(ContextCompat.getColor(this, R.color.moderado))
+                    alert.show()
+                } else {
+                    alert =
+                        Snackbar.make(
+                            lienzo!!,
+                            "Datos sincronizados correctamente.",
+                            Snackbar.LENGTH_LONG
+                        )
+                    alert.view.setBackgroundColor(ContextCompat.getColor(this, R.color.moderado))
+                    alert.show()
+                }
+
+            } else {
+                val alert: Snackbar =
+                    Snackbar.make(lienzo!!, "Enciende tu wifi", Snackbar.LENGTH_LONG)
+                alert.view.setBackgroundColor(ContextCompat.getColor(this, R.color.moderado))
+                alert.show()
+            } //valida conexion a internet
+            btnsincronizar!!.isEnabled = true
+        }
+
+        btnatras!!.setOnClickListener {
+            val intento = Intent(this, Inicio::class.java)
+            startActivity(intento)
+            finish()
+
+        } //regresa al menu principal
+
+        // SOLICITAR PERMISOS DE GPS
+        solicitarPermisos()
+
+        // MOSTRAR MENSAJE DE GPS
+        if (proviene == "inicio") {
+            AlertaGPS(this@Pedido)
+        }
+
+    }
+
+    override fun onStart() {
+        super.onStart()
+        //GlobalScope.launch(Dispatchers.IO) {
+        this@Pedido.lifecycleScope.launch {
+
+            try {
+                val lista = GetPedido()
+                if (lista.size > 0) {
+                    ShowList(lista)
+                }
+            } catch (e: Exception) {
+                runOnUiThread {
+                    val alert: Snackbar = Snackbar.make(
+                        lienzo!!,
+                        e.message.toString(),
+                        Snackbar.LENGTH_LONG
+                    )
+                    alert.view.setBackgroundColor(resources.getColor(R.color.moderado))
+                    alert.show()
+                }
+            }
+        }
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        lifecycleScope.cancel()
+    }
+
+    private fun ShowList(list: ArrayList<Pedidos>) {
+        var mLayoutManager = LinearLayoutManager(this@Pedido, LinearLayoutManager.VERTICAL, false)
+        reciclado!!.layoutManager = mLayoutManager
+        val adapter = PedidosAdapter(list, this@Pedido) { position ->
+
+            //GlobalScope.launch(Dispatchers.Main) {
+            this@Pedido.lifecycleScope.launch {
+
+                val data = list.get(position)
+
+                val intento = Intent(this@Pedido, Detallepedido::class.java)
+                intento.putExtra("nombrecliente", data.Nombre_cliente)
+                intento.putExtra("idcliene", data.Id_cliente!!)
+                intent.putExtra("codigo", "")
+                intento.putExtra("idpedido", data.Id)
+                intento.putExtra("from", "ver")
+                startActivity(intento)
+                finish()
+
+            }
+
+        }
+        reciclado!!.adapter = adapter
+
+    }
+
+    private fun GetPedido(): ArrayList<Pedidos> {
+        val base = bd!!.writableDatabase
+        try {
+            val cursor = base!!.rawQuery(
+                "SELECT Id, Id_cliente, Nombre_cliente, Total, Descuento, Enviado, Fecha_enviado, Id_pedido_sistema, Gps, Cerrado, Idvisita, strftime('%d/%m/%Y %H:%M', fecha_creado) as fecha_creado FROM pedidos order by id desc",
+                null
+            )
+            var lista = ArrayList<Pedidos>()
+            if (cursor.count > 0) {
+                cursor.moveToFirst()
+                do {
+
+                    val pedido = Pedidos(
+                        cursor.getInt(0),
+                        cursor.getInt(1),
+                        cursor.getString(2),
+                        cursor.getFloat(3),
+                        cursor.getFloat(4),
+                        cursor.getInt(5) == 1,
+                        cursor.getString(6),
+                        cursor.getInt(7),
+                        cursor.getString(8),
+                        cursor.getInt(9),
+                        cursor.getInt(10),
+                        cursor.getString(11)
+                    )
+                    lista.add(pedido)
+
+                } while (cursor.moveToNext())
+                cursor.close()
+            }
+            return lista
+        } catch (e: Exception) {
+            throw Exception(e.message)
+        } finally {
+            base.close()
+        }
+
+    }//obtiene el listado de los pedidos
+
+    private fun enviarVisita(data: JSONObject, idvisita: Int) {
+        try {
+            val strinjson = data.toString()
+            val ip = preferencias.getString("ip", "")
+            val puerto = preferencias.getInt("puerto", 0)
+            val direccion = "http://$ip:$puerto/visitas/registrar_visita"
+            val url = URL(direccion)
+            with(url.openConnection() as HttpURLConnection) {
+                connectTimeout = 5000
+                requestMethod = "POST"
+                setRequestProperty("Content-Type", "application/json;charset=utf-8")
+                val or = OutputStreamWriter(outputStream, StandardCharsets.UTF_8)
+                or.write(strinjson) //escribimos el json
+                or.flush() //se envia el json
+                val codigoRespuesta = responseCode
+                when (codigoRespuesta) {
+                    201 -> {
+                        BufferedReader(InputStreamReader(inputStream) as Reader?).use {
+                            val respuesta = StringBuffer()
+                            var inpuline = it.readLine()
+                            while (inpuline != null) {
+                                respuesta.append(inpuline)
+                                inpuline = it.readLine()
+                            } //obtenemos la respuesta completa
+                            it.close()
+                            var data: String? = respuesta.toString()
+                            if (data != null) {
+                                val res = JSONObject(data)
+                                if (!res.isNull("error") && !res.isNull("response")) {
+                                    val idser = res.getInt("error")
+                                    updateCheckIn(idser, idvisita)
+                                    updateCheckOut(idvisita)
+                                } else {
+                                    println("Error en la respuesta del servidor")
+                                    throw Exception("Error en la respuesta del servidor")
+                                }
+                            } else {
+                                println("Error al recibir respuesta del servidor")
+                                throw Exception("Error al recibir respuesta del servidor")
+                            }
+                        }
+                    } //termina response 201
+
+                    else -> {
+                        println("Error al recibir respuesta del servidor")
+                        throw Exception("Error al recibir respuesta del servidor")
+                    }
+                }
+            }
+        } catch (e: Exception) {
+            println("Error 3: " + e.message)
+            throw Exception(e.message)
+        }
+    } //envia la data al servidor
+
+
+
+    private fun updateCheckIn(idvisitaServer: Int, idvisita: Int) {
+        val base = bd!!.writableDatabase
+        try {
+            val data = ContentValues()
+            data.put("Idvisita", idvisitaServer)
+            data.put("Enviado", true)
+            data.put("Enviado_final", true)
+            base.update("visitas", data, "Id=?", arrayOf(idvisita.toString()))
+
+        } catch (e: Exception) {
+            throw Exception(e.message)
+        } finally {
+            base.close()
+        }
+    } //ACTUALIZA CON EL ID DEL PEDIDO DE LA BD
+
+    private fun updateCheckOut(idvisita: Int) {
+        val base = bd!!.writableDatabase
+        try {
+            val data = ContentValues()
+            data.put("Enviado_final", true)
+            base.update("visitas", data, "Id=?", arrayOf(idvisita.toString()))
+
+        } catch (e: Exception) {
+            throw Exception(e.message)
+        } finally {
+            base.close()
+        }
+    } //ACTUALIZA CON EL ID DEL PEDIDO DE LA BD
+
+
+
+    @Deprecated("Deprecated in Java")
+    override fun onBackPressed() {
+//        super.onBackPressed();
+
+    }//anula el boton atras
+
+    private fun isConnected(): Boolean {
+        val connectivityManager = getSystemService(CONNECTIVITY_SERVICE) as ConnectivityManager
+        val networkInfo = connectivityManager.activeNetworkInfo
+
+        var isConnected = true
+
+        isConnected = networkInfo != null && networkInfo.isConnected
+        return isConnected
+    }
+
+    private fun getPedidoSend(idpedido: Int): CabezeraPedidoSend? {
+        val base = bd!!.readableDatabase
+        try {
+            var envio: CabezeraPedidoSend? = null
+            val pedido = base!!.rawQuery("SELECT * FROM pedidos where Id=$idpedido", null)
+            if (pedido.count > 0) {
+                pedido.moveToFirst()
+                envio = CabezeraPedidoSend(
+                    pedido.getInt(1),//id del cliente
+                    pedido.getString(2), //nombre del cliente
+                    pedido.getFloat(3),
+                    pedido.getFloat(4),
+                    pedido.getFloat(3),
+                    pedido.getInt(5) == 1,
+                    pedido.getInt(9) == 1,
+                    0,
+                    "",
+                    null
+
+                )
+                pedido.close()
+                var cdetalle =
+                    base.rawQuery("SELECT * FROM detalle_producto WHERE Id_pedido=$idpedido", null)
+                if (cdetalle.count > 0) {
+                    var list = ArrayList<DetallePedido>() //lista donde se guardara el pedido
+                    cdetalle.moveToFirst()
+                    do {
+                        var detalle = DetallePedido(
+                            cdetalle.getInt(0),
+                            cdetalle.getInt(1),
+                            cdetalle.getInt(2),
+                            cdetalle.getString(3),
+                            cdetalle.getString(4),
+                            cdetalle.getFloat(5),
+                            cdetalle.getFloat(6),
+                            cdetalle.getFloat(7),
+                            cdetalle.getFloat(8),
+                            cdetalle.getFloat(9),
+                            cdetalle.getFloat(10),
+                            cdetalle.getFloat(11),
+                            cdetalle.getFloat(12),
+                            cdetalle.getFloat(13),
+                            cdetalle.getFloat(14),
+                            cdetalle.getString(15),
+                            cdetalle.getString(16),
+                            cdetalle.getString(17),
+                            cdetalle.getString(18),
+                            cdetalle.getString(19),
+                            cdetalle.getFloat(20),
+                            cdetalle.getInt(21),
+                            cdetalle.getFloat(22),
+                            cdetalle.getString(23),
+                            cdetalle.getInt(24),
+                            cdetalle.getInt(25)
+                        )
+                        list.add(detalle)
+                    } while (cdetalle.moveToNext())
+                    cdetalle.close()
+                    envio.detalle = list //se agrega al objecto el detalle del pedido
+                }
+            }
+            return envio
+        } catch (e: Exception) {
+            throw Exception(e)
+        } finally {
+            base.close()
+        }
+    }//obtiene el pedido
+
+
+
+    private fun SendPedido(pedido: CabezeraPedidoSend, idpedido: Int) {
+        try {
+            val objecto = convertToJson(pedido, idpedido) //convertimos a json el objecto pedido
+            val ruta: String = "http://$ip:$puerto/pedido" //ruta para enviar el pedido
+            //val ruta="http://192.168.0.103:53272/pedido"
+            val url = URL(ruta)
+            with(url.openConnection() as HttpURLConnection) {
+                try {
+                    setRequestProperty(
+                        "Content-Type",
+                        "application/json;charset=utf-8"
+                    ) //definimos la cabezera
+                    connectTimeout = 5000
+                    requestMethod = "POST"
+                    val or = OutputStreamWriter(outputStream, StandardCharsets.UTF_8)
+                    or.write(objecto.toString()) //escribo el json
+                    or.flush() //se envia el json
+                    val errorcode = responseCode
+                    BufferedReader(InputStreamReader(inputStream) as Reader?).use {
+                        try {
+                            val respuesta = StringBuffer()
+                            var inpuline = it.readLine()
+                            while (inpuline != null) {
+                                respuesta.append(inpuline)
+                                inpuline = it.readLine()
+                            }
+                            it.close()
+                            var data: String? = respuesta.toString()
+                            if (data != null && data.length > 0) {
+                                val datosservidor = JSONObject(data)
+                                if (!datosservidor.isNull("error") && !datosservidor.isNull("response")) {
+                                    when (responseCode) {
+                                        201 -> {
+                                            val idpedidoS = datosservidor.getString("error").toInt()
+                                            if (idpedidoS > 0) {
+                                                ConfirmarPedido(idpedido, idpedidoS)
+                                            } else {
+                                                throw Exception(datosservidor.getString("response"))
+                                            }
+                                        }
+                                        400 -> {
+                                            throw Exception(datosservidor.getString("response"))
+                                        }
+                                        500 -> {
+                                            throw Exception(datosservidor.getString("response"))
+                                        }
+                                        else -> {
+                                            throw Exception("Ocurrio algo Intenta Nuevamente")
+                                        }
+                                    }
+                                } else {
+                                    throw Exception("No se recibio ninguna respuesta del servidor")
+                                }
+                            } else {
+                                throw Exception("No se recibio ninguna respuesta del servidor")
+                            }
+                        } catch (e: Exception) {
+                            throw Exception(e.message)
+                        }
+                    } //se obtiene la respuesta del servidor
+
+                } catch (e: Exception) {
+                    throw Exception(e.message)
+                }
+            }
+        } catch (e: Exception) {
+            throw Exception("Error: No hay productos agregados al pedido.")
+            print(e.message)
+        }
+    } //funcion que envia el pedido a la bd
+
+    private fun ConfirmarPedido(idpedido: Int, idservidor: Int) {
+        val bd = bd!!.writableDatabase
+        try {
+            bd!!.execSQL("UPDATE pedidos set Id_pedido_sistema=$idservidor,Enviado=1,Cerrado=1 WHERE Id=$idpedido")
+        } catch (e: Exception) {
+            throw Exception(e.message)
+        } finally {
+            bd!!.close()
+        }
+    } //actualiza el pedido y confirma que se envio
+
+
+
+
+    private fun convertToJson(pedido: CabezeraPedidoSend, idpedido_param: Int): JsonObject {
+        // CONSULTAR EL ID DE LA VISITA EN EL SERVIDOR
+        var idvisita_v = 0.toInt()
+
+        val base = bd!!.writableDatabase
+        try {
+            var cursor = base!!.rawQuery(
+                "select v.Idvisita from visitas v inner join pedidos p on v.id = p.idvisita where p.id = ${idpedido_param}",
+                null
+            )
+            if (cursor.count > 0) {
+                cursor.moveToFirst()
+                idvisita_v = cursor.getInt(0)
+                cursor.close()
+            } else {
+                throw Exception("Error al obtener código de cliente")
+            }
+        } catch (e: Exception) {
+            throw Exception(e.message)
+        } finally {
+            base.close()
+        }
+
+        var json = JsonObject()
+        json.addProperty("Idcliente", pedido.Idcliente)
+        json.addProperty("Cliente", pedido.Cliente)
+        json.addProperty("Subtotal", pedido.Subtotal)
+        json.addProperty("Descuento", pedido.Descuento)
+        json.addProperty("Total", pedido.Total)
+        json.addProperty("Envidado", false)
+        json.addProperty("Cerrado", false)
+        json.addProperty("Idvendedor", pedido.Idvendedor)
+        json.addProperty("Vendedor", pedido.Vendedor)
+        json.addProperty("Idapp", idvisita_v)
+        //se ordena la cabezera
+        var detalle = JsonArray()
+        for (i in 0..(pedido.detalle!!.size - 1)) {
+            val data = pedido.detalle!!.get(i)
+            var d = JsonObject()
+            d.addProperty("Id", data.Id)
+            d.addProperty("Id_pedido", data.Id_pedido)
+            d.addProperty("Id_producto", data.Id_producto)
+            d.addProperty("Codigo", data.Codigo)
+            d.addProperty("Descripcion", data.Descripcion)
+            d.addProperty("Costo", data.Costo)
+            d.addProperty("Costo_iva", data.Costo_iva)
+            d.addProperty("Precio", data.Precio)
+            d.addProperty("Precio_iva", data.Precio_iva)
+            d.addProperty("Precio_u", data.Precio_u)
+            d.addProperty("Precio_u_iva", data.Precio_u_iva)
+            d.addProperty("Cantidad", data.Cantidad)
+            d.addProperty("Precio_venta", data.Precio_venta)
+            d.addProperty("Unidad", data.Unidad)
+            d.addProperty("Subtotal", data.Subtotal)
+            d.addProperty("Total", data.Total)
+            d.addProperty("Bonificado", data.Bonificado)
+            d.addProperty("Descuento", data.Descuento)
+            d.addProperty("Precio_editado", data.Precio_editado)
+            d.addProperty("Idunidad", data.Idunidad)
+            d.addProperty("Idtalla", data.Id_talla)
+            detalle.add(d)
+        }
+        json.add("detalle", detalle)
+        return json
+
+    } //convierte el pedido a json
+
+    private fun Sendfinal(data: JSONObject, idvisita: Int) {
+        try {
+            val strinjson = data.toString()
+            val ip = preferencias.getString("ip", "")
+            val puerto = preferencias.getInt("puerto", 0)
+            val direccion = "http://$ip:$puerto/visitas/fin_visita"
+            val url = URL(direccion)
+            with(url.openConnection() as HttpURLConnection) {
+                connectTimeout = 5000
+                requestMethod = "POST"
+                setRequestProperty("Content-Type", "application/json;charset=utf-8")
+                val or = OutputStreamWriter(outputStream, StandardCharsets.UTF_8)
+                or.write(strinjson) //escribimos el json
+                or.flush() //se envia el json
+                val codigoRespuesta = responseCode
+                when (codigoRespuesta) {
+                    200 -> {
+                        BufferedReader(InputStreamReader(inputStream) as Reader?).use {
+                            val respuesta = StringBuffer()
+                            var inpuline = it.readLine()
+                            while (inpuline != null) {
+                                respuesta.append(inpuline)
+                                inpuline = it.readLine()
+                            } //obtenemos la respuesta completa
+                            it.close()
+                            var data: String? = respuesta.toString()
+                            if (data != null) {
+                                val res = JSONObject(data)
+                                if (!res.isNull("error") && !res.isNull("response")) {
+                                    //respuesta correcta
+                                    updateCheckOut(idvisita)
+                                } else {
+                                    throw Exception("Error en la respuesta del servidor")
+                                }
+                            } else {
+                                throw Exception("Error al recibir respuesta del servidor")
+                            }
+                        }
+                    } //termina response 201
+
+                    else -> {
+                        throw Exception("Error al recibir respuesta del servidor")
+                    }
+                }
+            }
+        } catch (e: Exception) {
+            throw Exception(e.message)
+        }
+    }//finaliza el checkout
+
+    private fun solicitarPermisos() {
+        // SOLICITAR
+        ActivityCompat.requestPermissions(
+            this,
+            arrayOf(
+                Manifest.permission.ACCESS_FINE_LOCATION,
+                Manifest.permission.ACCESS_COARSE_LOCATION
+            ),  /* Este codigo es para identificar tu request */
+            1
+        )
+    }
+
+    private fun AlertaGPS(contexto: com.example.acae30.Pedido) {
+        val dialogo = Dialog(this)
+        dialogo.setContentView(R.layout.alerta_gps)
+
+        // Acccion de click al boton OK
+        dialogo.findViewById<Button>(R.id.btnok).setOnClickListener {
+            dialogo.dismiss()
+        }//boton eliminar
+
+        dialogo.show()
+
+    } //muestra la alerta para agregar precio
+}
