@@ -7,9 +7,13 @@ import android.view.ViewGroup
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.example.acae30.R
+<<<<<<< HEAD
 import com.example.acae30.modelos.DetallePedido
 import com.example.acae30.modelos.InventarioPrecios
 import com.example.acae30.modelos.VistaPedidos
+=======
+import com.example.acae30.modelos.InventarioPrecios
+>>>>>>> 7afa4de (LOCAL DE LA OFICINA)
 
 class InventarioDetalleAdapter(private var list: ArrayList<InventarioPrecios>, private var context: Context) : RecyclerView.Adapter<InventarioDetalleAdapter.MyViewHolder>()
 {

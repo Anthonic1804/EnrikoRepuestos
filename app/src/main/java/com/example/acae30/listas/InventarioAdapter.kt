@@ -1,7 +1,10 @@
 package com.example.acae30.listas
 
 import android.content.Context
+<<<<<<< HEAD
 import android.graphics.Color
+=======
+>>>>>>> 7afa4de (LOCAL DE LA OFICINA)
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup

@@ -2,8 +2,11 @@ package com.example.acae30.listas
 
 import android.app.Activity
 import android.content.Context
+<<<<<<< HEAD
 import android.content.Intent
 import android.graphics.Color
+=======
+>>>>>>> 7afa4de (LOCAL DE LA OFICINA)
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -13,7 +16,10 @@ import androidx.recyclerview.widget.RecyclerView
 import com.example.acae30.Funciones
 import com.example.acae30.R
 import com.example.acae30.modelos.Cliente
+<<<<<<< HEAD
 import com.example.acae30.modelos.JSONmodels.virtualCliente
+=======
+>>>>>>> 7afa4de (LOCAL DE LA OFICINA)
 
 class ClienteAdapter(
     private val lista: ArrayList<Cliente>?, private val context: Context,
