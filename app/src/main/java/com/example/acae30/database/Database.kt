@@ -14,7 +14,7 @@ class Database(context: Context) :
     } //inicializamos la tabla  en el constructor
 
     companion object {
-        private const val DATABASE_VERSION = 9 //version de la base
+        private const val DATABASE_VERSION = 10 //version de la base
         private const val DATABASE_NAME = "Acae.db" //nombre de la bd
     } //configuracion general de la bd
 
@@ -34,6 +34,7 @@ class Database(context: Context) :
         db.execSQL(tbl!!.VistaDetallePedidos())
         db.execSQL(tbl!!.triggerClienteVirtual()) //TRIGGER DE INSERCION DE DATOS EN LA TABLA VIRTUAL CLIENTES
         db.execSQL(tbl!!.triggerInventarioVirtual())//TRIGGER PARA INSERCION DE DATOS EN LA TABLA VIRTUAL INVENTARIO
+        db.execSQL(tbl!!.clienteSucursal()) //CREACION DE LA TABLA CLIENTES SUCURSALES -> 25/01/2023
 
     } //funcion que crea la base de datos y sus tablas
 
@@ -41,7 +42,7 @@ class Database(context: Context) :
         val tablas = arrayOf(
             "detalle_pedidos", "pedidos",
             "rubros", "lineas", "virtualinventario", "inventario_unidades", "inventario_precios",
-            "inventario", "clientes", "virtualcliente", "cuentas", "visitas"
+            "inventario", "clientes", "cliente_sucursal", "virtualcliente", "cuentas", "visitas"
         )
         tablas.forEach { key ->
             val sql = "DROP TABLE IF EXISTS $key"

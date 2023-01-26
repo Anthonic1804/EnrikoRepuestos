@@ -35,6 +35,24 @@ class Tablas {
         return cliente
     } //tabla cliente
 
+    //CREANDO TABLA CLIENTES_SUCURSALES
+    fun clienteSucursal(): String{
+        val clienteSucursal = "CREATE TABLE cliente_sucursal(" +
+                "Id INTEGER PRIMARY KEY NOT NULL," +
+                "id_cliente VARCHAR(25) NULL," +
+                "codigo_sucursal VARCHAR(25) NULL," +
+                "nombre_sucursal VARCHAR(25) NULL," +
+                "direccion_sucursal VARCHAR(200) NULL," +
+                "municipio_sucursal VARCHAR(50) NULL," +
+                "depto_sucursal VARCHAR(25) NULL," +
+                "telefono_1 VARCHAR(15) NULL," +
+                "telefono_2 VARCHAR(15) NULL," +
+                "correo_sucursal VARCHAR(100) NULL," +
+                "contacto_sucursal VARCHAR(50))"
+
+        return clienteSucursal
+    }
+
     //CREANDO TABLA VIRTUAL CLIENTES
     fun virtualCliente(): String{
         val virtualCliente = "CREATE VIRTUAL TABLE virtualcliente USING FTS4 (" +
