@@ -39,7 +39,7 @@ class Tablas {
     fun clienteSucursal(): String{
         val clienteSucursal = "CREATE TABLE cliente_sucursal(" +
                 "Id INTEGER PRIMARY KEY NOT NULL," +
-                "id_cliente VARCHAR(25) NULL," +
+                "id_cliente INTEGER NOT NULL," +
                 "codigo_sucursal VARCHAR(25) NULL," +
                 "nombre_sucursal VARCHAR(25) NULL," +
                 "direccion_sucursal VARCHAR(200) NULL," +
