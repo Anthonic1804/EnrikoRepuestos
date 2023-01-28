@@ -12,6 +12,7 @@ import androidx.cardview.widget.CardView
 import androidx.constraintlayout.widget.ConstraintLayout
 import com.example.acae30.database.Database
 import com.google.android.material.snackbar.Snackbar
+import kotlinx.android.synthetic.main.activity_carga_datos.*
 import kotlinx.coroutines.*
 import org.json.JSONArray
 import java.net.HttpURLConnection
@@ -25,6 +26,7 @@ class carga_datos : AppCompatActivity() {
     private var cvinventario: CardView? = null
     private var cvcliente: CardView? = null
     private var cvcuentas: CardView? = null
+    private var cvcSucursales: CardView? = null
     private var cvpedidos: CardView? = null
     private val instancia = "CONFIG_SERVIDOR"
     private var alert: AlertDialogo? = null
@@ -40,6 +42,7 @@ class carga_datos : AppCompatActivity() {
         preferencias = getSharedPreferences(instancia, Context.MODE_PRIVATE)
         btnatras = findViewById(R.id.imgbtnatras)
         cvcliente = findViewById(R.id.cvclientes)
+        cvcSucursales = findViewById(R.id.cvcSucursales)
         cvinventario = findViewById(R.id.cvinventario)
         cvcuentas = findViewById(R.id.cvcuentas)
         cvpedidos = findViewById(R.id.cvpedidos)
@@ -68,6 +71,21 @@ class carga_datos : AppCompatActivity() {
                     alert!!.Cargando() //muestra la alerta
                     GlobalScope.launch(Dispatchers.IO) {
                         getClients()
+                       // getSucursales()
+                    } //COURUTINA PARA OBTENER CLIENTES Y SUCURSALES
+                } else {
+                    ShowAlert("Enciende tus datos o el wifi")
+                }
+            } else {
+                ShowAlert("No hay configuracion del Servidor")
+            }
+        }//cuando se hace click en la card de
+
+        cvcSucursales!!.setOnClickListener {
+            if (url != null) {
+                if (funciones!!.isNetworkConneted(this)) {
+                    alert!!.Cargando() //muestra la alerta
+                    GlobalScope.launch(Dispatchers.IO) {
                         getSucursales()
                     } //COURUTINA PARA OBTENER CLIENTES Y SUCURSALES
                 } else {
@@ -188,7 +206,7 @@ class carga_datos : AppCompatActivity() {
     //28-01-2023
     private fun getSucursales() {
         try {
-            val direccion = url!! + "surcusales"
+            val direccion = url!! + "sucursales"
             val url = URL(direccion)
             with(url.openConnection() as HttpURLConnection) {
                 try {
@@ -225,7 +243,7 @@ class carga_datos : AppCompatActivity() {
                             } //caso que la respuesta venga vacia
                         }
                     } else {
-                        throw Exception("Error de Comunicacion con el servidor:$responseCode")
+                        throw Exception("getSurcusales() = Error de Comunicacion con el servidor:$responseCode + url: $url")
                     }
                 } catch (e: Exception) {
                     throw Exception(e.message)
