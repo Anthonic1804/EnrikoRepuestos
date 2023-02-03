@@ -40,6 +40,7 @@ import java.nio.charset.StandardCharsets
 class Detallepedido : AppCompatActivity() {
 
     private var btbuscar: ImageButton? = null
+
     private var btbuscarProducto: ImageButton? = null
     private var idcliente: Int = 0
     private var nombre: String? = ""
@@ -86,7 +87,9 @@ class Detallepedido : AppCompatActivity() {
         from = intento.getStringExtra("from").toString()
         txtfecha_creacion = findViewById(R.id.fecha_creacion)
         txtcliente = findViewById(R.id.txtcliente)
+
         btbuscar = findViewById(R.id.btnbuscar)
+
         btbuscarProducto = findViewById(R.id.imgbtnadd)
         lienzo = findViewById(R.id.lienzo)
         funciones = Funciones()

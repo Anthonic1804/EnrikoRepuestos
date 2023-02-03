@@ -38,7 +38,7 @@ class Tablas {
     //CREANDO TABLA CLIENTES_SUCURSALES 25-01-2023
     fun clienteSucursal(): String{
         val clienteSucursal = "CREATE TABLE cliente_sucursal(" +
-                "Id INTEGER PRIMARY KEY NOT NULL," +
+                "Id INTEGER NOT NULL," +
                 "id_cliente INTEGER NOT NULL," +
                 "codigo_sucursal VARCHAR(25) NULL," +
                 "nombre_sucursal VARCHAR(25) NULL," +

@@ -233,13 +233,12 @@ class carga_datos : AppCompatActivity() {
                             if (respuesta.length() > 0) {
                                 saveSucursalesDatabase(respuesta) //guarda los datos en la bd
                                 messageAsync("Cargando 100%")
-
                                 alert!!.dismisss()
                                 ShowAlert("Carga Completada Exitosamente")
                             } else {
                                 messageAsync("Cargando 100%")
                                 alert!!.dismisss()
-                                ShowAlert("Carga Completada Exitosamente")
+                                ShowAlert("No se Encontraron datos en el WS")
                             } //caso que la respuesta venga vacia
                         }
                     } else {
