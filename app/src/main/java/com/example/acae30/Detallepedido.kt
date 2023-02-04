@@ -39,7 +39,7 @@ import java.nio.charset.StandardCharsets
 
 class Detallepedido : AppCompatActivity() {
 
-    private var btbuscar: ImageButton? = null
+   // private var btbuscar: ImageButton? = null
 
     private var btbuscarProducto: ImageButton? = null
     private var idcliente: Int = 0
@@ -88,7 +88,7 @@ class Detallepedido : AppCompatActivity() {
         txtfecha_creacion = findViewById(R.id.fecha_creacion)
         txtcliente = findViewById(R.id.txtcliente)
 
-        btbuscar = findViewById(R.id.btnbuscar)
+       // btbuscar = findViewById(R.id.btnbuscar)
 
         btbuscarProducto = findViewById(R.id.imgbtnadd)
         lienzo = findViewById(R.id.lienzo)
@@ -107,13 +107,13 @@ class Detallepedido : AppCompatActivity() {
 
         recicler = findViewById(R.id.reciclerdetalle)
 
-        //obtenemos la direccion del servidor
+      /*  //obtenemos la direccion del servidor
         btbuscar!!.setOnClickListener {
             val intento = Intent(this, Clientes::class.java)
             intento.putExtra("busqueda", true)
 
             startActivity(intento)
-        } //busca al cliente
+        } //busca al cliente*/
 
         // Consultar datos de visita
         if (idpedido > 0) {
@@ -318,7 +318,7 @@ class Detallepedido : AppCompatActivity() {
 
     fun validarDatos() {
         if (idpedido > 0) {
-            btbuscar!!.visibility = View.GONE
+           // btbuscar!!.visibility = View.GONE
             txtcliente!!.isEnabled = false
             txtcliente!!.text = nombre
             GlobalScope.launch(Dispatchers.IO) {
@@ -329,7 +329,7 @@ class Detallepedido : AppCompatActivity() {
                     if (lista != null && lista.size > 0) {
                         if (cabezera != null) {
                             if (cabezera!!.Cerrado == 1) {
-                                btbuscar!!.visibility = View.GONE
+                              //  btbuscar!!.visibility = View.GONE
                                 txtcliente!!.isEnabled = false
                                 btbuscarProducto!!.visibility = View.GONE
                                 btnenviar!!.visibility = View.GONE
@@ -345,10 +345,10 @@ class Detallepedido : AppCompatActivity() {
                                 btneliminar!!.visibility = View.GONE
                             } else {
 
-                                btbuscar!!.visibility = View.VISIBLE
+                              //  btbuscar!!.visibility = View.VISIBLE
 
-                                btbuscar!!.visibility = View.GONE
-                                btbuscar!!.visibility = View.GONE
+                               // btbuscar!!.visibility = View.GONE
+                              //  btbuscar!!.visibility = View.GONE
                                 txtcliente!!.isEnabled = false
                                 btbuscarProducto!!.visibility = View.VISIBLE
                                 btnenviar!!.visibility = View.VISIBLE
@@ -361,10 +361,10 @@ class Detallepedido : AppCompatActivity() {
 
                         //RUTINA PARA AGREGAR NUEVO PEDIDO
 
-                        btbuscar!!.visibility = View.VISIBLE
+                      //  btbuscar!!.visibility = View.VISIBLE
 
-                        btbuscar!!.visibility = View.GONE
-                        btbuscar!!.visibility = View.GONE
+                      //  btbuscar!!.visibility = View.GONE
+                      //  btbuscar!!.visibility = View.GONE
                         txtcliente!!.isEnabled = false
                         btbuscarProducto!!.visibility = View.VISIBLE
                         btnenviar!!.visibility = View.VISIBLE
@@ -393,9 +393,9 @@ class Detallepedido : AppCompatActivity() {
         } else {
             if (idcliente > 0) {
                 txtcliente!!.text = nombre
-                btbuscar!!.visibility = View.GONE
+              //  btbuscar!!.visibility = View.GONE
             } else {
-                btbuscar!!.visibility = View.VISIBLE
+              //  btbuscar!!.visibility = View.VISIBLE
             }
         }
     } //VALIA QUE YA EXISTA EL CLIENTE DATOS
