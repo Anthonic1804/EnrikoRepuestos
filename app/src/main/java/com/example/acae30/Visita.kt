@@ -97,10 +97,8 @@ class Visita : AppCompatActivity() {
         bd = Database(this)
         preferencias = getSharedPreferences(instancia, Context.MODE_PRIVATE)
 
-        if (Build.VERSION.SDK_INT > 9) {
-            val policy = StrictMode.ThreadPolicy.Builder().permitAll().build()
-            StrictMode.setThreadPolicy(policy)
-        }
+        val policy = StrictMode.ThreadPolicy.Builder().permitAll().build()
+        StrictMode.setThreadPolicy(policy)
 
         btnvisita = findViewById(R.id.btnvisita)
 
@@ -236,7 +234,7 @@ class Visita : AppCompatActivity() {
 
         var isConnected = true
 
-        isConnected = networkInfo != null && networkInfo.isConnected
+        isConnected = (networkInfo != null) && networkInfo.isConnected
         return isConnected
     }
 

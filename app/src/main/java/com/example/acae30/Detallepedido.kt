@@ -4,20 +4,14 @@ import android.app.Dialog
 import android.content.Context
 import android.content.Intent
 import android.content.SharedPreferences
-import android.graphics.Color
 import android.os.Bundle
 import android.view.View
-import android.widget.ArrayAdapter
-import android.widget.Button
-import android.widget.ImageButton
-import android.widget.Spinner
-import android.widget.TextView
+import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.example.acae30.Controller.sucursalesController
 import com.example.acae30.database.Database
 import com.example.acae30.listas.PedidoDetalleAdapter
 import com.example.acae30.modelos.DetallePedido
@@ -42,7 +36,6 @@ import java.nio.charset.StandardCharsets
 
 class Detallepedido : AppCompatActivity() {
 
-   // private var btbuscar: ImageButton? = null
     //AGREGANDO EL SPINNER DE SUCURSALES
     private var spSucursal: Spinner? = null
     private var btbuscarProducto: ImageButton? = null
@@ -91,11 +84,6 @@ class Detallepedido : AppCompatActivity() {
         from = intento.getStringExtra("from").toString()
         txtfecha_creacion = findViewById(R.id.fecha_creacion)
         txtcliente = findViewById(R.id.txtcliente)
-        spSucursal = findViewById(R.id.spSucursal)
-
-
-       // btbuscar = findViewById(R.id.btnbuscar)
-
         btbuscarProducto = findViewById(R.id.imgbtnadd)
         lienzo = findViewById(R.id.lienzo)
         funciones = Funciones()
@@ -113,13 +101,8 @@ class Detallepedido : AppCompatActivity() {
 
         recicler = findViewById(R.id.reciclerdetalle)
 
-        val listaSucursal =
-        val adaptador = ArrayAdapter(this, android.R.layout.simple_spinner_item, listaSucursal)
-        adaptador.setDropDownViewResource(R.layout.support_simple_spinner_dropdown_item)
-        spSucursal!!.adapter = adaptador
-
-        println(listaSucursales())
-
+        //FUNCION PARA CARGAR LAS SUCURSALES AL SPINNER
+        cargarSucursales()
 
         // Consultar datos de visita
         if (idpedido > 0) {
@@ -151,7 +134,7 @@ class Detallepedido : AppCompatActivity() {
         // Si no hay visita, que no se pueda enviar pedido
         if (!visita_enviada!!) {
             btnenviar!!.isEnabled = false
-            btnenviar!!.setBackgroundColor(Color.GRAY)
+            btnenviar!!.setBackgroundResource(R.drawable.border_btndisable)
         }
 
         btnatras!!.setOnClickListener {
@@ -172,14 +155,6 @@ class Detallepedido : AppCompatActivity() {
                 intento.putExtra("codigo", codigo)
                 intento.putExtra("idapi", idapi)
                 startActivity(intento)
-            } else {
-//                val alert: Snackbar = Snackbar.make(
-//                    lienzo!!,
-//                    "Debes Ingresar un Nombre o buscar el cliente",
-//                    Snackbar.LENGTH_LONG
-//                )
-//                alert.view.setBackgroundColor(resources.getColor(R.color.moderado))
-//                alert.show()
             }
         }
         //muestra el listado de los productos
@@ -322,29 +297,21 @@ class Detallepedido : AppCompatActivity() {
         }
     }
 
-    private fun listaSucursales(){
-        try {
-            val list: ArrayList<Sucursales> = getSucursales(idcliente)
-            var nombreSucursal = ArrayList<String>()
-            if(list.isNotEmpty()){
-                for(data in list){
-                    //println("SUCURSAL: ${data.nombreSucursal}")
-                    nombreSucursal.add(data.nombreSucursal.toString())
-                }
-            }else{
-                nombreSucursal.add("NO TIENE SUCURSALES")
-            }
-        } catch (e: Exception) {
-            println("$e -> ERROR AL CARGAR LAS SUCRUSALES")
-        }
+    //FUNCION PARA CARGAR LAS SUCURSALES AL SPINNER
+    private fun cargarSucursales(){
+        spSucursal = findViewById(R.id.spSucursal)
+        val listSucursal = getSucursalesNombre(idcliente).toMutableList()
+
+        val adaptador = ArrayAdapter(this@Detallepedido, android.R.layout.simple_spinner_item, listSucursal)
+        adaptador.setDropDownViewResource(R.layout.support_simple_spinner_dropdown_item)
+        spSucursal!!.adapter = adaptador
     }
 
     //FUNCION PARA OBTENER LAS SUCURSALES POR CLIENTE.
     //03-02-2023
-    private fun getSucursales(idCliente:Int): ArrayList<Sucursales> {
+    private fun getSucursalesNombre(idCliente:Int): ArrayList<Sucursales> {
         val db = db!!.writableDatabase
         val listaSucursales = ArrayList<Sucursales>()
-
         try {
 
             val dataSucursal = db.rawQuery("SELECT * FROM cliente_sucursal WHERE id_cliente='$idCliente'", null)
@@ -352,17 +319,8 @@ class Detallepedido : AppCompatActivity() {
                 dataSucursal.moveToFirst()
                 do{
                     val data = Sucursales(
-                        dataSucursal.getInt(0),
-                        dataSucursal.getInt(1),
                         dataSucursal.getString(2),
-                        dataSucursal.getString(3),
-                        dataSucursal.getString(4),
-                        dataSucursal.getString(5),
-                        dataSucursal.getString(6),
-                        dataSucursal.getString(7),
-                        dataSucursal.getString(8),
-                        dataSucursal.getString(9),
-                        dataSucursal.getString(10)
+                        dataSucursal.getString(3)
                     )
                     listaSucursales.add(data)
                 }while (dataSucursal.moveToNext())
