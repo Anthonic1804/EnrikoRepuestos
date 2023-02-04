@@ -7,20 +7,23 @@ import android.content.SharedPreferences
 import android.graphics.Color
 import android.os.Bundle
 import android.view.View
+import android.widget.ArrayAdapter
 import android.widget.Button
 import android.widget.ImageButton
+import android.widget.Spinner
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.example.acae30.Controller.sucursalesController
 import com.example.acae30.database.Database
 import com.example.acae30.listas.PedidoDetalleAdapter
 import com.example.acae30.modelos.DetallePedido
 import com.example.acae30.modelos.JSONmodels.CabezeraPedidoSend
 import com.example.acae30.modelos.Pedidos
-import com.example.acae30.modelos.VistaPedidos
+import com.example.acae30.modelos.Sucursales
 import com.google.android.material.snackbar.Snackbar
 import com.google.gson.JsonArray
 import com.google.gson.JsonObject
@@ -40,7 +43,8 @@ import java.nio.charset.StandardCharsets
 class Detallepedido : AppCompatActivity() {
 
    // private var btbuscar: ImageButton? = null
-
+    //AGREGANDO EL SPINNER DE SUCURSALES
+    private var spSucursal: Spinner? = null
     private var btbuscarProducto: ImageButton? = null
     private var idcliente: Int = 0
     private var nombre: String? = ""
@@ -87,6 +91,8 @@ class Detallepedido : AppCompatActivity() {
         from = intento.getStringExtra("from").toString()
         txtfecha_creacion = findViewById(R.id.fecha_creacion)
         txtcliente = findViewById(R.id.txtcliente)
+        spSucursal = findViewById(R.id.spSucursal)
+
 
        // btbuscar = findViewById(R.id.btnbuscar)
 
@@ -107,13 +113,13 @@ class Detallepedido : AppCompatActivity() {
 
         recicler = findViewById(R.id.reciclerdetalle)
 
-      /*  //obtenemos la direccion del servidor
-        btbuscar!!.setOnClickListener {
-            val intento = Intent(this, Clientes::class.java)
-            intento.putExtra("busqueda", true)
+        val listaSucursal =
+        val adaptador = ArrayAdapter(this, android.R.layout.simple_spinner_item, listaSucursal)
+        adaptador.setDropDownViewResource(R.layout.support_simple_spinner_dropdown_item)
+        spSucursal!!.adapter = adaptador
 
-            startActivity(intento)
-        } //busca al cliente*/
+        println(listaSucursales())
+
 
         // Consultar datos de visita
         if (idpedido > 0) {
@@ -315,6 +321,60 @@ class Detallepedido : AppCompatActivity() {
             }
         }
     }
+
+    private fun listaSucursales(){
+        try {
+            val list: ArrayList<Sucursales> = getSucursales(idcliente)
+            var nombreSucursal = ArrayList<String>()
+            if(list.isNotEmpty()){
+                for(data in list){
+                    //println("SUCURSAL: ${data.nombreSucursal}")
+                    nombreSucursal.add(data.nombreSucursal.toString())
+                }
+            }else{
+                nombreSucursal.add("NO TIENE SUCURSALES")
+            }
+        } catch (e: Exception) {
+            println("$e -> ERROR AL CARGAR LAS SUCRUSALES")
+        }
+    }
+
+    //FUNCION PARA OBTENER LAS SUCURSALES POR CLIENTE.
+    //03-02-2023
+    private fun getSucursales(idCliente:Int): ArrayList<Sucursales> {
+        val db = db!!.writableDatabase
+        val listaSucursales = ArrayList<Sucursales>()
+
+        try {
+
+            val dataSucursal = db.rawQuery("SELECT * FROM cliente_sucursal WHERE id_cliente='$idCliente'", null)
+            if(dataSucursal.count > 0){
+                dataSucursal.moveToFirst()
+                do{
+                    val data = Sucursales(
+                        dataSucursal.getInt(0),
+                        dataSucursal.getInt(1),
+                        dataSucursal.getString(2),
+                        dataSucursal.getString(3),
+                        dataSucursal.getString(4),
+                        dataSucursal.getString(5),
+                        dataSucursal.getString(6),
+                        dataSucursal.getString(7),
+                        dataSucursal.getString(8),
+                        dataSucursal.getString(9),
+                        dataSucursal.getString(10)
+                    )
+                    listaSucursales.add(data)
+                }while (dataSucursal.moveToNext())
+            }
+        }catch (e: Exception) {
+            throw Exception(e.message)
+        } finally {
+            db!!.close()
+        }
+        return listaSucursales
+    }
+
 
     fun validarDatos() {
         if (idpedido > 0) {

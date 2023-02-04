@@ -39,8 +39,6 @@ class Producto_agregar : AppCompatActivity() {
     private var spiner: Spinner? = null
     private var precio: Float = 0.toFloat()
     private var cantidad: Float = 1.toFloat()
-    private var btnMas: ImageButton? = null
-    private var btnMenos: ImageButton? = null
     private var txttotal: TextView? = null
     private var idpedido: Int = 0
     private var idcliente: Int? = 0
