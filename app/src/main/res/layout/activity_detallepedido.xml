@@ -127,6 +127,44 @@
         />
 
     <TextView
+        android:id="@+id/tvenvio"
+        android:layout_width = "0dp"
+        android:layout_height = "wrap_content"
+        android:layout_marginStart="16dp"
+        android:layout_marginEnd="16dp"
+        android:text="TIPO DE ENVIO"
+        android:textSize="18sp"
+        android:textStyle="bold"
+        android:layout_marginTop="35dp"
+        android:textColor="@color/colordark"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/tvsucursal"
+        />
+
+    <Switch
+        android:id="@+id/swcaes"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="CAES"
+        android:textStyle="bold"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.075"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/tvenvio" />
+
+    <Switch
+        android:id="@+id/swruta"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="RUTA"
+        android:textStyle="bold"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.18"
+        app:layout_constraintStart_toEndOf="@+id/swcaes"
+        app:layout_constraintTop_toBottomOf="@+id/tvenvio" />
+
+    <TextView
         android:id="@+id/textView18"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -138,7 +176,7 @@
         android:textSize="18sp"
         android:textStyle="bold"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/tvsucursal" />
+        app:layout_constraintTop_toBottomOf="@+id/tvenvio" />
 
     <TextView
         android:id="@+id/fecha_creacion"
@@ -158,14 +196,15 @@
         android:id="@+id/imgbtnadd"
         android:layout_width="45dp"
         android:layout_height="45dp"
-        android:layout_marginTop="20dp"
         android:layout_marginEnd="16dp"
         android:layout_marginBottom="13dp"
         android:backgroundTint="@android:color/holo_green_dark"
         app:layout_constraintBottom_toTopOf="@+id/reciclerdetalle"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/spSucursal"
-        app:layout_constraintVertical_bias="0.0"
+        app:layout_constraintHorizontal_bias="1.0"
+        app:layout_constraintStart_toEndOf="@+id/textView18"
+        app:layout_constraintTop_toBottomOf="@+id/swruta"
+        app:layout_constraintVertical_bias="0.876"
         app:srcCompat="@drawable/ic_baseline_add_box_24" />
 
     <TextView

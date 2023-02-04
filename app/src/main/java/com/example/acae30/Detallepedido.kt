@@ -42,6 +42,9 @@ class Detallepedido : AppCompatActivity() {
     //AGREGANDO EL SPINNER DE SUCURSALES
     private var spSucursal: Spinner? = null
     private var sinSucursal: TextView? = null
+    private var swcaes: Switch? = null
+    private var swruta: Switch? = null
+
     private var btbuscarProducto: ImageButton? = null
     private var idcliente: Int = 0
     private var nombre: String? = ""
@@ -70,6 +73,7 @@ class Detallepedido : AppCompatActivity() {
     private var alerta: AlertDialogo? = null
     private var codigo = ""
     private var idapi = 0
+
 
     @SuppressLint("MissingInflatedId")
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -104,9 +108,30 @@ class Detallepedido : AppCompatActivity() {
         puerto = preferencias!!.getInt("puerto", 0)
         visita_enviada = false
 
+        //FUNCIONES AGRAGADAS PARA LOS CONTROLES DE ENVIO
+        swcaes = findViewById(R1.id.swcaes)
+        swruta = findViewById(R1.id.swruta)
+        swruta!!.isChecked = true
+
+        swcaes!!.setOnCheckedChangeListener { _, isChecked ->
+            if (isChecked) {
+                swruta!!.isChecked = false
+            } else {
+                swruta!!.isChecked = true
+            }
+        }
+
+        swruta!!.setOnCheckedChangeListener { _, isChecked ->
+            if (isChecked) {
+                swcaes!!.isChecked = false
+            } else {
+                swcaes!!.isChecked = true
+            }
+        }
+
         recicler = findViewById(R1.id.reciclerdetalle)
-        sinSucursal = findViewById(R1.id.sinSucursal)
-        sinSucursal!!.visibility = View.GONE
+        sinSucursal = findViewById(R1.id.sinSucursal) //TEXTVIEW PARA LOS CLIENTES SIN SUCURSALES
+        sinSucursal!!.visibility = View.GONE //DESHABILITAMOS LA VISIBILIDAD DEL TEXVIEW
 
         //FUNCION PARA CARGAR LAS SUCURSALES AL SPINNER
         cargarSucursales()
