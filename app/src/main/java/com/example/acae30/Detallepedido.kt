@@ -1,5 +1,6 @@
 package com.example.acae30
 
+import android.annotation.SuppressLint
 import android.app.Dialog
 import android.content.Context
 import android.content.Intent
@@ -21,6 +22,7 @@ import com.example.acae30.modelos.Sucursales
 import com.google.android.material.snackbar.Snackbar
 import com.google.gson.JsonArray
 import com.google.gson.JsonObject
+import kotlinx.android.synthetic.main.activity_inicio.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
@@ -32,12 +34,14 @@ import java.io.Reader
 import java.net.HttpURLConnection
 import java.net.URL
 import java.nio.charset.StandardCharsets
+import com.example.acae30.R as R1
 
 
 class Detallepedido : AppCompatActivity() {
 
     //AGREGANDO EL SPINNER DE SUCURSALES
     private var spSucursal: Spinner? = null
+    private var sinSucursal: TextView? = null
     private var btbuscarProducto: ImageButton? = null
     private var idcliente: Int = 0
     private var nombre: String? = ""
@@ -67,12 +71,13 @@ class Detallepedido : AppCompatActivity() {
     private var codigo = ""
     private var idapi = 0
 
+    @SuppressLint("MissingInflatedId")
     override fun onCreate(savedInstanceState: Bundle?) {
 
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_detallepedido)
+        setContentView(R1.layout.activity_detallepedido)
         supportActionBar?.hide()
-        btnatras = findViewById(R.id.imbtnatras)
+        btnatras = findViewById(R1.id.imbtnatras)
         val intento = intent
         alerta = AlertDialogo(this)
         idcliente = intento.getIntExtra("id", 0)
@@ -82,16 +87,16 @@ class Detallepedido : AppCompatActivity() {
         codigo = intento.getStringExtra("codigo").toString()
         idapi = intento.getIntExtra("idapi", 0)
         from = intento.getStringExtra("from").toString()
-        txtfecha_creacion = findViewById(R.id.fecha_creacion)
-        txtcliente = findViewById(R.id.txtcliente)
-        btbuscarProducto = findViewById(R.id.imgbtnadd)
-        lienzo = findViewById(R.id.lienzo)
+        txtfecha_creacion = findViewById(R1.id.fecha_creacion)
+        txtcliente = findViewById(R1.id.txtcliente)
+        btbuscarProducto = findViewById(R1.id.imgbtnadd)
+        lienzo = findViewById(R1.id.lienzo)
         funciones = Funciones()
         db = Database(this)
-        txttotal = findViewById(R.id.txttotal)
-        btneliminar = findViewById(R.id.btncancelar)
-        btnenviar = findViewById(R.id.btnenviar)
-        btnguardar = findViewById(R.id.btnguardar)
+        txttotal = findViewById(R1.id.txttotal)
+        btneliminar = findViewById(R1.id.btncancelar)
+        btnenviar = findViewById(R1.id.btnenviar)
+        btnguardar = findViewById(R1.id.btnguardar)
         preferencias = getSharedPreferences(instancia, Context.MODE_PRIVATE)
         idvendedor = preferencias!!.getInt("Idvendedor", 0)
         vendedor = preferencias!!.getString("Vendedor", "").toString()
@@ -99,7 +104,9 @@ class Detallepedido : AppCompatActivity() {
         puerto = preferencias!!.getInt("puerto", 0)
         visita_enviada = false
 
-        recicler = findViewById(R.id.reciclerdetalle)
+        recicler = findViewById(R1.id.reciclerdetalle)
+        sinSucursal = findViewById(R1.id.sinSucursal)
+        sinSucursal!!.visibility = View.GONE
 
         //FUNCION PARA CARGAR LAS SUCURSALES AL SPINNER
         cargarSucursales()
@@ -134,7 +141,7 @@ class Detallepedido : AppCompatActivity() {
         // Si no hay visita, que no se pueda enviar pedido
         if (!visita_enviada!!) {
             btnenviar!!.isEnabled = false
-            btnenviar!!.setBackgroundResource(R.drawable.border_btndisable)
+            btnenviar!!.setBackgroundResource(R1.drawable.border_btndisable)
         }
 
         btnatras!!.setOnClickListener {
@@ -213,7 +220,7 @@ class Detallepedido : AppCompatActivity() {
                                 alert.view.setBackgroundColor(
                                     ContextCompat.getColor(
                                         this@Detallepedido,
-                                        R.color.moderado
+                                        R1.color.moderado
                                     )
                                 )
                                 alert.show()
@@ -223,7 +230,7 @@ class Detallepedido : AppCompatActivity() {
                 } else {
                     val alert: Snackbar =
                         Snackbar.make(lienzo!!, "Enciende tu wifi", Snackbar.LENGTH_LONG)
-                    alert.view.setBackgroundColor(ContextCompat.getColor(this, R.color.moderado))
+                    alert.view.setBackgroundColor(ContextCompat.getColor(this, R1.color.moderado))
                     alert.show()
                 } //valida conexion a internet
             }
@@ -278,7 +285,7 @@ class Detallepedido : AppCompatActivity() {
                             alert.view.setBackgroundColor(
                                 ContextCompat.getColor(
                                     this@Detallepedido,
-                                    R.color.moderado
+                                    R1.color.moderado
                                 )
                             )
                             alert.show()
@@ -290,7 +297,7 @@ class Detallepedido : AppCompatActivity() {
                         "Error: PRIMERO No hay productos agregados al pedido.",
                         Snackbar.LENGTH_LONG
                     )
-                    alert.view.setBackgroundColor(ContextCompat.getColor(this, R.color.moderado))
+                    alert.view.setBackgroundColor(ContextCompat.getColor(this, R1.color.moderado))
                     alert.show()
                 }
             }
@@ -299,11 +306,11 @@ class Detallepedido : AppCompatActivity() {
 
     //FUNCION PARA CARGAR LAS SUCURSALES AL SPINNER
     private fun cargarSucursales(){
-        spSucursal = findViewById(R.id.spSucursal)
+        spSucursal = findViewById(R1.id.spSucursal)
         val listSucursal = getSucursalesNombre(idcliente).toMutableList()
 
         val adaptador = ArrayAdapter(this@Detallepedido, android.R.layout.simple_spinner_item, listSucursal)
-        adaptador.setDropDownViewResource(R.layout.support_simple_spinner_dropdown_item)
+        adaptador.setDropDownViewResource(R1.layout.support_simple_spinner_dropdown_item)
         spSucursal!!.adapter = adaptador
     }
 
@@ -324,6 +331,9 @@ class Detallepedido : AppCompatActivity() {
                     )
                     listaSucursales.add(data)
                 }while (dataSucursal.moveToNext())
+            }else{
+                spSucursal!!.visibility = View.GONE
+                sinSucursal!!.visibility = View.VISIBLE
             }
         }catch (e: Exception) {
             throw Exception(e.message)
@@ -403,7 +413,7 @@ class Detallepedido : AppCompatActivity() {
                         e.message.toString(),
                         Snackbar.LENGTH_LONG
                     )
-                    alert.view.setBackgroundColor(resources.getColor(R.color.moderado))
+                    alert.view.setBackgroundColor(resources.getColor(R1.color.moderado))
                     alert.show()
                 }
             }
@@ -534,8 +544,8 @@ class Detallepedido : AppCompatActivity() {
 
     private fun AlertaEliminar() {
         val dialogo = Dialog(this)
-        dialogo.setContentView(R.layout.alert_eliminar)
-        dialogo.findViewById<Button>(R.id.btneliminar).setOnClickListener {
+        dialogo.setContentView(R1.layout.alert_eliminar)
+        dialogo.findViewById<Button>(R1.id.btneliminar).setOnClickListener {
             GlobalScope.launch(Dispatchers.Main) {
                 //this@Detallepedido.lifecycleScope.launch {
                 try {
@@ -561,14 +571,14 @@ class Detallepedido : AppCompatActivity() {
                         e.message.toString(),
                         Snackbar.LENGTH_LONG
                     )
-                    alert.view.setBackgroundColor(resources.getColor(R.color.moderado))
+                    alert.view.setBackgroundColor(resources.getColor(R1.color.moderado))
                     alert.show()
                 }
             }
 
         }//boton eliminar
 
-        dialogo.findViewById<Button>(R.id.btncancelar).setOnClickListener {
+        dialogo.findViewById<Button>(R1.id.btncancelar).setOnClickListener {
             dialogo.dismiss()
         }//boton eliminar
 

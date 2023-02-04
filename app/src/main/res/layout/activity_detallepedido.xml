@@ -98,6 +98,21 @@
         app:layout_constraintTop_toBottomOf="@+id/txtcliente"
         />
 
+    <TextView
+        android:id="@+id/sinSucursal"
+        android:layout_width = "0dp"
+        android:layout_height = "wrap_content"
+        android:layout_marginStart="16dp"
+        android:layout_marginEnd="16dp"
+        android:text="NO TIENE SUCURSAL REGISTRADA"
+        android:textSize="16sp"
+        android:textColor="@color/colordark"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/tvsucursal"
+        />
+
+
     <Spinner
         android:id="@+id/spSucursal"
         android:layout_width="0dp"
@@ -116,14 +131,14 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="16dp"
-        android:layout_marginTop="20dp"
+        android:layout_marginTop="40dp"
         android:text="DETALLE DEL PEDIDO"
         android:textAlignment="viewStart"
         android:textColor="@color/colordark"
         android:textSize="18sp"
         android:textStyle="bold"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/spSucursal" />
+        app:layout_constraintTop_toBottomOf="@+id/tvsucursal" />
 
     <TextView
         android:id="@+id/fecha_creacion"
