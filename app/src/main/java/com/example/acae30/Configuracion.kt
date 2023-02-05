@@ -58,10 +58,9 @@ class Configuracion : AppCompatActivity() {
         var nombre_vendedor = preferencias!!.getString("Vendedor", "")
         txtvendedor!!.text = nombre_vendedor
 
-        //FUNCIONES AGRAGADAS PARA LOS CONTROLES DE ENVIO
+        //FUNCIONES AGRAGADAS PARA LOS CONTROLES DE VISTA DE INVENTARIO
         swlista = findViewById(R.id.swlista)
         swminiatura = findViewById(R.id.swminiatura)
-        //swlista!!.isChecked = true
 
         mostrarSeleccionInventario()
 
@@ -84,8 +83,6 @@ class Configuracion : AppCompatActivity() {
                 updateVistaInventario(2)
             }
         }
-
-
 
     } //funcion que inicializa las variables
 

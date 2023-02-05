@@ -222,11 +222,11 @@ class carga_datos : AppCompatActivity() {
                             } else {
                                 messageAsync("Cargando 100%")
                                 alert!!.dismisss()
-                                ShowAlert("No se Encontraron datos en el WS")
+                                ShowAlert("NO SE ENCONTRARON SUCURSALES REGISTRADAS")
                             } //caso que la respuesta venga vacia
                         }
                     } else {
-                        throw Exception("getSurcusales() = Error de Comunicacion con el servidor:$responseCode + url: $url")
+                        throw Exception("SERVIDOR: NO SE ENCONTRARON SUCURSALES REGISTRADAS")
                     }
                 } catch (e: Exception) {
                     throw Exception(e.message)
