@@ -63,9 +63,7 @@ class Inventario : AppCompatActivity() {
         idapi = intent.getIntExtra("idapi", 0)
         db = Database(this)
 
-
-
-
+        busqueda!!.clearFocus()
         dataSearch = intent.getStringExtra("dataSearch") //OBTIENE LA BUSQUEDA ALMACENADA DEL SEARCHVIEW
         recicle = findViewById(R.id.reciInvent)
 
