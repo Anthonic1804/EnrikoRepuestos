@@ -52,6 +52,18 @@ class Tablas {
 
         return clienteSucursal
     }
+    //CREANDO LA TABLA CONFIG DE LA APP
+    fun configApp(): String{
+        val configApp = "CREATE TABLE config(" +
+                "vistaInventario INTEGER NOT NULL)"
+        return  configApp
+    }
+    //INSERTANDO LA VISTA POR DEFECTO DEL INVENTARIO
+    fun insertConfig():String{
+        val insertConfig = "INSERT INTO config values(" +
+                "2)"
+        return insertConfig
+    }
 
     //CREANDO TABLA VIRTUAL CLIENTES
     fun virtualCliente(): String{

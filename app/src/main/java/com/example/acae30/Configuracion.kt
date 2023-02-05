@@ -3,14 +3,16 @@ package com.example.acae30
 import android.content.Context
 import android.content.Intent
 import android.content.SharedPreferences
-import android.database.sqlite.SQLiteDatabase
 import android.os.Bundle
 import android.view.View
 import android.widget.Button
 import android.widget.ImageButton
+import android.widget.Switch
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
+import com.example.acae30.database.Database
+import com.example.acae30.modelos.Config
 import com.google.android.material.snackbar.Snackbar
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
@@ -21,6 +23,11 @@ import java.net.URL
 
 
 class Configuracion : AppCompatActivity() {
+
+    private var swlista: Switch? = null
+    private var swminiatura: Switch? = null
+    private var dataBase: Database? = null
+
     private var atras: ImageButton? = null
     private var ip: TextView? = null
     private var puerto: TextView? = null
@@ -31,9 +38,6 @@ class Configuracion : AppCompatActivity() {
     private var txtvendedor: TextView? = null
     private var funciones: Funciones? = null
     private var alerta: AlertDialogo? = null
-    private var sqLite: TextView? = null
-    private var versionCode: TextView? = null
-
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -48,27 +52,100 @@ class Configuracion : AppCompatActivity() {
         btnGuardar = findViewById(R.id.btnupdate)
         atras = findViewById(R.id.imgbtnatras)
         alerta = AlertDialogo(this)
-        sqLite = findViewById(R.id.txtSqlite)
-        versionCode = findViewById(R.id.txtKotlin)
+        dataBase = Database(this)
+
 
         var nombre_vendedor = preferencias!!.getString("Vendedor", "")
         txtvendedor!!.text = nombre_vendedor
 
-        //OBTENIENDO LA VERSION DE SQLITE UTILIZADA
-        val cursor =
-            SQLiteDatabase.create(null).rawQuery("select sqlite_version() AS sqlite_version", null)
-        var sqliteVersion = ""
-        while (cursor.moveToNext()) {
-            sqliteVersion += cursor.getString(0)
+        //FUNCIONES AGRAGADAS PARA LOS CONTROLES DE ENVIO
+        swlista = findViewById(R.id.swlista)
+        swminiatura = findViewById(R.id.swminiatura)
+        //swlista!!.isChecked = true
+
+        mostrarSeleccionInventario()
+
+        swlista!!.setOnCheckedChangeListener { _, isChecked ->
+            if (isChecked) {
+                swminiatura!!.isChecked = false
+                updateVistaInventario(2)
+            } else {
+                swminiatura!!.isChecked = true
+                updateVistaInventario(1)
+            }
         }
-        sqLite!!.text = sqliteVersion
+
+        swminiatura!!.setOnCheckedChangeListener { _, isChecked ->
+            if (isChecked) {
+                swlista!!.isChecked = false
+                updateVistaInventario(1)
+            } else {
+                swlista!!.isChecked = true
+                updateVistaInventario(2)
+            }
+        }
 
 
-        //OPTENIENDO LA VERSION DE KOTLIN UTLIZADA
-        var versionC = BuildConfig.VERSION_NAME.toString()
-        versionCode!!.text = versionC
 
     } //funcion que inicializa las variables
+
+    //FUNCION PARA SELECCION LOS DATOS DE LA TABLA CONFIG
+    private fun getConfigInventario(): ArrayList<Config> {
+        val data = dataBase!!.writableDatabase
+        val list = ArrayList<Config>()
+
+        try {
+            val cursor = data.rawQuery("SELECT * FROM config", null)
+            if(cursor.count > 0){
+                cursor.moveToFirst()
+                do{
+                    val arreglo = Config(
+                        cursor.getInt(0)
+                    )
+                    list.add(arreglo)
+                }while (cursor.moveToNext())
+                cursor.close()
+            }
+        }catch (e: Exception) {
+            throw Exception(e.message)
+        } finally {
+            data.close()
+        }
+        return list
+    }
+
+    //FUNCION PARA EXTRAER EL CAMPO VISTA INVENTARIO
+    private fun mostrarSeleccionInventario(){
+        try {
+            val list: ArrayList<com.example.acae30.modelos.Config> = getConfigInventario()
+            if(list.isNotEmpty()){
+                var vistaInventario = ""
+                for(data in list){
+                    vistaInventario = data.vistaInventario.toString()
+                }
+
+                if(vistaInventario.toInt() == 1){
+                    swminiatura!!.isChecked = true
+                }else{
+                    swlista!!.isChecked = true
+                }
+            }
+        } catch (e: Exception) {
+            println("ERROR AL MOSTRAR LA TABLA CONFIG")
+        }
+    }
+
+    //FUNCION PARA ACTUALIZAR EL CAMPO VISTA INVENTARIO
+    private fun updateVistaInventario(vistaInventario:Int){
+        val data = dataBase!!.writableDatabase
+        try {
+            data!!.execSQL("UPDATE config set vistaInventario=$vistaInventario")
+        }catch (e: Exception) {
+            throw Exception(e.message)
+        } finally {
+            data.close()
+        }
+    }
 
     override fun onStart() {
         super.onStart()

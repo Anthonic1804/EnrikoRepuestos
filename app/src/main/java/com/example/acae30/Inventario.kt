@@ -7,7 +7,6 @@ import android.view.View
 import android.view.inputmethod.InputMethodManager
 import android.widget.ImageButton
 import android.widget.SearchView
-import android.widget.SearchView.OnCloseListener
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
@@ -16,8 +15,10 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.acae30.database.Database
 import com.example.acae30.listas.InventarioAdapter
+import com.example.acae30.modelos.Config
 import com.example.acae30.modelos.Inventario
 import com.google.zxing.integration.android.IntentIntegrator
+import kotlinx.android.synthetic.main.carta_inventario_miniatura.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
@@ -41,9 +42,10 @@ class Inventario : AppCompatActivity() {
     private var idapi = 0
     private var scanner: ImageButton? = null
 
+    var vista:Int? = null //INVENTARIO 1 -> VISTA MINIATURA  2-> VISTA EN LISTA
+
     private var dataSearch: String? = null
 
-    //private var vistaInventario: Int? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
 
@@ -61,8 +63,10 @@ class Inventario : AppCompatActivity() {
         idapi = intent.getIntExtra("idapi", 0)
         db = Database(this)
 
-        dataSearch = intent.getStringExtra("dataSearch") //OBTIENE LA BUSQUEDA ALMACENADA DEL SEARCHVIEW
 
+
+
+        dataSearch = intent.getStringExtra("dataSearch") //OBTIENE LA BUSQUEDA ALMACENADA DEL SEARCHVIEW
         recicle = findViewById(R.id.reciInvent)
 
         funciones = Funciones()
@@ -86,6 +90,54 @@ class Inventario : AppCompatActivity() {
             integrador.initiateScan()
         }
 
+        mostrarSeleccionInventario()
+
+    }
+
+    //FUNCION PARA SELECCION LOS DATOS DE LA TABLA CONFIG
+    private fun getConfigInventario(): ArrayList<Config> {
+        val data = db!!.writableDatabase
+        val list = ArrayList<Config>()
+
+        try {
+            val cursor = data.rawQuery("SELECT * FROM config", null)
+            if(cursor.count > 0){
+                cursor.moveToFirst()
+                do{
+                    val arreglo = Config(
+                        cursor.getInt(0)
+                    )
+                    list.add(arreglo)
+                }while (cursor.moveToNext())
+                cursor.close()
+            }
+        }catch (e: Exception) {
+            throw Exception(e.message)
+        } finally {
+            data.close()
+        }
+        return list
+    }
+
+    //FUNCION PARA EXTRAER EL CAMPO VISTA INVENTARIO
+    private fun mostrarSeleccionInventario(){
+        try {
+            val list: ArrayList<com.example.acae30.modelos.Config> = getConfigInventario()
+            if(list.isNotEmpty()){
+                var vistaInventario = ""
+                for(data in list){
+                    vistaInventario = data.vistaInventario.toString()
+                }
+
+                if(vistaInventario.toInt() == 1){
+                    vista = 1
+                }else{
+                    vista = 2
+                }
+            }
+        } catch (e: Exception) {
+            println("ERROR AL MOSTRAR LA TABLA CONFIG")
+        }
     }
 
     //LECTURA DE CODIGO DE BARRAS
@@ -229,15 +281,15 @@ class Inventario : AppCompatActivity() {
 
     }
 
-   var vistaInventario = 2 //INVENTARIO 1 -> VISTA MINIATURA  2-> VISTA EN LISTA
+
     private fun MostrarLista(list: List<Inventario>) {
             try {
                 if (list.isNotEmpty()) {
                     //MOSTRANDO INVENTARIO EN VISTA LISTA
-                    if(vistaInventario == 1){
+                    if(vista == 2){
                         val mLayoutManager = LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false)
                         recicle!!.layoutManager = mLayoutManager
-                        val adapter = InventarioAdapter(list, this) { position ->
+                        val adapter = InventarioAdapter(list, this, vista) { position ->
                             if (busquedaProducto) {
                                 val intento = Intent(this@Inventario, Producto_agregar::class.java)
                                 intento.putExtra("idproducto", list.get(position).Id)
@@ -263,7 +315,7 @@ class Inventario : AppCompatActivity() {
                         //MOSTRANDO INVENTARIO EN VISTA MINIATURA
                         val gridLayoutManayer = GridLayoutManager(this, 2, GridLayoutManager.VERTICAL, false)
                         recicle!!.layoutManager = gridLayoutManayer
-                        val adapter = InventarioAdapter(list, this) { position ->
+                        val adapter = InventarioAdapter(list, this, vista) { position ->
                             if (busquedaProducto) {
                                 val intento = Intent(this@Inventario, Producto_agregar::class.java)
                                 intento.putExtra("idproducto", list.get(position).Id)
