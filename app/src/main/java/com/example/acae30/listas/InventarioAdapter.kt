@@ -19,7 +19,10 @@ class InventarioAdapter(
     var contador = 0
     var colores: Array<String>? = null
     override fun onCreateViewHolder(p0: ViewGroup, p1: Int): InventarioAdapter.MyViewHolder {
-        val vista = LayoutInflater.from(p0.context).inflate(R.layout.carta_inventario, p0, false)
+        //VISTAS DE INVENTARIO
+        // 1 -> VISTA MINIATURA -> carta_inventario_miniatura
+        // 2 -> VISTA LISTA -> carta_inventario
+        val vista = LayoutInflater.from(p0.context).inflate(R.layout.carta_inventario_miniatura, p0, false)
         return MyViewHolder(vista)
     }
 
