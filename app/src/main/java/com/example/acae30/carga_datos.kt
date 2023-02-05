@@ -26,7 +26,6 @@ class carga_datos : AppCompatActivity() {
     private var cvinventario: CardView? = null
     private var cvcliente: CardView? = null
     private var cvcuentas: CardView? = null
-    private var cvcSucursales: CardView? = null
     private var cvpedidos: CardView? = null
     private val instancia = "CONFIG_SERVIDOR"
     private var alert: AlertDialogo? = null
@@ -42,7 +41,6 @@ class carga_datos : AppCompatActivity() {
         preferencias = getSharedPreferences(instancia, Context.MODE_PRIVATE)
         btnatras = findViewById(R.id.imgbtnatras)
         cvcliente = findViewById(R.id.cvclientes)
-        cvcSucursales = findViewById(R.id.cvcSucursales)
         cvinventario = findViewById(R.id.cvinventario)
         cvcuentas = findViewById(R.id.cvcuentas)
         cvpedidos = findViewById(R.id.cvpedidos)
@@ -71,6 +69,7 @@ class carga_datos : AppCompatActivity() {
                     alert!!.Cargando() //muestra la alerta
                     GlobalScope.launch(Dispatchers.IO) {
                         getClients()
+                        getSucursales()
                        // getSucursales()
                     } //COURUTINA PARA OBTENER CLIENTES Y SUCURSALES
                 } else {
@@ -80,21 +79,6 @@ class carga_datos : AppCompatActivity() {
                 ShowAlert("No hay configuracion del Servidor")
             }
         }//cuando se hace click en la card de
-
-        cvcSucursales!!.setOnClickListener {
-            if (url != null) {
-                if (funciones!!.isNetworkConneted(this)) {
-                    alert!!.Cargando() //muestra la alerta
-                    GlobalScope.launch(Dispatchers.IO) {
-                        getSucursales()
-                    } //COURUTINA PARA OBTENER CLIENTES Y SUCURSALES
-                } else {
-                    ShowAlert("Enciende tus datos o el wifi")
-                }
-            } else {
-                ShowAlert("No hay configuracion del Servidor")
-            }
-        }//cuando se hace click en la card de clientes
 
         cvinventario!!.setOnClickListener {
             if (url != null) {
@@ -183,7 +167,7 @@ class carga_datos : AppCompatActivity() {
                                 saveClienteDataBase(respuesta)
                                 messageAsync("Cargando 100%")
                                 alert!!.dismisss()
-                                ShowAlert("Carga Completada Exitosamente")
+                                ShowAlert("Clientes Almacenados Exitosamente")
                             } else {
                                 throw Exception("Servidor no Devolvio datos")
                             } //caso que la respuesta venga vacia
@@ -234,7 +218,7 @@ class carga_datos : AppCompatActivity() {
                                 saveSucursalesDatabase(respuesta) //guarda los datos en la bd
                                 messageAsync("Cargando 100%")
                                 alert!!.dismisss()
-                                ShowAlert("Carga Completada Exitosamente")
+                                ShowAlert("Sucursales Almacenadas Exitosamente")
                             } else {
                                 messageAsync("Cargando 100%")
                                 alert!!.dismisss()

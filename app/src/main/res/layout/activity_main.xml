@@ -110,7 +110,7 @@
         android:layout_marginTop="22dp"
         android:layout_marginEnd="20dp"
         android:layout_marginBottom="153dp"
-        android:background="@color/colorPrimaryDark"
+        android:background="@drawable/border_btnenviar"
         android:elevation="5dp"
         android:text="Guardar"
         android:textColor="#FFFFFF"
