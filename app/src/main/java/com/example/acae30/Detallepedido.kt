@@ -44,6 +44,9 @@ class Detallepedido : AppCompatActivity() {
     private var sinSucursal: TextView? = null
     private var swcaes: Switch? = null
     private var swruta: Switch? = null
+    private var idSucursal: Int? = null
+    private var codigoSucursal: String? = null
+    private var nombreSucursal: String? = null
 
     private var btbuscarProducto: ImageButton? = null
     private var idcliente: Int = 0
@@ -116,16 +119,20 @@ class Detallepedido : AppCompatActivity() {
         swcaes!!.setOnCheckedChangeListener { _, isChecked ->
             if (isChecked) {
                 swruta!!.isChecked = false
+                updateTipoPedido(1, idpedido)
             } else {
                 swruta!!.isChecked = true
+                updateTipoPedido(0, idpedido)
             }
         }
 
         swruta!!.setOnCheckedChangeListener { _, isChecked ->
             if (isChecked) {
                 swcaes!!.isChecked = false
+                updateTipoPedido(0, idpedido)
             } else {
                 swcaes!!.isChecked = true
+                updateTipoPedido(1, idpedido)
             }
         }
 
@@ -135,6 +142,7 @@ class Detallepedido : AppCompatActivity() {
 
         //FUNCION PARA CARGAR LAS SUCURSALES AL SPINNER
         cargarSucursales()
+
 
         // Consultar datos de visita
         if (idpedido > 0) {
@@ -788,6 +796,18 @@ class Detallepedido : AppCompatActivity() {
             bd!!.close()
         }
     } //actualiza el pedido y confirma que se envio
+
+    //FUNCION PARA ACTUALIZAR EL TIPO DE ENVIO SELECCIONADO
+    private fun updateTipoPedido(tipoPedido:Int, idpedido:Int){
+        val data = db!!.writableDatabase
+        try {
+            data!!.execSQL("UPDATE pedidos set tipo_envio=$tipoPedido WHERE id=$idpedido")
+        }catch (e: Exception) {
+            throw Exception(e.message)
+        } finally {
+            data.close()
+        }
+    }
 
     private fun ConfirmarDetallePedido(): Int {
         val bd = db!!.writableDatabase

@@ -41,7 +41,7 @@ class Tablas {
                 "Id INTEGER NOT NULL," +
                 "id_cliente INTEGER NOT NULL," +
                 "codigo_sucursal VARCHAR(25) NULL," +
-                "nombre_sucursal VARCHAR(25) NULL," +
+                "nombre_sucursal VARCHAR(45) NULL," +
                 "direccion_sucursal VARCHAR(200) NULL," +
                 "municipio_sucursal VARCHAR(50) NULL," +
                 "depto_sucursal VARCHAR(25) NULL," +
@@ -61,7 +61,7 @@ class Tablas {
     //INSERTANDO LA VISTA POR DEFECTO DEL INVENTARIO
     fun insertConfig():String{
         val insertConfig = "INSERT INTO config values(" +
-                "2)"
+                "2)" //INSERTAMOS 2 COMO SELECCION POR DEFECTO VISTA LISTA
         return insertConfig
     }
 
@@ -182,8 +182,11 @@ class Tablas {
                 "[Gps] TEXT  NULL," +
                 "Cerrado INTEGER NOT NUll default 0," +
                 "[Idvisita] INTEGER NOT NULL DEFAULT 0," +
-                "[Fecha_creado] TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL" +
-                ");"
+                "[Fecha_creado] TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL," +
+                "id_sucursal INTEGER NOT NULL DEFAULT 0," +
+                "codigo_sucursal VARCHAR(25) DEFAULT 'TEMP' NOT NULL," +
+                "nombre_sucursal VARCHAR(45) DEFAULT 'TEMP' NOT NULL," +
+                "tipo_envio INTEGER NOT NULL DEFAULT 0 );" //AGREGAR CAMPO A LA BD SQL
         return pedido
     } //tabla pedidos
 

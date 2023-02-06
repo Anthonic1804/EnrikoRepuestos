@@ -5,6 +5,6 @@ data class Sucursales(
     var nombreSucursal:String
     ){
     override fun toString(): String {
-        return nombreSucursal
+        return nombreSucursal; codigoSucursal
     }
 }
