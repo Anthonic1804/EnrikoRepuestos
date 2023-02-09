@@ -8,6 +8,7 @@ import android.content.SharedPreferences
 import android.os.Bundle
 import android.view.View
 import android.widget.*
+import android.widget.AdapterView.OnItemSelectedListener
 import androidx.appcompat.app.AppCompatActivity
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.content.ContextCompat
@@ -45,8 +46,8 @@ class Detallepedido : AppCompatActivity() {
     private var swcaes: Switch? = null
     private var swruta: Switch? = null
     private var idSucursal: Int? = null
-    private var codigoSucursal: String? = null
-    private var nombreSucursal: String? = null
+    private var codigoSucursal: Int? = null
+    private var sucursalName: String? = null
 
     private var btbuscarProducto: ImageButton? = null
     private var idcliente: Int = 0
@@ -335,12 +336,91 @@ class Detallepedido : AppCompatActivity() {
                 }
             }
         }
+
+        //IMPLEMENTANDO LOGICA DE SUCURSAL SELECCIONADA EN SPINNER
+        spSucursal!!.onItemSelectedListener = object : OnItemSelectedListener{
+            override fun onItemSelected(
+                parent: AdapterView<*>?,
+                view: View?,
+                position: Int,
+                id: Long
+            ) {
+                sucursalName = parent?.getItemAtPosition(position).toString()
+                if (sucursalName == "-- SELECCIONE UNA SUCURSAL --") {
+                    btnguardar!!.isEnabled = false
+                    btnenviar!!.isEnabled = false
+                    btnenviar!!.setBackgroundResource(R1.drawable.border_btndisable)
+                    btnguardar!!.setBackgroundResource(R1.drawable.border_btndisable)
+                }else{
+                    btnguardar!!.isEnabled = true
+                    btnenviar!!.isEnabled = true
+                    btnenviar!!.setBackgroundResource(R1.drawable.border_btnenviar)
+                    btnguardar!!.setBackgroundResource(R1.drawable.border_btnenviar)
+
+                    updatePedidoSucursal(idcliente, sucursalName!!, idpedido)
+                }
+            }
+
+            override fun onNothingSelected(parent: AdapterView<*>?) {
+                //NADA IMPLEMENTADO
+            }
+
+        }
+    }
+
+    //ACTUALIZANDO LA SUCURSAL DEL PEDIDO
+    private fun updatePedidoSucursal(idCliente:Int, nombreSucursal: String, idpedidos: Int){
+        val db = db!!.writableDatabase
+        try {
+            val dataSucursal = db.rawQuery("SELECT * FROM cliente_sucursal WHERE id_cliente=$idCliente and nombre_sucursal like '%$nombreSucursal%'", null)
+            val listaSucursales = ArrayList<Sucursales>()
+            if(dataSucursal.count > 0){
+                dataSucursal.moveToFirst()
+                do{
+                    val data = Sucursales(
+                        dataSucursal.getString(0),
+                        dataSucursal.getString(2),
+                        dataSucursal.getString(3)
+                    )
+                    listaSucursales.add(data)
+                }while (dataSucursal.moveToNext())
+            }
+
+            for (data in listaSucursales) {
+                idSucursal = data.idSucursa.toInt()
+                codigoSucursal = data.codigoSucursal.toInt()
+            }
+            db!!.execSQL("UPDATE pedidos set id_sucursal=$idSucursal, codigo_sucursal=$codigoSucursal, nombre_sucursal='$nombreSucursal' WHERE id=$idpedidos")
+            dataSucursal.close()
+
+        }catch (e: Exception) {
+            throw Exception(e.message)
+        } finally {
+            db!!.close()
+        }
+    }
+
+    //CARGANDO EL NOMBRE DE LA SUCURSAL EN EL SPINNER
+    private fun nombreSucursal(): ArrayList<String> {
+        val nombreSucursal = arrayListOf<String>()
+        nombreSucursal.add("-- SELECCIONE UNA SUCURSAL --")
+        try {
+            val list: ArrayList<com.example.acae30.modelos.Sucursales> = getSucursalesNombre(idcliente)
+            if(list.isNotEmpty()){
+                for(data in list){
+                    nombreSucursal.add(data.nombreSucursal)
+                }
+            }
+        } catch (e: Exception) {
+            println("ERROR AL MOSTRAR LA TABLA CONFIG")
+        }
+        return nombreSucursal
     }
 
     //FUNCION PARA CARGAR LAS SUCURSALES AL SPINNER
-    private fun cargarSucursales(){
+    private fun cargarSucursales() {
         spSucursal = findViewById(R1.id.spSucursal)
-        val listSucursal = getSucursalesNombre(idcliente).toMutableList()
+        val listSucursal = nombreSucursal().toMutableList()
 
         val adaptador = ArrayAdapter(this@Detallepedido, android.R.layout.simple_spinner_item, listSucursal)
         adaptador.setDropDownViewResource(R1.layout.support_simple_spinner_dropdown_item)
@@ -359,6 +439,7 @@ class Detallepedido : AppCompatActivity() {
                 dataSucursal.moveToFirst()
                 do{
                     val data = Sucursales(
+                        dataSucursal.getString(0),
                         dataSucursal.getString(2),
                         dataSucursal.getString(3)
                     )

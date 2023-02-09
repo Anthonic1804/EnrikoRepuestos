@@ -276,7 +276,7 @@ class Inventario : AppCompatActivity() {
 
     }
 
-
+    //IMPLEMENTADA LA FUNCION DE NO AGREGAR PRODUCTOS SIN EXISTENCIAS
     private fun MostrarLista(list: List<Inventario>) {
             try {
                 if (list.isNotEmpty()) {
