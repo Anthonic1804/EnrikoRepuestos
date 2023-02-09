@@ -23,6 +23,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import java.util.*
+import kotlin.collections.ArrayList
 
 
 @Suppress("DEPRECATION")
@@ -41,10 +42,11 @@ class Inventario : AppCompatActivity() {
     private var codigo = ""
     private var idapi = 0
     private var scanner: ImageButton? = null
-
-    var vista:Int? = null //INVENTARIO 1 -> VISTA MINIATURA  2-> VISTA EN LISTA
-
     private var dataSearch: String? = null
+
+    //VARIABLES TABLA CONFIG DE LA APP
+    private var vistaInventario: Int? = null //INVENTARIO 1 -> VISTA MINIATURA  2-> VISTA EN LISTA
+    private var sinExistencias: Int? = null  // 1 -> Si    0 -> no
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -87,12 +89,13 @@ class Inventario : AppCompatActivity() {
             integrador.initiateScan()
         }
 
-        mostrarSeleccionInventario()
+        //OPTENIENDO LA INFORMACION DE LA TABLA CONFIG
+        getConfigApp()
 
     }
 
     //FUNCION PARA SELECCION LOS DATOS DE LA TABLA CONFIG
-    private fun getConfigInventario(): ArrayList<Config> {
+    private fun getConfigTable(): ArrayList<Config> {
         val data = db!!.writableDatabase
         val list = ArrayList<Config>()
 
@@ -102,7 +105,8 @@ class Inventario : AppCompatActivity() {
                 cursor.moveToFirst()
                 do{
                     val arreglo = Config(
-                        cursor.getInt(0)
+                        cursor.getInt(0),
+                        cursor.getInt(1)
                     )
                     list.add(arreglo)
                 }while (cursor.moveToNext())
@@ -116,24 +120,18 @@ class Inventario : AppCompatActivity() {
         return list
     }
 
-    //FUNCION PARA EXTRAER EL CAMPO VISTA INVENTARIO
-    private fun mostrarSeleccionInventario(){
+    //FUNCION PARA EXTRAER LA CONFIGURACION DE LA APP
+    private fun getConfigApp(){
         try {
-            val list: ArrayList<com.example.acae30.modelos.Config> = getConfigInventario()
+            val list: ArrayList<com.example.acae30.modelos.Config> = getConfigTable()
             if(list.isNotEmpty()){
-                var vistaInventario = ""
                 for(data in list){
-                    vistaInventario = data.vistaInventario.toString()
-                }
-
-                if(vistaInventario.toInt() == 1){
-                    vista = 1
-                }else{
-                    vista = 2
+                    vistaInventario = data.vistaInventario!!.toInt()
+                    sinExistencias = data.sinExistencias!!.toInt()
                 }
             }
         } catch (e: Exception) {
-            println("ERROR AL MOSTRAR LA TABLA CONFIG")
+            println("ERROR AL CARGAR LA TABLA CONFIG")
         }
     }
 
@@ -283,23 +281,28 @@ class Inventario : AppCompatActivity() {
             try {
                 if (list.isNotEmpty()) {
                     //MOSTRANDO INVENTARIO EN VISTA LISTA
-                    if(vista == 2){
+                    if(vistaInventario == 2){
                         val mLayoutManager = LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false)
                         recicle!!.layoutManager = mLayoutManager
-                        val adapter = InventarioAdapter(list, this, vista) { position ->
+                        val adapter = InventarioAdapter(list, this, vistaInventario) { position ->
                             if (busquedaProducto) {
-                                val intento = Intent(this@Inventario, Producto_agregar::class.java)
-                                intento.putExtra("idproducto", list.get(position).Id)
-                                intento.putExtra("idcliente", idcliente)
-                                intento.putExtra("nombrecliente", nombrecliente)
-                                intento.putExtra("codigo", codigo)
-                                intento.putExtra("idpedido", idpedido)
-                                intento.putExtra("visitaid", idvisita)
-                                intento.putExtra("from", "visita")
-                                intento.putExtra("proviene", "buscar_producto")
-                                intento.putExtra("total_param", 0.toFloat())
-                                intento.putExtra("dataSearch", busqueda!!.query.toString()) //PRUEBA DE ENVIO HISTORIAL BSUQUEDA
-                                startActivity(intento)
+                                val existeniasProducto = list.get(position).Existencia!!.toFloat()
+                                if(sinExistencias == 0 && existeniasProducto == 0f){
+                                    Toast.makeText(this@Inventario, "NO SE PUEDEN AGREGAR PRODUCTOS SIN EXISTENCIAS", Toast.LENGTH_SHORT).show()
+                                }else{
+                                    val intento = Intent(this@Inventario, Producto_agregar::class.java)
+                                    intento.putExtra("idproducto", list.get(position).Id)
+                                    intento.putExtra("idcliente", idcliente)
+                                    intento.putExtra("nombrecliente", nombrecliente)
+                                    intento.putExtra("codigo", codigo)
+                                    intento.putExtra("idpedido", idpedido)
+                                    intento.putExtra("visitaid", idvisita)
+                                    intento.putExtra("from", "visita")
+                                    intento.putExtra("proviene", "buscar_producto")
+                                    intento.putExtra("total_param", 0.toFloat())
+                                    intento.putExtra("dataSearch", busqueda!!.query.toString()) //PRUEBA DE ENVIO HISTORIAL BSUQUEDA
+                                    startActivity(intento)
+                                }
                             } else {
                                 val intento = Intent(this@Inventario, Inventariodetalle::class.java)
                                 intento.putExtra("idproducto", list.get(position).Id)
@@ -312,20 +315,25 @@ class Inventario : AppCompatActivity() {
                         //MOSTRANDO INVENTARIO EN VISTA MINIATURA
                         val gridLayoutManayer = GridLayoutManager(this, 2, GridLayoutManager.VERTICAL, false)
                         recicle!!.layoutManager = gridLayoutManayer
-                        val adapter = InventarioAdapter(list, this, vista) { position ->
+                        val adapter = InventarioAdapter(list, this, vistaInventario) { position ->
                             if (busquedaProducto) {
-                                val intento = Intent(this@Inventario, Producto_agregar::class.java)
-                                intento.putExtra("idproducto", list.get(position).Id)
-                                intento.putExtra("idcliente", idcliente)
-                                intento.putExtra("nombrecliente", nombrecliente)
-                                intento.putExtra("codigo", codigo)
-                                intento.putExtra("idpedido", idpedido)
-                                intento.putExtra("visitaid", idvisita)
-                                intento.putExtra("from", "visita")
-                                intento.putExtra("proviene", "buscar_producto")
-                                intento.putExtra("total_param", 0.toFloat())
-                                intento.putExtra("dataSearch", busqueda!!.query.toString()) //PRUEBA DE ENVIO HISTORIAL BSUQUEDA
-                                startActivity(intento)
+                                val existeniasProducto = list.get(position).Existencia!!.toFloat()
+                                if(sinExistencias == 0 && existeniasProducto == 0f){
+                                    Toast.makeText(this@Inventario, "NO SE PUEDEN AGREGAR PRODUCTOS SIN EXISTENCIAS", Toast.LENGTH_SHORT).show()
+                                }else{
+                                    val intento = Intent(this@Inventario, Producto_agregar::class.java)
+                                    intento.putExtra("idproducto", list.get(position).Id)
+                                    intento.putExtra("idcliente", idcliente)
+                                    intento.putExtra("nombrecliente", nombrecliente)
+                                    intento.putExtra("codigo", codigo)
+                                    intento.putExtra("idpedido", idpedido)
+                                    intento.putExtra("visitaid", idvisita)
+                                    intento.putExtra("from", "visita")
+                                    intento.putExtra("proviene", "buscar_producto")
+                                    intento.putExtra("total_param", 0.toFloat())
+                                    intento.putExtra("dataSearch", busqueda!!.query.toString()) //PRUEBA DE ENVIO HISTORIAL BSUQUEDA
+                                    startActivity(intento)
+                                }
                             } else {
                                 val intento = Intent(this@Inventario, Inventariodetalle::class.java)
                                 intento.putExtra("idproducto", list.get(position).Id)

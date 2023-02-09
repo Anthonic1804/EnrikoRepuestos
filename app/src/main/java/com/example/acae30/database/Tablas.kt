@@ -55,13 +55,15 @@ class Tablas {
     //CREANDO LA TABLA CONFIG DE LA APP
     fun configApp(): String{
         val configApp = "CREATE TABLE config(" +
-                "vistaInventario INTEGER NOT NULL)"
+                "vistaInventario INTEGER NOT NULL," +
+                "sinExistencias INTEGER NOT NULL)"
         return  configApp
     }
     //INSERTANDO LA VISTA POR DEFECTO DEL INVENTARIO
     fun insertConfig():String{
         val insertConfig = "INSERT INTO config values(" +
-                "2)" //INSERTAMOS 2 COMO SELECCION POR DEFECTO VISTA LISTA
+                "2," + //INSERTAMOS 2 COMO SELECCION POR DEFECTO VISTA LISTA
+                "1)" //INSERTAMOS 1 COMO SELECCION POR DEFECTO AGREGAR PRODUCTOS SIN EXISTENCIAS
         return insertConfig
     }
 

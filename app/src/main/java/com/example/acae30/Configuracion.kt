@@ -14,6 +14,7 @@ import androidx.core.content.ContextCompat
 import com.example.acae30.database.Database
 import com.example.acae30.modelos.Config
 import com.google.android.material.snackbar.Snackbar
+import kotlinx.android.synthetic.main.activity_inicio.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
@@ -26,6 +27,7 @@ class Configuracion : AppCompatActivity() {
 
     private var swlista: Switch? = null
     private var swminiatura: Switch? = null
+    private var swSinExistencia: Switch? = null
     private var dataBase: Database? = null
 
     private var atras: ImageButton? = null
@@ -38,6 +40,10 @@ class Configuracion : AppCompatActivity() {
     private var txtvendedor: TextView? = null
     private var funciones: Funciones? = null
     private var alerta: AlertDialogo? = null
+
+    //VARIABLES TABLA CONFIG DE LA APP
+    private var vistaInventario: Int? = null //INVENTARIO 1 -> VISTA MINIATURA  2-> VISTA EN LISTA
+    private var sinExistencias: Int? = null  // 1 -> Si    0 -> no
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -61,9 +67,12 @@ class Configuracion : AppCompatActivity() {
         //FUNCIONES AGRAGADAS PARA LOS CONTROLES DE VISTA DE INVENTARIO
         swlista = findViewById(R.id.swlista)
         swminiatura = findViewById(R.id.swminiatura)
+        swSinExistencia = findViewById(R.id.swSinExistencias)
 
         mostrarSeleccionInventario()
 
+        // 1 -> LISTADO
+        // 2 -> VISTA MINIATURA
         swlista!!.setOnCheckedChangeListener { _, isChecked ->
             if (isChecked) {
                 swminiatura!!.isChecked = false
@@ -84,6 +93,17 @@ class Configuracion : AppCompatActivity() {
             }
         }
 
+        //ACTUALIZAR CONFIG PARA PEDIDOS SIN EXISTENCIAS
+        //1 -> SI
+        //0 -> NO
+        swSinExistencia!!.setOnCheckedChangeListener { _, isChecked ->
+            if(isChecked){
+                updateConfigPedido(1)
+            }else{
+                updateConfigPedido(0)
+            }
+        }
+
     } //funcion que inicializa las variables
 
     //FUNCION PARA SELECCION LOS DATOS DE LA TABLA CONFIG
@@ -97,7 +117,8 @@ class Configuracion : AppCompatActivity() {
                 cursor.moveToFirst()
                 do{
                     val arreglo = Config(
-                        cursor.getInt(0)
+                        cursor.getInt(0),
+                        cursor.getInt(1)
                     )
                     list.add(arreglo)
                 }while (cursor.moveToNext())
@@ -116,15 +137,21 @@ class Configuracion : AppCompatActivity() {
         try {
             val list: ArrayList<com.example.acae30.modelos.Config> = getConfigInventario()
             if(list.isNotEmpty()){
-                var vistaInventario = ""
                 for(data in list){
-                    vistaInventario = data.vistaInventario.toString()
+                    vistaInventario = data.vistaInventario!!.toInt()
+                    sinExistencias = data.sinExistencias!!.toInt()
                 }
 
-                if(vistaInventario.toInt() == 1){
+                if(vistaInventario == 1){
                     swminiatura!!.isChecked = true
                 }else{
                     swlista!!.isChecked = true
+                }
+
+                if(sinExistencias == 1){
+                    swSinExistencia!!.isChecked = true
+                }else{
+                    swSinExistencia!!.isChecked = false
                 }
             }
         } catch (e: Exception) {
@@ -136,10 +163,22 @@ class Configuracion : AppCompatActivity() {
     private fun updateVistaInventario(vistaInventario:Int){
         val data = dataBase!!.writableDatabase
         try {
-            data!!.execSQL("UPDATE config set vistaInventario=$vistaInventario")
+            data!!.execSQL("UPDATE config SET vistaInventario=$vistaInventario")
         }catch (e: Exception) {
             throw Exception(e.message)
         } finally {
+            data.close()
+        }
+    }
+
+    //FUNCION PARA ACTUALIZAR EL CAMPO DE EXISTENCIAS 0 EN PEDIDOS
+    private fun updateConfigPedido(sinExistencia: Int){
+        val data = dataBase!!.writableDatabase
+        try {
+            data!!.execSQL("UPDATE config SET sinExistencias=$sinExistencia")
+        }catch (e: Exception){
+            throw Exception(e.message)
+        }finally{
             data.close()
         }
     }
