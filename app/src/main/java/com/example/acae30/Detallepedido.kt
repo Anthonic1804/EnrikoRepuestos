@@ -20,6 +20,7 @@ import com.example.acae30.modelos.DetallePedido
 import com.example.acae30.modelos.JSONmodels.CabezeraPedidoSend
 import com.example.acae30.modelos.Pedidos
 import com.example.acae30.modelos.Sucursales
+import com.example.acae30.modelos.dataPedidos
 import com.google.android.material.snackbar.Snackbar
 import com.google.gson.JsonArray
 import com.google.gson.JsonObject
@@ -48,6 +49,7 @@ class Detallepedido : AppCompatActivity() {
     private var idSucursal: Int? = null
     private var codigoSucursal: Int? = null
     private var sucursalName: String? = null
+    private var tipoEnvio: Int? = null
 
     private var btbuscarProducto: ImageButton? = null
     private var idcliente: Int = 0
@@ -112,10 +114,18 @@ class Detallepedido : AppCompatActivity() {
         puerto = preferencias!!.getInt("puerto", 0)
         visita_enviada = false
 
+        getTipoEnvio(idpedido)
+
         //FUNCIONES AGRAGADAS PARA LOS CONTROLES DE ENVIO
         swcaes = findViewById(R1.id.swcaes)
         swruta = findViewById(R1.id.swruta)
-        swruta!!.isChecked = true
+
+        //ACTIVADO EL TIPO DE PEDIDO CORRESPONDIENTE
+        if(tipoEnvio == 0){
+            swruta!!.isChecked = true
+        }else{
+            swcaes!!.isChecked = true
+        }
 
         swcaes!!.setOnCheckedChangeListener { _, isChecked ->
             if (isChecked) {
@@ -365,6 +375,32 @@ class Detallepedido : AppCompatActivity() {
                 //NADA IMPLEMENTADO
             }
 
+        }
+    }
+
+    //OPTENIENDO EL TIPO DE ENVIO SELECCIONADO
+    private fun getTipoEnvio(ipPedido: Int){
+        val dataBase = db!!.writableDatabase
+        try {
+            val getTipo = dataBase.rawQuery("SELECT * FROM pedidos WHERE id=$ipPedido", null)
+            val getPedidoData = ArrayList<dataPedidos>()
+            if(getTipo.count > 0){
+                getTipo.moveToFirst()
+                do {
+                    val data = dataPedidos(
+                        getTipo.getInt(15)
+                    )
+                    getPedidoData.add(data)
+                }while (getTipo.moveToNext())
+            }
+
+            for(data in getPedidoData){
+                tipoEnvio = data.tipoPedido!!.toInt()
+            }
+        }catch (e: Exception) {
+            throw Exception(e.message)
+        } finally {
+            dataBase!!.close()
         }
     }
 
