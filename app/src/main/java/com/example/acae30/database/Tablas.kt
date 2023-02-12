@@ -35,6 +35,38 @@ class Tablas {
         return cliente
     } //tabla cliente
 
+    //CREANDO TABLA CLIENTES_SUCURSALES 25-01-2023
+    fun clienteSucursal(): String{
+        val clienteSucursal = "CREATE TABLE cliente_sucursal(" +
+                "Id INTEGER NOT NULL," +
+                "id_cliente INTEGER NOT NULL," +
+                "codigo_sucursal VARCHAR(25) NULL," +
+                "nombre_sucursal VARCHAR(45) NULL," +
+                "direccion_sucursal VARCHAR(200) NULL," +
+                "municipio_sucursal VARCHAR(50) NULL," +
+                "depto_sucursal VARCHAR(25) NULL," +
+                "telefono_1 VARCHAR(15) NULL," +
+                "telefono_2 VARCHAR(15) NULL," +
+                "correo_sucursal VARCHAR(100) NULL," +
+                "contacto_sucursal VARCHAR(50))"
+
+        return clienteSucursal
+    }
+    //CREANDO LA TABLA CONFIG DE LA APP
+    fun configApp(): String{
+        val configApp = "CREATE TABLE config(" +
+                "vistaInventario INTEGER NOT NULL," +
+                "sinExistencias INTEGER NOT NULL)"
+        return  configApp
+    }
+    //INSERTANDO LA VISTA POR DEFECTO DEL INVENTARIO
+    fun insertConfig():String{
+        val insertConfig = "INSERT INTO config values(" +
+                "2," + //INSERTAMOS 2 COMO SELECCION POR DEFECTO VISTA LISTA
+                "1)" //INSERTAMOS 1 COMO SELECCION POR DEFECTO AGREGAR PRODUCTOS SIN EXISTENCIAS
+        return insertConfig
+    }
+
     //CREANDO TABLA VIRTUAL CLIENTES
     fun virtualCliente(): String{
         val virtualCliente = "CREATE VIRTUAL TABLE virtualcliente USING FTS4 (" +
@@ -152,8 +184,11 @@ class Tablas {
                 "[Gps] TEXT  NULL," +
                 "Cerrado INTEGER NOT NUll default 0," +
                 "[Idvisita] INTEGER NOT NULL DEFAULT 0," +
-                "[Fecha_creado] TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL" +
-                ");"
+                "[Fecha_creado] TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL," +
+                "id_sucursal INTEGER NOT NULL DEFAULT 0," +
+                "codigo_sucursal VARCHAR(25) DEFAULT 'TEMP' NOT NULL," +
+                "nombre_sucursal VARCHAR(45) DEFAULT 'TEMP' NOT NULL," +
+                "tipo_envio INTEGER NOT NULL DEFAULT 0 );" //AGREGAR CAMPO A LA BD SQL
         return pedido
     } //tabla pedidos
 

@@ -1,7 +1,5 @@
 package com.example.acae30.modelos
 
-import java.util.*
-
 data class Pedidos(
 
     var Id: Int,

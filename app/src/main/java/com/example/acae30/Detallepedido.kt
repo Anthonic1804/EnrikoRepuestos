@@ -1,15 +1,14 @@
 package com.example.acae30
 
+import android.annotation.SuppressLint
 import android.app.Dialog
 import android.content.Context
 import android.content.Intent
 import android.content.SharedPreferences
-import android.graphics.Color
 import android.os.Bundle
 import android.view.View
-import android.widget.Button
-import android.widget.ImageButton
-import android.widget.TextView
+import android.widget.*
+import android.widget.AdapterView.OnItemSelectedListener
 import androidx.appcompat.app.AppCompatActivity
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.content.ContextCompat
@@ -20,10 +19,12 @@ import com.example.acae30.listas.PedidoDetalleAdapter
 import com.example.acae30.modelos.DetallePedido
 import com.example.acae30.modelos.JSONmodels.CabezeraPedidoSend
 import com.example.acae30.modelos.Pedidos
-import com.example.acae30.modelos.VistaPedidos
+import com.example.acae30.modelos.Sucursales
+import com.example.acae30.modelos.dataPedidos
 import com.google.android.material.snackbar.Snackbar
 import com.google.gson.JsonArray
 import com.google.gson.JsonObject
+import kotlinx.android.synthetic.main.activity_inicio.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
@@ -35,11 +36,21 @@ import java.io.Reader
 import java.net.HttpURLConnection
 import java.net.URL
 import java.nio.charset.StandardCharsets
+import com.example.acae30.R as R1
 
 
 class Detallepedido : AppCompatActivity() {
 
-    private var btbuscar: ImageButton? = null
+    //AGREGANDO EL SPINNER DE SUCURSALES
+    private var spSucursal: Spinner? = null
+    private var sinSucursal: TextView? = null
+    private var swcaes: Switch? = null
+    private var swruta: Switch? = null
+    private var idSucursal: Int? = null
+    private var codigoSucursal: Int? = null
+    private var sucursalName: String? = null
+    private var tipoEnvio: Int? = null
+
     private var btbuscarProducto: ImageButton? = null
     private var idcliente: Int = 0
     private var nombre: String? = ""
@@ -69,12 +80,14 @@ class Detallepedido : AppCompatActivity() {
     private var codigo = ""
     private var idapi = 0
 
+
+    @SuppressLint("MissingInflatedId")
     override fun onCreate(savedInstanceState: Bundle?) {
 
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_detallepedido)
+        setContentView(R1.layout.activity_detallepedido)
         supportActionBar?.hide()
-        btnatras = findViewById(R.id.imbtnatras)
+        btnatras = findViewById(R1.id.imbtnatras)
         val intento = intent
         alerta = AlertDialogo(this)
         idcliente = intento.getIntExtra("id", 0)
@@ -84,17 +97,16 @@ class Detallepedido : AppCompatActivity() {
         codigo = intento.getStringExtra("codigo").toString()
         idapi = intento.getIntExtra("idapi", 0)
         from = intento.getStringExtra("from").toString()
-        txtfecha_creacion = findViewById(R.id.fecha_creacion)
-        txtcliente = findViewById(R.id.txtcliente)
-        btbuscar = findViewById(R.id.btnbuscar)
-        btbuscarProducto = findViewById(R.id.imgbtnadd)
-        lienzo = findViewById(R.id.lienzo)
+        txtfecha_creacion = findViewById(R1.id.fecha_creacion)
+        txtcliente = findViewById(R1.id.txtcliente)
+        btbuscarProducto = findViewById(R1.id.imgbtnadd)
+        lienzo = findViewById(R1.id.lienzo)
         funciones = Funciones()
         db = Database(this)
-        txttotal = findViewById(R.id.txttotal)
-        btneliminar = findViewById(R.id.btncancelar)
-        btnenviar = findViewById(R.id.btnenviar)
-        btnguardar = findViewById(R.id.btnguardar)
+        txttotal = findViewById(R1.id.txttotal)
+        btneliminar = findViewById(R1.id.btncancelar)
+        btnenviar = findViewById(R1.id.btnenviar)
+        btnguardar = findViewById(R1.id.btnguardar)
         preferencias = getSharedPreferences(instancia, Context.MODE_PRIVATE)
         idvendedor = preferencias!!.getInt("Idvendedor", 0)
         vendedor = preferencias!!.getString("Vendedor", "").toString()
@@ -102,15 +114,46 @@ class Detallepedido : AppCompatActivity() {
         puerto = preferencias!!.getInt("puerto", 0)
         visita_enviada = false
 
-        recicler = findViewById(R.id.reciclerdetalle)
+        getTipoEnvio(idpedido)
 
-        //obtenemos la direccion del servidor
-        btbuscar!!.setOnClickListener {
-            val intento = Intent(this, Clientes::class.java)
-            intento.putExtra("busqueda", true)
+        //FUNCIONES AGRAGADAS PARA LOS CONTROLES DE ENVIO
+        swcaes = findViewById(R1.id.swcaes)
+        swruta = findViewById(R1.id.swruta)
 
-            startActivity(intento)
-        } //busca al cliente
+        //ACTIVADO EL TIPO DE PEDIDO CORRESPONDIENTE
+        if(tipoEnvio == 0){
+            swruta!!.isChecked = true
+        }else{
+            swcaes!!.isChecked = true
+        }
+
+        swcaes!!.setOnCheckedChangeListener { _, isChecked ->
+            if (isChecked) {
+                swruta!!.isChecked = false
+                updateTipoPedido(1, idpedido)
+            } else {
+                swruta!!.isChecked = true
+                updateTipoPedido(0, idpedido)
+            }
+        }
+
+        swruta!!.setOnCheckedChangeListener { _, isChecked ->
+            if (isChecked) {
+                swcaes!!.isChecked = false
+                updateTipoPedido(0, idpedido)
+            } else {
+                swcaes!!.isChecked = true
+                updateTipoPedido(1, idpedido)
+            }
+        }
+
+        recicler = findViewById(R1.id.reciclerdetalle)
+        sinSucursal = findViewById(R1.id.sinSucursal) //TEXTVIEW PARA LOS CLIENTES SIN SUCURSALES
+        sinSucursal!!.visibility = View.GONE //DESHABILITAMOS LA VISIBILIDAD DEL TEXVIEW
+
+        //FUNCION PARA CARGAR LAS SUCURSALES AL SPINNER
+        cargarSucursales()
+
 
         // Consultar datos de visita
         if (idpedido > 0) {
@@ -142,7 +185,7 @@ class Detallepedido : AppCompatActivity() {
         // Si no hay visita, que no se pueda enviar pedido
         if (!visita_enviada!!) {
             btnenviar!!.isEnabled = false
-            btnenviar!!.setBackgroundColor(Color.GRAY)
+            btnenviar!!.setBackgroundResource(R1.drawable.border_btndisable)
         }
 
         btnatras!!.setOnClickListener {
@@ -163,14 +206,6 @@ class Detallepedido : AppCompatActivity() {
                 intento.putExtra("codigo", codigo)
                 intento.putExtra("idapi", idapi)
                 startActivity(intento)
-            } else {
-//                val alert: Snackbar = Snackbar.make(
-//                    lienzo!!,
-//                    "Debes Ingresar un Nombre o buscar el cliente",
-//                    Snackbar.LENGTH_LONG
-//                )
-//                alert.view.setBackgroundColor(resources.getColor(R.color.moderado))
-//                alert.show()
             }
         }
         //muestra el listado de los productos
@@ -229,7 +264,7 @@ class Detallepedido : AppCompatActivity() {
                                 alert.view.setBackgroundColor(
                                     ContextCompat.getColor(
                                         this@Detallepedido,
-                                        R.color.moderado
+                                        R1.color.moderado
                                     )
                                 )
                                 alert.show()
@@ -239,7 +274,7 @@ class Detallepedido : AppCompatActivity() {
                 } else {
                     val alert: Snackbar =
                         Snackbar.make(lienzo!!, "Enciende tu wifi", Snackbar.LENGTH_LONG)
-                    alert.view.setBackgroundColor(ContextCompat.getColor(this, R.color.moderado))
+                    alert.view.setBackgroundColor(ContextCompat.getColor(this, R1.color.moderado))
                     alert.show()
                 } //valida conexion a internet
             }
@@ -294,7 +329,7 @@ class Detallepedido : AppCompatActivity() {
                             alert.view.setBackgroundColor(
                                 ContextCompat.getColor(
                                     this@Detallepedido,
-                                    R.color.moderado
+                                    R1.color.moderado
                                 )
                             )
                             alert.show()
@@ -306,16 +341,162 @@ class Detallepedido : AppCompatActivity() {
                         "Error: PRIMERO No hay productos agregados al pedido.",
                         Snackbar.LENGTH_LONG
                     )
-                    alert.view.setBackgroundColor(ContextCompat.getColor(this, R.color.moderado))
+                    alert.view.setBackgroundColor(ContextCompat.getColor(this, R1.color.moderado))
                     alert.show()
                 }
             }
         }
+
+        //IMPLEMENTANDO LOGICA DE SUCURSAL SELECCIONADA EN SPINNER
+        spSucursal!!.onItemSelectedListener = object : OnItemSelectedListener{
+            override fun onItemSelected(
+                parent: AdapterView<*>?,
+                view: View?,
+                position: Int,
+                id: Long
+            ) {
+                sucursalName = parent?.getItemAtPosition(position).toString()
+                if (sucursalName == "-- SELECCIONE UNA SUCURSAL --") {
+                    btnguardar!!.isEnabled = false
+                    btnenviar!!.isEnabled = false
+                    btnenviar!!.setBackgroundResource(R1.drawable.border_btndisable)
+                    btnguardar!!.setBackgroundResource(R1.drawable.border_btndisable)
+                }else{
+                    btnguardar!!.isEnabled = true
+                    btnenviar!!.isEnabled = true
+                    btnenviar!!.setBackgroundResource(R1.drawable.border_btnenviar)
+                    btnguardar!!.setBackgroundResource(R1.drawable.border_btnenviar)
+
+                    updatePedidoSucursal(idcliente, sucursalName!!, idpedido)
+                }
+            }
+
+            override fun onNothingSelected(parent: AdapterView<*>?) {
+                //NADA IMPLEMENTADO
+            }
+
+        }
     }
+
+    //OPTENIENDO EL TIPO DE ENVIO SELECCIONADO
+    private fun getTipoEnvio(ipPedido: Int){
+        val dataBase = db!!.writableDatabase
+        try {
+            val getTipo = dataBase.rawQuery("SELECT * FROM pedidos WHERE id=$ipPedido", null)
+            val getPedidoData = ArrayList<dataPedidos>()
+            if(getTipo.count > 0){
+                getTipo.moveToFirst()
+                do {
+                    val data = dataPedidos(
+                        getTipo.getInt(15)
+                    )
+                    getPedidoData.add(data)
+                }while (getTipo.moveToNext())
+            }
+
+            for(data in getPedidoData){
+                tipoEnvio = data.tipoPedido!!.toInt()
+            }
+        }catch (e: Exception) {
+            throw Exception(e.message)
+        } finally {
+            dataBase!!.close()
+        }
+    }
+
+    //ACTUALIZANDO LA SUCURSAL DEL PEDIDO
+    private fun updatePedidoSucursal(idCliente:Int, nombreSucursal: String, idpedidos: Int){
+        val db = db!!.writableDatabase
+        try {
+            val dataSucursal = db.rawQuery("SELECT * FROM cliente_sucursal WHERE id_cliente=$idCliente and nombre_sucursal like '%$nombreSucursal%'", null)
+            val listaSucursales = ArrayList<Sucursales>()
+            if(dataSucursal.count > 0){
+                dataSucursal.moveToFirst()
+                do{
+                    val data = Sucursales(
+                        dataSucursal.getString(0),
+                        dataSucursal.getString(2),
+                        dataSucursal.getString(3)
+                    )
+                    listaSucursales.add(data)
+                }while (dataSucursal.moveToNext())
+            }
+
+            for (data in listaSucursales) {
+                idSucursal = data.idSucursa.toInt()
+                codigoSucursal = data.codigoSucursal.toInt()
+            }
+            db!!.execSQL("UPDATE pedidos set id_sucursal=$idSucursal, codigo_sucursal=$codigoSucursal, nombre_sucursal='$nombreSucursal' WHERE id=$idpedidos")
+            dataSucursal.close()
+
+        }catch (e: Exception) {
+            throw Exception(e.message)
+        } finally {
+            db!!.close()
+        }
+    }
+
+    //CARGANDO EL NOMBRE DE LA SUCURSAL EN EL SPINNER
+    private fun nombreSucursal(): ArrayList<String> {
+        val nombreSucursal = arrayListOf<String>()
+        nombreSucursal.add("-- SELECCIONE UNA SUCURSAL --")
+        try {
+            val list: ArrayList<com.example.acae30.modelos.Sucursales> = getSucursalesNombre(idcliente)
+            if(list.isNotEmpty()){
+                for(data in list){
+                    nombreSucursal.add(data.nombreSucursal)
+                }
+            }
+        } catch (e: Exception) {
+            println("ERROR AL MOSTRAR LA TABLA CONFIG")
+        }
+        return nombreSucursal
+    }
+
+    //FUNCION PARA CARGAR LAS SUCURSALES AL SPINNER
+    private fun cargarSucursales() {
+        spSucursal = findViewById(R1.id.spSucursal)
+        val listSucursal = nombreSucursal().toMutableList()
+
+        val adaptador = ArrayAdapter(this@Detallepedido, android.R.layout.simple_spinner_item, listSucursal)
+        adaptador.setDropDownViewResource(R1.layout.support_simple_spinner_dropdown_item)
+        spSucursal!!.adapter = adaptador
+    }
+
+    //FUNCION PARA OBTENER LAS SUCURSALES POR CLIENTE.
+    //03-02-2023
+    private fun getSucursalesNombre(idCliente:Int): ArrayList<Sucursales> {
+        val db = db!!.writableDatabase
+        val listaSucursales = ArrayList<Sucursales>()
+        try {
+
+            val dataSucursal = db.rawQuery("SELECT * FROM cliente_sucursal WHERE id_cliente='$idCliente'", null)
+            if(dataSucursal.count > 0){
+                dataSucursal.moveToFirst()
+                do{
+                    val data = Sucursales(
+                        dataSucursal.getString(0),
+                        dataSucursal.getString(2),
+                        dataSucursal.getString(3)
+                    )
+                    listaSucursales.add(data)
+                }while (dataSucursal.moveToNext())
+            }else{
+                spSucursal!!.visibility = View.GONE
+                sinSucursal!!.visibility = View.VISIBLE
+            }
+        }catch (e: Exception) {
+            throw Exception(e.message)
+        } finally {
+            db!!.close()
+        }
+        return listaSucursales
+    }
+
 
     fun validarDatos() {
         if (idpedido > 0) {
-            btbuscar!!.visibility = View.GONE
+           // btbuscar!!.visibility = View.GONE
             txtcliente!!.isEnabled = false
             txtcliente!!.text = nombre
             GlobalScope.launch(Dispatchers.IO) {
@@ -326,7 +507,7 @@ class Detallepedido : AppCompatActivity() {
                     if (lista != null && lista.size > 0) {
                         if (cabezera != null) {
                             if (cabezera!!.Cerrado == 1) {
-                                btbuscar!!.visibility = View.GONE
+                              //  btbuscar!!.visibility = View.GONE
                                 txtcliente!!.isEnabled = false
                                 btbuscarProducto!!.visibility = View.GONE
                                 btnenviar!!.visibility = View.GONE
@@ -342,10 +523,10 @@ class Detallepedido : AppCompatActivity() {
                                 btneliminar!!.visibility = View.GONE
                             } else {
 
-                                btbuscar!!.visibility = View.VISIBLE
+                              //  btbuscar!!.visibility = View.VISIBLE
 
-                                btbuscar!!.visibility = View.GONE
-                                btbuscar!!.visibility = View.GONE
+                               // btbuscar!!.visibility = View.GONE
+                              //  btbuscar!!.visibility = View.GONE
                                 txtcliente!!.isEnabled = false
                                 btbuscarProducto!!.visibility = View.VISIBLE
                                 btnenviar!!.visibility = View.VISIBLE
@@ -358,10 +539,10 @@ class Detallepedido : AppCompatActivity() {
 
                         //RUTINA PARA AGREGAR NUEVO PEDIDO
 
-                        btbuscar!!.visibility = View.VISIBLE
+                      //  btbuscar!!.visibility = View.VISIBLE
 
-                        btbuscar!!.visibility = View.GONE
-                        btbuscar!!.visibility = View.GONE
+                      //  btbuscar!!.visibility = View.GONE
+                      //  btbuscar!!.visibility = View.GONE
                         txtcliente!!.isEnabled = false
                         btbuscarProducto!!.visibility = View.VISIBLE
                         btnenviar!!.visibility = View.VISIBLE
@@ -382,7 +563,7 @@ class Detallepedido : AppCompatActivity() {
                         e.message.toString(),
                         Snackbar.LENGTH_LONG
                     )
-                    alert.view.setBackgroundColor(resources.getColor(R.color.moderado))
+                    alert.view.setBackgroundColor(resources.getColor(R1.color.moderado))
                     alert.show()
                 }
             }
@@ -390,9 +571,9 @@ class Detallepedido : AppCompatActivity() {
         } else {
             if (idcliente > 0) {
                 txtcliente!!.text = nombre
-                btbuscar!!.visibility = View.GONE
+              //  btbuscar!!.visibility = View.GONE
             } else {
-                btbuscar!!.visibility = View.VISIBLE
+              //  btbuscar!!.visibility = View.VISIBLE
             }
         }
     } //VALIA QUE YA EXISTA EL CLIENTE DATOS
@@ -513,8 +694,8 @@ class Detallepedido : AppCompatActivity() {
 
     private fun AlertaEliminar() {
         val dialogo = Dialog(this)
-        dialogo.setContentView(R.layout.alert_eliminar)
-        dialogo.findViewById<Button>(R.id.btneliminar).setOnClickListener {
+        dialogo.setContentView(R1.layout.alert_eliminar)
+        dialogo.findViewById<Button>(R1.id.btneliminar).setOnClickListener {
             GlobalScope.launch(Dispatchers.Main) {
                 //this@Detallepedido.lifecycleScope.launch {
                 try {
@@ -540,14 +721,14 @@ class Detallepedido : AppCompatActivity() {
                         e.message.toString(),
                         Snackbar.LENGTH_LONG
                     )
-                    alert.view.setBackgroundColor(resources.getColor(R.color.moderado))
+                    alert.view.setBackgroundColor(resources.getColor(R1.color.moderado))
                     alert.show()
                 }
             }
 
         }//boton eliminar
 
-        dialogo.findViewById<Button>(R.id.btncancelar).setOnClickListener {
+        dialogo.findViewById<Button>(R1.id.btncancelar).setOnClickListener {
             dialogo.dismiss()
         }//boton eliminar
 
@@ -732,6 +913,18 @@ class Detallepedido : AppCompatActivity() {
             bd!!.close()
         }
     } //actualiza el pedido y confirma que se envio
+
+    //FUNCION PARA ACTUALIZAR EL TIPO DE ENVIO SELECCIONADO
+    private fun updateTipoPedido(tipoPedido:Int, idpedido:Int){
+        val data = db!!.writableDatabase
+        try {
+            data!!.execSQL("UPDATE pedidos set tipo_envio=$tipoPedido WHERE id=$idpedido")
+        }catch (e: Exception) {
+            throw Exception(e.message)
+        } finally {
+            data.close()
+        }
+    }
 
     private fun ConfirmarDetallePedido(): Int {
         val bd = db!!.writableDatabase

@@ -49,7 +49,7 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="15dp"
         android:text="AGREGAR"
-        android:backgroundTint="#43A047"
+        android:background="@drawable/border_btnenviar"
         android:textColor="@color/colorAccent"
         android:textStyle="bold"
         app:layout_constraintEnd_toEndOf="parent"

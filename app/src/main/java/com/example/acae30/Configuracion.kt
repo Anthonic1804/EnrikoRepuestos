@@ -3,15 +3,18 @@ package com.example.acae30
 import android.content.Context
 import android.content.Intent
 import android.content.SharedPreferences
-import android.database.sqlite.SQLiteDatabase
 import android.os.Bundle
 import android.view.View
 import android.widget.Button
 import android.widget.ImageButton
+import android.widget.Switch
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
+import com.example.acae30.database.Database
+import com.example.acae30.modelos.Config
 import com.google.android.material.snackbar.Snackbar
+import kotlinx.android.synthetic.main.activity_inicio.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
@@ -21,6 +24,12 @@ import java.net.URL
 
 
 class Configuracion : AppCompatActivity() {
+
+    private var swlista: Switch? = null
+    private var swminiatura: Switch? = null
+    private var swSinExistencia: Switch? = null
+    private var dataBase: Database? = null
+
     private var atras: ImageButton? = null
     private var ip: TextView? = null
     private var puerto: TextView? = null
@@ -31,9 +40,10 @@ class Configuracion : AppCompatActivity() {
     private var txtvendedor: TextView? = null
     private var funciones: Funciones? = null
     private var alerta: AlertDialogo? = null
-    private var sqLite: TextView? = null
-    private var versionCode: TextView? = null
 
+    //VARIABLES TABLA CONFIG DE LA APP
+    private var vistaInventario: Int? = null //INVENTARIO 1 -> VISTA MINIATURA  2-> VISTA EN LISTA
+    private var sinExistencias: Int? = null  // 1 -> Si    0 -> no
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -48,27 +58,130 @@ class Configuracion : AppCompatActivity() {
         btnGuardar = findViewById(R.id.btnupdate)
         atras = findViewById(R.id.imgbtnatras)
         alerta = AlertDialogo(this)
-        sqLite = findViewById(R.id.txtSqlite)
-        versionCode = findViewById(R.id.txtKotlin)
+        dataBase = Database(this)
+
 
         var nombre_vendedor = preferencias!!.getString("Vendedor", "")
         txtvendedor!!.text = nombre_vendedor
 
-        //OBTENIENDO LA VERSION DE SQLITE UTILIZADA
-        val cursor =
-            SQLiteDatabase.create(null).rawQuery("select sqlite_version() AS sqlite_version", null)
-        var sqliteVersion = ""
-        while (cursor.moveToNext()) {
-            sqliteVersion += cursor.getString(0)
+        //FUNCIONES AGRAGADAS PARA LOS CONTROLES DE VISTA DE INVENTARIO
+        swlista = findViewById(R.id.swlista)
+        swminiatura = findViewById(R.id.swminiatura)
+        swSinExistencia = findViewById(R.id.swSinExistencias)
+
+        mostrarSeleccionInventario()
+
+        // 1 -> LISTADO
+        // 2 -> VISTA MINIATURA
+        swlista!!.setOnCheckedChangeListener { _, isChecked ->
+            if (isChecked) {
+                swminiatura!!.isChecked = false
+                updateVistaInventario(2)
+            } else {
+                swminiatura!!.isChecked = true
+                updateVistaInventario(1)
+            }
         }
-        sqLite!!.text = sqliteVersion
 
+        swminiatura!!.setOnCheckedChangeListener { _, isChecked ->
+            if (isChecked) {
+                swlista!!.isChecked = false
+                updateVistaInventario(1)
+            } else {
+                swlista!!.isChecked = true
+                updateVistaInventario(2)
+            }
+        }
 
-        //OPTENIENDO LA VERSION DE KOTLIN UTLIZADA
-        var versionC = BuildConfig.VERSION_NAME.toString()
-        versionCode!!.text = versionC
+        //ACTUALIZAR CONFIG PARA PEDIDOS SIN EXISTENCIAS
+        //1 -> SI
+        //0 -> NO
+        swSinExistencia!!.setOnCheckedChangeListener { _, isChecked ->
+            if(isChecked){
+                updateConfigPedido(1)
+            }else{
+                updateConfigPedido(0)
+            }
+        }
 
     } //funcion que inicializa las variables
+
+    //FUNCION PARA SELECCION LOS DATOS DE LA TABLA CONFIG
+    private fun getConfigInventario(): ArrayList<Config> {
+        val data = dataBase!!.writableDatabase
+        val list = ArrayList<Config>()
+
+        try {
+            val cursor = data.rawQuery("SELECT * FROM config", null)
+            if(cursor.count > 0){
+                cursor.moveToFirst()
+                do{
+                    val arreglo = Config(
+                        cursor.getInt(0),
+                        cursor.getInt(1)
+                    )
+                    list.add(arreglo)
+                }while (cursor.moveToNext())
+                cursor.close()
+            }
+        }catch (e: Exception) {
+            throw Exception(e.message)
+        } finally {
+            data.close()
+        }
+        return list
+    }
+
+    //FUNCION PARA EXTRAER EL CAMPO VISTA INVENTARIO
+    private fun mostrarSeleccionInventario(){
+        try {
+            val list: ArrayList<com.example.acae30.modelos.Config> = getConfigInventario()
+            if(list.isNotEmpty()){
+                for(data in list){
+                    vistaInventario = data.vistaInventario!!.toInt()
+                    sinExistencias = data.sinExistencias!!.toInt()
+                }
+
+                if(vistaInventario == 1){
+                    swminiatura!!.isChecked = true
+                }else{
+                    swlista!!.isChecked = true
+                }
+
+                if(sinExistencias == 1){
+                    swSinExistencia!!.isChecked = true
+                }else{
+                    swSinExistencia!!.isChecked = false
+                }
+            }
+        } catch (e: Exception) {
+            println("ERROR AL MOSTRAR LA TABLA CONFIG")
+        }
+    }
+
+    //FUNCION PARA ACTUALIZAR EL CAMPO VISTA INVENTARIO
+    private fun updateVistaInventario(vistaInventario:Int){
+        val data = dataBase!!.writableDatabase
+        try {
+            data!!.execSQL("UPDATE config SET vistaInventario=$vistaInventario")
+        }catch (e: Exception) {
+            throw Exception(e.message)
+        } finally {
+            data.close()
+        }
+    }
+
+    //FUNCION PARA ACTUALIZAR EL CAMPO DE EXISTENCIAS 0 EN PEDIDOS
+    private fun updateConfigPedido(sinExistencia: Int){
+        val data = dataBase!!.writableDatabase
+        try {
+            data!!.execSQL("UPDATE config SET sinExistencias=$sinExistencia")
+        }catch (e: Exception){
+            throw Exception(e.message)
+        }finally{
+            data.close()
+        }
+    }
 
     override fun onStart() {
         super.onStart()

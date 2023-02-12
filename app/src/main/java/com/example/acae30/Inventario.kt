@@ -7,20 +7,23 @@ import android.view.View
 import android.view.inputmethod.InputMethodManager
 import android.widget.ImageButton
 import android.widget.SearchView
-import android.widget.SearchView.OnCloseListener
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
+import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.acae30.database.Database
 import com.example.acae30.listas.InventarioAdapter
+import com.example.acae30.modelos.Config
 import com.example.acae30.modelos.Inventario
 import com.google.zxing.integration.android.IntentIntegrator
+import kotlinx.android.synthetic.main.carta_inventario_miniatura.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import java.util.*
+import kotlin.collections.ArrayList
 
 
 @Suppress("DEPRECATION")
@@ -39,8 +42,12 @@ class Inventario : AppCompatActivity() {
     private var codigo = ""
     private var idapi = 0
     private var scanner: ImageButton? = null
-
     private var dataSearch: String? = null
+
+    //VARIABLES TABLA CONFIG DE LA APP
+    private var vistaInventario: Int? = null //INVENTARIO 1 -> VISTA MINIATURA  2-> VISTA EN LISTA
+    private var sinExistencias: Int? = null  // 1 -> Si    0 -> no
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
 
@@ -59,7 +66,6 @@ class Inventario : AppCompatActivity() {
         db = Database(this)
 
         dataSearch = intent.getStringExtra("dataSearch") //OBTIENE LA BUSQUEDA ALMACENADA DEL SEARCHVIEW
-
         recicle = findViewById(R.id.reciInvent)
 
         funciones = Funciones()
@@ -83,6 +89,50 @@ class Inventario : AppCompatActivity() {
             integrador.initiateScan()
         }
 
+        //OPTENIENDO LA INFORMACION DE LA TABLA CONFIG
+        getConfigApp()
+
+    }
+
+    //FUNCION PARA SELECCION LOS DATOS DE LA TABLA CONFIG
+    private fun getConfigTable(): ArrayList<Config> {
+        val data = db!!.writableDatabase
+        val list = ArrayList<Config>()
+
+        try {
+            val cursor = data.rawQuery("SELECT * FROM config", null)
+            if(cursor.count > 0){
+                cursor.moveToFirst()
+                do{
+                    val arreglo = Config(
+                        cursor.getInt(0),
+                        cursor.getInt(1)
+                    )
+                    list.add(arreglo)
+                }while (cursor.moveToNext())
+                cursor.close()
+            }
+        }catch (e: Exception) {
+            throw Exception(e.message)
+        } finally {
+            data.close()
+        }
+        return list
+    }
+
+    //FUNCION PARA EXTRAER LA CONFIGURACION DE LA APP
+    private fun getConfigApp(){
+        try {
+            val list: ArrayList<com.example.acae30.modelos.Config> = getConfigTable()
+            if(list.isNotEmpty()){
+                for(data in list){
+                    vistaInventario = data.vistaInventario!!.toInt()
+                    sinExistencias = data.sinExistencias!!.toInt()
+                }
+            }
+        } catch (e: Exception) {
+            println("ERROR AL CARGAR LA TABLA CONFIG")
+        }
     }
 
     //LECTURA DE CODIGO DE BARRAS
@@ -226,45 +276,83 @@ class Inventario : AppCompatActivity() {
 
     }
 
+    //IMPLEMENTADA LA FUNCION DE NO AGREGAR PRODUCTOS SIN EXISTENCIAS
     private fun MostrarLista(list: List<Inventario>) {
-        try {
-
-            if (list.isNotEmpty()) {
-                val mLayoutManager = LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false)
-                recicle!!.layoutManager = mLayoutManager
-                val adapter = InventarioAdapter(list, this) { position ->
-                    if (busquedaProducto) {
-                        val intento = Intent(this@Inventario, Producto_agregar::class.java)
-                        intento.putExtra("idproducto", list.get(position).Id)
-                        intento.putExtra("idcliente", idcliente)
-                        intento.putExtra("nombrecliente", nombrecliente)
-                        intento.putExtra("codigo", codigo)
-                        intento.putExtra("idpedido", idpedido)
-                        intento.putExtra("visitaid", idvisita)
-                        intento.putExtra("from", "visita")
-                        intento.putExtra("proviene", "buscar_producto")
-                        intento.putExtra("total_param", 0.toFloat())
-                        intento.putExtra("dataSearch", busqueda!!.query.toString()) //PRUEBA DE ENVIO HISTORIAL BSUQUEDA
-                        startActivity(intento)
-                    } else {
-                        val intento = Intent(this@Inventario, Inventariodetalle::class.java)
-                        intento.putExtra("idproducto", list.get(position).Id)
-                        startActivity(intento)
+            try {
+                if (list.isNotEmpty()) {
+                    //MOSTRANDO INVENTARIO EN VISTA LISTA
+                    if(vistaInventario == 2){
+                        val mLayoutManager = LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false)
+                        recicle!!.layoutManager = mLayoutManager
+                        val adapter = InventarioAdapter(list, this, vistaInventario) { position ->
+                            if (busquedaProducto) {
+                                val existeniasProducto = list.get(position).Existencia!!.toFloat()
+                                if(sinExistencias == 0 && existeniasProducto == 0f){
+                                    Toast.makeText(this@Inventario, "NO SE PUEDEN AGREGAR PRODUCTOS SIN EXISTENCIAS", Toast.LENGTH_SHORT).show()
+                                }else{
+                                    val intento = Intent(this@Inventario, Producto_agregar::class.java)
+                                    intento.putExtra("idproducto", list.get(position).Id)
+                                    intento.putExtra("idcliente", idcliente)
+                                    intento.putExtra("nombrecliente", nombrecliente)
+                                    intento.putExtra("codigo", codigo)
+                                    intento.putExtra("idpedido", idpedido)
+                                    intento.putExtra("visitaid", idvisita)
+                                    intento.putExtra("from", "visita")
+                                    intento.putExtra("proviene", "buscar_producto")
+                                    intento.putExtra("total_param", 0.toFloat())
+                                    intento.putExtra("dataSearch", busqueda!!.query.toString()) //PRUEBA DE ENVIO HISTORIAL BSUQUEDA
+                                    startActivity(intento)
+                                }
+                            } else {
+                                val intento = Intent(this@Inventario, Inventariodetalle::class.java)
+                                intento.putExtra("idproducto", list.get(position).Id)
+                                startActivity(intento)
+                            }
+                        }
+                        recicle!!.adapter = adapter
+                        alert!!.dismisss()
+                    }else{
+                        //MOSTRANDO INVENTARIO EN VISTA MINIATURA
+                        val gridLayoutManayer = GridLayoutManager(this, 2, GridLayoutManager.VERTICAL, false)
+                        recicle!!.layoutManager = gridLayoutManayer
+                        val adapter = InventarioAdapter(list, this, vistaInventario) { position ->
+                            if (busquedaProducto) {
+                                val existeniasProducto = list.get(position).Existencia!!.toFloat()
+                                if(sinExistencias == 0 && existeniasProducto == 0f){
+                                    Toast.makeText(this@Inventario, "NO SE PUEDEN AGREGAR PRODUCTOS SIN EXISTENCIAS", Toast.LENGTH_SHORT).show()
+                                }else{
+                                    val intento = Intent(this@Inventario, Producto_agregar::class.java)
+                                    intento.putExtra("idproducto", list.get(position).Id)
+                                    intento.putExtra("idcliente", idcliente)
+                                    intento.putExtra("nombrecliente", nombrecliente)
+                                    intento.putExtra("codigo", codigo)
+                                    intento.putExtra("idpedido", idpedido)
+                                    intento.putExtra("visitaid", idvisita)
+                                    intento.putExtra("from", "visita")
+                                    intento.putExtra("proviene", "buscar_producto")
+                                    intento.putExtra("total_param", 0.toFloat())
+                                    intento.putExtra("dataSearch", busqueda!!.query.toString()) //PRUEBA DE ENVIO HISTORIAL BSUQUEDA
+                                    startActivity(intento)
+                                }
+                            } else {
+                                val intento = Intent(this@Inventario, Inventariodetalle::class.java)
+                                intento.putExtra("idproducto", list.get(position).Id)
+                                startActivity(intento)
+                            }
+                        }
+                        recicle!!.adapter = adapter
+                        alert!!.dismisss()
                     }
+
+                } else {
+                    alert!!.dismisss()
                 }
-                recicle!!.adapter = adapter
+            } catch (e: Exception) {
                 alert!!.dismisss()
-            } else {
-                alert!!.dismisss()
+                runOnUiThread {
+                    Toast.makeText(this@Inventario, e.message, Toast.LENGTH_SHORT).show()
+                }
             }
-
-
-        } catch (e: Exception) {
-            alert!!.dismisss()
-            runOnUiThread {
-                Toast.makeText(this@Inventario, e.message, Toast.LENGTH_SHORT).show()
-            }
-        }
     }
 
 
@@ -411,54 +499,106 @@ class Inventario : AppCompatActivity() {
         val base = db!!.writableDatabase
         val lista = ArrayList<Inventario>()
         try {
-            val cursor = base.rawQuery("SELECT * FROM inventario WHERE Id IN (SELECT docid FROM virtualinventario WHERE virtualinventario MATCH '$dato') LIMIT 30", null)
+            if(dato.isNotEmpty()){
+                val cursor = base.rawQuery("SELECT * FROM inventario WHERE Id IN (SELECT docid FROM virtualinventario WHERE virtualinventario MATCH '$dato') LIMIT 30", null)
 
-            if (cursor.count > 0) {
-                cursor.moveToFirst()
-                do {
-                    val arreglo = Inventario(
-                        cursor.getInt(0),
-                        cursor.getString(1),
-                        cursor.getString(2),
-                        cursor.getInt(3),
-                        cursor.getString(4),
-                        cursor.getString(5),
-                        cursor.getString(6),
-                        cursor.getFloat(7),
-                        cursor.getString(8),
-                        cursor.getInt(9),
-                        cursor.getFloat(10),
-                        cursor.getFloat(11),
-                        cursor.getFloat(12),
-                        cursor.getFloat(13),
-                        cursor.getFloat(14),
-                        cursor.getFloat(15),
-                        cursor.getFloat(16),
-                        cursor.getString(17),
-                        cursor.getString(18),
-                        cursor.getInt(19),
-                        cursor.getString(20),
-                        cursor.getInt(21),
-                        cursor.getString(22),
-                        cursor.getString(23),
-                        cursor.getString(24),
-                        cursor.getString(25),
-                        cursor.getString(26),
-                        cursor.getString(27),
-                        cursor.getInt(28),
-                        cursor.getString(29),
-                        cursor.getFloat(30),
-                        cursor.getDouble(31),
-                        cursor.getInt(32),
-                        cursor.getFloat(33)
-                    )
+                if (cursor.count > 0) {
+                    cursor.moveToFirst()
+                    do {
+                        val arreglo = Inventario(
+                            cursor.getInt(0),
+                            cursor.getString(1),
+                            cursor.getString(2),
+                            cursor.getInt(3),
+                            cursor.getString(4),
+                            cursor.getString(5),
+                            cursor.getString(6),
+                            cursor.getFloat(7),
+                            cursor.getString(8),
+                            cursor.getInt(9),
+                            cursor.getFloat(10),
+                            cursor.getFloat(11),
+                            cursor.getFloat(12),
+                            cursor.getFloat(13),
+                            cursor.getFloat(14),
+                            cursor.getFloat(15),
+                            cursor.getFloat(16),
+                            cursor.getString(17),
+                            cursor.getString(18),
+                            cursor.getInt(19),
+                            cursor.getString(20),
+                            cursor.getInt(21),
+                            cursor.getString(22),
+                            cursor.getString(23),
+                            cursor.getString(24),
+                            cursor.getString(25),
+                            cursor.getString(26),
+                            cursor.getString(27),
+                            cursor.getInt(28),
+                            cursor.getString(29),
+                            cursor.getFloat(30),
+                            cursor.getDouble(31),
+                            cursor.getInt(32),
+                            cursor.getFloat(33)
+                        )
 
-                    lista.add(arreglo)
+                        lista.add(arreglo)
 
 
-                } while (cursor.moveToNext())
+                    } while (cursor.moveToNext())
 
-                cursor.close()
+                    cursor.close()
+                }else{
+                    val cursor = base.rawQuery("SELECT * FROM inventario LIMIT 30", null)
+
+                    if (cursor.count > 0) {
+                        cursor.moveToFirst()
+                        do {
+                            val arreglo = Inventario(
+                                cursor.getInt(0),
+                                cursor.getString(1),
+                                cursor.getString(2),
+                                cursor.getInt(3),
+                                cursor.getString(4),
+                                cursor.getString(5),
+                                cursor.getString(6),
+                                cursor.getFloat(7),
+                                cursor.getString(8),
+                                cursor.getInt(9),
+                                cursor.getFloat(10),
+                                cursor.getFloat(11),
+                                cursor.getFloat(12),
+                                cursor.getFloat(13),
+                                cursor.getFloat(14),
+                                cursor.getFloat(15),
+                                cursor.getFloat(16),
+                                cursor.getString(17),
+                                cursor.getString(18),
+                                cursor.getInt(19),
+                                cursor.getString(20),
+                                cursor.getInt(21),
+                                cursor.getString(22),
+                                cursor.getString(23),
+                                cursor.getString(24),
+                                cursor.getString(25),
+                                cursor.getString(26),
+                                cursor.getString(27),
+                                cursor.getInt(28),
+                                cursor.getString(29),
+                                cursor.getFloat(30),
+                                cursor.getDouble(31),
+                                cursor.getInt(32),
+                                cursor.getFloat(33)
+                            )
+
+                            lista.add(arreglo)
+
+
+                        } while (cursor.moveToNext())
+
+                        cursor.close()
+                    }
+                }
             }
         } catch (e: Exception) {
             throw Exception(e.message)

@@ -12,6 +12,7 @@ import androidx.cardview.widget.CardView
 import androidx.constraintlayout.widget.ConstraintLayout
 import com.example.acae30.database.Database
 import com.google.android.material.snackbar.Snackbar
+import kotlinx.android.synthetic.main.activity_carga_datos.*
 import kotlinx.coroutines.*
 import org.json.JSONArray
 import java.net.HttpURLConnection
@@ -68,14 +69,16 @@ class carga_datos : AppCompatActivity() {
                     alert!!.Cargando() //muestra la alerta
                     GlobalScope.launch(Dispatchers.IO) {
                         getClients()
-                    } //courrutina para obtener clientes
+                        getSucursales()
+                       // getSucursales()
+                    } //COURUTINA PARA OBTENER CLIENTES Y SUCURSALES
                 } else {
                     ShowAlert("Enciende tus datos o el wifi")
                 }
             } else {
                 ShowAlert("No hay configuracion del Servidor")
             }
-        }//cuando se hace click en la card de clientes
+        }//cuando se hace click en la card de
 
         cvinventario!!.setOnClickListener {
             if (url != null) {
@@ -164,7 +167,7 @@ class carga_datos : AppCompatActivity() {
                                 saveClienteDataBase(respuesta)
                                 messageAsync("Cargando 100%")
                                 alert!!.dismisss()
-                                ShowAlert("Carga Completada Exitosamente")
+                                ShowAlert("Clientes Almacenados Exitosamente")
                             } else {
                                 throw Exception("Servidor no Devolvio datos")
                             } //caso que la respuesta venga vacia
@@ -182,6 +185,102 @@ class carga_datos : AppCompatActivity() {
             ShowAlert(e.message.toString())
         }
     } //obtiene los clientes del servidor
+
+    //OBTENIENDO SUCURSALES DESDE WEBSERVIS
+    //28-01-2023
+    private fun getSucursales() {
+        try {
+            val direccion = url!! + "sucursales"
+            val url = URL(direccion)
+            with(url.openConnection() as HttpURLConnection) {
+                try {
+                    connectTimeout = 30000
+                    requestMethod = "GET"
+                    if (responseCode == 200) {
+                        messageAsync("Cargando 10%")
+                        inputStream.bufferedReader().use { data ->
+                            var talla = 0
+                            val response = StringBuffer()
+                            var inputLine = data.readLine()
+                            while (inputLine != null) {
+                                response.append(inputLine)
+                                inputLine = data.readLine()
+                                talla++
+                                if (talla <= 45) {
+                                    messageAsync("Cargando $talla%")
+                                }
+                            }
+                            messageAsync("Cargando 45%")
+                            data.close()
+                            messageAsync("Cargando 50%")
+                            val respuesta = JSONArray(response.toString())
+                            if (respuesta.length() > 0) {
+                                saveSucursalesDatabase(respuesta) //guarda los datos en la bd
+                                messageAsync("Cargando 100%")
+                                alert!!.dismisss()
+                                ShowAlert("Sucursales Almacenadas Exitosamente")
+                            } else {
+                                messageAsync("Cargando 100%")
+                                alert!!.dismisss()
+                                ShowAlert("NO SE ENCONTRARON SUCURSALES REGISTRADAS")
+                            } //caso que la respuesta venga vacia
+                        }
+                    } else {
+                        throw Exception("SERVIDOR: NO SE ENCONTRARON SUCURSALES REGISTRADAS")
+                    }
+                } catch (e: Exception) {
+                    throw Exception(e.message)
+                }
+            }//termina de obtener los datos
+        } catch (e: Exception) {
+            alert!!.dismisss()
+            ShowAlert(e.message.toString())
+        }
+    }
+
+    //GUARDANDO SUCURSALES EN SQLITE
+    //28-01-2023
+    private fun saveSucursalesDatabase(json: JSONArray) {
+        val bd = database!!.writableDatabase
+        val total = json.length()
+        val talla = (50.toFloat() / total.toFloat()).toFloat()
+        var contador: Float = 0.toFloat()
+        try {
+            bd!!.beginTransaction() //INICIANDO TRANSACCION DE REGISTRO
+            bd.execSQL("DELETE FROM cliente_sucursal") //LIMPIANDO TABLA SUCURSALES
+
+            val sql2 = "DELETE FROM SQLITE_SEQUENCE WHERE NAME = 'cliente_sucursal'"
+            bd.execSQL(sql2)
+
+            for (i in 0 until json.length()) {
+                val dato = json.getJSONObject(i)
+                val valor = ContentValues()
+                valor.put("Id", dato.getInt("id"))
+                valor.put("Id_cliente", dato.getInt("id_cliente"))
+                valor.put("codigo_sucursal", funciones!!.validateJsonIsnullString(dato, "codigo_sucursal"))
+                valor.put("nombre_sucursal", funciones!!.validateJsonIsnullString(dato, "nombre_sucursal"))
+                valor.put("direccion_sucursal", funciones!!.validateJsonIsnullString(dato, "direccion"))
+                valor.put("municipio_sucursal", funciones!!.validateJsonIsnullString(dato, "municipio"))
+                valor.put("depto_sucursal", funciones!!.validateJsonIsnullString(dato, "departamento"))
+                valor.put("telefono_1", funciones!!.validateJsonIsnullString(dato, "telefono1"))
+                valor.put("telefono_2", funciones!!.validateJsonIsnullString(dato, "telefono2"))
+                valor.put("correo_sucursal", funciones!!.validateJsonIsnullString(dato, "correo"))
+                valor.put("contacto_sucursal", funciones!!.validateJsonIsnullString(dato, "contacto"))
+
+                bd.insert("cliente_sucursal", null, valor)
+                contador += talla
+                val mensaje = contador + 50.toFloat()
+                messageAsync("Cargando ${mensaje.toInt()}%")
+            } //FINALIZANDO ITERACION FOR
+            bd.setTransactionSuccessful() //TRANSACCION COMPLETA
+        } catch (e: Exception) {
+            throw  Exception(e.message)
+        } finally {
+            bd!!.endTransaction()
+            bd.close()
+        }
+    } //INSERTANDO DATOS EN LA TABLA SUCURSALES EN SQLITE
+
 
     private fun getInventario() {
         // TABLA INVENTARIO
@@ -536,7 +635,7 @@ class carga_datos : AppCompatActivity() {
                     funciones!!.validate(dato.getString("aporte_mensual").toFloat())
                 )
                 bd.insert("clientes", null, data)
-                contador = contador + talla
+                contador += talla
                 val mensaje = contador + 50.toFloat()
                 messageAsync("Cargando ${mensaje.toInt()}%")
             } //recorre el json array

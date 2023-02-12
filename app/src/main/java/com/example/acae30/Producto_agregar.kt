@@ -14,8 +14,10 @@ import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
 import androidx.constraintlayout.widget.ConstraintLayout
 import com.example.acae30.database.Database
+import com.example.acae30.modelos.Config
 import com.example.acae30.modelos.DetallePedido
 import com.example.acae30.modelos.InventarioPrecios
+import com.example.acae30.modelos.dataPedidos
 import com.google.android.material.snackbar.Snackbar
 import kotlinx.android.synthetic.main.activity_producto_agregar.*
 import kotlinx.android.synthetic.main.alerta_precio.*
@@ -38,9 +40,7 @@ class Producto_agregar : AppCompatActivity() {
     private var txtexistencia: TextView? = null
     private var spiner: Spinner? = null
     private var precio: Float = 0.toFloat()
-    private var cantidad: Float = 1.toFloat()
-    private var btnMas: ImageButton? = null
-    private var btnMenos: ImageButton? = null
+    private var cantidad: Float = 0.toFloat()
     private var txttotal: TextView? = null
     private var idpedido: Int = 0
     private var idcliente: Int? = 0
@@ -63,6 +63,9 @@ class Producto_agregar : AppCompatActivity() {
     private var txttituloproducto: TextView? = null
 
     private var dataSearch: String? = null
+
+    private var sinExistencias: Int? = null  // 1 -> Si    0 -> no
+    private var existenciaProducto: Float = 0f
 
     override fun onCreate(savedInstanceState: Bundle?) {
 
@@ -109,6 +112,9 @@ class Producto_agregar : AppCompatActivity() {
 
         txttituloproducto = findViewById(R.id.txttituloproducto)
 
+        //OBTENIDO DATOS DE LA TABLA CONFIGURACION
+        getConfig()
+
         var contexto = this
 
         // Validar que la cantidad sea con hasta dos decimales
@@ -130,6 +136,7 @@ class Producto_agregar : AppCompatActivity() {
                 return if (decimals < 4) source else ""
             }
         })
+
 
         // Actualizar los precios cuando cambie el select de unidad
         //ACTUALIZADOS LOS DECIMALES A 4 ---> 23-08-2022
@@ -270,22 +277,70 @@ class Producto_agregar : AppCompatActivity() {
             }
             override fun afterTextChanged(s: Editable) {
                 val nuevaCantidad = s.toString()
-                if (nuevaCantidad != "") {
-                    if(isInteger(nuevaCantidad)){
-                        cantidad = nuevaCantidad.toFloat()
+                if(sinExistencias != 0){
+                    if (nuevaCantidad != "") {
+                        if(isInteger(nuevaCantidad)){
+                            cantidad = nuevaCantidad.toFloat()
+                            Totalizar(cantidad)
+                        }else{
+                            txtcantidad!!.error = "Este campo solo permite datos enteros";
+                        }
+                    } else {
+                        txtcantidad!!.error = "Campo no puede quedar vacio"
+                        cantidad = 0.toFloat()
                         Totalizar(cantidad)
-                    }else{
-                        txtcantidad!!.error = "Este campo solo permite datos enteros";
                     }
-                } else {
-                    txtcantidad!!.error = "Campo no puede quedar vacio"
-                    cantidad = 0.toFloat()
-                    Totalizar(cantidad)
+                }else{
+                    if (nuevaCantidad != "") {
+                        if(isInteger(nuevaCantidad)){
+                            cantidad = nuevaCantidad.toFloat()
+                            if(cantidad > existenciaProducto || cantidad == 0f){
+                                txtcantidad!!.error = "No puede Agregar una cantidad mayor a las existencias actuales";
+                                btnagregar!!.setBackgroundResource(R.drawable.border_btndisable)
+                            }else{
+                                Totalizar(cantidad)
+                                btnagregar!!.setBackgroundResource(R.drawable.border_btnenviar)
+                            }
+                        }else{
+                            txtcantidad!!.error = "Este campo solo permite datos enteros";
+                        }
+                    } else {
+                        txtcantidad!!.error = "Campo no puede quedar vacio"
+                        cantidad = 0.toFloat()
+                        Totalizar(cantidad)
+                    }
                 }
             }
         })
 
     } //inicializa todas las variables y los objetos del xml
+
+    //FUNCION PARA EXTRAER LOS CAMPOS DE LA TABLA CONFIG
+    private fun getConfig(){
+        val dataBase = db!!.writableDatabase
+        try {
+            val getConf = dataBase.rawQuery("SELECT * FROM config", null)
+            val getConfData = ArrayList<Config>()
+            if(getConf.count > 0){
+                getConf.moveToFirst()
+                do {
+                    val data = Config(
+                        getConf.getInt(0),
+                        getConf.getInt(1)
+                    )
+                    getConfData.add(data)
+                }while (getConf.moveToNext())
+            }
+
+            for(data in getConfData){
+                sinExistencias = data.sinExistencias!!.toInt()
+            }
+        }catch (e: Exception) {
+            throw Exception(e.message)
+        } finally {
+            dataBase!!.close()
+        }
+    }
 
     //YA NO REGRESA HASTA EL DETALLE DEL PEDIDO, REGRESA A LA BUSQUEDA DE PRODUCTOS
     //BTNATRAS Y TEXTO CANTIDAD SETEADO SIN DECIMALES
@@ -651,6 +706,7 @@ class Producto_agregar : AppCompatActivity() {
                         precio = datos.Precio_iva!!
                         Totalizar(cantidad)
                         txtexistencia!!.text = "${datos.Existencia}"
+                        existenciaProducto = datos.Existencia!!.toFloat()
 //                       txtprecio!!.text="$"+"${String.format("%.2f", datos!!.Precio_iva)}"
 
                         // Agregar precios a lista

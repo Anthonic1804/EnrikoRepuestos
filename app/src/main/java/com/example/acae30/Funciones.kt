@@ -10,7 +10,6 @@ import android.view.ViewAnimationUtils
 import android.view.animation.AlphaAnimation
 import android.view.animation.Animation
 import android.widget.TextView
-import androidx.core.content.ContextCompat.getSystemService
 import com.example.acae30.database.Database
 import com.example.acae30.modelos.Visitas
 import org.json.JSONObject

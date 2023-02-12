@@ -115,6 +115,7 @@ class Inicio : AppCompatActivity() {
         menu() //llama los botones de menu
         funciones!!.VendedorVerific(this) //valida que haya sesion
         mostrarFecha() //MOSTRANDOLA FECHA DEL INVENTARIO
+        //PRUEBA DESDE GIT DE OFICINA
     }
 
     //FUNCION PARA OBTENER LA FECHA DE INVENTARIO
