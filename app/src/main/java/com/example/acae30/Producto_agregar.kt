@@ -17,7 +17,6 @@ import com.example.acae30.database.Database
 import com.example.acae30.modelos.Config
 import com.example.acae30.modelos.DetallePedido
 import com.example.acae30.modelos.InventarioPrecios
-import com.example.acae30.modelos.dataPedidos
 import com.google.android.material.snackbar.Snackbar
 import kotlinx.android.synthetic.main.activity_producto_agregar.*
 import kotlinx.android.synthetic.main.alerta_precio.*

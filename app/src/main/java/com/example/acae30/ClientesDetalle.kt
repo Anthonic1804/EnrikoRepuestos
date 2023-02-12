@@ -1,11 +1,10 @@
 package com.example.acae30
 
 import android.content.Intent
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import android.view.View
 import android.widget.ImageButton
 import android.widget.TextView
+import androidx.appcompat.app.AppCompatActivity
 import com.example.acae30.database.Database
 import com.example.acae30.modelos.Cliente
 import kotlinx.coroutines.Dispatchers
@@ -29,7 +28,6 @@ class ClientesDetalle : AppCompatActivity() {
     private var txtteleuno: TextView? = null
     private var txtteledos: TextView? = null
     private var btnatras: ImageButton? = null
-    private var btneditar: ImageButton? = null
 
     private var idcliente = 0
 
@@ -57,9 +55,7 @@ class ClientesDetalle : AppCompatActivity() {
         txtteledos = findViewById(R.id.txtteldos)
 
         btnatras = findViewById(R.id.imgatras)
-        btneditar = findViewById(R.id.imgeditar)
 
-        btneditar!!.visibility = View.GONE // DESHABILITANDO EL BOTON EDITAR DETALLE DEL CLIENTE
 
       //  lienzo = findViewById(R.id.lienzo)
     }
@@ -99,10 +95,6 @@ class ClientesDetalle : AppCompatActivity() {
 
         btnatras!!.setOnClickListener {
             Regresar()
-        }
-
-        btneditar!!.setOnClickListener{
-            editClient()
         }
 
     }
@@ -158,13 +150,6 @@ class ClientesDetalle : AppCompatActivity() {
     }
     private fun Regresar() {
         val intento = Intent(this, Clientes::class.java)
-        startActivity(intento)
-        finish()
-    }
-
-    private fun editClient(){
-        val intento = Intent(this, activity_editCliente::class.java)
-        intento.putExtra("idproducto", idcliente)
         startActivity(intento)
         finish()
     }

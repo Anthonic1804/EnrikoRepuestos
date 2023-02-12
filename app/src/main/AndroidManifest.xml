@@ -24,9 +24,6 @@
         android:hardwareAccelerated="true"
         android:usesCleartextTraffic="true">
         <activity
-            android:name=".activity_editCliente"
-            android:exported="false" />
-        <activity
             android:name=".Visita"
             android:screenOrientation="portrait" />
         <activity

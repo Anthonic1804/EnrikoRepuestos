@@ -52,18 +52,6 @@
                 app:layout_constraintTop_toTopOf="parent"
                 app:layout_constraintVertical_bias="0.466" />
 
-            <ImageButton
-                android:id="@+id/imgeditar"
-                android:layout_width="62dp"
-                android:layout_height="35dp"
-                android:backgroundTint="@color/colorPrimary"
-                android:tint="@color/colorAccent"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintHorizontal_bias="0.719"
-                app:layout_constraintStart_toEndOf="@+id/textView5"
-                app:layout_constraintTop_toTopOf="parent"
-                app:srcCompat="@drawable/ic_bedit" />
         </androidx.constraintlayout.widget.ConstraintLayout>
     </androidx.cardview.widget.CardView>
     <androidx.constraintlayout.widget.ConstraintLayout
@@ -127,7 +115,7 @@
         android:layout_marginLeft="20dp"
         android:layout_marginTop="160dp"
         android:layout_marginRight="20dp"
-        app:cardCornerRadius="25dp"
+        app:cardCornerRadius="10dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" >
@@ -249,7 +237,7 @@
         android:layout_marginLeft="20dp"
         android:layout_marginTop="16dp"
         android:layout_marginRight="20dp"
-        app:cardCornerRadius="25dp"
+        app:cardCornerRadius="10dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.4"
         app:layout_constraintStart_toStartOf="parent"

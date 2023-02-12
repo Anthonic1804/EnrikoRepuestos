@@ -385,7 +385,7 @@ class Inventario : AppCompatActivity() {
                 //REALIZA LA BUSQUEDA ALMACENA DEL SEARCHVIEW
                 //val cursor = base.rawQuery("SELECT * FROM inventario WHERE Descripcion LIKE '%$dataSearch%' limit 30", null)
 
-                val cursor = base.rawQuery("SELECT * FROM inventario WHERE Id IN (SELECT docid FROM virtualinventario WHERE virtualinventario MATCH '$dataSearch') LIMIT 30", null)
+                val cursor = base.rawQuery("SELECT * FROM inventario WHERE Id IN (SELECT docid FROM virtualinventario WHERE virtualinventario MATCH '$dataSearch') LIMIT 20", null)
 
                 if (cursor.count > 0) {
                     cursor.moveToFirst()
@@ -435,7 +435,7 @@ class Inventario : AppCompatActivity() {
                     cursor.close()
                 }
             }else{
-                val cursor = base.rawQuery("SELECT * FROM inventario limit 30", null)
+                val cursor = base.rawQuery("SELECT * FROM inventario limit 20", null)
 
                 if (cursor.count > 0) {
                     cursor.moveToFirst()
@@ -500,7 +500,7 @@ class Inventario : AppCompatActivity() {
         val lista = ArrayList<Inventario>()
         try {
             if(dato.isNotEmpty()){
-                val cursor = base.rawQuery("SELECT * FROM inventario WHERE Id IN (SELECT docid FROM virtualinventario WHERE virtualinventario MATCH '$dato') LIMIT 30", null)
+                val cursor = base.rawQuery("SELECT * FROM inventario WHERE Id IN (SELECT docid FROM virtualinventario WHERE virtualinventario MATCH '$dato') LIMIT 20", null)
 
                 if (cursor.count > 0) {
                     cursor.moveToFirst()
@@ -549,7 +549,7 @@ class Inventario : AppCompatActivity() {
 
                     cursor.close()
                 }else{
-                    val cursor = base.rawQuery("SELECT * FROM inventario LIMIT 30", null)
+                    val cursor = base.rawQuery("SELECT * FROM inventario LIMIT 20", null)
 
                     if (cursor.count > 0) {
                         cursor.moveToFirst()
