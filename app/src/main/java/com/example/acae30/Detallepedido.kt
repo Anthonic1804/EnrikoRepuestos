@@ -16,11 +16,8 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.acae30.database.Database
 import com.example.acae30.listas.PedidoDetalleAdapter
-import com.example.acae30.modelos.DetallePedido
+import com.example.acae30.modelos.*
 import com.example.acae30.modelos.JSONmodels.CabezeraPedidoSend
-import com.example.acae30.modelos.Pedidos
-import com.example.acae30.modelos.Sucursales
-import com.example.acae30.modelos.dataPedidos
 import com.google.android.material.snackbar.Snackbar
 import com.google.gson.JsonArray
 import com.google.gson.JsonObject
@@ -50,6 +47,8 @@ class Detallepedido : AppCompatActivity() {
     private var codigoSucursal: Int? = null
     private var sucursalName: String? = null
     private var tipoEnvio: Int? = null
+    private var nombreSucursalPedido: String? = ""
+    private var pedidoEnviado: Boolean = false
 
     private var btbuscarProducto: ImageButton? = null
     private var idcliente: Int = 0
@@ -114,6 +113,7 @@ class Detallepedido : AppCompatActivity() {
         puerto = preferencias!!.getInt("puerto", 0)
         visita_enviada = false
 
+        //FUNCION PARA OBTENER LA INFORMACION DEL PEDIDO
         getTipoEnvio(idpedido)
 
         //FUNCIONES AGRAGADAS PARA LOS CONTROLES DE ENVIO
@@ -378,7 +378,7 @@ class Detallepedido : AppCompatActivity() {
         }
     }
 
-    //OPTENIENDO EL TIPO DE ENVIO SELECCIONADO
+    //OPTENIENDO INFORMACION DEL PEDIDO
     private fun getTipoEnvio(ipPedido: Int){
         val dataBase = db!!.writableDatabase
         try {
@@ -388,6 +388,8 @@ class Detallepedido : AppCompatActivity() {
                 getTipo.moveToFirst()
                 do {
                     val data = dataPedidos(
+                        getTipo.getInt(5) == 1,
+                        getTipo.getString(14),
                         getTipo.getInt(15)
                     )
                     getPedidoData.add(data)
@@ -395,8 +397,11 @@ class Detallepedido : AppCompatActivity() {
             }
 
             for(data in getPedidoData){
+                pedidoEnviado = data.envioPedido!!
+                nombreSucursalPedido = data.nombreSucursalPedido!!.toString()
                 tipoEnvio = data.tipoPedido!!.toInt()
             }
+            getTipo.close()
         }catch (e: Exception) {
             throw Exception(e.message)
         } finally {
@@ -485,6 +490,7 @@ class Detallepedido : AppCompatActivity() {
                 spSucursal!!.visibility = View.GONE
                 sinSucursal!!.visibility = View.VISIBLE
             }
+            dataSucursal.close()
         }catch (e: Exception) {
             throw Exception(e.message)
         } finally {
@@ -494,6 +500,8 @@ class Detallepedido : AppCompatActivity() {
     }
 
 
+    //SE MODIFICO PARA AGREGAR FUNCIONABILIDAD DE LAS SUCURSALES
+    //Y DE LOS TIPOS DE ENVIO
     fun validarDatos() {
         if (idpedido > 0) {
            // btbuscar!!.visibility = View.GONE
@@ -521,6 +529,26 @@ class Detallepedido : AppCompatActivity() {
 
                                 btnguardar!!.visibility = View.GONE
                                 btneliminar!!.visibility = View.GONE
+
+                                //MOSTRANDO EL NOMBRE DE LA SUCURSAL
+                                if(nombreSucursalPedido != ""){
+                                    sinSucursal!!.text = nombreSucursalPedido
+                                }
+                                else{
+                                    sinSucursal!!.text = "NO TIENE SUCURSAL REGISTRADA"
+                                }
+                                //DESHABILITANDO EL SPINNER DE SUCURSALES
+                                spSucursal!!.visibility = View.GONE
+
+                                //DESHABILITANDO LOS TIPOS DE ENVIO
+                                if(pedidoEnviado == true){
+                                    swcaes!!.isEnabled = false
+                                    swruta!!.isEnabled = false
+                                }else{
+                                    swcaes!!.isEnabled = true
+                                    swruta!!.isEnabled = true
+                                }
+
                             } else {
 
                               //  btbuscar!!.visibility = View.VISIBLE

@@ -63,10 +63,8 @@ class Login : AppCompatActivity() {
         txtclave = findViewById(R.id.txtclave)
         txtusuario = findViewById(R.id.txtusuario)
 
-        if (Build.VERSION.SDK_INT > 9) {
-            val policy = StrictMode.ThreadPolicy.Builder().permitAll().build()
-            StrictMode.setThreadPolicy(policy)
-        }
+        val policy = StrictMode.ThreadPolicy.Builder().permitAll().build()
+        StrictMode.setThreadPolicy(policy)
 
         if (ActivityCompat.checkSelfPermission(
                 this,
@@ -79,7 +77,7 @@ class Login : AppCompatActivity() {
                 ), 101
             )
         }
-        var context = this
+        val context = this
 
         btnlogin!!.setOnClickListener {
             var identidad = ""

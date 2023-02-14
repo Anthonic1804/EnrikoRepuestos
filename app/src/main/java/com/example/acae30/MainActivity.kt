@@ -82,7 +82,7 @@ class MainActivity : AppCompatActivity() {
     fun validar() {
         if (ip!!.text.length > 0 && puerto!!.text.length > 0) {
             alerta!!.Cargando()
-            var v = vista
+            val v = vista
             GlobalScope.launch(Dispatchers.IO) {
                 val ip = ip!!.text.toString()
                 val p = puerto!!.text.toString()

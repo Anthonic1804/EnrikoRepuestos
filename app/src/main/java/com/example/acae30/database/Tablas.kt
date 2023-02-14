@@ -186,8 +186,8 @@ class Tablas {
                 "[Idvisita] INTEGER NOT NULL DEFAULT 0," +
                 "[Fecha_creado] TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL," +
                 "id_sucursal INTEGER NOT NULL DEFAULT 0," +
-                "codigo_sucursal VARCHAR(25) DEFAULT 'TEMP' NOT NULL," +
-                "nombre_sucursal VARCHAR(45) DEFAULT 'TEMP' NOT NULL," +
+                "codigo_sucursal VARCHAR(25) NOT NULL DEFAULT ''," +
+                "nombre_sucursal VARCHAR(45) NOT NULL DEFAULT ''," +
                 "tipo_envio INTEGER NOT NULL DEFAULT 0 );" //AGREGAR CAMPO A LA BD SQL
         return pedido
     } //tabla pedidos
