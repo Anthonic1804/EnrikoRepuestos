@@ -594,7 +594,7 @@ class Producto_agregar : AppCompatActivity() {
                             intento.putExtra("idpedido", idpedido)
                             intento.putExtra("id", idcliente)
                             intento.putExtra("nombrecliente", nombrecliente)
-                            intento.putExtra("idpedido", idpedido)
+                            //intento.putExtra("idpedido", idpedido)
                             intento.putExtra("visitaid", idvisita)
                             intento.putExtra("codigo", codigo)
                             intento.putExtra("idapi", idapi)

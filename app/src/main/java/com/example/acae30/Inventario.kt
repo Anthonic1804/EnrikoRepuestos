@@ -259,7 +259,7 @@ class Inventario : AppCompatActivity() {
     fun Atras(view: View) {
         if (busquedaProducto) {
             val intento = Intent(this, Detallepedido::class.java)
-            intento.putExtra("idcliente", idcliente)
+            intento.putExtra("id", idcliente)
             intento.putExtra("nombrecliente", nombrecliente)
             intento.putExtra("idpedido", idpedido)
             intento.putExtra("visitaid", idvisita)
