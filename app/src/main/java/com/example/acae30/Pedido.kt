@@ -673,6 +673,10 @@ class Pedido : AppCompatActivity() {
                     pedido.getFloat(3),
                     pedido.getInt(5) == 1,
                     pedido.getInt(9) == 1,
+                    pedido.getInt(12),
+                    pedido.getString(13),
+                    pedido.getString(14),
+                    pedido.getInt(15),
                     0,
                     "",
                     null

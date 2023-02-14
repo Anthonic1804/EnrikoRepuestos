@@ -781,6 +781,7 @@ class Detallepedido : AppCompatActivity() {
         }
     }
 
+    //AGREGANDO CAMPOS DE SUCURSAL Y TIPO DE ENVIO A LA CABECERA DEL PEDIDO
     private fun getPedidoSend(idpedido: Int): CabezeraPedidoSend? {
         val base = db!!.readableDatabase
         try {
@@ -796,6 +797,10 @@ class Detallepedido : AppCompatActivity() {
                     pedido.getFloat(3),
                     pedido.getInt(5) == 1,
                     pedido.getInt(9) == 1,
+                    pedido.getInt(12),
+                    pedido.getString(13),
+                    pedido.getString(14),
+                    pedido.getInt(15),
                     0,
                     "",
                     null

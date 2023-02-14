@@ -11,6 +11,10 @@ data class CabezeraPedidoSend (
     var Total:Float?,
     var Enviado:Boolean?,
     var Cerrado:Boolean?,
+    var IdSucursal: Int?,
+    var CodigoSucursal: String?,
+    var NombreSucursal: String?,
+    var TipoEnvio: Int?,
     var Idvendedor:Int?,
     var Vendedor:String?,
     var detalle:ArrayList<DetallePedido>?
