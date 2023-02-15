@@ -68,9 +68,8 @@ class carga_datos : AppCompatActivity() {
                 if (funciones!!.isNetworkConneted(this)) {
                     alert!!.Cargando() //muestra la alerta
                     GlobalScope.launch(Dispatchers.IO) {
-                        getClients()
                         getSucursales()
-                       // getSucursales()
+                        getClients()
                     } //COURUTINA PARA OBTENER CLIENTES Y SUCURSALES
                 } else {
                     ShowAlert("Enciende tus datos o el wifi")
@@ -294,7 +293,7 @@ class carga_datos : AppCompatActivity() {
                     requestMethod = "GET"
                     if (responseCode == 200) {
                         inputStream.bufferedReader().use { data ->
-                            var readline = data.readLine()
+                            val readline = data.readLine()
 
                             cantidadRegistros = readline.toInt()
                         }
@@ -307,7 +306,7 @@ class carga_datos : AppCompatActivity() {
                 }
             }
 
-            var BLOQUE = 1000.toInt()
+            val BLOQUE = 1000.toInt()
 
             //Log.d("Cantidad: ", cantidadRegistros!!.toString())
             var inicio = 0.toInt()
@@ -339,17 +338,18 @@ class carga_datos : AppCompatActivity() {
                 bd.close()
             }
 
+            //var porcentaje = (100 * registrosCargados) / cantidadRegistros
+            var porcentaje = 2
 
             do {
-                var porcentaje = (100 * registrosCargados) / cantidadRegistros
 
-                if (porcentaje > 100.toInt()) {
-                    porcentaje = 100.toInt()
-                }
-
-                if (porcentaje <= 50.toInt()) {
+                if (porcentaje <= 99.toInt()) {
                     messageAsync("Cargando " + porcentaje.toString() + "%")
+                }else{
+                    messageAsync("Cargando 100%")
                 }
+
+                porcentaje += 13
 
                 val direccion =
                     url!! + "inventario/" + inicio.toString() + "/" + longitud.toString()
@@ -373,7 +373,7 @@ class carga_datos : AppCompatActivity() {
                                 val respuesta = JSONArray(response.toString())
                                 if (respuesta.length() > 0) {
                                     saveInventarioDatabase(respuesta) //guarda los datos en la bd
-                                    println("DATOS ALMACENADOS CORRECTAMEMENTE")
+                                    //println("DATOS ALMACENADOS CORRECTAMEMENTE")
                                 } else {
                                     throw Exception("Servidor no Devolvio datos")
                                 } //caso que la respuesta venga vacia
@@ -397,7 +397,7 @@ class carga_datos : AppCompatActivity() {
 
         } catch (e: Exception) {
             alert!!.dismisss()
-            ShowAlert("Error #4 Linea 301")
+            //ShowAlert("Error #4 Linea 301")
         }
 
         // TABLA INVENTARIO PRECIOS
@@ -489,7 +489,7 @@ class carga_datos : AppCompatActivity() {
                                 val respuesta = JSONArray(response.toString())
                                 if (respuesta.length() > 0) {
                                     saveInventarioPreciosDatabase(respuesta) //guarda los datos en la bd
-                                    println("PRECIOS ALMACENADOS CORRECTAMENTE")
+                                    //println("PRECIOS ALMACENADOS CORRECTAMENTE")
                                 } else {
                                     throw Exception("Servidor no Devolvio datos")
                                 } //caso que la respuesta venga vacia
@@ -517,7 +517,8 @@ class carga_datos : AppCompatActivity() {
 
         } catch (e: Exception) {
             alert!!.dismisss()
-            ShowAlert("Error #7 Linea 420")
+            ShowAlert("NO SE ENCONTRARON ESCALAS REGISTRADAS")
+            ShowAlert("INVENTARIO GARGADO CORRECTAMENTE")
         }
     }
 

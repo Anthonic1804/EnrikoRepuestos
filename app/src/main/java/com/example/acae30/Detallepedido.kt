@@ -22,6 +22,7 @@ import com.google.android.material.snackbar.Snackbar
 import com.google.gson.JsonArray
 import com.google.gson.JsonObject
 import kotlinx.android.synthetic.main.activity_inicio.*
+import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
@@ -502,6 +503,7 @@ class Detallepedido : AppCompatActivity() {
 
     //SE MODIFICO PARA AGREGAR FUNCIONABILIDAD DE LAS SUCURSALES
     //Y DE LOS TIPOS DE ENVIO
+    @OptIn(DelicateCoroutinesApi::class)
     fun validarDatos() {
         if (idpedido > 0) {
            // btbuscar!!.visibility = View.GONE
@@ -520,7 +522,7 @@ class Detallepedido : AppCompatActivity() {
                                 btbuscarProducto!!.visibility = View.GONE
                                 btnenviar!!.visibility = View.GONE
 
-                                var visitaAbierta = getEstadoVisita()
+                                val visitaAbierta = getEstadoVisita()
 
                                 if (visitaAbierta == 0 && !cabezera!!.Enviado) {
                                     //RUTINA PARA SOLO ENVIAR EL PEDIDO
@@ -630,11 +632,11 @@ class Detallepedido : AppCompatActivity() {
             }
 
             val cursor = base.rawQuery("SELECT *  FROM detalle_producto where Id_pedido=$id", null)
-            var lista = ArrayList<DetallePedido>()
+            val lista = ArrayList<DetallePedido>()
             if (cursor.count > 0) {
                 cursor.moveToFirst()
                 do {
-                    var detalle = DetallePedido(
+                    val detalle = DetallePedido(
                         cursor.getInt(0),
                         cursor.getInt(1),
                         cursor.getInt(2),
@@ -662,9 +664,7 @@ class Detallepedido : AppCompatActivity() {
                         cursor.getInt(24),
                         cursor.getInt(25)
                     )
-                    if (detalle != null) {
-                        lista.add(detalle)
-                    }
+                    lista.add(detalle)
                 } while (cursor.moveToNext())
                 cursor.close()
             }
@@ -683,7 +683,7 @@ class Detallepedido : AppCompatActivity() {
     //23-08-2022
     private fun ArmarLista(lista: ArrayList<DetallePedido>) {
         var total = 0.toFloat()
-        var mLayoutManager = LinearLayoutManager(
+        val mLayoutManager = LinearLayoutManager(
             this@Detallepedido,
             LinearLayoutManager.VERTICAL,
             false
@@ -722,16 +722,11 @@ class Detallepedido : AppCompatActivity() {
 
     private fun AlertaEliminar() {
         val dialogo = Dialog(this)
+        dialogo.show()
         dialogo.setContentView(R1.layout.alert_eliminar)
         dialogo.findViewById<Button>(R1.id.btneliminar).setOnClickListener {
-            GlobalScope.launch(Dispatchers.Main) {
-                //this@Detallepedido.lifecycleScope.launch {
                 try {
                     EliminarPedido(idpedido)
-
-//                    val intento=Intent(this@Detallepedido,Pedido::class.java)
-//                    startActivity(intento)
-//                    finish()
 
                     val intento = Intent(this@Detallepedido, Visita::class.java)
                     intento.putExtra("id", idcliente)
@@ -752,15 +747,12 @@ class Detallepedido : AppCompatActivity() {
                     alert.view.setBackgroundColor(resources.getColor(R1.color.moderado))
                     alert.show()
                 }
-            }
-
         }//boton eliminar
-
         dialogo.findViewById<Button>(R1.id.btncancelar).setOnClickListener {
             dialogo.dismiss()
         }//boton eliminar
 
-        dialogo.show()
+
 
     } //muestra la alerta para eliminar
 
@@ -807,13 +799,13 @@ class Detallepedido : AppCompatActivity() {
 
                 )
                 pedido.close()
-                var cdetalle =
+                val cdetalle =
                     base.rawQuery("SELECT * FROM detalle_producto WHERE Id_pedido=$idpedido", null)
                 if (cdetalle.count > 0) {
-                    var list = ArrayList<DetallePedido>() //lista donde se guardara el pedido
+                    val list = ArrayList<DetallePedido>() //lista donde se guardara el pedido
                     cdetalle.moveToFirst()
                     do {
-                        var detalle = DetallePedido(
+                        val detalle = DetallePedido(
                             cdetalle.getInt(0),
                             cdetalle.getInt(1),
                             cdetalle.getInt(2),
@@ -888,7 +880,7 @@ class Detallepedido : AppCompatActivity() {
                                 inpuline = it.readLine()
                             }
                             it.close()
-                            var data: String? = respuesta.toString()
+                            val data: String? = respuesta.toString()
                             if (data != null && data.length > 0) {
                                 val datosservidor = JSONObject(data)
                                 if (!datosservidor.isNull("error") && !datosservidor.isNull("response")) {
@@ -928,7 +920,7 @@ class Detallepedido : AppCompatActivity() {
             }
         } catch (e: Exception) {
             throw Exception("Error: SEGUNDO No hay productos agregados al pedido.")
-            print(e.message)
+          //  print(e.message)
         }
     } //funcion que envia el pedido a la bd
 
@@ -988,7 +980,7 @@ class Detallepedido : AppCompatActivity() {
 
         val base = db!!.writableDatabase
         try {
-            var cursor = base!!.rawQuery(
+            val cursor = base!!.rawQuery(
                 "select v.Idvisita from visitas v inner join pedidos p on v.id = p.idvisita where p.id = ${idpedido_param}",
                 null
             )
@@ -1005,7 +997,7 @@ class Detallepedido : AppCompatActivity() {
             base.close()
         }
 
-        var json = JsonObject()
+        val json = JsonObject()
         json.addProperty("Idcliente", pedido.Idcliente)
         json.addProperty("Cliente", pedido.Cliente)
         json.addProperty("Subtotal", pedido.Subtotal)
@@ -1021,10 +1013,10 @@ class Detallepedido : AppCompatActivity() {
         json.addProperty("Vendedor", pedido.Vendedor)
         json.addProperty("Idapp", idvisita_v)
         //se ordena la cabezera
-        var detalle = JsonArray()
+        val detalle = JsonArray()
         for (i in 0..(pedido.detalle!!.size - 1)) {
             val data = pedido.detalle!!.get(i)
-            var d = JsonObject()
+            val d = JsonObject()
             d.addProperty("Id", data.Id)
             d.addProperty("Id_pedido", data.Id_pedido)
             d.addProperty("Id_producto", data.Id_producto)
