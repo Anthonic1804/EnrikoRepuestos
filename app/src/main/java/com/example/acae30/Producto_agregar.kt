@@ -65,6 +65,7 @@ class Producto_agregar : AppCompatActivity() {
 
     private var sinExistencias: Int? = null  // 1 -> Si    0 -> no
     private var existenciaProducto: Float = 0f
+    private var getSucursalPosition: Int? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
 
@@ -82,12 +83,17 @@ class Producto_agregar : AppCompatActivity() {
         codigo = intent.getStringExtra("codigo").toString()
         idapi = intent.getIntExtra("idapi", 0)
 
+
         //DATASEARCH INVENTARIO
         //CAPTURA EL VALOR DE LA BUSQUEDA EN EL SEARCHVIEW
         dataSearch = intent.getStringExtra("dataSearch").toString()
         if(dataSearch!!.isEmpty() || dataSearch == ""){
             dataSearch = null
         }
+
+        //CAPTURANDO SUCURSAL
+        getSucursalPosition = intent.getIntExtra("sucursalPosition", 0)
+       // println("posicion enviada desde detalle: $getSucursalPosition")
 
 
 
@@ -116,6 +122,7 @@ class Producto_agregar : AppCompatActivity() {
 
         //OBTENIDO DATOS DE LA TABLA CONFIGURACION
         getConfig()
+
 
         var contexto = this
 
@@ -372,6 +379,7 @@ class Producto_agregar : AppCompatActivity() {
                 intento.putExtra("visitaid", idvisita)
                 intento.putExtra("codigo", codigo)
                 intento.putExtra("idapi", idapi)
+                intento.putExtra("sucursalPosition", getSucursalPosition)
                 startActivity(intento)
             }else{
                 val intento = Intent(this@Producto_agregar, Inventario::class.java)
@@ -601,6 +609,7 @@ class Producto_agregar : AppCompatActivity() {
                             intento.putExtra("visitaid", idvisita)
                             intento.putExtra("codigo", codigo)
                             intento.putExtra("idapi", idapi)
+                            intento.putExtra("sucursalPosition", getSucursalPosition)
                             startActivity(intento)
                             finish()
                         }
@@ -647,6 +656,7 @@ class Producto_agregar : AppCompatActivity() {
                     intento.putExtra("codigo", codigo)
                     intento.putExtra("idapi", idapi)
                     intento.putExtra("from", "visita")
+                    intento.putExtra("sucursalPosition", getSucursalPosition)
                     startActivity(intento)
                     finish()
                 } catch (e: Exception) {

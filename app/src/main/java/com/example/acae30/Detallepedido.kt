@@ -46,10 +46,11 @@ class Detallepedido : AppCompatActivity() {
     private var swruta: Switch? = null
     private var idSucursal: Int? = null
     private var codigoSucursal: Int? = null
-    private var sucursalName: String? = null
+    private var sucursalName: String = ""
     private var tipoEnvio: Int? = null
     private var nombreSucursalPedido: String? = ""
     private var pedidoEnviado: Boolean = false
+    private var getSucursalPosition: Int? = null
 
     private var dataSearch: String? = null
 
@@ -158,6 +159,15 @@ class Detallepedido : AppCompatActivity() {
         cargarSucursales()
 
 
+        //CARTURANDO LA SUCURSAL SELECCIONADA
+         getSucursalPosition = intento.getIntExtra("sucursalPosition", 0)
+        //println("Sucursal desde Agregar Producto: $getSucursalPosition")
+        if(getSucursalPosition != 0){
+            spSucursal!!.setSelection(getSucursalPosition!!, true)
+        }
+
+
+
         // Consultar datos de visita
         if (idpedido > 0) {
             val base = db!!.writableDatabase
@@ -209,6 +219,7 @@ class Detallepedido : AppCompatActivity() {
                 intento.putExtra("codigo", codigo)
                 intento.putExtra("idapi", idapi)
                 intento.putExtra("dataSearch", dataSearch)
+                intento.putExtra("sucursalPosition", getSucursalPosition)
                 startActivity(intento)
             }
         }
@@ -360,6 +371,7 @@ class Detallepedido : AppCompatActivity() {
                 id: Long
             ) {
                 sucursalName = parent?.getItemAtPosition(position).toString()
+
                 if (sucursalName == "-- SELECCIONE UNA SUCURSAL --") {
                     btnguardar!!.isEnabled = false
                     btnenviar!!.isEnabled = false
@@ -371,7 +383,10 @@ class Detallepedido : AppCompatActivity() {
                     btnenviar!!.setBackgroundResource(R1.drawable.border_btnenviar)
                     btnguardar!!.setBackgroundResource(R1.drawable.border_btnenviar)
 
-                    updatePedidoSucursal(idcliente, sucursalName!!, idpedido)
+                    getSucursalPosition = spSucursal!!.selectedItemPosition
+                    //println("Sucursal Seleccioada: $getSucursalPosition")
+
+                    updatePedidoSucursal(idcliente, sucursalName, idpedido)
                 }
             }
 
@@ -704,6 +719,7 @@ class Detallepedido : AppCompatActivity() {
                     intento.putExtra("idproducto", data.Id_producto)
                     intento.putExtra("proviene", "editar")
                     intento.putExtra("total_param", data.Subtotal)
+                    intento.putExtra("sucursalPosition", getSucursalPosition)
                     startActivity(intento)
                     finish()
                 }

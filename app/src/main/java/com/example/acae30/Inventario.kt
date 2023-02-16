@@ -48,6 +48,7 @@ class Inventario : AppCompatActivity() {
     //VARIABLES TABLA CONFIG DE LA APP
     private var vistaInventario: Int? = null //INVENTARIO 1 -> VISTA MINIATURA  2-> VISTA EN LISTA
     private var sinExistencias: Int? = null  // 1 -> Si    0 -> no
+    private var getSucursalPosition: Int? = null
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -92,6 +93,10 @@ class Inventario : AppCompatActivity() {
 
         //OPTENIENDO LA INFORMACION DE LA TABLA CONFIG
         getConfigApp()
+
+        //CAPTURANDO SUCURSAL
+        getSucursalPosition = intent.getIntExtra("sucursalPosition", 0)
+       // println("posicion enviada desde detalle: $getSucursalPosition")
 
     }
 
@@ -303,6 +308,7 @@ class Inventario : AppCompatActivity() {
                                     intento.putExtra("from", "visita")
                                     intento.putExtra("proviene", "buscar_producto")
                                     intento.putExtra("total_param", 0.toFloat())
+                                    intento.putExtra("sucursalPosition", getSucursalPosition)
                                     intento.putExtra("dataSearch", busqueda!!.query.toString()) //PRUEBA DE ENVIO HISTORIAL BSUQUEDA
                                     startActivity(intento)
                                 }
@@ -334,6 +340,7 @@ class Inventario : AppCompatActivity() {
                                     intento.putExtra("from", "visita")
                                     intento.putExtra("proviene", "buscar_producto")
                                     intento.putExtra("total_param", 0.toFloat())
+                                    intento.putExtra("sucursalPosition", getSucursalPosition)
                                     intento.putExtra("dataSearch", busqueda!!.query.toString()) //PRUEBA DE ENVIO HISTORIAL BSUQUEDA
                                     startActivity(intento)
                                 }
