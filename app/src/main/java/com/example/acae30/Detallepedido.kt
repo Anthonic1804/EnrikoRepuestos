@@ -51,6 +51,8 @@ class Detallepedido : AppCompatActivity() {
     private var nombreSucursalPedido: String? = ""
     private var pedidoEnviado: Boolean = false
 
+    private var dataSearch: String? = null
+
     private var btbuscarProducto: ImageButton? = null
     private var idcliente: Int = 0
     private var nombre: String? = ""
@@ -206,6 +208,7 @@ class Detallepedido : AppCompatActivity() {
                 intento.putExtra("visitaid", idvisita)
                 intento.putExtra("codigo", codigo)
                 intento.putExtra("idapi", idapi)
+                intento.putExtra("dataSearch", dataSearch)
                 startActivity(intento)
             }
         }

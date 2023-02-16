@@ -85,6 +85,9 @@ class Producto_agregar : AppCompatActivity() {
         //DATASEARCH INVENTARIO
         //CAPTURA EL VALOR DE LA BUSQUEDA EN EL SEARCHVIEW
         dataSearch = intent.getStringExtra("dataSearch").toString()
+        if(dataSearch!!.isEmpty() || dataSearch == ""){
+            dataSearch = null
+        }
 
 
 

@@ -19,6 +19,7 @@ import com.example.acae30.modelos.Config
 import com.example.acae30.modelos.Inventario
 import com.google.zxing.integration.android.IntentIntegrator
 import kotlinx.android.synthetic.main.carta_inventario_miniatura.*
+import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
@@ -136,6 +137,8 @@ class Inventario : AppCompatActivity() {
     }
 
     //LECTURA DE CODIGO DE BARRAS
+    @OptIn(DelicateCoroutinesApi::class)
+    @Deprecated("Deprecated in Java")
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         val result = IntentIntegrator.parseActivityResult(requestCode, resultCode, data)
         if (result != null) {
