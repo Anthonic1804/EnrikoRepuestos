@@ -850,10 +850,8 @@ class Visita : AppCompatActivity() {
                 }
         } else {
             // permissions not granted yet.
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                solicitarPermisos()
-                alerta!!.dismisss()
-            }
+            solicitarPermisos()
+            alerta!!.dismisss()
         }
     }
 

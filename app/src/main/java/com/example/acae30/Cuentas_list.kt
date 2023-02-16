@@ -13,10 +13,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.example.acae30.database.Database
 import com.example.acae30.listas.ClienteAdapter
 import com.example.acae30.modelos.Cliente
-import com.example.acae30.modelos.JSONmodels.virtualCliente
 import com.google.android.material.snackbar.Snackbar
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import java.util.*
 import kotlin.collections.ArrayList
