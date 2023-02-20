@@ -390,6 +390,7 @@ class Producto_agregar : AppCompatActivity() {
                 intento.putExtra("visitaid", idvisita)
                 intento.putExtra("codigo", codigo)
                 intento.putExtra("idapi", idapi)
+                intento.putExtra("sucursalPosition", getSucursalPosition)
                 intento.putExtra("dataSearch", dataSearch) //ENVIA LA BUSQUEDA ALMACENADA DEL SEARCHVIEW
                 startActivity(intento)
             }

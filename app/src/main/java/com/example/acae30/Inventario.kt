@@ -274,6 +274,7 @@ class Inventario : AppCompatActivity() {
             intento.putExtra("codigo", codigo)
             intento.putExtra("idapi", idapi)
             intento.putExtra("from", "visita")
+            intento.putExtra("sucursalPosition", getSucursalPosition)
             startActivity(intento)
         } else {
             val intento = Intent(this, Inicio::class.java)
