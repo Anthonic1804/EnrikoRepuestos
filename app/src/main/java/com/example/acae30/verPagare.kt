@@ -101,6 +101,7 @@ class verPagare : AppCompatActivity() {
 
         tvUpdate.setOnClickListener {
             atras()
+            updateDialog.dismiss()
         }
 
         tvCancel.setOnClickListener {

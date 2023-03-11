@@ -10,7 +10,9 @@ import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.graphics.Paint
 import android.graphics.Typeface
+import android.graphics.drawable.BitmapDrawable
 import android.graphics.pdf.PdfDocument
+import android.os.Build
 import android.os.Bundle
 import android.os.Environment
 import android.text.TextPaint
@@ -19,6 +21,7 @@ import android.widget.Button
 import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.app.ActivityCompat
@@ -28,9 +31,12 @@ import com.itextpdf.text.*
 import com.itextpdf.text.pdf.PdfWriter
 import kotlinx.android.synthetic.main.activity_firmar_pagare.*
 import org.w3c.dom.Text
+import java.io.ByteArrayOutputStream
 import java.io.File
 import java.io.FileNotFoundException
 import java.io.FileOutputStream
+import java.time.LocalDate
+import java.time.format.DateTimeFormatter
 
 class firmarPagare : AppCompatActivity() {
 
@@ -39,6 +45,9 @@ class firmarPagare : AppCompatActivity() {
     private lateinit var btnCancelar : Button
     private lateinit var btnLimpiar : Button
     private lateinit var btnFirmar : Button
+    private lateinit var imagenBitmap: Bitmap
+    private lateinit var drawableImageFinal : BitmapDrawable
+    private lateinit var imageFinal : ByteArray
     private var idcliente : Int = 0
     private var nombreCliente : String? = null
 
@@ -53,7 +62,11 @@ class firmarPagare : AppCompatActivity() {
         }
     }
 
-    val tituloText = "PAGARÉ SIN PROTESTO"
+    private val tituloText = "PAGARÉ SIN PROTESTO"
+    @RequiresApi(Build.VERSION_CODES.O)
+    val fechaPagare = "La Unión, " + LocalDate.now().format(DateTimeFormatter.ofPattern("dd MMM yyyy"))
+
+
     val textoPagare = "Por $400.00; PAGARÉ  en forma incondicional a la ordel del señor: ARMANDO ANTONIO" +
             " LOPEZ VIERA: con Documento Único de Identidad número: 01664366-2, propietario de " +
             "AGROFERRETERIA EL REY Y FORJADOS E INSERTOS EL SALVADOR, en cualquiera de sus " +
@@ -73,6 +86,7 @@ class firmarPagare : AppCompatActivity() {
             "a quien relevo de la obligación de rendir fianza y cuenta de administración."
 
 
+    @RequiresApi(Build.VERSION_CODES.O)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_firmar_pagare)
@@ -81,6 +95,7 @@ class firmarPagare : AppCompatActivity() {
         btnFirmar = findViewById(R.id.save)
         idcliente = intent.getIntExtra("idcliente", 0)
         nombreCliente = intent.getStringExtra("nombreCliente")
+
 
         btnCancelar.setOnClickListener {
             mensajeCancelar()
@@ -91,6 +106,14 @@ class firmarPagare : AppCompatActivity() {
         }
 
         btnFirmar.setOnClickListener {
+            imagenBitmap = signatureView.getSignatureBitmap()!!
+            imageFinal = bitmapToByteArray(imagenBitmap)
+
+            //CONVIRTIENDO EN BITMAP
+            val bitmapImagenFinal = BitmapFactory.decodeByteArray(imageFinal, 0, imageFinal.size)
+
+            //CONVIRTIENDO A DRAWABLE
+            drawableImageFinal = BitmapDrawable(resources, bitmapImagenFinal)
 
             verificarPermisos(it)
 
@@ -98,6 +121,13 @@ class firmarPagare : AppCompatActivity() {
 
     }
 
+    private fun bitmapToByteArray(bitmap: Bitmap): ByteArray {
+        val stream = ByteArrayOutputStream()
+        bitmap.compress(Bitmap.CompressFormat.PNG, 100, stream)
+        return stream.toByteArray()
+    }
+
+    @RequiresApi(Build.VERSION_CODES.O)
     private fun verificarPermisos(view: View) {
         when{
             ContextCompat.checkSelfPermission(
@@ -123,7 +153,8 @@ class firmarPagare : AppCompatActivity() {
         }
     }
 
-    fun generarPDF() {
+    @RequiresApi(Build.VERSION_CODES.O)
+    private fun generarPDF() {
         try {
             val carpeta = "/archivospdf"
             val path = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS).absolutePath + carpeta
@@ -144,10 +175,17 @@ class firmarPagare : AppCompatActivity() {
 
             //AGREGANDO EL TITULO AL PAGARE
             val titulo = Paragraph(
-                "$tituloText\n\n\n",
+                "\n\n$tituloText\n\n",
                 FontFactory.getFont("arial", 14f, Font.BOLD, BaseColor.BLACK)
             )
             documento.add(titulo)
+
+            //AGREGANDO LA FECHA DEL DOCUMENTO
+            val fechaDocumento = Paragraph(
+                "$fechaPagare\n\n",
+                FontFactory.getFont("arial", 12f, Font.NORMAL, BaseColor.BLACK)
+            )
+            documento.add(fechaDocumento)
 
             //AGREGANDO EL CONTENIDO AL PAGARE
             val descripcion = Paragraph(
@@ -157,8 +195,19 @@ class firmarPagare : AppCompatActivity() {
             documento.add(descripcion)
 
             //AGREGANDO EL PIE AL PAGARE + LA FIRMA DEL CLIENTE
+            val pieDocumento = Paragraph(
+                "\n\n\n" +
+                        "NOMBRE: ADOLFO ANTONIO HERNANDEZ MEMBREÑO\n" +
+                        "D.U.I: 09142866-9\n" +
+                        "DIRECCION: 7A CALLE PNT, B. LA MERCED, SAN MIGUEL\n\n" +
+                        "FIRMA: $drawableImageFinal",
+                FontFactory.getFont("arial", 12f, Font.NORMAL, BaseColor.BLACK)
+            )
+            documento.add(pieDocumento)
 
             documento.close()
+
+            Toast.makeText(this, "PAGARÉ CREADO CON EXITO", Toast.LENGTH_LONG).show()
 
         }catch (e: FileNotFoundException){
             e.printStackTrace()
@@ -186,6 +235,7 @@ class firmarPagare : AppCompatActivity() {
 
         tvUpdate.setOnClickListener {
             atras()
+            updateDialog.dismiss()
         }
 
         tvCancel.setOnClickListener {
