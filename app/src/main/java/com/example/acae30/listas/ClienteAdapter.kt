@@ -64,7 +64,7 @@ class ClienteAdapter(
 
         // internal  var btn:ImageButton
         init {
-            colores = context.applicationContext.resources.getStringArray(R.array.colors)
+            //colores = context.applicationContext.resources.getStringArray(R.array.colors)
             titulo = itemView.findViewById(R.id.titulo)
             descripcion = itemView.findViewById(R.id.descripcion)
             // btn=itemView.findViewById(R.id.btnaccion)

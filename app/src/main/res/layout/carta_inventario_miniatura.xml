@@ -15,7 +15,7 @@
         <androidx.cardview.widget.CardView
             android:id="@+id/carta"
             android:layout_width="match_parent"
-            android:layout_height="250dp"
+            android:layout_height="270dp"
             android:layout_marginTop="1dp"
             android:layout_marginLeft="3dp"
             android:layout_marginRight="3dp"
@@ -71,6 +71,20 @@
                     app:layout_constraintTop_toBottomOf="@+id/txtdescripcion" />
 
                 <TextView
+                    android:id="@+id/txtFraccion"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="TextView"
+                    android:layout_marginTop="5dp"
+                    android:textColor="@color/colordark"
+                    android:textSize="12sp"
+                    android:textStyle="normal"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@+id/txtexiste" />
+
+                <TextView
                     android:id="@+id/txtprecio"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -79,7 +93,7 @@
                     android:textColor="@color/colorPrimaryDark"
                     android:textSize="12sp"
                     android:textStyle="bold"
-                    app:layout_constraintTop_toBottomOf="@+id/txtexiste" />
+                    app:layout_constraintTop_toBottomOf="@+id/txtFraccion" />
 
                 <ImageView
                     android:id="@+id/imageView4"

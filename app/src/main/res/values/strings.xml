@@ -1,9 +1,49 @@
 <resources>
-    <string name="app_name">acae3.0</string>
+    <string name="app_name">ACAE APP</string>
     <string name="title_activity_pedido">Pedido</string>
     <!-- Strings used for fragments for navigation -->
     <string name="next">Next</string>
     <string name="previous">Previous</string>
 
     <string name="hello_first_fragment">Hello first fragment</string>
+    <string name="star">Yes</string>
+
+
+    <string name="update">ACTUALIZAR</string>
+    <string name="cancel">CANCELAR</string>
+    <string name="name">Está seguro de continuar con el proceso?</string>
+    <string name="update_records">DESEA ACTUALIZAR LA APLICACION?</string>
+    <string name="buscar_actualizaciones">Buscar Actualizaciones</string>
+
+
+    <string name="app_name_download">Download APK</string>
+    <string name="downloading">Downloading...</string>
+    <string name="title_file_download">APK is downloading</string>
+    <string name="storage_access_required">Storage access is required to downloading the file.</string>
+    <string name="storage_permission_denied">Storage permission request was denied.</string>
+    <string name="ok">OK</string>
+    <string name="detalle_de_cliente">DETALLE DE CLIENTE</string>
+    <string name="codigo">CODIGO</string>
+    <string name="nombre">NOMBRE</string>
+    <string name="telefono1">TELEFONO1</string>
+    <string name="telefono2">TELEFONO2</string>
+    <string name="direcci_n">DIRECCIÓN</string>
+    <string name="depto">DEPTO</string>
+    <string name="municipio">MUNICIPIO</string>
+    <string name="datos_crediticios">DATOS CREDITICIOS</string>
+    <string name="d_u_i">D.U.I</string>
+    <string name="dui">DUI</string>
+    <string name="n_i_t">N.I.T</string>
+    <string name="nit">NIT</string>
+    <string name="n_r_c">N.R.C</string>
+    <string name="nrc">NRC</string>
+    <string name="estado_crediticio">ESTADO CREDITICIO</string>
+    <string name="balance">BALANCE</string>
+    <string name="balance2">BALANCE</string>
+    <string name="limite">LIMITE</string>
+    <string name="limite_de_credito">LIMITE DE CREDITO</string>
+    <string name="plazo">PLAZO</string>
+    <string name="plazo_de_credito">PLAZO DE CREDITO</string>
+    <string name="ver_pagar">VER PAGARÉ</string>
+    <string name="activo">ACTIVO</string>
 </resources>

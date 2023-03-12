@@ -68,7 +68,6 @@ class carga_datos : AppCompatActivity() {
                 if (funciones!!.isNetworkConneted(this)) {
                     alert!!.Cargando() //muestra la alerta
                     GlobalScope.launch(Dispatchers.IO) {
-                        getSucursales()
                         getClients()
                     } //COURUTINA PARA OBTENER CLIENTES Y SUCURSALES
                 } else {
@@ -134,13 +133,17 @@ class carga_datos : AppCompatActivity() {
         alert.show()
     }//
 
-    private fun getClients() {
+    //OBTENIENDO SUCURSALES DESDE WEBSERVIS
+    //09-03-2023
+    private suspend fun getClients() {
         try {
             //val direccion = url!! + "clientes"
             val id_vendedor = preferencias!!.getInt("Idvendedor", 0)
             val direccion = url!! + "clientes/vendedor/"+id_vendedor
             val url = URL(direccion)
-            with(url.openConnection() as HttpURLConnection) {
+            with(withContext(Dispatchers.IO) {
+                url.openConnection()
+            } as HttpURLConnection) {
                 try {
                     connectTimeout = 30000
                     requestMethod = "GET"
@@ -164,9 +167,6 @@ class carga_datos : AppCompatActivity() {
                             val respuesta = JSONArray(response.toString())
                             if (respuesta.length() > 0) {
                                 saveClienteDataBase(respuesta)
-                                messageAsync("Cargando 100%")
-                                alert!!.dismisss()
-                                ShowAlert("Clientes Almacenados Exitosamente")
                             } else {
                                 throw Exception("Servidor no Devolvio datos")
                             } //caso que la respuesta venga vacia
@@ -183,15 +183,15 @@ class carga_datos : AppCompatActivity() {
             alert!!.dismisss()
             ShowAlert(e.message.toString())
         }
-    } //obtiene los clientes del servidor
 
-    //OBTENIENDO SUCURSALES DESDE WEBSERVIS
-    //28-01-2023
-    private fun getSucursales() {
+        //IMPORTANDO DATOS DE TABLA SUCURSALES CLIENTE
+
         try {
             val direccion = url!! + "sucursales"
             val url = URL(direccion)
-            with(url.openConnection() as HttpURLConnection) {
+            with(withContext(Dispatchers.IO) {
+                url.openConnection()
+            } as HttpURLConnection) {
                 try {
                     connectTimeout = 30000
                     requestMethod = "GET"
@@ -216,12 +216,16 @@ class carga_datos : AppCompatActivity() {
                             if (respuesta.length() > 0) {
                                 saveSucursalesDatabase(respuesta) //guarda los datos en la bd
                                 messageAsync("Cargando 100%")
+                                delay(1000)
+                                messageAsync("Datos del Cliente Almacenados Exitosamente")
+                                delay(1500)
                                 alert!!.dismisss()
-                                ShowAlert("Sucursales Almacenadas Exitosamente")
                             } else {
                                 messageAsync("Cargando 100%")
+                                delay(1000)
+                                messageAsync("Datos del Cliente Almacenados Exitosamente")
+                                delay(1500)
                                 alert!!.dismisss()
-                                ShowAlert("NO SE ENCONTRARON SUCURSALES REGISTRADAS")
                             } //caso que la respuesta venga vacia
                         }
                     } else {
@@ -235,7 +239,7 @@ class carga_datos : AppCompatActivity() {
             alert!!.dismisss()
             ShowAlert(e.message.toString())
         }
-    }
+    } //obtiene los clientes del servidor
 
     //GUARDANDO SUCURSALES EN SQLITE
     //28-01-2023
@@ -281,13 +285,15 @@ class carga_datos : AppCompatActivity() {
     } //INSERTANDO DATOS EN LA TABLA SUCURSALES EN SQLITE
 
 
-    private fun getInventario() {
+    private suspend fun getInventario() {
         // TABLA INVENTARIO
         try {
             val direccioncantidad = url!! + "inventario/cantidad"
             val urlcantidad = URL(direccioncantidad)
             var cantidadRegistros = 0.toInt()
-            with(urlcantidad.openConnection() as HttpURLConnection) {
+            with(withContext(Dispatchers.IO) {
+                urlcantidad.openConnection()
+            } as HttpURLConnection) {
                 try {
                     connectTimeout = 30000
                     requestMethod = "GET"
@@ -354,7 +360,9 @@ class carga_datos : AppCompatActivity() {
                 val direccion =
                     url!! + "inventario/" + inicio.toString() + "/" + longitud.toString()
                 val url = URL(direccion)
-                with(url.openConnection() as HttpURLConnection) {
+                with(withContext(Dispatchers.IO) {
+                    url.openConnection()
+                } as HttpURLConnection) {
                     try {
                         connectTimeout = 30000
                         requestMethod = "GET"
@@ -406,7 +414,9 @@ class carga_datos : AppCompatActivity() {
             val direccionprecioscantidad = url!! + "inventario/precios/cantidad"
             val urlprecioscantidad = URL(direccionprecioscantidad)
             var cantidadPreciosRegistros = 0.toInt()
-            with(urlprecioscantidad.openConnection() as HttpURLConnection) {
+            with(withContext(Dispatchers.IO) {
+                urlprecioscantidad.openConnection()
+            } as HttpURLConnection) {
                 try {
                     connectTimeout = 30000
                     requestMethod = "GET"
@@ -470,7 +480,9 @@ class carga_datos : AppCompatActivity() {
                 val direccion =
                     url!! + "inventario/precios/" + inicioPrecios.toString() + "/" + longitudPrecios.toString()
                 val url = URL(direccion)
-                with(url.openConnection() as HttpURLConnection) {
+                with(withContext(Dispatchers.IO) {
+                    url.openConnection()
+                } as HttpURLConnection) {
                     try {
                         connectTimeout = 30000
                         requestMethod = "GET"
@@ -512,21 +524,28 @@ class carga_datos : AppCompatActivity() {
             } while (inicioPrecios < cantidadPreciosRegistros)
 
             messageAsync("Cargando 100%")
+            delay(1000)
+            messageAsync("Inventario Almacenado Exitosamente")
+            delay(1500)
             alert!!.dismisss()
-            ShowAlert("Carga Completada Exitosamente")
 
         } catch (e: Exception) {
+            //alert!!.dismisss()
+            //ShowAlert("NO SE ENCONTRARON ESCALAS REGISTRADAS")
+           // ShowAlert("INVENTARIO GARGADO CORRECTAMENTE")
+            messageAsync("Inventario Almacenado Exitosamente")
+            delay(1500)
             alert!!.dismisss()
-            ShowAlert("NO SE ENCONTRARON ESCALAS REGISTRADAS")
-            ShowAlert("INVENTARIO GARGADO CORRECTAMENTE")
         }
     }
 
-    private fun getCuentas() {
+    private suspend fun getCuentas() {
         try {
             val direccion = url!! + "cuentas"
             val url = URL(direccion)
-            with(url.openConnection() as HttpURLConnection) {
+            with(withContext(Dispatchers.IO) {
+                url.openConnection()
+            } as HttpURLConnection) {
                 try {
                     connectTimeout = 30000
                     requestMethod = "GET"
@@ -551,13 +570,16 @@ class carga_datos : AppCompatActivity() {
                             if (respuesta.length() > 0) {
                                 saveCuentaDatabase(respuesta) //guarda los datos en la bd
                                 messageAsync("Cargando 100%")
-
+                                delay(1000)
+                                messageAsync("Cuentas Almacenadas Exitosamente")
+                                delay(1500)
                                 alert!!.dismisss()
-                                ShowAlert("Carga Completada Exitosamente")
                             } else {
                                 messageAsync("Cargando 100%")
+                                delay(1000)
+                                messageAsync("Cuentas Almacenados Exitosamente")
+                                delay(1500)
                                 alert!!.dismisss()
-                                ShowAlert("Carga Completada Exitosamente")
                             } //caso que la respuesta venga vacia
                         }
                     } else {

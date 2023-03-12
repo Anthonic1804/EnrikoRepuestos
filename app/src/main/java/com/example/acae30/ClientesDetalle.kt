@@ -2,6 +2,7 @@ package com.example.acae30
 
 import android.content.Intent
 import android.os.Bundle
+import android.widget.Button
 import android.widget.ImageButton
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
@@ -10,6 +11,7 @@ import com.example.acae30.modelos.Cliente
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
+import org.w3c.dom.Text
 
 class ClientesDetalle : AppCompatActivity() {
     private var bd: Database? = null
@@ -28,6 +30,8 @@ class ClientesDetalle : AppCompatActivity() {
     private var txtteleuno: TextView? = null
     private var txtteledos: TextView? = null
     private var btnatras: ImageButton? = null
+    private lateinit var txtDui : TextView
+    private lateinit var btnPagare : Button
 
     private var idcliente = 0
 
@@ -53,8 +57,10 @@ class ClientesDetalle : AppCompatActivity() {
         txtnrc = findViewById(R.id.txtnrc)
         txtteleuno = findViewById(R.id.txtteluno)
         txtteledos = findViewById(R.id.txtteldos)
+        txtDui = findViewById(R.id.txtDui)
 
         btnatras = findViewById(R.id.imgatras)
+        btnPagare = findViewById(R.id.btnPagare)
 
 
       //  lienzo = findViewById(R.id.lienzo)
@@ -76,6 +82,7 @@ class ClientesDetalle : AppCompatActivity() {
                         txtbalance!!.text = "$ " + data.Balance.toString()
                         txtlimite!!.text = "$ " + data.Limite_credito.toString()
                         txtplazo!!.text = data.Plazo_credito.toString() + " días"
+                        txtDui.text = data.Dui
                         txtnit!!.text = data.Nit
                         txtnrc!!.text = data.Nrc
                         txtteleuno!!.text = data.Telefono_1
@@ -95,6 +102,10 @@ class ClientesDetalle : AppCompatActivity() {
 
         btnatras!!.setOnClickListener {
             Regresar()
+        }
+
+        btnPagare.setOnClickListener {
+            pagare()
         }
 
     }
@@ -134,6 +145,7 @@ class ClientesDetalle : AppCompatActivity() {
                     consulta.getString(24),
                     consulta.getFloat(25)
                 )
+                consulta.close()
             }
             return cliente
         } catch (e: Exception) {
@@ -147,6 +159,14 @@ class ClientesDetalle : AppCompatActivity() {
     override fun onBackPressed() {
         //super.onBackPressed();
 
+    }
+
+    private fun pagare(){
+        val intent = Intent(this, verPagare::class.java)
+        intent.putExtra("idcliente", idcliente)
+        intent.putExtra("nombreCliente", txtnombre.toString())
+        startActivity(intent)
+        finish()
     }
     private fun Regresar() {
         val intento = Intent(this, Clientes::class.java)

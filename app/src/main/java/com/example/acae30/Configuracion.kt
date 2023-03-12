@@ -1,23 +1,20 @@
 package com.example.acae30
 
+import android.app.Dialog
 import android.content.Context
 import android.content.Intent
 import android.content.SharedPreferences
 import android.os.Bundle
 import android.view.View
-import android.widget.Button
-import android.widget.ImageButton
-import android.widget.Switch
-import android.widget.TextView
+import android.widget.*
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
+import com.dcastalia.localappupdate.DownloadApk
 import com.example.acae30.database.Database
 import com.example.acae30.modelos.Config
 import com.google.android.material.snackbar.Snackbar
-import kotlinx.android.synthetic.main.activity_inicio.*
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.*
 import org.json.JSONArray
 import java.net.HttpURLConnection
 import java.net.URL
@@ -29,6 +26,22 @@ class Configuracion : AppCompatActivity() {
     private var swminiatura: Switch? = null
     private var swSinExistencia: Switch? = null
     private var dataBase: Database? = null
+    private lateinit var btnBuscarUpdate : Button
+    private var url: String? = null
+    private var versionAppServer : String? = null
+    private var urlAppServer : String? = null
+    private lateinit var tvUpdate : TextView
+    private lateinit var tvCancel : TextView
+    private var versionActual : Float = 0f
+   /* private var permission = 0
+    private val requestPermissionLauncher = registerForActivityResult(ActivityResultContracts.RequestPermission()){
+        permission = if(it){
+            1
+        }else{
+            0
+        }
+    }*/
+    private lateinit var tvVersionActual : TextView
 
     private var atras: ImageButton? = null
     private var ip: TextView? = null
@@ -37,7 +50,6 @@ class Configuracion : AppCompatActivity() {
     private val instancia = "CONFIG_SERVIDOR"
     private var preferencias: SharedPreferences? = null
     private var vista: View? = null
-    private var txtvendedor: TextView? = null
     private var funciones: Funciones? = null
     private var alerta: AlertDialogo? = null
 
@@ -53,23 +65,29 @@ class Configuracion : AppCompatActivity() {
         funciones = Funciones()
         vista = findViewById(R.id.vistaalerta)
         ip = findViewById(R.id.txtip)
-        txtvendedor = findViewById(R.id.txtvendedor)
         puerto = findViewById(R.id.txtpuerto)
         btnGuardar = findViewById(R.id.btnupdate)
         atras = findViewById(R.id.imgbtnatras)
         alerta = AlertDialogo(this)
         dataBase = Database(this)
 
-
-        var nombre_vendedor = preferencias!!.getString("Vendedor", "")
-        txtvendedor!!.text = nombre_vendedor
-
         //FUNCIONES AGRAGADAS PARA LOS CONTROLES DE VISTA DE INVENTARIO
         swlista = findViewById(R.id.swlista)
         swminiatura = findViewById(R.id.swminiatura)
         swSinExistencia = findViewById(R.id.swSinExistencias)
+        swSinExistencia!!.isEnabled = false
 
+        tvVersionActual = findViewById(R.id.tvVersionActualApp)
+
+        btnBuscarUpdate = findViewById(R.id.btnBuscarUpdate)
+
+        //OBTENIENDO LA URL DEL SERVIDOR
+        getApiUrl()
+
+        //CARGANDO LAS CONFIGURACION DE LA APP DE LA TABLA CONFIG
         mostrarSeleccionInventario()
+
+        tvVersionActual.setText("ACAE APP Ver. $versionActual")
 
         // 1 -> LISTADO
         // 2 -> VISTA MINIATURA
@@ -104,6 +122,21 @@ class Configuracion : AppCompatActivity() {
             }
         }
 
+        btnBuscarUpdate.setOnClickListener {
+            //getVersionUpdate()
+            if (url != null) {
+                if (funciones!!.isNetworkConneted(this)) {
+                    GlobalScope.launch(Dispatchers.IO) {
+                        getAppVersion()
+                    } //COURUTINA CARGAR DATOS DE ACTUALIZACION
+                } else {
+                    ShowAlert("Enciende tus datos o el wifi")
+                }
+            } else {
+                ShowAlert("No hay configuracion del Servidor")
+            }
+        }
+
     } //funcion que inicializa las variables
 
     //FUNCION PARA SELECCION LOS DATOS DE LA TABLA CONFIG
@@ -118,7 +151,8 @@ class Configuracion : AppCompatActivity() {
                 do{
                     val arreglo = Config(
                         cursor.getInt(0),
-                        cursor.getInt(1)
+                        cursor.getInt(1),
+                        cursor.getString(2)
                     )
                     list.add(arreglo)
                 }while (cursor.moveToNext())
@@ -140,6 +174,7 @@ class Configuracion : AppCompatActivity() {
                 for(data in list){
                     vistaInventario = data.vistaInventario!!.toInt()
                     sinExistencias = data.sinExistencias!!.toInt()
+                    versionActual = data.versionApp!!.toFloat()
                 }
 
                 if(vistaInventario == 1){
@@ -200,6 +235,7 @@ class Configuracion : AppCompatActivity() {
         }//guarda los datos del servidor
     }
 
+    //FUNCION PARA OBTENER LA IP DEL SERVIDOR Y EL PUERTO DE CONEXION
     private fun GetServerData() {
         val e = preferencias!!
         ip!!.text = e.getString("ip", "")
@@ -289,4 +325,126 @@ class Configuracion : AppCompatActivity() {
         //super.onBackPressed();
 
     }//anula el boton atras
+
+    //FUNCION PARA VERIFICAR LA VERSION DE LA APP INSTALADA
+    private suspend fun getAppVersion() {
+        try {
+            val direccion = url!! + "updateapp"
+            val url = URL(direccion)
+            with(withContext(Dispatchers.IO) {
+                url.openConnection()
+            } as HttpURLConnection) {
+                try {
+                    runOnUiThread {
+                        alerta!!.Cargando()
+                    }
+                    delay(5000)
+                    connectTimeout = 30000
+                    requestMethod = "GET"
+                    if (responseCode == 200) {
+                        inputStream.bufferedReader().use { data ->
+                            var talla = 0
+                            val response = StringBuffer()
+                            var inputLine = data.readLine()
+                            while (inputLine != null) {
+                                response.append(inputLine)
+                                inputLine = data.readLine()
+                                talla++
+                            }
+                            data.close()
+                            val respuesta = JSONArray(response.toString())
+                            if (respuesta.length() > 0) {
+                                for (i in 0 until respuesta.length()) {
+                                    val dato = respuesta.getJSONObject(i)
+
+                                    versionAppServer = funciones!!.validateJsonIsnullString(dato, "version")
+                                    urlAppServer = funciones!!.validateJsonIsnullString(dato, "url")
+
+                                    runOnUiThread {
+                                        if(versionActual >= versionAppServer!!.toFloat()){
+                                            alerta!!.dismisss()
+                                            Toast.makeText(applicationContext, "NO ES NECESARIO ACTUALIZAR", Toast.LENGTH_SHORT).show()
+                                        }else{
+                                            alerta!!.dismisss()
+                                            mensajeUpdate(versionAppServer.toString(), urlAppServer.toString())
+                                        }
+                                    }
+
+                                } //termina el for
+                            } else {
+                                ShowAlert("NO SE ENCONTRARON DATOS DE ACTUALIZACIOIN")
+                            } //caso que la respuesta venga vacia
+                        }
+                    } else {
+                        throw Exception("SERVIDOR: NO SE ENCONTRARON DATOS DE ACTUALIZACION")
+                    }
+                } catch (e: Exception) {
+                    throw Exception(e.message)
+                }
+            }//termina de obtener los datos
+        } catch (e: Exception) {
+            ShowAlert("ERROR AL CONECTARSE CON EL SERVIDOR")
+        }
+    }
+
+    private fun ShowAlert(mensaje: String) {
+        val alert: Snackbar = Snackbar.make(vista!!, mensaje, Snackbar.LENGTH_LONG)
+        alert.view.setBackgroundColor(resources.getColor(R.color.moderado))
+        alert.show()
+    }//
+
+    //FUNCION PARA OBTERNER LA URL DEL SERVER
+    private fun getApiUrl() {
+        val ip = preferencias!!.getString("ip", "")
+        val puerto = preferencias!!.getInt("puerto", 0)
+        if (ip!!.length > 0 && puerto > 0) {
+            url = "http://$ip:$puerto/"
+        }
+    } //obtiene la url de la api
+
+    //FUNCION PARA CREAR EL DIALOG DE ACTUALIZAR APP
+    fun mensajeUpdate(versionServer: String, urlServer: String){
+
+        val updateDialog = Dialog(this, R.style.Theme_Dialog)
+        updateDialog.setCancelable(false)
+
+        updateDialog.setContentView(R.layout.dialog_update)
+        tvUpdate = updateDialog.findViewById(R.id.tvUpdate)
+        tvCancel = updateDialog.findViewById(R.id.tvCancel)
+
+
+        tvUpdate.setOnClickListener {
+            //updateDialog.dismiss()
+            //Toast.makeText(applicationContext, "FUNCION EN DESARROLLO", Toast.LENGTH_SHORT).show()
+            updateDialog.dismiss()
+            updateVersionApp(versionServer)
+            Descargar(urlServer, "UpdateApp_$versionServer")
+        }
+
+        tvCancel.setOnClickListener {
+            updateDialog.dismiss()
+        }
+
+        updateDialog.show()
+
+    }
+
+    //FUNCION PARA ACTUALIZAR LA VERSION ACTUAL DE LA APP
+    private fun updateVersionApp(versionApp:String){
+        val data = dataBase!!.writableDatabase
+        try {
+            data!!.execSQL("UPDATE config SET versionApp=$versionApp")
+        }catch (e: Exception) {
+            throw Exception(e.message)
+        } finally {
+            data.close()
+        }
+    }
+
+    //FUNCION PARA DESCARGAR Y EJECUTAR LA INSTALACION DE LA ACTUALIZACION
+    fun Descargar(url: String, filename: String){
+        val downloadApk = DownloadApk(this@Configuracion)
+        downloadApk.startDownloadingApk(url, filename);
+    }
+
 }

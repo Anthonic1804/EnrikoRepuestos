@@ -47,6 +47,8 @@ class Inicio : AppCompatActivity() {
     private var database: Database? = null
     private var fechaUpdate: TextView? = null
 
+    private lateinit var txtvendedor : TextView
+
     private var ip = ""
     private var puerto = 0
    // private val INTERVALO: Int = 2000 //2 segundos para salir
@@ -81,8 +83,14 @@ class Inicio : AppCompatActivity() {
         funciones!!.VendedorVerific(this) //valida que haya sesion y que haya configuracion
         database = Database(this)
 
+        txtvendedor = findViewById(R.id.txtvendedor)
+
+
         ip = preferencias!!.getString("ip", "").toString()
         puerto = preferencias!!.getInt("puerto", 0)
+
+        var nombre_vendedor = preferencias!!.getString("Vendedor", "")
+        txtvendedor.setText("BIENVENIDO $nombre_vendedor")
 
         val policy = StrictMode.ThreadPolicy.Builder().permitAll().build()
         StrictMode.setThreadPolicy(policy)

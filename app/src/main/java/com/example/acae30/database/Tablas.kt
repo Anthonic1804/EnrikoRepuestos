@@ -56,14 +56,16 @@ class Tablas {
     fun configApp(): String{
         val configApp = "CREATE TABLE config(" +
                 "vistaInventario INTEGER NOT NULL," +
-                "sinExistencias INTEGER NOT NULL)"
+                "sinExistencias INTEGER NOT NULL," +
+                "versionApp VARCHAR(25) NOT NULL)"
         return  configApp
     }
     //INSERTANDO LA VISTA POR DEFECTO DEL INVENTARIO
     fun insertConfig():String{
         val insertConfig = "INSERT INTO config values(" +
                 "2," + //INSERTAMOS 2 COMO SELECCION POR DEFECTO VISTA LISTA
-                "1)" //INSERTAMOS 1 COMO SELECCION POR DEFECTO AGREGAR PRODUCTOS SIN EXISTENCIAS
+                "0," +//INSERTAMOS 1 COMO SELECCION POR DEFECTO AGREGAR PRODUCTOS SIN EXISTENCIAS
+                "'1.0')" //VERSION DE LA APP
         return insertConfig
     }
 
@@ -149,6 +151,7 @@ class Tablas {
     fun virtualInventario(): String{
         val virtualInventario = "CREATE VIRTUAL TABLE virtualinventario USING FTS4 (" +
                 "CONTENT='inventario'," +
+                "Codigo," +
                 "Descripcion" +
                 ") ";
 

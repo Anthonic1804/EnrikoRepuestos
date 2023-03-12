@@ -112,7 +112,8 @@ class Inventario : AppCompatActivity() {
                 do{
                     val arreglo = Config(
                         cursor.getInt(0),
-                        cursor.getInt(1)
+                        cursor.getInt(1),
+                        cursor.getString(2)
                     )
                     list.add(arreglo)
                 }while (cursor.moveToNext())
@@ -157,74 +158,72 @@ class Inventario : AppCompatActivity() {
             } else {
                 val base = db!!.writableDatabase
                 val dato = result.contents.toString().trim()
-                    try {
+                try {
+                    GlobalScope.launch(Dispatchers.IO) {
+                        val cursor =
+                            base.rawQuery(
+                                "SELECT * FROM inventario WHERE Codigo LIKE '%$dato%'",
+                                null
+                            )
 
-                        GlobalScope.launch(Dispatchers.IO) {
-                            val cursor =
-                                base.rawQuery(
-                                    "SELECT * FROM inventario WHERE Codigo LIKE '%$dato%'",
-                                    null
+                        if (cursor.count > 0) {
+                            cursor.moveToFirst()
+                            do {
+                                val arreglo = Inventario(
+                                    cursor.getInt(0),
+                                    cursor.getString(1),
+                                    cursor.getString(2),
+                                    cursor.getInt(3),
+                                    cursor.getString(4),
+                                    cursor.getString(5),
+                                    cursor.getString(6),
+                                    cursor.getFloat(7),
+                                    cursor.getString(8),
+                                    cursor.getInt(9),
+                                    cursor.getFloat(10),
+                                    cursor.getFloat(11),
+                                    cursor.getFloat(12),
+                                    cursor.getFloat(13),
+                                    cursor.getFloat(14),
+                                    cursor.getFloat(15),
+                                    cursor.getFloat(16),
+                                    cursor.getString(17),
+                                    cursor.getString(18),
+                                    cursor.getInt(19),
+                                    cursor.getString(20),
+                                    cursor.getInt(21),
+                                    cursor.getString(22),
+                                    cursor.getString(23),
+                                    cursor.getString(24),
+                                    cursor.getString(25),
+                                    cursor.getString(26),
+                                    cursor.getString(27),
+                                    cursor.getInt(28),
+                                    cursor.getString(29),
+                                    cursor.getFloat(30),
+                                    cursor.getDouble(31),
+                                    cursor.getInt(32),
+                                    cursor.getFloat(33)
                                 )
 
-                            if (cursor.count > 0) {
-                                cursor.moveToFirst()
-                                do {
-                                    val arreglo = Inventario(
-                                        cursor.getInt(0),
-                                        cursor.getString(1),
-                                        cursor.getString(2),
-                                        cursor.getInt(3),
-                                        cursor.getString(4),
-                                        cursor.getString(5),
-                                        cursor.getString(6),
-                                        cursor.getFloat(7),
-                                        cursor.getString(8),
-                                        cursor.getInt(9),
-                                        cursor.getFloat(10),
-                                        cursor.getFloat(11),
-                                        cursor.getFloat(12),
-                                        cursor.getFloat(13),
-                                        cursor.getFloat(14),
-                                        cursor.getFloat(15),
-                                        cursor.getFloat(16),
-                                        cursor.getString(17),
-                                        cursor.getString(18),
-                                        cursor.getInt(19),
-                                        cursor.getString(20),
-                                        cursor.getInt(21),
-                                        cursor.getString(22),
-                                        cursor.getString(23),
-                                        cursor.getString(24),
-                                        cursor.getString(25),
-                                        cursor.getString(26),
-                                        cursor.getString(27),
-                                        cursor.getInt(28),
-                                        cursor.getString(29),
-                                        cursor.getFloat(30),
-                                        cursor.getDouble(31),
-                                        cursor.getInt(32),
-                                        cursor.getFloat(33)
-                                    )
-
-                                    val intento = Intent(this@Inventario, Inventariodetalle::class.java)
-                                    intento.putExtra("idproducto", arreglo.Id)
-                                    startActivity(intento)
-                                    cursor.close()
-                                    finish()
-                                } while (cursor.moveToNext())
-                            }else{
-                                alert!!.dismisss()
-                                runOnUiThread {
-                                    Toast.makeText(this@Inventario, "No hay coincidencias", Toast.LENGTH_SHORT)
-                                        .show()
-                                }
+                                val intento = Intent(this@Inventario, Inventariodetalle::class.java)
+                                intento.putExtra("idproducto", arreglo.Id)
+                                startActivity(intento)
+                                cursor.close()
+                                finish()
+                            } while (cursor.moveToNext())
+                        }else{
+                            alert!!.dismisss()
+                            runOnUiThread {
+                                Toast.makeText(this@Inventario, "No hay coincidencias", Toast.LENGTH_SHORT)
+                                    .show()
+                            }
                         }
                     }
                 } catch (e: Exception) {
                     println("ERROR: ${e.message}")
 
                 }
-
             }
         } else {
             super.onActivityResult(requestCode, resultCode, data)
@@ -377,7 +376,7 @@ class Inventario : AppCompatActivity() {
             }
 
             override fun onQueryTextChange(texto: String): Boolean {
-                val dSearch = SearchInventario(texto)
+                val dSearch = SearchInventario(texto.uppercase())
                 this@Inventario.MostrarLista(dSearch)
                 return false
             }
@@ -396,7 +395,7 @@ class Inventario : AppCompatActivity() {
                 //REALIZA LA BUSQUEDA ALMACENA DEL SEARCHVIEW
                 //val cursor = base.rawQuery("SELECT * FROM inventario WHERE Descripcion LIKE '%$dataSearch%' limit 30", null)
 
-                val cursor = base.rawQuery("SELECT * FROM inventario WHERE Id IN (SELECT docid FROM virtualinventario WHERE virtualinventario MATCH '$dataSearch') LIMIT 20", null)
+                val cursor = base.rawQuery("SELECT * FROM inventario WHERE Id IN (SELECT docid FROM virtualinventario WHERE virtualinventario MATCH '$dataSearch') LIMIT 60", null)
 
                 if (cursor.count > 0) {
                     cursor.moveToFirst()
@@ -446,7 +445,7 @@ class Inventario : AppCompatActivity() {
                     cursor.close()
                 }
             }else{
-                val cursor = base.rawQuery("SELECT * FROM inventario limit 20", null)
+                val cursor = base.rawQuery("SELECT * FROM inventario limit 60", null)
 
                 if (cursor.count > 0) {
                     cursor.moveToFirst()
@@ -511,7 +510,7 @@ class Inventario : AppCompatActivity() {
         val lista = ArrayList<Inventario>()
         try {
             if(dato.isNotEmpty()){
-                val cursor = base.rawQuery("SELECT * FROM inventario WHERE Id IN (SELECT docid FROM virtualinventario WHERE virtualinventario MATCH '$dato') LIMIT 20", null)
+                val cursor = base.rawQuery("SELECT * FROM inventario WHERE Id IN (SELECT docid FROM virtualinventario WHERE virtualinventario MATCH '$dato') LIMIT 60", null)
 
                 if (cursor.count > 0) {
                     cursor.moveToFirst()
@@ -560,7 +559,7 @@ class Inventario : AppCompatActivity() {
 
                     cursor.close()
                 }else{
-                    val cursor = base.rawQuery("SELECT * FROM inventario LIMIT 20", null)
+                    val cursor = base.rawQuery("SELECT * FROM inventario LIMIT 60", null)
 
                     if (cursor.count > 0) {
                         cursor.moveToFirst()

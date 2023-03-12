@@ -10,4 +10,5 @@
     <color name="border">#e0e0e0</color>
     <color name="icons">#9e9e9e</color>
     <color name="recicler">#EFEFEF</color>
+    <color name="black">#000000</color>
 </resources>

@@ -9,39 +9,35 @@
 
     <LinearLayout
         android:id="@+id/barraSearch"
-        android:layout_width="match_parent"
+        android:layout_width="0dp"
         android:layout_height="55dp"
         android:orientation="horizontal"
-        android:paddingLeft="10dp"
-        android:paddingRight="10dp"
+        android:padding="5dp"
+        android:background="@color/colorPrimary"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        android:background="@color/colorPrimary">
+        app:layout_constraintTop_toTopOf="parent">
 
         <ImageButton
             android:id="@+id/btnatras"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
-            android:layout_marginBottom="8dp"
             android:backgroundTint="@color/colorPrimary"
             android:onClick="Atras"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
-            app:srcCompat="@drawable/ic_baseline_arrow_back_24"
-            app:tint="@color/colorAccent" />
+            app:srcCompat="@drawable/ic_baseline_arrow_back_24" />
 
         <SearchView
             android:id="@+id/busquedainv"
-            android:layout_width="250dp"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
-            android:layout_marginBottom="8dp"
+            android:layout_weight="1"
+            android:background="@drawable/border_textbox"
             android:iconifiedByDefault="false"
+            android:inputType="textCapCharacters"
             android:queryHint="Ingrese su Búsqueda"
-            android:searchHintIcon="@android:drawable/ic_menu_search"
             android:searchIcon="@drawable/ic_baseline_search_24"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
@@ -50,13 +46,12 @@
 
         <ImageButton
             android:id="@+id/btnscanner"
-            android:layout_width="30dp"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
-            android:layout_marginEnd="30dp"
-            android:layout_marginBottom="8dp"
             android:backgroundTint="@color/colorPrimary"
-            android:padding="20dp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
             app:srcCompat="@drawable/ic_scanner_24"
             app:tint="@color/colorAccent" />
 

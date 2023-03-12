@@ -31,10 +31,10 @@
                     android:id="@+id/textView4"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="36dp"
+                    android:layout_marginTop="30dp"
                     android:text="ACAE APP"
                     android:textColor="@color/colorPrimaryDark"
-                    android:textSize="30dp"
+                    android:textSize="35sp"
                     android:textStyle="bold"
                     app:layout_constraintEnd_toStartOf="@+id/logoSismantec"
                     app:layout_constraintHorizontal_bias="0.288"
@@ -48,17 +48,30 @@
                     android:layout_marginTop="4dp"
                     android:text="MENÚ PRINCIPAL"
                     android:textColor="@color/colorPrimary"
-                    android:textSize="15dp"
+                    android:textSize="15sp"
                     app:layout_constraintEnd_toStartOf="@+id/logoSismantec"
-                    app:layout_constraintHorizontal_bias="0.24"
+                    app:layout_constraintHorizontal_bias="0.193"
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toBottomOf="@+id/textView4" />
+
+                <TextView
+                    android:id="@+id/txtvendedor"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="120dp"
+                    android:text="BIENVENIDO EMPLEADO DE PRUEBA"
+                    android:gravity="center_horizontal"
+                    android:textColor="@color/colorPrimaryDark"
+                    android:textSize="15sp"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent" />
 
                 <ImageView
                     android:id="@+id/logoSismantec"
                     android:layout_width="100dp"
                     android:layout_height="100dp"
-                    android:layout_marginTop="25dp"
+                    android:layout_marginTop="15dp"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintHorizontal_bias="0.864"
                     app:layout_constraintStart_toStartOf="parent"
@@ -69,21 +82,20 @@
                     android:id="@+id/opcion1"
                     android:layout_width="match_parent"
                     android:layout_height="165dp"
-                    android:layout_marginTop="0dp"
                     android:orientation="horizontal"
                     android:padding="10dp"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintHorizontal_bias="0.0"
                     app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toBottomOf="@+id/logoSismantec">
+                    app:layout_constraintTop_toBottomOf="@+id/txtvendedor">
 
                     <androidx.cardview.widget.CardView
                         android:id="@+id/cvcuentas"
                         android:layout_width="0dp"
                         android:layout_height="match_parent"
                         android:layout_marginLeft="10dp"
-                        android:layout_marginRight="10dp"
                         android:layout_marginTop="2dp"
+                        android:layout_marginRight="10dp"
                         android:layout_marginBottom="2dp"
                         android:layout_weight="1"
                         android:backgroundTint="@color/cart">
@@ -114,8 +126,8 @@
                         android:layout_width="0dp"
                         android:layout_height="match_parent"
                         android:layout_marginLeft="10dp"
-                        android:layout_marginRight="10dp"
                         android:layout_marginTop="2dp"
+                        android:layout_marginRight="10dp"
                         android:layout_marginBottom="2dp"
                         android:layout_weight="1"
                         android:backgroundTint="@color/cart">

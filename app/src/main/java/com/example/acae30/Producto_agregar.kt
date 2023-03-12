@@ -335,7 +335,8 @@ class Producto_agregar : AppCompatActivity() {
                 do {
                     val data = Config(
                         getConf.getInt(0),
-                        getConf.getInt(1)
+                        getConf.getInt(1),
+                        getConf.getString(2)
                     )
                     getConfData.add(data)
                 }while (getConf.moveToNext())

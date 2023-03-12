@@ -185,7 +185,7 @@ class Login : AppCompatActivity() {
         var respuestaVal = ""
         try {
             val credenciales = Login(
-                usuario.toUpperCase(),
+                usuario.uppercase(),
                 clave,
                 identidad
             ) //se crea el modelo con los datos    que se enviaran
@@ -280,7 +280,7 @@ class Login : AppCompatActivity() {
     private fun IniciarSesion(usuario: String, clave: String, identidad: String) {
         try {
             val credenciales = Login(
-                usuario.toUpperCase(),
+                usuario.uppercase(),
                 clave,
                 identidad
             ) //se crea el modelo con los datos    que se enviaran
@@ -316,14 +316,15 @@ class Login : AppCompatActivity() {
                                     if (!res.isNull("error") && !res.isNull("response")) {
                                         val coderror: Int = res.getInt("error")
                                         val response: String = res.getString("response")
+                                        val nombreEmpleado : String = res.getString("nombreEmpleado")
                                         val identidad_param: String = res.getString("identidad")
                                         val estado: String = res.getString("estado")
 
                                         if (coderror > 0) {
                                             val editor = preferencias!!.edit()
                                             editor.putInt("Idvendedor", coderror)
-                                            editor.putString("Vendedor", usuario.toUpperCase())
-                                            editor.putString("Usuario", usuario.toUpperCase())
+                                            editor.putString("Vendedor", nombreEmpleado.uppercase()) //MODIFICACION OBTENIENDO EL NOMBRE DEL EMPLEADO
+                                            editor.putString("Usuario", usuario.uppercase())
                                             editor.putString("Identidad", identidad)
                                             editor.putBoolean("sesion", true)
                                             editor.commit()

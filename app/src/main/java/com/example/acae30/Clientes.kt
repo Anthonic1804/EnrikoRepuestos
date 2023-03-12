@@ -88,7 +88,7 @@ class Clientes : AppCompatActivity() {
         val lista = ArrayList<Cliente>()
         try {
             //val consulta = base.rawQuery("SELECT * FROM Clientes  LIMIT 30", null)
-            val consulta = base.rawQuery("SELECT * FROM Clientes LIMIT 30", null)
+            val consulta = base.rawQuery("SELECT * FROM Clientes LIMIT 50", null)
             var i = 0
             if (consulta.count > 0) {
                 consulta.moveToFirst()
@@ -154,7 +154,7 @@ class Clientes : AppCompatActivity() {
             //22-08-2022
 
             override fun onQueryTextChange(texto: String): Boolean {
-                 val dSearch = searchClient(texto)
+                 val dSearch = searchClient(texto.uppercase())
                  MostrarLista(dSearch)
                  return false
             }
@@ -168,7 +168,7 @@ class Clientes : AppCompatActivity() {
         val lista = ArrayList<Cliente>()
         try {
 
-            val consulta = base.rawQuery("SELECT * FROM Clientes WHERE Id IN (SELECT docid FROM virtualcliente WHERE virtualcliente MATCH '$dato') LIMIT 30", null)
+            val consulta = base.rawQuery("SELECT * FROM Clientes WHERE Id IN (SELECT docid FROM virtualcliente WHERE virtualcliente MATCH '$dato') LIMIT 50", null)
 
             var i = 0
             if (consulta.count > 0) {
