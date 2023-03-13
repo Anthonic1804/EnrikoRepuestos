@@ -5,6 +5,7 @@ import android.app.Dialog
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.Bitmap
+import android.graphics.Path
 import android.os.Build
 import android.os.Bundle
 import android.os.Environment
@@ -42,7 +43,7 @@ class firmarPagare : AppCompatActivity() {
 
     private lateinit var imagenBitmap: Bitmap
     private lateinit var imageFinal : ByteArray
-    //private lateinit var drawableImageFinal : BitmapDrawable
+    private var imageFirmada : Boolean = false
 
 
     private val requestPermissionLauncher = registerForActivityResult(
@@ -92,7 +93,6 @@ class firmarPagare : AppCompatActivity() {
         direccionCliente = intent.getStringExtra("direccionCliente").toString()
         duiCliente = intent.getStringExtra("duiCliente").toString()
 
-
         btnCancelar.setOnClickListener {
             mensajeCancelar()
         }
@@ -102,17 +102,14 @@ class firmarPagare : AppCompatActivity() {
         }
 
         btnFirmar.setOnClickListener {
-            imagenBitmap = signatureView.getSignatureBitmap()!!
-            imageFinal = bitmapToByteArray(imagenBitmap)
-
-            //CONVIRTIENDO EN BITMAP
-            //val bitmapImagenFinal = BitmapFactory.decodeByteArray(imageFinal, 0, imageFinal.size)
-
-            //CONVIRTIENDO A DRAWABLE
-            //drawableImageFinal = BitmapDrawable(resources, bitmapImagenFinal)
-
-            verificarPermisos(it)
-
+            imageFirmada = signatureView.isSignature()
+            if(imageFirmada){
+                imagenBitmap = signatureView.getSignatureBitmap()!!
+                imageFinal = bitmapToByteArray(imagenBitmap)
+                verificarPermisos(it)
+            }else{
+                Toast.makeText(this, "POR FAVOR INGRESE SU FIRMA", Toast.LENGTH_LONG).show()
+            }
         }
 
     }
