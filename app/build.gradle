@@ -59,6 +59,7 @@ dependencies {
     // SCANNER CAMARA
     implementation 'com.journeyapps:zxing-android-embedded:4.1.0'
 
+    //LIBRERIA PARA EL USUARIO DE LA SIGNATURE VIEW
     implementation 'com.github.nsmarinro.SignatureView:librarySignature:0.1.2'
 
     //LIBRERIA PARA EXPORTAR PDF

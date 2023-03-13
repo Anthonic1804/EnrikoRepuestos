@@ -3,14 +3,12 @@ package com.example.acae30
 import android.app.Dialog
 import android.content.Intent
 import android.os.Build
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.widget.Button
 import android.widget.EditText
-import android.widget.ImageButton
 import android.widget.TextView
-import android.widget.Toast
 import androidx.annotation.RequiresApi
+import androidx.appcompat.app.AppCompatActivity
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 
@@ -23,7 +21,9 @@ class verPagare : AppCompatActivity() {
     private lateinit var tvUpdate : TextView
     private lateinit var tvCancel : TextView
     private var idcliente : Int = 0
-    private var nombreCliente : String? = null
+    private var nombreCliente : String = ""
+    private var direccionCliente : String = ""
+    private var duiCliente : String = ""
 
 
     @RequiresApi(Build.VERSION_CODES.O)
@@ -32,7 +32,9 @@ class verPagare : AppCompatActivity() {
         setContentView(R.layout.activity_ver_pagare)
 
         idcliente = intent.getIntExtra("idcliente", 0)
-        nombreCliente = intent.getStringExtra("nombreCliente")
+        nombreCliente = intent.getStringExtra("nombreCliente").toString()
+        direccionCliente = intent.getStringExtra("direccionCliente").toString()
+        duiCliente = intent.getStringExtra("duiCliente").toString()
 
         textPagare = findViewById(R.id.textoPagare)
         tvFecha = findViewById(R.id.tvFecha)
@@ -43,15 +45,15 @@ class verPagare : AppCompatActivity() {
             .format(DateTimeFormatter.ofPattern("dd MMM yyyy"))
 
         textPagare.isEnabled = false
-        textPagare.setText("Por $400.00; PAGARÉ  en forma incondicional a la ordel del señor: ARMANDO ANTONIO" +
+        textPagare.setText("Por _______; PAGARÉ  en forma incondicional a la ordel del señor: ARMANDO ANTONIO" +
                 " LOPEZ VIERA: con Documento Único de Identidad número: 01664366-2, propietario de " +
                 "AGROFERRETERIA EL REY Y FORJADOS E INSERTOS EL SALVADOR, en cualquiera de sus " +
-                "sucursales, en la ciudad de La Unión, la cantidad de $400 DÓLARES DE LOS " +
-                "ESTADOS UNIDOS DE AMÉRICA, más el interés convencional de 5 por ciento mensual, " +
-                "teniendo como fecha de vencimiento para el pago de la deuda, el día 15 de abril del " +
-                " 2023; calculados a partir de la fecha de suscripción del presente documento y en " +
+                "sucursales, en la ciudad de La Unión, la cantidad de _____ DÓLARES DE LOS " +
+                "ESTADOS UNIDOS DE AMÉRICA, más el interés convencional de _____ por ciento mensual, " +
+                "teniendo como fecha de vencimiento para el pago de la deuda, el día ____ de ______ del " +
+                " _____; calculados a partir de la fecha de suscripción del presente documento y en " +
                 "caso que no fueren cubiertos el capital más los interés a su vencimiento, pagaré además a partir de " +
-                "esta última fecha, el interés moratorio del NO SE QUE VA AQUI. El tipo de interés " +
+                "esta última fecha, el interés moratorio del ________________. El tipo de interés " +
                 "quedara sujeto a aumento o disminución de acuerdo a las fluctuaciones del mercado. Para los " +
                 "efectos legales de esta obligación mercantil, tomamos como domicilio especial la Ciudad de La " +
                 "Unión, y en caso de acción judicial renuncio al derecho de apelar del decreto de embargo, sentencia " +
@@ -84,6 +86,8 @@ class verPagare : AppCompatActivity() {
         val intent = Intent(this, firmarPagare::class.java)
         intent.putExtra("idcliente", idcliente)
         intent.putExtra("nombreCliente", nombreCliente)
+        intent.putExtra("direccionCliente", direccionCliente)
+        intent.putExtra("duiCliente", duiCliente)
         startActivity(intent)
         finish()
     }

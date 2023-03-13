@@ -11,13 +11,11 @@ import com.example.acae30.modelos.Cliente
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
-import org.w3c.dom.Text
 
 class ClientesDetalle : AppCompatActivity() {
     private var bd: Database? = null
     private var funciones: Funciones? = null
     private var txtcodigo: TextView? = null
-    private var txtnombre: TextView? = null
     private var txtdirec: TextView? = null
     private var txtdepa: TextView? = null
     private var txtmuni: TextView? = null
@@ -32,6 +30,10 @@ class ClientesDetalle : AppCompatActivity() {
     private var btnatras: ImageButton? = null
     private lateinit var txtDui : TextView
     private lateinit var btnPagare : Button
+    private lateinit var txtnombre : TextView
+    private var nombreCliente : String = ""
+    private var direccionCliente : String = ""
+    private var duiCliente : String = ""
 
     private var idcliente = 0
 
@@ -74,7 +76,7 @@ class ClientesDetalle : AppCompatActivity() {
                     val data = getClient(idcliente)
                     if (data != null) {
                         txtcodigo!!.text = data.Codigo
-                        txtnombre!!.text = data.Cliente
+                        txtnombre.text = data.Cliente
                         txtdirec!!.text =  data.Direccion
                         txtdepa!!.text = data.Departamento
                         txtmuni!!.text = data.Municipio
@@ -87,6 +89,10 @@ class ClientesDetalle : AppCompatActivity() {
                         txtnrc!!.text = data.Nrc
                         txtteleuno!!.text = data.Telefono_1
                         txtteledos!!.text = data.Telefono_2
+
+                        nombreCliente = data.Cliente.toString()
+                        direccionCliente = data.Direccion.toString()
+                        duiCliente = data.Dui.toString()
                     }
                 }
 
@@ -164,7 +170,9 @@ class ClientesDetalle : AppCompatActivity() {
     private fun pagare(){
         val intent = Intent(this, verPagare::class.java)
         intent.putExtra("idcliente", idcliente)
-        intent.putExtra("nombreCliente", txtnombre.toString())
+        intent.putExtra("nombreCliente", nombreCliente)
+        intent.putExtra("direccionCliente", direccionCliente)
+        intent.putExtra("duiCliente", duiCliente)
         startActivity(intent)
         finish()
     }
