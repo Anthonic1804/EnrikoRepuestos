@@ -57,7 +57,6 @@ class Clientes : AppCompatActivity() {
         //SETEA LA BUSQUEDA DEL SEARCHVIEW
         //SI HAY DATO ALMACENADO EN ESTE
         dSearch = preferences!!.getString("clienteBusqueda", "")
-        println("DATOS BUSCADOS: $dSearch")
         if(dSearch != ""){
             busqueda!!.setQuery("$dSearch", true)
         }
@@ -111,7 +110,10 @@ class Clientes : AppCompatActivity() {
     private fun getClient(): ArrayList<Cliente> {
         val base = db!!.writableDatabase
         val lista = ArrayList<Cliente>()
-        if(dSearch == ""){
+        if(dSearch != ""){
+            val query = searchClient(dSearch.toString())
+            this@Clientes.MostrarLista(query)
+        }else{
             try {
                 //val consulta = base.rawQuery("SELECT * FROM Clientes  LIMIT 30", null)
                 val consulta = base.rawQuery("SELECT * FROM Clientes LIMIT 50", null)
@@ -157,57 +159,7 @@ class Clientes : AppCompatActivity() {
             } finally {
                 db!!.close()
             }
-        }else{
-
-            try {
-
-                val consulta = base.rawQuery("SELECT * FROM Clientes WHERE Id IN (SELECT docid FROM virtualcliente WHERE virtualcliente MATCH '$dSearch') LIMIT 50", null)
-
-                var i = 0
-                if (consulta.count > 0) {
-                    consulta.moveToFirst()
-                    do {
-                        val listado = Cliente(
-                            consulta.getInt(0),
-                            consulta.getString(1),
-                            consulta.getString(2),
-                            consulta.getString(3),
-                            consulta.getString(4),
-                            consulta.getString(5),
-                            consulta.getString(6),
-                            consulta.getString(7),
-                            consulta.getString(8),
-                            consulta.getInt(9),
-                            consulta.getFloat(10),
-                            consulta.getFloat(11),
-                            consulta.getString(12),
-                            consulta.getString(13),
-                            consulta.getString(14),
-                            consulta.getString(15),
-                            consulta.getString(16),
-                            consulta.getString(17),
-                            consulta.getString(18),
-                            consulta.getString(19),
-                            consulta.getInt(20),
-                            consulta.getInt(21),
-                            consulta.getString(22),
-                            consulta.getString(23),
-                            consulta.getString(24),
-                            consulta.getFloat(25)
-                        )
-                        lista.add(listado)
-
-                    } while (consulta.moveToNext())
-                    consulta.close()
-                }
-            } catch (e: Exception) {
-                throw Exception(e.message)
-            } finally {
-                db!!.close()
-            }
-
         }
-
         return lista
     }
 
@@ -241,7 +193,6 @@ class Clientes : AppCompatActivity() {
 
     private fun searchClient(dato: String): ArrayList<Cliente> {
         val base = db!!.writableDatabase
-
         val lista = ArrayList<Cliente>()
         try {
 
