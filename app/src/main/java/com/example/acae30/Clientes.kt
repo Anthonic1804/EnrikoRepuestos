@@ -1,6 +1,8 @@
 package com.example.acae30
 
+import android.content.Context
 import android.content.Intent
+import android.content.SharedPreferences
 import android.os.Bundle
 import android.view.View
 import android.widget.SearchView
@@ -26,6 +28,9 @@ class Clientes : AppCompatActivity() {
     private var cuentas = false
     private var visita = false
 
+    private var preferences: SharedPreferences? = null
+    private val instancia = "CONFIG_SERVIDOR"
+    private var dSearch : String? = null
     override fun onCreate(savedInstanceState: Bundle?) {
 
         super.onCreate(savedInstanceState)
@@ -34,6 +39,8 @@ class Clientes : AppCompatActivity() {
         busquedaPedido = intent.getBooleanExtra("busqueda", false)
         cuentas = intent.getBooleanExtra("cuentas", false)
         visita = intent.getBooleanExtra("visita", false)
+
+        preferences = getSharedPreferences(instancia, Context.MODE_PRIVATE)
 
         db = Database(this)
         alert = AlertDialogo(this)
@@ -46,6 +53,15 @@ class Clientes : AppCompatActivity() {
 
     override fun onStart() {
         super.onStart()
+
+        //SETEA LA BUSQUEDA DEL SEARCHVIEW
+        //SI HAY DATO ALMACENADO EN ESTE
+        dSearch = preferences!!.getString("clienteBusqueda", "")
+        println("DATOS BUSCADOS: $dSearch")
+        if(dSearch != ""){
+            busqueda!!.setQuery("$dSearch", true)
+        }
+
         MostrarClientes()
         Busqueda()
     }
@@ -67,15 +83,24 @@ class Clientes : AppCompatActivity() {
     fun Atras(view: View) {
         if (busquedaPedido) {
             if (visita) {
+
+                eliminarBusqueda()
+
                 val intento = Intent(this, Pedido::class.java)
                 startActivity(intento)
                 finish()
             } else {
+
+                eliminarBusqueda()
+
                 val intento = Intent(this, Detallepedido::class.java)
                 startActivity(intento)
                 finish()
             }
         } else {
+
+            eliminarBusqueda()
+
             val intento = Intent(this, Inicio::class.java)
             startActivity(intento)
             finish()
@@ -86,51 +111,103 @@ class Clientes : AppCompatActivity() {
     private fun getClient(): ArrayList<Cliente> {
         val base = db!!.writableDatabase
         val lista = ArrayList<Cliente>()
-        try {
-            //val consulta = base.rawQuery("SELECT * FROM Clientes  LIMIT 30", null)
-            val consulta = base.rawQuery("SELECT * FROM Clientes LIMIT 50", null)
-            var i = 0
-            if (consulta.count > 0) {
-                consulta.moveToFirst()
-                do {
-                    val listado = Cliente(
-                        consulta.getInt(0),
-                        consulta.getString(1),
-                        consulta.getString(2),
-                        consulta.getString(3),
-                        consulta.getString(4),
-                        consulta.getString(5),
-                        consulta.getString(6),
-                        consulta.getString(7),
-                        consulta.getString(8),
-                        consulta.getInt(9),
-                        consulta.getFloat(10),
-                        consulta.getFloat(11),
-                        consulta.getString(12),
-                        consulta.getString(13),
-                        consulta.getString(14),
-                        consulta.getString(15),
-                        consulta.getString(16),
-                        consulta.getString(17),
-                        consulta.getString(18),
-                        consulta.getString(19),
-                        consulta.getInt(20),
-                        consulta.getInt(21),
-                        consulta.getString(22),
-                        consulta.getString(23),
-                        consulta.getString(24),
-                        consulta.getFloat(25)
-                    )
-                    lista.add(listado)
+        if(dSearch == ""){
+            try {
+                //val consulta = base.rawQuery("SELECT * FROM Clientes  LIMIT 30", null)
+                val consulta = base.rawQuery("SELECT * FROM Clientes LIMIT 50", null)
+                var i = 0
+                if (consulta.count > 0) {
+                    consulta.moveToFirst()
+                    do {
+                        val listado = Cliente(
+                            consulta.getInt(0),
+                            consulta.getString(1),
+                            consulta.getString(2),
+                            consulta.getString(3),
+                            consulta.getString(4),
+                            consulta.getString(5),
+                            consulta.getString(6),
+                            consulta.getString(7),
+                            consulta.getString(8),
+                            consulta.getInt(9),
+                            consulta.getFloat(10),
+                            consulta.getFloat(11),
+                            consulta.getString(12),
+                            consulta.getString(13),
+                            consulta.getString(14),
+                            consulta.getString(15),
+                            consulta.getString(16),
+                            consulta.getString(17),
+                            consulta.getString(18),
+                            consulta.getString(19),
+                            consulta.getInt(20),
+                            consulta.getInt(21),
+                            consulta.getString(22),
+                            consulta.getString(23),
+                            consulta.getString(24),
+                            consulta.getFloat(25)
+                        )
+                        lista.add(listado)
 
-                } while (consulta.moveToNext())
-                consulta.close()
+                    } while (consulta.moveToNext())
+                    consulta.close()
+                }
+            } catch (e: Exception) {
+                throw Exception(e.message)
+            } finally {
+                db!!.close()
             }
-        } catch (e: Exception) {
-            throw Exception(e.message)
-        } finally {
-            db!!.close()
+        }else{
+
+            try {
+
+                val consulta = base.rawQuery("SELECT * FROM Clientes WHERE Id IN (SELECT docid FROM virtualcliente WHERE virtualcliente MATCH '$dSearch') LIMIT 50", null)
+
+                var i = 0
+                if (consulta.count > 0) {
+                    consulta.moveToFirst()
+                    do {
+                        val listado = Cliente(
+                            consulta.getInt(0),
+                            consulta.getString(1),
+                            consulta.getString(2),
+                            consulta.getString(3),
+                            consulta.getString(4),
+                            consulta.getString(5),
+                            consulta.getString(6),
+                            consulta.getString(7),
+                            consulta.getString(8),
+                            consulta.getInt(9),
+                            consulta.getFloat(10),
+                            consulta.getFloat(11),
+                            consulta.getString(12),
+                            consulta.getString(13),
+                            consulta.getString(14),
+                            consulta.getString(15),
+                            consulta.getString(16),
+                            consulta.getString(17),
+                            consulta.getString(18),
+                            consulta.getString(19),
+                            consulta.getInt(20),
+                            consulta.getInt(21),
+                            consulta.getString(22),
+                            consulta.getString(23),
+                            consulta.getString(24),
+                            consulta.getFloat(25)
+                        )
+                        lista.add(listado)
+
+                    } while (consulta.moveToNext())
+                    consulta.close()
+                }
+            } catch (e: Exception) {
+                throw Exception(e.message)
+            } finally {
+                db!!.close()
+            }
+
         }
+
         return lista
     }
 
@@ -154,9 +231,9 @@ class Clientes : AppCompatActivity() {
             //22-08-2022
 
             override fun onQueryTextChange(texto: String): Boolean {
-                 val dSearch = searchClient(texto.uppercase())
-                 MostrarLista(dSearch)
-                 return false
+                val dSearch = searchClient(texto.uppercase())
+                this@Clientes.MostrarLista(dSearch)
+                return false
             }
 
         })
@@ -266,6 +343,7 @@ class Clientes : AppCompatActivity() {
 
                     } else {
                         if (!cuentas) {
+                            busquedaCliente(busqueda!!.query.toString())
                             val intento = Intent(this@Clientes, ClientesDetalle::class.java)
                             intento.putExtra("idcliente", cliente.Id)
                             startActivity(intento)
@@ -279,6 +357,22 @@ class Clientes : AppCompatActivity() {
         } catch (e: Exception) {
             alert!!.dismisss()
             Toast.makeText(this@Clientes, e.message, Toast.LENGTH_LONG).show()
+        }
+    }
+
+    private fun busquedaCliente(busqueda : String){
+        //ALAMACENADO EN MEMORIA LA BUSQUEDA DEL CLIENTE
+        val clienteBusqueda = preferences!!.edit()
+        clienteBusqueda.putString("clienteBusqueda", busqueda)
+        clienteBusqueda.apply()
+    }
+
+    private fun eliminarBusqueda(){
+        val dSearch = preferences?.getString("clienteBusqueda", "")
+        if(dSearch != null){
+            val eliminarBusqueda = preferences?.edit()
+            eliminarBusqueda!!.remove("clienteBusqueda")
+            eliminarBusqueda.apply()
         }
     }
 

@@ -1,6 +1,7 @@
 package com.example.acae30
 
 import android.content.Intent
+import android.content.SharedPreferences
 import android.os.Bundle
 import android.widget.Button
 import android.widget.ImageButton
@@ -37,7 +38,9 @@ class ClientesDetalle : AppCompatActivity() {
 
     private var idcliente = 0
 
-  //  private var lienzo: ConstraintLayout? = null
+    private var preferences: SharedPreferences? = null
+
+        //  private var lienzo: ConstraintLayout? = null
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_clientes_detalle)
@@ -63,7 +66,6 @@ class ClientesDetalle : AppCompatActivity() {
 
         btnatras = findViewById(R.id.imgatras)
         btnPagare = findViewById(R.id.btnPagare)
-
 
       //  lienzo = findViewById(R.id.lienzo)
     }
@@ -93,6 +95,7 @@ class ClientesDetalle : AppCompatActivity() {
                         nombreCliente = data.Cliente.toString()
                         direccionCliente = data.Direccion.toString()
                         duiCliente = data.Dui.toString()
+
                     }
                 }
 
