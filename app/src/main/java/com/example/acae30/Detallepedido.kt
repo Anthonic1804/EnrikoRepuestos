@@ -1121,9 +1121,6 @@ class Detallepedido : AppCompatActivity() {
                 this,
                 Manifest.permission.WRITE_EXTERNAL_STORAGE
             ) == PackageManager.PERMISSION_GRANTED -> {
-
-                //Toast.makeText(this, "PERMISOS CONCEDIDOS", Toast.LENGTH_LONG).show()
-
                 generarPDF(nombre!!, vendedor)
             }
 
@@ -1188,7 +1185,7 @@ class Detallepedido : AppCompatActivity() {
 
             //AGREGANDO LA SUCURSAL AL DOCUMENTO
             val sucursalDocumento = Paragraph(
-                "SUCURSAL: NOMBRE DE LA SUCURSAL\n",
+                "SUCURSAL: $nombreSucursalPedido\n",
                 FontFactory.getFont("arial", 12f, Font.NORMAL, BaseColor.BLACK)
             )
             fechaDocumento.alignment = Element.ALIGN_LEFT
@@ -1220,7 +1217,7 @@ class Detallepedido : AppCompatActivity() {
                 tabla.addCell(Paragraph(""+data.Cantidad, FontFactory.getFont("arial", 10f, Font.NORMAL, BaseColor.BLACK)))
                 tabla.addCell(Paragraph(""+data.Codigo, FontFactory.getFont("arial", 10f, Font.NORMAL, BaseColor.BLACK)))
                 tabla.addCell(Paragraph(""+data.Descripcion, FontFactory.getFont("arial", 10f, Font.NORMAL, BaseColor.BLACK)))
-                tabla.addCell(Paragraph(""+data.Total, FontFactory.getFont("arial", 10f, Font.NORMAL, BaseColor.BLACK)))
+                tabla.addCell(Paragraph("$ "+data.Total, FontFactory.getFont("arial", 10f, Font.NORMAL, BaseColor.BLACK)))
 
                 total += data.Total!!
             }
@@ -1228,7 +1225,7 @@ class Detallepedido : AppCompatActivity() {
             tabla.addCell("")
             tabla.addCell("")
             tabla.addCell(Paragraph("TOTAL:", FontFactory.getFont("arial", 12f, Font.BOLD, BaseColor.BLACK)))
-            tabla.addCell(Paragraph("$total", FontFactory.getFont("arial", 12f, Font.BOLD, BaseColor.BLACK)))
+            tabla.addCell(Paragraph("$ $total", FontFactory.getFont("arial", 12f, Font.BOLD, BaseColor.BLACK)))
 
             documento.add(tabla)
 

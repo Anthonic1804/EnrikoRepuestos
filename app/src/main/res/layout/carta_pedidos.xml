@@ -30,9 +30,9 @@
                 android:layout_centerInParent="true"
                 android:layout_marginTop="36dp"
                 android:src="@drawable/ic_baseline_create_24"
-                app:civ_border_color="#0288d1"
+                app:civ_border_color="@color/colorPrimary"
                 app:civ_border_width="2dp"
-                app:civ_circle_background_color="#0288d1"
+                app:civ_circle_background_color="@color/colorPrimary"
                 app:layout_constraintTop_toTopOf="parent"
                 tools:ignore="MissingConstraints"
                 tools:layout_editor_absoluteX="0dp" />

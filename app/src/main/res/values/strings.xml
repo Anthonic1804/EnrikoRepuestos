@@ -46,4 +46,9 @@
     <string name="plazo_de_credito">PLAZO DE CREDITO</string>
     <string name="ver_pagar">VER PAGARÉ</string>
     <string name="activo">ACTIVO</string>
+    <string name="codigo2">CODIGO</string>
+    <string name="descripcion">DESCRIPCION</string>
+    <string name="detalle_del_producto">DETALLE DEL PRODUCTO</string>
+    <string name="detalle_de_cuentas">DETALLE DE CUENTAS</string>
+    <string name="total_de_cuentas">TOTAL DE CUENTAS</string>
 </resources>
