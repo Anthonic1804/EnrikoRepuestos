@@ -70,7 +70,7 @@ class Clientes : AppCompatActivity() {
         //GlobalScope.launch(Dispatchers.IO) {
         this@Clientes.lifecycleScope.launch {
             try {
-                val list: ArrayList<Cliente>? = getClient()
+                val list: ArrayList<Cliente> = getClient()
                 MostrarLista(list)
             } catch (e: Exception) {
                 alert!!.dismisss()
@@ -108,16 +108,18 @@ class Clientes : AppCompatActivity() {
 
     //DEVUELVE LOS DATOS DE LA TABLA VIRTUAL
     private fun getClient(): ArrayList<Cliente> {
-        val base = db!!.writableDatabase
+        val base = db!!.readableDatabase
         val lista = ArrayList<Cliente>()
         if(dSearch != ""){
+
             val query = searchClient(dSearch.toString())
             this@Clientes.MostrarLista(query)
+
         }else{
+
             try {
-                //val consulta = base.rawQuery("SELECT * FROM Clientes  LIMIT 30", null)
                 val consulta = base.rawQuery("SELECT * FROM Clientes LIMIT 50", null)
-                var i = 0
+
                 if (consulta.count > 0) {
                     consulta.moveToFirst()
                     do {
@@ -192,7 +194,7 @@ class Clientes : AppCompatActivity() {
     }
 
     private fun searchClient(dato: String): ArrayList<Cliente> {
-        val base = db!!.writableDatabase
+        val base = db!!.readableDatabase
         val lista = ArrayList<Cliente>()
         try {
 
@@ -294,7 +296,9 @@ class Clientes : AppCompatActivity() {
 
                     } else {
                         if (!cuentas) {
+
                             busquedaCliente(busqueda!!.query.toString())
+
                             val intento = Intent(this@Clientes, ClientesDetalle::class.java)
                             intento.putExtra("idcliente", cliente.Id)
                             startActivity(intento)
@@ -318,6 +322,7 @@ class Clientes : AppCompatActivity() {
         clienteBusqueda.apply()
     }
 
+    //FUNCION PARA ELIMINA DE MEMORIA LA BUSQUEDA DEL CLIENTE
     private fun eliminarBusqueda(){
         val dSearch = preferences?.getString("clienteBusqueda", "")
         if(dSearch != null){

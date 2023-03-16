@@ -97,7 +97,7 @@ class Inventariodetalle : AppCompatActivity() {
     }
 
     private fun getProducto(id: Int): Inventario? {
-        val base = bd!!.writableDatabase
+        val base = bd!!.readableDatabase
         try {
             val cursor = base!!.rawQuery("SELECT * FROM inventario where Id=$id", null)
             var datos: Inventario? = null
@@ -150,7 +150,7 @@ class Inventariodetalle : AppCompatActivity() {
 
 
     private fun GetInvPreciosProducto(id_inventario: Int): ArrayList<InventarioPrecios>? {
-        val base =bd!!.writableDatabase
+        val base =bd!!.readableDatabase
         var datos = ArrayList<InventarioPrecios>()
         try {
             val cursor = base.rawQuery(

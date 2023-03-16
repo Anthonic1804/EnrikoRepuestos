@@ -1,7 +1,9 @@
 package com.example.acae30
 
 import android.app.Activity
+import android.content.Context
 import android.content.Intent
+import android.content.SharedPreferences
 import android.os.Bundle
 import android.view.View
 import android.view.inputmethod.InputMethodManager
@@ -18,13 +20,13 @@ import com.example.acae30.listas.InventarioAdapter
 import com.example.acae30.modelos.Config
 import com.example.acae30.modelos.Inventario
 import com.google.zxing.integration.android.IntentIntegrator
+import kotlinx.android.synthetic.main.activity_inicio.*
 import kotlinx.android.synthetic.main.carta_inventario_miniatura.*
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import java.util.*
-import kotlin.collections.ArrayList
 
 
 @Suppress("DEPRECATION")
@@ -33,7 +35,6 @@ class Inventario : AppCompatActivity() {
     private var db: Database? = null
     private var recicle: RecyclerView? = null
     private var funciones: Funciones? = null
-    private var alert: AlertDialogo? = null
     private var busqueda: SearchView? = null
     private var busquedaProducto: Boolean = false
     private var idcliente: Int? = 0
@@ -43,12 +44,16 @@ class Inventario : AppCompatActivity() {
     private var codigo = ""
     private var idapi = 0
     private var scanner: ImageButton? = null
-    private var dataSearch: String? = null
 
     //VARIABLES TABLA CONFIG DE LA APP
     private var vistaInventario: Int? = null //INVENTARIO 1 -> VISTA MINIATURA  2-> VISTA EN LISTA
     private var sinExistencias: Int? = null  // 1 -> Si    0 -> no
     private var getSucursalPosition: Int? = null
+
+    //VARIABLES PARA SHAREDPREFERENCES
+    private var preferences : SharedPreferences? = null
+    private var instancia = "CONFIG_SERVIDOR"
+    private var productSearch : String? = null
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -67,11 +72,11 @@ class Inventario : AppCompatActivity() {
         idapi = intent.getIntExtra("idapi", 0)
         db = Database(this)
 
-        dataSearch = intent.getStringExtra("dataSearch") //OBTIENE LA BUSQUEDA ALMACENADA DEL SEARCHVIEW
+        preferences = getSharedPreferences(instancia, Context.MODE_PRIVATE)
+
         recicle = findViewById(R.id.reciInvent)
 
         funciones = Funciones()
-        alert = AlertDialogo(this)
 
         scanner = findViewById(R.id.btnscanner)
 
@@ -98,6 +103,38 @@ class Inventario : AppCompatActivity() {
         getSucursalPosition = intent.getIntExtra("sucursalPosition", 0)
        // println("posicion enviada desde detalle: $getSucursalPosition")
 
+    }
+
+    override fun onStart() {
+        super.onStart()
+
+        //DESHABILITANDO EL BOTON DE SCANNER
+        //EN BUSQUEDA DE PEDIDO
+        if(idcliente != 0){
+            scanner!!.visibility = View.GONE
+        }
+
+        //SETEA LA BUSQUEDA DEL SEARCHVIEW
+        //SI HAY DATO ALMACENADO EN ESTE
+        productSearch = preferences!!.getString("buscarProducto", "")
+        if(productSearch != null){
+            busqueda!!.setQuery("$productSearch", true)
+        }
+
+        Busqueda()
+        //GlobalScope.launch(Dispatchers.IO) {
+        this@Inventario.lifecycleScope.launch {
+            try {
+                val lista = getInventario()
+                MostrarLista(lista)
+            } catch (e: Exception) {
+                runOnUiThread {
+                    Toast.makeText(this@Inventario, e.message, Toast.LENGTH_SHORT).show()
+                }
+
+            }
+
+        }
     }
 
     //FUNCION PARA SELECCION LOS DATOS DE LA TABLA CONFIG
@@ -150,7 +187,6 @@ class Inventario : AppCompatActivity() {
         if (result != null) {
             // If QRCode has no data.
             if (result.contents == null) {
-                alert!!.dismisss()
                 runOnUiThread {
                     Toast.makeText(this@Inventario, "Lectura Cancelada", Toast.LENGTH_SHORT)
                         .show()
@@ -213,7 +249,6 @@ class Inventario : AppCompatActivity() {
                                 finish()
                             } while (cursor.moveToNext())
                         }else{
-                            alert!!.dismisss()
                             runOnUiThread {
                                 Toast.makeText(this@Inventario, "No hay coincidencias", Toast.LENGTH_SHORT)
                                     .show()
@@ -230,41 +265,11 @@ class Inventario : AppCompatActivity() {
         }
     }
 
-    override fun onStart() {
-        super.onStart()
-
-        //DESHABILITANDO EL BOTON DE SCANNER
-        //EN BUSQUEDA DE PEDIDO
-        if(idcliente != 0){
-            scanner!!.visibility = View.GONE
-        }
-
-        //SETEA LA BUSQUEDA DEL SEARCHVIEW
-        //SI HAY DATO ALMACENADO EN ESTE
-        if(dataSearch != null){
-            busqueda!!.setQuery("$dataSearch", true)
-        }
-
-        Busqueda()
-        alert!!.Cargando()
-        //GlobalScope.launch(Dispatchers.IO) {
-        this@Inventario.lifecycleScope.launch {
-            try {
-                val lista = getInventario()
-                MostrarLista(lista)
-            } catch (e: Exception) {
-                alert!!.dismisss()
-                runOnUiThread {
-                    Toast.makeText(this@Inventario, e.message, Toast.LENGTH_SHORT).show()
-                }
-
-            }
-
-        }
-    }
-
     fun Atras(view: View) {
         if (busquedaProducto) {
+
+            eliminarBusqueda()
+
             val intento = Intent(this, Detallepedido::class.java)
             intento.putExtra("id", idcliente)
             intento.putExtra("nombrecliente", nombrecliente)
@@ -276,9 +281,11 @@ class Inventario : AppCompatActivity() {
             intento.putExtra("sucursalPosition", getSucursalPosition)
             startActivity(intento)
         } else {
+
+            eliminarBusqueda()
+
             val intento = Intent(this, Inicio::class.java)
             startActivity(intento)
-            dataSearch = null
             finish()
         }
 
@@ -298,6 +305,9 @@ class Inventario : AppCompatActivity() {
                                 if(sinExistencias == 0 && existeniasProducto == 0f){
                                     Toast.makeText(this@Inventario, "NO SE PUEDEN AGREGAR PRODUCTOS SIN EXISTENCIAS", Toast.LENGTH_SHORT).show()
                                 }else{
+
+                                    buscarProducto(busqueda!!.query.toString())
+
                                     val intento = Intent(this@Inventario, Producto_agregar::class.java)
                                     intento.putExtra("idproducto", list.get(position).Id)
                                     intento.putExtra("idcliente", idcliente)
@@ -309,17 +319,18 @@ class Inventario : AppCompatActivity() {
                                     intento.putExtra("proviene", "buscar_producto")
                                     intento.putExtra("total_param", 0.toFloat())
                                     intento.putExtra("sucursalPosition", getSucursalPosition)
-                                    intento.putExtra("dataSearch", busqueda!!.query.toString()) //PRUEBA DE ENVIO HISTORIAL BSUQUEDA
                                     startActivity(intento)
                                 }
                             } else {
+
+                                buscarProducto(busqueda!!.query.toString())
+
                                 val intento = Intent(this@Inventario, Inventariodetalle::class.java)
                                 intento.putExtra("idproducto", list.get(position).Id)
                                 startActivity(intento)
                             }
                         }
                         recicle!!.adapter = adapter
-                        alert!!.dismisss()
                     }else{
                         //MOSTRANDO INVENTARIO EN VISTA MINIATURA
                         val gridLayoutManayer = GridLayoutManager(this, 2, GridLayoutManager.VERTICAL, false)
@@ -330,6 +341,9 @@ class Inventario : AppCompatActivity() {
                                 if(sinExistencias == 0 && existeniasProducto == 0f){
                                     Toast.makeText(this@Inventario, "NO SE PUEDEN AGREGAR PRODUCTOS SIN EXISTENCIAS", Toast.LENGTH_SHORT).show()
                                 }else{
+
+                                    buscarProducto(busqueda!!.query.toString())
+
                                     val intento = Intent(this@Inventario, Producto_agregar::class.java)
                                     intento.putExtra("idproducto", list.get(position).Id)
                                     intento.putExtra("idcliente", idcliente)
@@ -341,30 +355,31 @@ class Inventario : AppCompatActivity() {
                                     intento.putExtra("proviene", "buscar_producto")
                                     intento.putExtra("total_param", 0.toFloat())
                                     intento.putExtra("sucursalPosition", getSucursalPosition)
-                                    intento.putExtra("dataSearch", busqueda!!.query.toString()) //PRUEBA DE ENVIO HISTORIAL BSUQUEDA
                                     startActivity(intento)
                                 }
                             } else {
+
+                                buscarProducto(busqueda!!.query.toString())
+
                                 val intento = Intent(this@Inventario, Inventariodetalle::class.java)
                                 intento.putExtra("idproducto", list.get(position).Id)
                                 startActivity(intento)
                             }
                         }
                         recicle!!.adapter = adapter
-                        alert!!.dismisss()
                     }
 
                 } else {
-                    alert!!.dismisss()
+                    runOnUiThread {
+                        //Toast.makeText(this@Inventario, "NO SE ENCONTRARON DATOS", Toast.LENGTH_SHORT).show()
+                    }
                 }
             } catch (e: Exception) {
-                alert!!.dismisss()
                 runOnUiThread {
                     Toast.makeText(this@Inventario, e.message, Toast.LENGTH_SHORT).show()
                 }
             }
     }
-
 
     //FUNCION DE BUSQUEDA DE PRODUCTOS DINAMICA
     //MODIFICACION PARA LA PAPELERIA DM
@@ -385,66 +400,34 @@ class Inventario : AppCompatActivity() {
     }
     //filtro para busca en la bd
 
+    //FUNCION PARA ALMACENAR LA BUSQUEDA DEL PRODUCTO EN MEMORIA
+    private fun buscarProducto(busqueda : String){
+        val dataSearch = preferences!!.edit()
+        dataSearch.putString("buscarProducto", busqueda)
+        dataSearch.apply()
+    }
 
-    private fun getInventario(): List<Inventario> {
-        val base = db!!.writableDatabase
+    //FUNCION PARA ELIMINAR LA BUSQUEDA DE PRODUCTO EN MEMORIA
+    private fun eliminarBusqueda(){
+        val dataSearch = preferences!!.getString("buscarProducto","")
+        if(dataSearch != ""){
+            val deleteSearch = preferences!!.edit()
+            deleteSearch.remove("buscarProducto")
+            deleteSearch.apply()
+        }
+    }
+
+    private fun getInventario(): ArrayList<Inventario> {
+        val base = db!!.readableDatabase
         val lista = ArrayList<Inventario>()
-        try {
 
-            if(dataSearch != null){
-                //REALIZA LA BUSQUEDA ALMACENA DEL SEARCHVIEW
-                //val cursor = base.rawQuery("SELECT * FROM inventario WHERE Descripcion LIKE '%$dataSearch%' limit 30", null)
+        if(productSearch != ""){
 
-                val cursor = base.rawQuery("SELECT * FROM inventario WHERE Id IN (SELECT docid FROM virtualinventario WHERE virtualinventario MATCH '$dataSearch') LIMIT 60", null)
+            val query : List<Inventario> = SearchInventario(productSearch.toString())
+            this@Inventario.MostrarLista(query)
 
-                if (cursor.count > 0) {
-                    cursor.moveToFirst()
-                    do {
-                        val arreglo = com.example.acae30.modelos.Inventario(
-                            cursor.getInt(0),
-                            cursor.getString(1),
-                            cursor.getString(2),
-                            cursor.getInt(3),
-                            cursor.getString(4),
-                            cursor.getString(5),
-                            cursor.getString(6),
-                            cursor.getFloat(7),
-                            cursor.getString(8),
-                            cursor.getInt(9),
-                            cursor.getFloat(10),
-                            cursor.getFloat(11),
-                            cursor.getFloat(12),
-                            cursor.getFloat(13),
-                            cursor.getFloat(14),
-                            cursor.getFloat(15),
-                            cursor.getFloat(16),
-                            cursor.getString(17),
-                            cursor.getString(18),
-                            cursor.getInt(19),
-                            cursor.getString(20),
-                            cursor.getInt(21),
-                            cursor.getString(22),
-                            cursor.getString(23),
-                            cursor.getString(24),
-                            cursor.getString(25),
-                            cursor.getString(26),
-                            cursor.getString(27),
-                            cursor.getInt(28),
-                            cursor.getString(29),
-                            cursor.getFloat(30),
-                            cursor.getDouble(31),
-                            cursor.getInt(32),
-                            cursor.getFloat(33)
-                        )
-
-                        lista.add(arreglo)
-
-
-                    } while (cursor.moveToNext())
-
-                    cursor.close()
-                }
-            }else{
+        }else{
+            try {
                 val cursor = base.rawQuery("SELECT * FROM inventario limit 60", null)
 
                 if (cursor.count > 0) {
@@ -486,34 +469,28 @@ class Inventario : AppCompatActivity() {
                             cursor.getInt(32),
                             cursor.getFloat(33)
                         )
-
                         lista.add(arreglo)
-
-
                     } while (cursor.moveToNext())
-
                     cursor.close()
                 }
-            }
 
-        } catch (e: Exception) {
-            throw Exception(e.message)
-        } finally {
-            base.close()
+            } catch (e: Exception) {
+                throw Exception(e.message)
+            } finally {
+                base.close()
+            }
         }
         return lista
     } //SE OBTIENE EL INVENTARIO Y SE FILTRA LA INFORMACION SEGUN EL SEARCHVIEW
 
 
     private fun SearchInventario(dato: String): List<Inventario> {
-        val base = db!!.writableDatabase
+        val base = db!!.readableDatabase
         val lista = ArrayList<Inventario>()
         try {
-            if(dato.isNotEmpty()){
-                val cursor = base.rawQuery("SELECT * FROM inventario WHERE Id IN (SELECT docid FROM virtualinventario WHERE virtualinventario MATCH '$dato') LIMIT 60", null)
-
-                if (cursor.count > 0) {
-                    cursor.moveToFirst()
+            val cursor = base.rawQuery("SELECT * FROM inventario WHERE Id IN (SELECT docid FROM virtualinventario WHERE virtualinventario MATCH '$dato') LIMIT 60", null)
+            if (cursor.count > 0) {
+                cursor.moveToFirst()
                     do {
                         val arreglo = Inventario(
                             cursor.getInt(0),
@@ -551,65 +528,10 @@ class Inventario : AppCompatActivity() {
                             cursor.getInt(32),
                             cursor.getFloat(33)
                         )
-
                         lista.add(arreglo)
-
-
                     } while (cursor.moveToNext())
-
                     cursor.close()
-                }else{
-                    val cursor = base.rawQuery("SELECT * FROM inventario LIMIT 60", null)
-
-                    if (cursor.count > 0) {
-                        cursor.moveToFirst()
-                        do {
-                            val arreglo = Inventario(
-                                cursor.getInt(0),
-                                cursor.getString(1),
-                                cursor.getString(2),
-                                cursor.getInt(3),
-                                cursor.getString(4),
-                                cursor.getString(5),
-                                cursor.getString(6),
-                                cursor.getFloat(7),
-                                cursor.getString(8),
-                                cursor.getInt(9),
-                                cursor.getFloat(10),
-                                cursor.getFloat(11),
-                                cursor.getFloat(12),
-                                cursor.getFloat(13),
-                                cursor.getFloat(14),
-                                cursor.getFloat(15),
-                                cursor.getFloat(16),
-                                cursor.getString(17),
-                                cursor.getString(18),
-                                cursor.getInt(19),
-                                cursor.getString(20),
-                                cursor.getInt(21),
-                                cursor.getString(22),
-                                cursor.getString(23),
-                                cursor.getString(24),
-                                cursor.getString(25),
-                                cursor.getString(26),
-                                cursor.getString(27),
-                                cursor.getInt(28),
-                                cursor.getString(29),
-                                cursor.getFloat(30),
-                                cursor.getDouble(31),
-                                cursor.getInt(32),
-                                cursor.getFloat(33)
-                            )
-
-                            lista.add(arreglo)
-
-
-                        } while (cursor.moveToNext())
-
-                        cursor.close()
-                    }
                 }
-            }
         } catch (e: Exception) {
             throw Exception(e.message)
         } finally {
@@ -619,6 +541,7 @@ class Inventario : AppCompatActivity() {
     } //busaca el
 
     // BOTON PARA RETROCEDER
+    @Deprecated("Deprecated in Java")
     override fun onBackPressed() {
         //super.onBackPressed();
     }

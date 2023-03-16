@@ -60,9 +60,6 @@ class Producto_agregar : AppCompatActivity() {
     private var total_param: Float? = null
     private var precioEditado: Float = 0.toFloat()
     private var txttituloproducto: TextView? = null
-
-    private var dataSearch: String? = null
-
     private var sinExistencias: Int? = null  // 1 -> Si    0 -> no
     private var existenciaProducto: Float = 0f
     private var getSucursalPosition: Int? = null
@@ -82,14 +79,6 @@ class Producto_agregar : AppCompatActivity() {
         idvisita = intent.getIntExtra("visitaid", 0)
         codigo = intent.getStringExtra("codigo").toString()
         idapi = intent.getIntExtra("idapi", 0)
-
-
-        //DATASEARCH INVENTARIO
-        //CAPTURA EL VALOR DE LA BUSQUEDA EN EL SEARCHVIEW
-        dataSearch = intent.getStringExtra("dataSearch").toString()
-        if(dataSearch!!.isEmpty() || dataSearch == ""){
-            dataSearch = null
-        }
 
         //CAPTURANDO SUCURSAL
         getSucursalPosition = intent.getIntExtra("sucursalPosition", 0)
@@ -326,7 +315,7 @@ class Producto_agregar : AppCompatActivity() {
 
     //FUNCION PARA EXTRAER LOS CAMPOS DE LA TABLA CONFIG
     private fun getConfig(){
-        val dataBase = db!!.writableDatabase
+        val dataBase = db!!.readableDatabase
         try {
             val getConf = dataBase.rawQuery("SELECT * FROM config", null)
             val getConfData = ArrayList<Config>()
@@ -392,7 +381,6 @@ class Producto_agregar : AppCompatActivity() {
                 intento.putExtra("codigo", codigo)
                 intento.putExtra("idapi", idapi)
                 intento.putExtra("sucursalPosition", getSucursalPosition)
-                intento.putExtra("dataSearch", dataSearch) //ENVIA LA BUSQUEDA ALMACENADA DEL SEARCHVIEW
                 startActivity(intento)
             }
 
@@ -401,9 +389,6 @@ class Producto_agregar : AppCompatActivity() {
         btnagregar!!.setOnClickListener {
             GlobalScope.launch(Dispatchers.IO) {
                 // Validar si la cantidad corresponde al precio
-
-                dataSearch = null
-
                 var esCorrecto = true
 
                 var precio_provisional = 0.toFloat()
@@ -861,7 +846,7 @@ class Producto_agregar : AppCompatActivity() {
     }
 
     private fun GetProducto(id: Int): com.example.acae30.modelos.Inventario? {
-        val base = db!!.writableDatabase
+        val base = db!!.readableDatabase
         var dato: com.example.acae30.modelos.Inventario? = null
         try {
             val cursor = base.rawQuery("SELECT * FROM inventario WHERE Id=$id", null)
@@ -917,7 +902,7 @@ class Producto_agregar : AppCompatActivity() {
     } //obtiene los datos del producto
 
     private fun GetInvPreciosProducto(id_inventario: Int): ArrayList<InventarioPrecios>? {
-        val base = db!!.writableDatabase
+        val base = db!!.readableDatabase
         var datos = ArrayList<InventarioPrecios>()
         try {
             val cursor = base.rawQuery(
