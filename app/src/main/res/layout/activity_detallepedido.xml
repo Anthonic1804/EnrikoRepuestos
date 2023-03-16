@@ -325,9 +325,25 @@
                     android:layout_marginStart="16dp"
                     android:layout_marginTop="16dp"
                     android:layout_marginEnd="16dp"
-                    android:layout_marginBottom="32dp"
                     android:background="@drawable/btn_eliminarpedido"
                     android:text="ELIMINAR PEDIDO"
+                    android:textAlignment="center"
+                    android:textColor="@color/colorAccent"
+                    android:textStyle="bold"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintHorizontal_bias="0.0"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@+id/layout_buttons" />
+
+                <Button
+                    android:id="@+id/btnexportar"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="16dp"
+                    android:layout_marginEnd="16dp"
+                    android:layout_marginTop="10dp"
+                    android:background="@drawable/border_btnenviar"
+                    android:text="EXPORTAR A PDF"
                     android:textAlignment="center"
                     android:textColor="@color/colorAccent"
                     android:textStyle="bold"
@@ -335,7 +351,7 @@
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintHorizontal_bias="0.0"
                     app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toBottomOf="@+id/layout_buttons"
+                    app:layout_constraintTop_toBottomOf="@+id/btncancelar"
                     app:layout_constraintVertical_bias="0.0" />
 
             </androidx.constraintlayout.widget.ConstraintLayout>

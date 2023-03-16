@@ -1,16 +1,23 @@
 package com.example.acae30
 
+import android.Manifest
 import android.annotation.SuppressLint
 import android.app.Dialog
 import android.content.Context
 import android.content.Intent
 import android.content.SharedPreferences
+import android.content.pm.PackageManager
+import android.os.Build
 import android.os.Bundle
+import android.os.Environment
 import android.view.View
 import android.widget.*
 import android.widget.AdapterView.OnItemSelectedListener
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
 import androidx.constraintlayout.widget.ConstraintLayout
+import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -21,19 +28,21 @@ import com.example.acae30.modelos.JSONmodels.CabezeraPedidoSend
 import com.google.android.material.snackbar.Snackbar
 import com.google.gson.JsonArray
 import com.google.gson.JsonObject
+import com.itextpdf.text.*
+import com.itextpdf.text.pdf.PdfPTable
+import com.itextpdf.text.pdf.PdfWriter
 import kotlinx.android.synthetic.main.activity_inicio.*
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import org.json.JSONObject
-import java.io.BufferedReader
-import java.io.InputStreamReader
-import java.io.OutputStreamWriter
-import java.io.Reader
+import java.io.*
 import java.net.HttpURLConnection
 import java.net.URL
 import java.nio.charset.StandardCharsets
+import java.time.LocalDate
+import java.time.format.DateTimeFormatter
 import com.example.acae30.R as R1
 
 
@@ -83,7 +92,23 @@ class Detallepedido : AppCompatActivity() {
     private var codigo = ""
     private var idapi = 0
 
+    private lateinit var exportar : Button
+    private val requestPermissionLauncher = registerForActivityResult(
+        ActivityResultContracts.RequestPermission()
+    ){
+            isAceptado ->
+        if(isAceptado){
+            Toast.makeText(this, "PERMISOS CONCEDIDOS", Toast.LENGTH_LONG).show()
+        }else{
+            Toast.makeText(this, "PERMISOS DENEGADOS", Toast.LENGTH_LONG).show()
+        }
+    }
 
+    @RequiresApi(Build.VERSION_CODES.O)
+    val fecha = LocalDate.now().format(DateTimeFormatter.ofPattern("dd MMM yyyy"))
+    private val tituloText = "PEDIDO"
+
+    @RequiresApi(Build.VERSION_CODES.O)
     @SuppressLint("MissingInflatedId")
     override fun onCreate(savedInstanceState: Bundle?) {
 
@@ -116,6 +141,8 @@ class Detallepedido : AppCompatActivity() {
         ip = preferencias!!.getString("ip", "").toString()
         puerto = preferencias!!.getInt("puerto", 0)
         visita_enviada = false
+
+        exportar = findViewById(R1.id.btnexportar)
 
         //FUNCION PARA OBTENER LA INFORMACION DEL PEDIDO
         getTipoEnvio(idpedido)
@@ -362,6 +389,11 @@ class Detallepedido : AppCompatActivity() {
             }
         }
 
+        //BOTON DE EXPORTAR A PDF EL PEDIDO
+        exportar.setOnClickListener {
+            verificarPermisos(it)
+        }
+
         //IMPLEMENTANDO LOGICA DE SUCURSAL SELECCIONADA EN SPINNER
         spSucursal!!.onItemSelectedListener = object : OnItemSelectedListener{
             override fun onItemSelected(
@@ -399,7 +431,7 @@ class Detallepedido : AppCompatActivity() {
 
     //OPTENIENDO INFORMACION DEL PEDIDO
     private fun getTipoEnvio(ipPedido: Int){
-        val dataBase = db!!.writableDatabase
+        val dataBase = db!!.readableDatabase
         try {
             val getTipo = dataBase.rawQuery("SELECT * FROM pedidos WHERE id=$ipPedido", null)
             val getPedidoData = ArrayList<dataPedidos>()
@@ -490,7 +522,7 @@ class Detallepedido : AppCompatActivity() {
     //FUNCION PARA OBTENER LAS SUCURSALES POR CLIENTE.
     //03-02-2023
     private fun getSucursalesNombre(idCliente:Int): ArrayList<Sucursales> {
-        val db = db!!.writableDatabase
+        val db = db!!.readableDatabase
         val listaSucursales = ArrayList<Sucursales>()
         try {
 
@@ -545,6 +577,7 @@ class Detallepedido : AppCompatActivity() {
                                 if (visitaAbierta == 0 && !cabezera!!.Enviado) {
                                     //RUTINA PARA SOLO ENVIAR EL PEDIDO
                                     btnenviar!!.visibility = View.VISIBLE
+                                    exportar.visibility = View.GONE
                                 }
 
                                 btnguardar!!.visibility = View.GONE
@@ -580,6 +613,7 @@ class Detallepedido : AppCompatActivity() {
                                 btnenviar!!.visibility = View.VISIBLE
                                 btnguardar!!.visibility = View.VISIBLE
                                 btneliminar!!.visibility = View.VISIBLE
+                                exportar.visibility = View.GONE
                             }
                         }
                         ArmarLista(lista)
@@ -596,6 +630,7 @@ class Detallepedido : AppCompatActivity() {
                         btnenviar!!.visibility = View.VISIBLE
                         btnguardar!!.visibility = View.VISIBLE
                         btneliminar!!.visibility = View.VISIBLE
+                        exportar.visibility = View.GONE
                     } else {
                         throw Exception("Error al encontrar el pedido")
                     }
@@ -867,11 +902,6 @@ class Detallepedido : AppCompatActivity() {
     }//obtiene el pedido
     //obtiene el pedido de la base de datos
 
-
-
-
-
-
     private fun SendPedido(pedido: CabezeraPedidoSend, idpedido: Int) {
         try {
             val objecto = convertToJson(pedido, idpedido) //convertimos a json el objecto pedido
@@ -942,10 +972,6 @@ class Detallepedido : AppCompatActivity() {
           //  print(e.message)
         }
     } //funcion que envia el pedido a la bd
-
-
-
-
 
     private fun ConfirmarPedido(idpedido: Int, idservidor: Int) {
         val bd = db!!.writableDatabase
@@ -1085,6 +1111,136 @@ class Detallepedido : AppCompatActivity() {
         }
 
         return visitaAbierta
+    }
+
+
+    @RequiresApi(Build.VERSION_CODES.O)
+    private fun verificarPermisos(view: View) {
+        when{
+            ContextCompat.checkSelfPermission(
+                this,
+                Manifest.permission.WRITE_EXTERNAL_STORAGE
+            ) == PackageManager.PERMISSION_GRANTED -> {
+
+                //Toast.makeText(this, "PERMISOS CONCEDIDOS", Toast.LENGTH_LONG).show()
+
+                generarPDF(nombre!!, vendedor)
+            }
+
+            ActivityCompat.shouldShowRequestPermissionRationale(
+                this,
+                Manifest.permission.WRITE_EXTERNAL_STORAGE
+            ) -> {
+                Snackbar.make(view, "ESTE PERMISO ES NECESARIO PARA CREAR EL ARCHIVO", Snackbar.LENGTH_INDEFINITE).setAction("Ok"){
+                    requestPermissionLauncher.launch(Manifest.permission.WRITE_EXTERNAL_STORAGE)
+                }.show()
+            }
+
+            else -> {
+                requestPermissionLauncher.launch(Manifest.permission.WRITE_EXTERNAL_STORAGE)
+            }
+        }
+    }
+    @RequiresApi(Build.VERSION_CODES.O)
+    private fun generarPDF(nombreCliente : String, nombreVendedor: String) {
+        try {
+            val carpeta = "/pedidospdf"
+            val path = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS).absolutePath + carpeta
+
+            val dir = File(path)
+            if(!dir.exists()){
+                dir.mkdirs()
+                Toast.makeText(this, "CARPETA CREADA CON EXITO", Toast.LENGTH_LONG).show()
+            }
+
+            val archivo = File(dir, nombreCliente + "_$fecha.pdf")
+            val fos = FileOutputStream(archivo)
+
+            val documento = Document()
+            PdfWriter.getInstance(documento, fos)
+
+            documento.open()
+            documento.pageSize = PageSize.LETTER
+
+            //AGREGANDO EL TITULO AL PAGARE
+            val titulo = Paragraph(
+                "\n\n$tituloText\n\n",
+                FontFactory.getFont("arial", 20f, Font.BOLD, BaseColor.BLACK)
+            )
+            titulo.alignment = Element.ALIGN_CENTER
+            documento.add(titulo)
+
+            //AGREGANDO LA FECHA DEL DOCUMENTO
+            val fechaDocumento = Paragraph(
+                "FECHA: $fecha\n",
+                FontFactory.getFont("arial", 12f, Font.NORMAL, BaseColor.BLACK)
+            )
+            fechaDocumento.alignment = Element.ALIGN_LEFT
+            documento.add(fechaDocumento)
+
+            //AGREGANDO EL CLIENTE AL DOCUMENTO
+            val clienteDocumento = Paragraph(
+                "CLIENTE: $nombreCliente\n",
+                FontFactory.getFont("arial", 12f, Font.NORMAL, BaseColor.BLACK)
+            )
+            fechaDocumento.alignment = Element.ALIGN_LEFT
+            documento.add(clienteDocumento)
+
+            //AGREGANDO LA SUCURSAL AL DOCUMENTO
+            val sucursalDocumento = Paragraph(
+                "SUCURSAL: NOMBRE DE LA SUCURSAL\n",
+                FontFactory.getFont("arial", 12f, Font.NORMAL, BaseColor.BLACK)
+            )
+            fechaDocumento.alignment = Element.ALIGN_LEFT
+            documento.add(sucursalDocumento)
+
+            //AGREGANDO EL VENDEDOR AL DOCUMENTO
+            val vendedorDocumento = Paragraph(
+                "VENDEDOR: $nombreVendedor\n\n",
+                FontFactory.getFont("arial", 12f, Font.NORMAL, BaseColor.BLACK)
+            )
+            fechaDocumento.alignment = Element.ALIGN_LEFT
+            documento.add(vendedorDocumento)
+
+
+            //AGREGANDO EL CONTENIDO AL PAGARE (tabla)
+            val lista = getPedido(idpedido)
+
+            val tabla = PdfPTable(4)
+            val medidas = floatArrayOf(3.40f, 3.40f, 7.70f, 2.40f)
+            tabla.setWidths(medidas)
+
+            tabla.addCell(Paragraph("CANTIDAD", FontFactory.getFont("arial", 12f, Font.BOLD, BaseColor.BLACK)))
+            tabla.addCell(Paragraph("REFERENCIA", FontFactory.getFont("arial", 12f, Font.BOLD, BaseColor.BLACK)))
+            tabla.addCell(Paragraph("DESCRIPCION", FontFactory.getFont("arial", 12f, Font.BOLD, BaseColor.BLACK)))
+            tabla.addCell(Paragraph("TOTAL", FontFactory.getFont("arial", 12f, Font.BOLD, BaseColor.BLACK)))
+
+            var total = 0f
+            for(data in lista){
+                tabla.addCell(Paragraph(""+data.Cantidad, FontFactory.getFont("arial", 10f, Font.NORMAL, BaseColor.BLACK)))
+                tabla.addCell(Paragraph(""+data.Codigo, FontFactory.getFont("arial", 10f, Font.NORMAL, BaseColor.BLACK)))
+                tabla.addCell(Paragraph(""+data.Descripcion, FontFactory.getFont("arial", 10f, Font.NORMAL, BaseColor.BLACK)))
+                tabla.addCell(Paragraph(""+data.Total, FontFactory.getFont("arial", 10f, Font.NORMAL, BaseColor.BLACK)))
+
+                total += data.Total!!
+            }
+
+            tabla.addCell("")
+            tabla.addCell("")
+            tabla.addCell(Paragraph("TOTAL:", FontFactory.getFont("arial", 12f, Font.BOLD, BaseColor.BLACK)))
+            tabla.addCell(Paragraph("$total", FontFactory.getFont("arial", 12f, Font.BOLD, BaseColor.BLACK)))
+
+            documento.add(tabla)
+
+            documento.close()
+
+            Toast.makeText(this, "PEDIDO EXPORTADO CORRECTAMENTE", Toast.LENGTH_LONG).show()
+
+        }catch (e: FileNotFoundException){
+            e.printStackTrace()
+        }catch (e: DocumentException){
+            e.printStackTrace()
+        }
     }
 
 }
