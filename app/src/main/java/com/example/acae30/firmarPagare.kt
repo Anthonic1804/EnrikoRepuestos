@@ -61,7 +61,7 @@ class firmarPagare : AppCompatActivity() {
     @RequiresApi(Build.VERSION_CODES.O)
     val fechaPagare = "La Unión, " + LocalDate.now().format(DateTimeFormatter.ofPattern("dd MMM yyyy"))
     @RequiresApi(Build.VERSION_CODES.O)
-    val fechaDoc = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy_MM_dd_HH_mm_ss"))
+    var fechaDoc = ""
 
 
     val textoPagare = "Por _______; PAGARÉ  en forma incondicional a la ordel del señor: ARMANDO ANTONIO" +
@@ -104,6 +104,7 @@ class firmarPagare : AppCompatActivity() {
         }
 
         btnFirmar.setOnClickListener {
+            fechaDoc = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy_MM_dd_HH_mm_ss"))
             imageFirmada = signatureView.isSignature()
             if(imageFirmada){
                 imagenBitmap = signatureView.getSignatureBitmap()!!

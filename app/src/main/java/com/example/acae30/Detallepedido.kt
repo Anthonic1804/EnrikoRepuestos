@@ -13,7 +13,6 @@ import android.os.Environment
 import android.view.View
 import android.widget.*
 import android.widget.AdapterView.OnItemSelectedListener
-import android.widget.AdapterView.TEXT_ALIGNMENT_CENTER
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
@@ -110,7 +109,7 @@ class Detallepedido : AppCompatActivity() {
     @RequiresApi(Build.VERSION_CODES.O)
     val fecha = LocalDate.now().format(DateTimeFormatter.ofPattern("dd MMM yyyy"))
     @RequiresApi(Build.VERSION_CODES.O)
-    val fechaDoc = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy_MM_dd_HH_mm_ss"))
+    var fechaDoc = ""
     private val tituloText = "DETALLE DEL PEDIDO"
 
     @RequiresApi(Build.VERSION_CODES.O)
@@ -396,6 +395,7 @@ class Detallepedido : AppCompatActivity() {
 
         //BOTON DE EXPORTAR A PDF EL PEDIDO
         exportar.setOnClickListener {
+            fechaDoc = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy_MM_dd_HH_mm_ss"))
             verificarPermisos(it)
         }
 
@@ -1169,7 +1169,7 @@ class Detallepedido : AppCompatActivity() {
             )
             documento.add(espaciosDocumento)
 
-            //DATOS DE LA EMPRESA Y VENDEDOR
+            //DATOS DE LA EMPRESA
             val tablaEncabezado = PdfPTable(2)
             tablaEncabezado.widthPercentage = 80f
             val cellInforEmpresa = PdfPCell(Paragraph("FERRETERIA EL REY S.A DE C.V\n" +
@@ -1235,7 +1235,7 @@ class Detallepedido : AppCompatActivity() {
             cellTotal.horizontalAlignment = Element.ALIGN_CENTER
             tablaPedido.addCell(cellTotal)
 
-            //AGREGANDO EL CONTENIDO AL PAGARE (tabla)
+            //AGREGANDO EL CONTENIDO DEL PEDIDO
             val lista = getPedido(idpedido)
             var total = 0f
 
