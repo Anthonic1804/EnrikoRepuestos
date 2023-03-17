@@ -5,7 +5,6 @@ import android.app.Dialog
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.Bitmap
-import android.graphics.Path
 import android.os.Build
 import android.os.Bundle
 import android.os.Environment
@@ -27,6 +26,7 @@ import java.io.File
 import java.io.FileNotFoundException
 import java.io.FileOutputStream
 import java.time.LocalDate
+import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 
 class firmarPagare : AppCompatActivity() {
@@ -60,6 +60,8 @@ class firmarPagare : AppCompatActivity() {
     private val tituloText = "PAGARÉ SIN PROTESTO"
     @RequiresApi(Build.VERSION_CODES.O)
     val fechaPagare = "La Unión, " + LocalDate.now().format(DateTimeFormatter.ofPattern("dd MMM yyyy"))
+    @RequiresApi(Build.VERSION_CODES.O)
+    val fechaDoc = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy_MM_dd_HH_mm_ss"))
 
 
     val textoPagare = "Por _______; PAGARÉ  en forma incondicional a la ordel del señor: ARMANDO ANTONIO" +
@@ -160,7 +162,7 @@ class firmarPagare : AppCompatActivity() {
                 Toast.makeText(this, "CARPETA CREADA CON EXITO", Toast.LENGTH_LONG).show()
             }
 
-            val archivo = File(dir, "$nombreCliente.pdf")
+            val archivo = File(dir, nombreCliente + "_$fechaDoc.pdf")
             val fos = FileOutputStream(archivo)
 
             val documento = Document()

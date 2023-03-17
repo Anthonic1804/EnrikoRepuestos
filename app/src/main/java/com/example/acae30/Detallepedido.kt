@@ -13,6 +13,7 @@ import android.os.Environment
 import android.view.View
 import android.widget.*
 import android.widget.AdapterView.OnItemSelectedListener
+import android.widget.AdapterView.TEXT_ALIGNMENT_CENTER
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
@@ -29,6 +30,7 @@ import com.google.android.material.snackbar.Snackbar
 import com.google.gson.JsonArray
 import com.google.gson.JsonObject
 import com.itextpdf.text.*
+import com.itextpdf.text.pdf.PdfPCell
 import com.itextpdf.text.pdf.PdfPTable
 import com.itextpdf.text.pdf.PdfWriter
 import kotlinx.android.synthetic.main.activity_inicio.*
@@ -42,6 +44,7 @@ import java.net.HttpURLConnection
 import java.net.URL
 import java.nio.charset.StandardCharsets
 import java.time.LocalDate
+import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 import com.example.acae30.R as R1
 
@@ -106,7 +109,9 @@ class Detallepedido : AppCompatActivity() {
 
     @RequiresApi(Build.VERSION_CODES.O)
     val fecha = LocalDate.now().format(DateTimeFormatter.ofPattern("dd MMM yyyy"))
-    private val tituloText = "PEDIDO"
+    @RequiresApi(Build.VERSION_CODES.O)
+    val fechaDoc = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy_MM_dd_HH_mm_ss"))
+    private val tituloText = "DETALLE DEL PEDIDO"
 
     @RequiresApi(Build.VERSION_CODES.O)
     @SuppressLint("MissingInflatedId")
@@ -1150,84 +1155,152 @@ class Detallepedido : AppCompatActivity() {
                 Toast.makeText(this, "CARPETA CREADA CON EXITO", Toast.LENGTH_LONG).show()
             }
 
-            val archivo = File(dir, nombreCliente + "_$fecha.pdf")
+            val archivo = File(dir, nombreCliente + "_$fechaDoc.pdf")
             val fos = FileOutputStream(archivo)
 
-            val documento = Document()
+            val documento = Document(PageSize.LETTER, 2.5f, 2.5f, 3.5f, 3.5f)
             PdfWriter.getInstance(documento, fos)
 
             documento.open()
-            documento.pageSize = PageSize.LETTER
 
-            //AGREGANDO EL TITULO AL PAGARE
-            val titulo = Paragraph(
-                "\n\n$tituloText\n\n",
-                FontFactory.getFont("arial", 20f, Font.BOLD, BaseColor.BLACK)
+            //ESPACIOS
+            val espaciosDocumento = Paragraph(
+                "\n\n\n"
             )
-            titulo.alignment = Element.ALIGN_CENTER
-            documento.add(titulo)
+            documento.add(espaciosDocumento)
 
-            //AGREGANDO LA FECHA DEL DOCUMENTO
-            val fechaDocumento = Paragraph(
-                "FECHA: $fecha\n",
+            //DATOS DE LA EMPRESA Y VENDEDOR
+            val tablaEncabezado = PdfPTable(2)
+            tablaEncabezado.widthPercentage = 80f
+            val cellInforEmpresa = PdfPCell(Paragraph("FERRETERIA EL REY S.A DE C.V\n" +
+                    "DESVIOS LOS MANGOS, LA UNION\n" +
+                    "TEL. 2668-9999\n\n\n",
                 FontFactory.getFont("arial", 12f, Font.NORMAL, BaseColor.BLACK)
+            ))
+            cellInforEmpresa.horizontalAlignment = Element.ALIGN_LEFT
+            cellInforEmpresa.border = 0
+            tablaEncabezado.addCell(cellInforEmpresa)
+
+            val cellLogo = PdfPCell(Paragraph("[LOGO]"))
+            cellLogo.horizontalAlignment = Element.ALIGN_CENTER
+            cellLogo.border = 0
+            tablaEncabezado.addCell(cellLogo)
+            documento.add(tablaEncabezado)
+
+            //DATOS DEL CLIENTE
+            val tablaCliente = PdfPTable(1)
+            tablaCliente.widthPercentage = 80f
+            val cellInforCliente = PdfPCell(Paragraph("$nombreCliente\n" +
+                    "$nombreSucursalPedido\n\n\n",
+                FontFactory.getFont("arial", 12f, Font.NORMAL, BaseColor.BLACK)
+            ))
+            cellInforCliente.horizontalAlignment = Element.ALIGN_LEFT
+            cellInforCliente.border = 0
+            tablaCliente.addCell(cellInforCliente)
+            documento.add(tablaCliente)
+
+            //AGREGANDO TITULO PEDIDO
+            val fechaDocumento = Paragraph(
+                "$tituloText\n\n",
+                FontFactory.getFont("arial", 14f, Font.BOLD, BaseColor.BLACK)
             )
-            fechaDocumento.alignment = Element.ALIGN_LEFT
+            fechaDocumento.alignment = Element.ALIGN_CENTER
             documento.add(fechaDocumento)
 
-            //AGREGANDO EL CLIENTE AL DOCUMENTO
-            val clienteDocumento = Paragraph(
-                "CLIENTE: $nombreCliente\n",
-                FontFactory.getFont("arial", 12f, Font.NORMAL, BaseColor.BLACK)
-            )
-            fechaDocumento.alignment = Element.ALIGN_LEFT
-            documento.add(clienteDocumento)
+            //DATOS DEL PEDIDO
+            val tablaPedido = PdfPTable(4)
+            tablaPedido.widthPercentage = 80f
 
-            //AGREGANDO LA SUCURSAL AL DOCUMENTO
-            val sucursalDocumento = Paragraph(
-                "SUCURSAL: $nombreSucursalPedido\n",
-                FontFactory.getFont("arial", 12f, Font.NORMAL, BaseColor.BLACK)
-            )
-            fechaDocumento.alignment = Element.ALIGN_LEFT
-            documento.add(sucursalDocumento)
+            val cellReferencia = PdfPCell(Paragraph("REFERENCIA",
+                FontFactory.getFont("arial", 12f, Font.BOLD, BaseColor.BLACK)
+            ))
+            cellReferencia.horizontalAlignment = Element.ALIGN_CENTER
+            tablaPedido.addCell(cellReferencia)
 
-            //AGREGANDO EL VENDEDOR AL DOCUMENTO
-            val vendedorDocumento = Paragraph(
-                "VENDEDOR: $nombreVendedor\n\n",
-                FontFactory.getFont("arial", 12f, Font.NORMAL, BaseColor.BLACK)
-            )
-            fechaDocumento.alignment = Element.ALIGN_LEFT
-            documento.add(vendedorDocumento)
+            val cellDescripcion = PdfPCell(Paragraph("DESCRIPCION",
+                FontFactory.getFont("arial", 12f, Font.BOLD, BaseColor.BLACK)
+            ))
+            cellDescripcion.horizontalAlignment = Element.ALIGN_CENTER
+            tablaPedido.addCell(cellDescripcion)
 
+            val cellCantidad = PdfPCell(Paragraph("CANTIDAD",
+                FontFactory.getFont("arial", 12f, Font.BOLD, BaseColor.BLACK)
+            ))
+            cellCantidad.horizontalAlignment = Element.ALIGN_CENTER
+            tablaPedido.addCell(cellCantidad)
+
+            val cellTotal = PdfPCell(Paragraph("TOTAL",
+                FontFactory.getFont("arial", 12f, Font.BOLD, BaseColor.BLACK)
+            ))
+            cellTotal.horizontalAlignment = Element.ALIGN_CENTER
+            tablaPedido.addCell(cellTotal)
 
             //AGREGANDO EL CONTENIDO AL PAGARE (tabla)
             val lista = getPedido(idpedido)
-
-            val tabla = PdfPTable(4)
-            val medidas = floatArrayOf(3.40f, 3.40f, 7.70f, 2.40f)
-            tabla.setWidths(medidas)
-
-            tabla.addCell(Paragraph("CANTIDAD", FontFactory.getFont("arial", 12f, Font.BOLD, BaseColor.BLACK)))
-            tabla.addCell(Paragraph("REFERENCIA", FontFactory.getFont("arial", 12f, Font.BOLD, BaseColor.BLACK)))
-            tabla.addCell(Paragraph("DESCRIPCION", FontFactory.getFont("arial", 12f, Font.BOLD, BaseColor.BLACK)))
-            tabla.addCell(Paragraph("TOTAL", FontFactory.getFont("arial", 12f, Font.BOLD, BaseColor.BLACK)))
-
             var total = 0f
+
             for(data in lista){
-                tabla.addCell(Paragraph(""+data.Cantidad, FontFactory.getFont("arial", 10f, Font.NORMAL, BaseColor.BLACK)))
-                tabla.addCell(Paragraph(""+data.Codigo, FontFactory.getFont("arial", 10f, Font.NORMAL, BaseColor.BLACK)))
-                tabla.addCell(Paragraph(""+data.Descripcion, FontFactory.getFont("arial", 10f, Font.NORMAL, BaseColor.BLACK)))
-                tabla.addCell(Paragraph("$ "+data.Total, FontFactory.getFont("arial", 10f, Font.NORMAL, BaseColor.BLACK)))
+
+                val cellReferenciaP = PdfPCell(Paragraph(""+data.Codigo,
+                    FontFactory.getFont("arial", 10f, Font.NORMAL, BaseColor.BLACK)
+                ))
+                cellReferenciaP.horizontalAlignment = Element.ALIGN_CENTER
+                tablaPedido.addCell(cellReferenciaP)
+
+                val cellDescripcionP = PdfPCell(Paragraph(""+data.Descripcion,
+                    FontFactory.getFont("arial", 10f, Font.NORMAL, BaseColor.BLACK)
+                ))
+                cellDescripcionP.horizontalAlignment = Element.ALIGN_LEFT
+                tablaPedido.addCell(cellDescripcionP)
+
+                val cellCantidadP = PdfPCell(Paragraph(""+data.Cantidad,
+                    FontFactory.getFont("arial", 10f, Font.NORMAL, BaseColor.BLACK)
+                ))
+                cellCantidadP.horizontalAlignment = Element.ALIGN_CENTER
+                tablaPedido.addCell(cellCantidadP)
+
+                val cellTotalP = PdfPCell(Paragraph("$ "+data.Total,
+                    FontFactory.getFont("arial", 10f, Font.NORMAL, BaseColor.BLACK)
+                ))
+                cellTotalP.horizontalAlignment = Element.ALIGN_RIGHT
+                tablaPedido.addCell(cellTotalP)
 
                 total += data.Total!!
             }
 
-            tabla.addCell("")
-            tabla.addCell("")
-            tabla.addCell(Paragraph("TOTAL:", FontFactory.getFont("arial", 12f, Font.BOLD, BaseColor.BLACK)))
-            tabla.addCell(Paragraph("$ $total", FontFactory.getFont("arial", 12f, Font.BOLD, BaseColor.BLACK)))
+            val cellReferenciaP = PdfPCell(Paragraph(""))
+            cellReferenciaP.border = 0
+            tablaPedido.addCell(cellReferenciaP)
 
-            documento.add(tabla)
+            val cellDescripcionP = PdfPCell(Paragraph(""))
+            cellDescripcionP.border = 0
+            tablaPedido.addCell(cellDescripcionP)
+
+            val cellCantidadP = PdfPCell(Paragraph("TOTAL",
+                FontFactory.getFont("arial", 14f, Font.BOLD, BaseColor.BLACK)
+            ))
+            cellCantidadP.horizontalAlignment = Element.ALIGN_RIGHT
+            tablaPedido.addCell(cellCantidadP)
+
+            val cellTotalP = PdfPCell(Paragraph("$ "+ total,
+                FontFactory.getFont("arial", 14f, Font.BOLD, BaseColor.BLACK)
+            ))
+            cellTotalP.horizontalAlignment = Element.ALIGN_RIGHT
+            tablaPedido.addCell(cellTotalP)
+            documento.add(tablaPedido)
+
+
+            //DATOS DEL VENDEDOR
+            val tablaVendedor = PdfPTable(1)
+            tablaVendedor.widthPercentage = 80f
+            val cellInforVendedor = PdfPCell(Paragraph("\n\nVENDEDOR: $vendedor\n" +
+                    "FECHA DEL PEDIDO: $fecha\n",
+                FontFactory.getFont("arial", 12f, Font.NORMAL, BaseColor.BLACK)
+            ))
+            cellInforVendedor.horizontalAlignment = Element.ALIGN_LEFT
+            cellInforVendedor.border = 0
+            tablaVendedor.addCell(cellInforVendedor)
+            documento.add(tablaVendedor)
 
             documento.close()
 
