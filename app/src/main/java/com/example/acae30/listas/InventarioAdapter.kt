@@ -4,11 +4,13 @@ import android.content.Context
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.ImageView
 import android.widget.TextView
 import androidx.cardview.widget.CardView
 import androidx.recyclerview.widget.RecyclerView
 import com.example.acae30.Funciones
 import com.example.acae30.R
+import com.squareup.picasso.Picasso
 
 class InventarioAdapter(
     private val lista: List<com.example.acae30.modelos.Inventario>?,
@@ -60,6 +62,14 @@ class InventarioAdapter(
         vista.precio.text = "$" + String.format("%.4f", lista.get(i).Precio_iva)
         vista.existencia.text = lista.get(i).Existencia.toString() + " Unidades"
         vista.fraccion.text = lista.get(i).Fraccion.toString() + " Piezas por Uni."
+
+        //CARGANDO LA IMAGEN EL EL MARCO
+        var url = "https://www.distriteco.com/wp-content/uploads/2020/11/refuerzo-forjados-1.png"
+        Picasso.get().load(url)
+            .placeholder(R.drawable.no_photography)
+            .resize(80,80)
+            .error(R.drawable.no_photography)
+            .into(vista.imagen)
         contador++
 
     }
@@ -74,6 +84,9 @@ class InventarioAdapter(
         internal var existencia : TextView
         internal var fraccion : TextView
 
+        //AGRENADO IMAGEN A LA VISTA MINISTURA
+        internal var imagen : ImageView
+
         init {
             //colores = context.applicationContext.resources.getStringArray(R.array.colors)
             titulo = itemView.findViewById(R.id.txttittulo)
@@ -82,6 +95,7 @@ class InventarioAdapter(
             carta = itemView.findViewById(R.id.carta)
             existencia = itemView.findViewById(R.id.txtexiste)
             fraccion = itemView.findViewById(R.id.txtFraccion)
+            imagen = itemView.findViewById(R.id.imgFoto)
             itemView.setOnClickListener({ itemClick(layoutPosition) })
             ani = Funciones()
         }

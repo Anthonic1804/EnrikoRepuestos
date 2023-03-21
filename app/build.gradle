@@ -65,4 +65,8 @@ dependencies {
     //LIBRERIA PARA EXPORTAR PDF
     implementation 'com.itextpdf:itextpdf:5.5.13.2'
 
+    //Picasso
+    def picassoVersion = "2.71828"
+    implementation "com.squareup.picasso:picasso:$picassoVersion"
+
 }
