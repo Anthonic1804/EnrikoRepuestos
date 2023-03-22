@@ -63,15 +63,20 @@ class InventarioAdapter(
         vista.existencia.text = lista[i].Existencia.toString() + " Unidades"
         vista.fraccion.text = lista[i].Fraccion.toString() + " Piezas por Uni."
 
-        //CARGANDO LA IMAGEN EL EL MARCO
-        var codigo = lista[i].Codigo.toString()
-        var url = "https://raw.githubusercontent.com/Anthonic1804/imgFerreteriaRey/master/$codigo.jpg"
-        Picasso.get().load(url)
-            .placeholder(R.drawable.no_photography)
-            .resize(500,500)
-            .centerCrop()
-            .error(R.drawable.no_photography)
-            .into(vista.imagen)
+        if(vistaInventario == 1){
+            //CARGANDO LA IMAGEN EL EL MARCO
+            var codigo = lista[i].Codigo.toString()
+            var url = "https://raw.githubusercontent.com/Anthonic1804/imgFerreteriaRey/master/$codigo.jpg"
+            Picasso.get().load(url)
+                .placeholder(R.drawable.no_photography)
+                .resize(500,500)
+                .centerCrop()
+                .error(R.drawable.no_photography)
+                .into(vista.imagen)
+        }else{
+            val imgDrawable = R.drawable.ic_car85dp
+            vista.imagen.setImageResource(imgDrawable)
+        }
         contador++
 
     }
