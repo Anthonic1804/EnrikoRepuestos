@@ -57,17 +57,19 @@ class InventarioAdapter(
       //  val color = colores?.get(contador)
        // vista.carta.setBackgroundColor(Color.parseColor("#e0e0e0"))
         val id = lista?.get(i)!!.Id
-        vista.titulo.text = lista.get(i).Codigo
-        vista.descripcion.text = lista.get(i).descripcion
-        vista.precio.text = "$" + String.format("%.4f", lista.get(i).Precio_iva)
-        vista.existencia.text = lista.get(i).Existencia.toString() + " Unidades"
-        vista.fraccion.text = lista.get(i).Fraccion.toString() + " Piezas por Uni."
+        vista.titulo.text = lista[i].Codigo
+        vista.descripcion.text = lista[i].descripcion
+        vista.precio.text = "$" + String.format("%.4f", lista[i].Precio_iva)
+        vista.existencia.text = lista[i].Existencia.toString() + " Unidades"
+        vista.fraccion.text = lista[i].Fraccion.toString() + " Piezas por Uni."
 
         //CARGANDO LA IMAGEN EL EL MARCO
-        var url = "https://www.distriteco.com/wp-content/uploads/2020/11/refuerzo-forjados-1.png"
+        var codigo = lista[i].Codigo.toString()
+        var url = "https://raw.githubusercontent.com/Anthonic1804/imgFerreteriaRey/master/$codigo.jpg"
         Picasso.get().load(url)
             .placeholder(R.drawable.no_photography)
-            .resize(80,80)
+            .resize(500,500)
+            .centerCrop()
             .error(R.drawable.no_photography)
             .into(vista.imagen)
         contador++

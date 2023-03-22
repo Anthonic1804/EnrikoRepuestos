@@ -946,42 +946,6 @@ class Producto_agregar : AppCompatActivity() {
     } // obtiene los precios de la tabla Inventario precio
 
 
-  /*  private fun CreatePedido() {
-        val base = db!!.writableDatabase
-        try {
-            base.beginTransaction()
-            val contenido = ContentValues()
-            contenido.put("Id_cliente", idcliente)
-            contenido.put("Nombre_cliente", nombrecliente)
-            contenido.put("Total", txttotal!!.text.toString().toFloat())
-            contenido.put("Descuento", 0.toFloat())
-            contenido.put("Enviado", false)
-            val id = base.insert("pedidos", null, contenido)
-            //inserta el encabezado del pedido
-            idpedido = id.toInt()
-            val detalle = ContentValues()
-            detalle.put("Id_pedido", id)
-            detalle.put("Id_producto", idproducto)
-            detalle.put("Cantidad", cantidad)
-            detalle.put("Unidad", "UNI")
-            detalle.put("Idunidad", 0)
-            detalle.put("Precio", precio)
-            detalle.put("Precio_oferta", 0.toFloat())
-            detalle.put("Subtotal", txttotal!!.text.toString().toFloat())
-            detalle.put("Descuento", 0.toFloat())
-            base.insert("detalle_pedidos", null, detalle)
-            base.setTransactionSuccessful()
-        } catch (e: Exception) {
-            idpedido = 0
-            throw Exception(e.message)
-        } finally {
-            base.endTransaction()
-            base.close()
-        }
-    } //crea el pedido en caso de que no exista*/
-
-
-
     private fun AddDetallePedido(esPrecioEditado: Boolean): Int {
         val base = db!!.writableDatabase
         try {
