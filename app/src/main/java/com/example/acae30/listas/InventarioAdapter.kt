@@ -67,7 +67,7 @@ class InventarioAdapter(
         var url = "https://www.distriteco.com/wp-content/uploads/2020/11/refuerzo-forjados-1.png"
         Picasso.get().load(url)
             .placeholder(R.drawable.no_photography)
-            .resize(80,80)
+            .resize(65,65)
             .error(R.drawable.no_photography)
             .into(vista.imagen)
         contador++
