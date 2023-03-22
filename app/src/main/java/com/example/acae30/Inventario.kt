@@ -302,7 +302,7 @@ class Inventario : AppCompatActivity() {
                         val adapter = InventarioAdapter(list, this, vistaInventario) { position ->
                             if (busquedaProducto) {
                                 val existeniasProducto = list.get(position).Existencia!!.toFloat()
-                                if(sinExistencias == 0 && existeniasProducto == 0f){
+                                if(sinExistencias == 0 && existeniasProducto == 0f || existeniasProducto < 0f){
                                     Toast.makeText(this@Inventario, "NO SE PUEDEN AGREGAR PRODUCTOS SIN EXISTENCIAS", Toast.LENGTH_SHORT).show()
                                 }else{
 
@@ -338,7 +338,7 @@ class Inventario : AppCompatActivity() {
                         val adapter = InventarioAdapter(list, this, vistaInventario) { position ->
                             if (busquedaProducto) {
                                 val existeniasProducto = list.get(position).Existencia!!.toFloat()
-                                if(sinExistencias == 0 && existeniasProducto == 0f){
+                                if(sinExistencias == 0 && existeniasProducto == 0f || existeniasProducto < 0f){
                                     Toast.makeText(this@Inventario, "NO SE PUEDEN AGREGAR PRODUCTOS SIN EXISTENCIAS", Toast.LENGTH_SHORT).show()
                                 }else{
 
