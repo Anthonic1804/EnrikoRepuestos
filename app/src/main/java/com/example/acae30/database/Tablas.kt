@@ -158,6 +158,28 @@ class Tablas {
         return virtualInventario
     }
 
+    //CREANDO LA TABLA EMPLEADOS
+    fun Empleados(): String{
+        val tblEmpleados = "CREATE TABLE empleado(" +
+                "Id INTEGER PRIMARY KEY NOT NULL," +
+                "id_empleado INTEGER NOT NULL," +
+                "nombre_empleado VARCHAR(50) NOT NULL," +
+                "generaToken INTEGER DEFAULT 0);"
+        return tblEmpleados
+    }
+
+    //CREANDO LA TABLA TOKENAPP
+    fun Token(): String{
+        val tblToken = "CREATE TABLE Token(" +
+                "Id INTEGER PRIMARY KEY NOT NULL," +
+                "Id_vendedor INTEGER NOT NULL," +
+                "Id_admin INTEGER NOT NULL," +
+                "cod_producto VARCHAR(25) NOT NULL," +
+                "precio_asig NUMERIC(18,6) NOT NULL," +
+                "id_server INTEGER);"
+        return tblToken
+    }
+
     fun Lineas(): String {
         val tabla = "CREATE TABLE lineas(" +
                 "Id INTEGER NOT NULL," +

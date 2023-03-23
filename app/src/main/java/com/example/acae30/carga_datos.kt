@@ -6,6 +6,7 @@ import android.content.Intent
 import android.content.SharedPreferences
 import android.os.Bundle
 import android.os.StrictMode
+import android.view.View
 import android.widget.ImageButton
 import androidx.appcompat.app.AppCompatActivity
 import androidx.cardview.widget.CardView
@@ -56,8 +57,10 @@ class carga_datos : AppCompatActivity() {
     }
 
     override fun onStart() {
-
         super.onStart()
+
+        cvpedidos!!.visibility = View.GONE //DESHABILITANDO LA CARDVIEW DE BORRAR PEDIDOS ANTIGUOS
+
         btnatras!!.setOnClickListener {
             val intento = Intent(this, Inicio::class.java)
             startActivity(intento)

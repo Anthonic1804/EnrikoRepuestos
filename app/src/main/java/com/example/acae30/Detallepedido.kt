@@ -63,7 +63,6 @@ class Detallepedido : AppCompatActivity() {
     private var pedidoEnviado: Boolean = false
     private var getSucursalPosition: Int? = null
 
-    private var dataSearch: String? = null
 
     private var btbuscarProducto: ImageButton? = null
     private var idcliente: Int = 0
@@ -107,7 +106,9 @@ class Detallepedido : AppCompatActivity() {
     }
 
     @RequiresApi(Build.VERSION_CODES.O)
-    val fecha = LocalDate.now().format(DateTimeFormatter.ofPattern("dd MMM yyyy"))
+    val fecha = LocalDate.now()
+        .format(DateTimeFormatter.ofPattern("dd MMM yyyy"))
+
     @RequiresApi(Build.VERSION_CODES.O)
     var fechaDoc = ""
     private val tituloText = "DETALLE DEL PEDIDO"
@@ -249,7 +250,6 @@ class Detallepedido : AppCompatActivity() {
                 intento.putExtra("visitaid", idvisita)
                 intento.putExtra("codigo", codigo)
                 intento.putExtra("idapi", idapi)
-                intento.putExtra("dataSearch", dataSearch)
                 intento.putExtra("sucursalPosition", getSucursalPosition)
                 startActivity(intento)
             }
@@ -576,6 +576,8 @@ class Detallepedido : AppCompatActivity() {
                                 txtcliente!!.isEnabled = false
                                 btbuscarProducto!!.visibility = View.GONE
                                 btnenviar!!.visibility = View.GONE
+
+                                exportar.visibility = View.GONE //DESHABILITANDO EL BOTON EXPORTAR - FERRETERIA EL REY
 
                                 val visitaAbierta = getEstadoVisita()
 
