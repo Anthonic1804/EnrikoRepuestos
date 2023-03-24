@@ -170,12 +170,12 @@ class Tablas {
 
     //CREANDO LA TABLA TOKENAPP
     fun Token(): String{
-        val tblToken = "CREATE TABLE Token(" +
+        val tblToken = "CREATE TABLE token(" +
                 "Id INTEGER PRIMARY KEY NOT NULL," +
                 "Id_vendedor INTEGER NOT NULL," +
                 "Id_admin INTEGER NOT NULL," +
                 "cod_producto VARCHAR(25) NOT NULL," +
-                "precio_asig NUMERIC(18,6) NOT NULL," +
+                "precio_asig NUMERIC(18,4) NOT NULL," +
                 "id_server INTEGER);"
         return tblToken
     }

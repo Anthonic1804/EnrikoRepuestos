@@ -892,10 +892,9 @@ class carga_datos : AppCompatActivity() {
     //   finish()
     }//anula el boton atras
 
-    @OptIn(DelicateCoroutinesApi::class)
     override fun onDestroy() {
         super.onDestroy()
-        GlobalScope.cancel()
+       // GlobalScope.cancel()
     }
 
 }
