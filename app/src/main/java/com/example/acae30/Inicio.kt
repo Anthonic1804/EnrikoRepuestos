@@ -6,17 +6,22 @@ import android.content.Context
 import android.content.Intent
 import android.content.SharedPreferences
 import android.content.pm.PackageManager
+import android.content.res.Configuration
 import android.net.ConnectivityManager
 import android.os.Bundle
 import android.os.StrictMode
+import android.view.MenuItem
 import android.view.View
 import android.widget.Button
 import android.widget.TextView
 import android.widget.Toast
+import androidx.appcompat.app.ActionBarDrawerToggle
 import androidx.appcompat.app.AppCompatActivity
 import androidx.cardview.widget.CardView
 import androidx.core.app.ActivityCompat
+import androidx.drawerlayout.widget.DrawerLayout
 import com.example.acae30.database.Database
+import com.google.android.material.navigation.NavigationView
 import com.google.gson.Gson
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.Dispatchers
@@ -32,7 +37,7 @@ import java.net.URL
 import java.nio.charset.StandardCharsets
 
 @Suppress("DEPRECATION")
-class Inicio : AppCompatActivity() {
+class Inicio : AppCompatActivity(), NavigationView.OnNavigationItemSelectedListener {
 
     private var load: CardView? = null
     private var cvconf: CardView? = null
@@ -47,12 +52,14 @@ class Inicio : AppCompatActivity() {
     private var database: Database? = null
     private var fechaUpdate: TextView? = null
 
+    //VARIABLES PARA UN SLIDE MENU
+    private lateinit var  drawerLayout: DrawerLayout
+    private lateinit var toogle: ActionBarDrawerToggle
+
     private lateinit var txtvendedor : TextView
 
     private var ip = ""
     private var puerto = 0
-   // private val INTERVALO: Int = 2000 //2 segundos para salir
-   // private var tiempoPrimerClick: Long = 0
 
     @Deprecated("Deprecated in Java")
     override fun onBackPressed() {
@@ -92,6 +99,21 @@ class Inicio : AppCompatActivity() {
         var nombre_vendedor = preferencias!!.getString("Vendedor", "")
         txtvendedor.setText("BIENVENIDO $nombre_vendedor")
 
+
+        //IMPLEMENTANDO MENU SLIDE
+        val toolbar: androidx.appcompat.widget.Toolbar = findViewById(R.id.toolbar_main)
+        setSupportActionBar(toolbar)
+
+        drawerLayout = findViewById(R.id.drawer_layout)
+        toogle = ActionBarDrawerToggle(this, drawerLayout, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close)
+        drawerLayout.addDrawerListener(toogle)
+        supportActionBar?.hide()
+
+        val navigationView: NavigationView = findViewById(R.id.nav_view)
+        navigationView.setNavigationItemSelectedListener(this)
+
+        //FIN DE LA IMPLEAMENTACION DEL MENU
+
         val policy = StrictMode.ThreadPolicy.Builder().permitAll().build()
         StrictMode.setThreadPolicy(policy)
 
@@ -129,7 +151,7 @@ class Inicio : AppCompatActivity() {
     //FUNCION PARA OBTENER LA FECHA DE INVENTARIO
     private fun getFechaInventario(): ArrayList<com.example.acae30.modelos.Inventario> {
         val lista = ArrayList<com.example.acae30.modelos.Inventario>()
-        val base = database!!.writableDatabase
+        val base = database!!.readableDatabase
 
         try {
             val cursor = base.rawQuery("SELECT * FROM inventario LIMIT 1", null)
@@ -497,5 +519,42 @@ class Inicio : AppCompatActivity() {
         isConnected = networkInfo != null && networkInfo.isConnected
         return isConnected
     } // VERIFICA LA CONEXION A WIFI O REDES
+
+
+    //FUNCIONES PARA EL MENU DESPLEGABLE
+    override fun onNavigationItemSelected(item: MenuItem): Boolean {
+        when(item.itemId){
+            R.id.nav_pedido -> historicoPedidos()
+            R.id.nav_token -> crearTokens()
+        }
+        //drawerLayout.closeDrawer(GravityCompat.START)
+        return true
+    }
+
+    override fun onPostCreate(savedInstanceState: Bundle?) {
+        super.onPostCreate(savedInstanceState)
+        toogle.syncState()
+    }
+
+    override fun onConfigurationChanged(newConfig: Configuration) {
+        super.onConfigurationChanged(newConfig)
+        toogle.onConfigurationChanged(newConfig)
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        if(toogle.onOptionsItemSelected(item)){
+            return true
+        }
+        return super.onOptionsItemSelected(item)
+
+    }
+
+    //REDIRECCIONES DEL MENU SLIDE
+    fun historicoPedidos(){
+        Toast.makeText(this, "FUNCION EN DESARROLLO", Toast.LENGTH_LONG).show()
+    }
+    fun crearTokens(){
+        Toast.makeText(this, "FUNCION EN DESARROLLO", Toast.LENGTH_LONG).show()
+    }
 
 }

@@ -51,4 +51,32 @@
     <string name="detalle_del_producto">DETALLE DEL PRODUCTO</string>
     <string name="detalle_de_cuentas">DETALLE DE CUENTAS</string>
     <string name="total_de_cuentas">TOTAL DE CUENTAS</string>
+
+
+
+    <string name="acae_app">ACAE APP</string>
+    <string name="men_principal">MENÚ PRINCIPAL</string>
+    <string name="historico_pedido">HISTORICO PEDIDO</string>
+    <string name="token">TOKENS</string>
+    <string name="cerrar_sesi_n">CERRAR SESIÓN</string>
+
+
+    <string name="navigation_drawer_open">OPEN</string>
+    <string name="navigation_drawer_close">CLOSE</string>
+
+    <string name="menu_principal">MENU PRINCIPAL</string>
+    <string name="logo_sismantec">Logo_sismantec</string>
+    <string name="crear_token">CREAR TOKEN</string>
+    <string name="boton_de_regreso">Boton de Regreso</string>
+    <string name="vendedor">VENDEDOR</string>
+    <string name="producto">PRODUCTO</string>
+    <string name="contrase_a">CONTRASEÑA</string>
+    <string name="cancelar_token">CANCELAR TOKEN</string>
+    <string name="crear_token2">CREAR TOKEN</string>
+    <string name="nombre_del_vendedor">BUSCAR VENDEDOR</string>
+    <string name="nombre_del_producto">BUSCAR PRODUCTO</string>
+    <string name="precio">PRECIO</string>
+    <string name="simboloDolar">$</string>
+    <string name="qwerty1234">QWERTY1234</string>
+    <string name="_0_0000">0.0000</string>
 </resources>

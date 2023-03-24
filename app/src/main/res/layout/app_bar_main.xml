@@ -1,0 +1,384 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".Inicio">
+
+    <com.google.android.material.appbar.AppBarLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="#00FFFFFF"
+        android:fitsSystemWindows="true">
+
+        <androidx.appcompat.widget.Toolbar
+            android:id="@+id/toolbar_main"
+            android:layout_width="match_parent"
+            android:layout_height="?attr/actionBarSize"
+            android:background="#00004C8C"
+            app:layout_scrollFlags="scroll|enterAlways"/>
+    </com.google.android.material.appbar.AppBarLayout>
+
+    <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:app="http://schemas.android.com/apk/res-auto"
+        xmlns:tools="http://schemas.android.com/tools"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@color/colorAccent"
+        tools:context=".Inicio">
+
+        <ScrollView
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.0"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintVertical_bias="0.0">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
+
+                <androidx.constraintlayout.widget.ConstraintLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="16dp">
+
+                    <TextView
+                        android:id="@+id/textView4"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="30dp"
+                        android:text="ACAE APP"
+                        android:textColor="@color/colorPrimaryDark"
+                        android:textSize="35sp"
+                        android:textStyle="bold"
+                        app:layout_constraintEnd_toStartOf="@+id/logoSismantec"
+                        app:layout_constraintHorizontal_bias="0.288"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toTopOf="parent" />
+
+                    <TextView
+                        android:id="@+id/textView2"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="4dp"
+                        android:text="MENÚ PRINCIPAL"
+                        android:textColor="@color/colorPrimary"
+                        android:textSize="15sp"
+                        app:layout_constraintEnd_toStartOf="@+id/logoSismantec"
+                        app:layout_constraintHorizontal_bias="0.193"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toBottomOf="@+id/textView4" />
+
+                    <TextView
+                        android:id="@+id/txtvendedor"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="120dp"
+                        android:text="BIENVENIDO EMPLEADO DE PRUEBA"
+                        android:gravity="center_horizontal"
+                        android:textColor="@color/colorPrimaryDark"
+                        android:textSize="15sp"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toTopOf="parent" />
+
+                    <ImageView
+                        android:id="@+id/logoSismantec"
+                        android:layout_width="100dp"
+                        android:layout_height="100dp"
+                        android:layout_marginTop="15dp"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintHorizontal_bias="0.864"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toTopOf="parent"
+                        app:srcCompat="@drawable/logo_sismantec" />
+
+                    <LinearLayout
+                        android:id="@+id/opcion1"
+                        android:layout_width="match_parent"
+                        android:layout_height="165dp"
+                        android:orientation="horizontal"
+                        android:padding="10dp"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintHorizontal_bias="0.0"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toBottomOf="@+id/txtvendedor">
+
+                        <androidx.cardview.widget.CardView
+                            android:id="@+id/cvcuentas"
+                            android:layout_width="0dp"
+                            android:layout_height="match_parent"
+                            android:layout_marginLeft="10dp"
+                            android:layout_marginTop="2dp"
+                            android:layout_marginRight="10dp"
+                            android:layout_marginBottom="2dp"
+                            android:layout_weight="1"
+                            android:backgroundTint="@color/cart">
+
+                            <TextView
+                                android:id="@+id/lblcuentas"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_gravity="center_horizontal|center_vertical"
+                                android:layout_marginTop="35dp"
+                                android:text="CUENTAS x C."
+                                android:textAlignment="center"
+                                android:textColor="@color/colorPrimaryDark"
+                                android:textSize="16dp"
+                                android:textStyle="bold" />
+
+                            <ImageView
+                                android:id="@+id/cxc"
+                                android:layout_width="75dp"
+                                android:layout_height="75dp"
+                                android:layout_gravity="center_horizontal"
+                                android:layout_marginTop="15dp"
+                                app:srcCompat="@drawable/dinero" />
+                        </androidx.cardview.widget.CardView>
+
+                        <androidx.cardview.widget.CardView
+                            android:id="@+id/cvpedido"
+                            android:layout_width="0dp"
+                            android:layout_height="match_parent"
+                            android:layout_marginLeft="10dp"
+                            android:layout_marginTop="2dp"
+                            android:layout_marginRight="10dp"
+                            android:layout_marginBottom="2dp"
+                            android:layout_weight="1"
+                            android:backgroundTint="@color/cart">
+
+                            <TextView
+                                android:id="@+id/lblpedidos"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_gravity="center_horizontal|center_vertical"
+                                android:layout_marginTop="35dp"
+                                android:text="PEDIDOS"
+                                android:textColor="@color/colorPrimaryDark"
+                                android:textSize="16dp"
+                                android:textStyle="bold" />
+
+                            <ImageView
+                                android:id="@+id/imageView9"
+                                android:layout_width="75dp"
+                                android:layout_height="75dp"
+                                android:layout_gravity="center_horizontal"
+                                android:layout_marginTop="15dp"
+                                app:srcCompat="@drawable/lapiz" />
+                        </androidx.cardview.widget.CardView>
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:id="@+id/linearLayout2"
+                        android:layout_width="match_parent"
+                        android:layout_height="165dp"
+                        android:orientation="horizontal"
+                        android:padding="10dp"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toBottomOf="@+id/opcion1">
+
+                        <androidx.cardview.widget.CardView
+                            android:id="@+id/cvinventario"
+                            android:layout_width="0dp"
+                            android:layout_height="match_parent"
+                            android:layout_marginLeft="10dp"
+                            android:layout_marginRight="10dp"
+                            android:layout_marginTop="2dp"
+                            android:layout_marginBottom="2dp"
+                            android:layout_weight="1"
+                            android:backgroundTint="@color/cart">
+
+                            <TextView
+                                android:id="@+id/lblinventario"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_gravity="center_horizontal|center_vertical"
+                                android:layout_marginTop="35dp"
+                                android:text="INVENTARIO"
+                                android:textAlignment="center"
+                                android:textColor="@color/colorPrimaryDark"
+                                android:textSize="16dp"
+                                android:textStyle="bold" />
+
+                            <ImageView
+                                android:id="@+id/inventario"
+                                android:layout_width="75dp"
+                                android:layout_height="75dp"
+                                android:layout_gravity="center_horizontal"
+                                android:layout_marginTop="15dp"
+                                app:srcCompat="@drawable/lista" />
+                        </androidx.cardview.widget.CardView>
+
+                        <androidx.cardview.widget.CardView
+                            android:id="@+id/cvcliente"
+                            android:layout_width="0dp"
+                            android:layout_height="match_parent"
+                            android:layout_marginLeft="10dp"
+                            android:layout_marginRight="10dp"
+                            android:layout_marginTop="2dp"
+                            android:layout_marginBottom="2dp"
+                            android:layout_weight="1"
+                            android:backgroundTint="@color/cart">
+
+                            <TextView
+                                android:id="@+id/lblclientes"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_gravity="center_horizontal|center_vertical"
+                                android:layout_marginTop="35dp"
+                                android:text="CLIENTES"
+                                android:textColor="@color/colorPrimaryDark"
+                                android:textSize="16dp"
+                                android:textStyle="bold" />
+
+                            <ImageView
+                                android:id="@+id/imgclientes"
+                                android:layout_width="75dp"
+                                android:layout_height="75dp"
+                                android:layout_gravity="center_horizontal"
+                                android:layout_marginTop="15dp"
+                                app:srcCompat="@drawable/cliente" />
+                        </androidx.cardview.widget.CardView>
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:id="@+id/opcion2"
+                        android:layout_width="match_parent"
+                        android:layout_height="165dp"
+                        android:orientation="horizontal"
+                        android:padding="10dp"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toBottomOf="@+id/linearLayout2">
+
+                        <androidx.cardview.widget.CardView
+                            android:id="@+id/cvData"
+                            android:layout_width="0dp"
+                            android:layout_height="match_parent"
+                            android:layout_marginLeft="10dp"
+                            android:layout_marginRight="10dp"
+                            android:layout_marginTop="2dp"
+                            android:layout_marginBottom="2dp"
+                            android:layout_weight="1"
+                            android:backgroundTint="@color/cart">
+
+                            <TextView
+                                android:id="@+id/lbldata"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_gravity="center_horizontal|center_vertical"
+                                android:layout_marginTop="35dp"
+                                android:text="CARGA DE DATOS"
+                                android:textAlignment="center"
+                                android:textColor="@color/colorPrimaryDark"
+                                android:textSize="16dp"
+                                android:textStyle="bold" />
+
+                            <ImageView
+                                android:id="@+id/data"
+                                android:layout_width="75dp"
+                                android:layout_height="75dp"
+                                android:layout_gravity="center_horizontal"
+                                android:layout_marginTop="15dp"
+                                app:srcCompat="@drawable/bases" />
+                        </androidx.cardview.widget.CardView>
+
+                        <androidx.cardview.widget.CardView
+                            android:id="@+id/cvconfig"
+                            android:layout_width="0dp"
+                            android:layout_height="match_parent"
+                            android:layout_marginLeft="10dp"
+                            android:layout_marginRight="10dp"
+                            android:layout_marginTop="2dp"
+                            android:layout_marginBottom="2dp"
+                            android:layout_weight="1"
+                            android:backgroundTint="@color/cart">
+
+                            <TextView
+                                android:id="@+id/lblconfig"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_gravity="center_horizontal|center_vertical"
+                                android:layout_marginTop="35dp"
+                                android:text="CONFIGURACIÓN"
+                                android:textColor="@color/colorPrimaryDark"
+                                android:textSize="16dp"
+                                android:textStyle="bold" />
+
+                            <ImageView
+                                android:id="@+id/ajustes"
+                                android:layout_width="75dp"
+                                android:layout_height="75dp"
+                                android:layout_gravity="center_horizontal"
+                                android:layout_marginTop="15dp"
+                                app:srcCompat="@drawable/ajustes" />
+                        </androidx.cardview.widget.CardView>
+
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:id="@+id/footer"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginLeft="20dp"
+                        android:layout_marginRight="20dp"
+                        android:orientation="horizontal"
+                        app:layout_constraintTop_toBottomOf="@+id/opcion2">
+
+
+                        <Button
+                            android:id="@+id/btnsalir"
+                            android:layout_width="wrap_content"
+                            android:layout_height="35dp"
+                            android:layout_gravity="center_vertical"
+                            android:layout_weight="1"
+                            android:background="@drawable/border_salir"
+                            android:drawableStart="@drawable/ic_baseline_exit"
+                            android:text="  CERRAR SESIÓN  "
+                            android:textColor="@color/colorAccent"
+                            android:textSize="10dp"
+                            android:textStyle="bold"
+                            tools:ignore="TouchTargetSizeCheck" />
+
+                        <LinearLayout
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:orientation="vertical"
+                            android:gravity="center_horizontal">
+
+                            <TextView
+                                android:id="@+id/textView6"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="ACTUALIZACIÓN INVENTARIO"
+                                android:textSize="12dp"
+                                android:textColor="@color/colorPrimaryDark"/>
+
+                            <TextView
+                                android:id="@+id/lblupdate"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_marginLeft="5dp"
+                                android:text="00-00-0000"
+                                android:textSize="13dp"
+                                android:textColor="@color/colorPrimary"
+                                android:textStyle="bold" />
+                        </LinearLayout>
+
+                    </LinearLayout>
+
+                </androidx.constraintlayout.widget.ConstraintLayout>
+
+            </LinearLayout>
+        </ScrollView>
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+</androidx.coordinatorlayout.widget.CoordinatorLayout>
