@@ -20,9 +20,7 @@
             app:layout_scrollFlags="scroll|enterAlways"/>
     </com.google.android.material.appbar.AppBarLayout>
 
-    <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
-        xmlns:app="http://schemas.android.com/apk/res-auto"
-        xmlns:tools="http://schemas.android.com/tools"
+    <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:background="@color/colorAccent"
@@ -48,56 +46,79 @@
                     android:layout_height="wrap_content"
                     android:layout_marginBottom="16dp">
 
-                    <TextView
-                        android:id="@+id/textView4"
-                        android:layout_width="wrap_content"
+                    <LinearLayout
+                        android:id="@+id/linearLayout4"
+                        android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="30dp"
-                        android:text="ACAE APP"
-                        android:textColor="@color/colorPrimaryDark"
-                        android:textSize="35sp"
-                        android:textStyle="bold"
-                        app:layout_constraintEnd_toStartOf="@+id/logoSismantec"
-                        app:layout_constraintHorizontal_bias="0.288"
+                        android:layout_marginTop="16dp"
+                        app:layout_constraintEnd_toEndOf="parent"
                         app:layout_constraintStart_toStartOf="parent"
-                        app:layout_constraintTop_toTopOf="parent" />
+                        app:layout_constraintTop_toTopOf="parent">
 
-                    <TextView
-                        android:id="@+id/textView2"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="4dp"
-                        android:text="MENÚ PRINCIPAL"
-                        android:textColor="@color/colorPrimary"
-                        android:textSize="15sp"
-                        app:layout_constraintEnd_toStartOf="@+id/logoSismantec"
-                        app:layout_constraintHorizontal_bias="0.193"
-                        app:layout_constraintStart_toStartOf="parent"
-                        app:layout_constraintTop_toBottomOf="@+id/textView4" />
+                        <LinearLayout
+                            android:layout_width="0dp"
+                            android:layout_height="match_parent"
+                            android:layout_marginStart="20dp"
+                            android:layout_weight="50"
+                            android:gravity="center_vertical"
+                            android:orientation="vertical">
 
-                    <TextView
-                        android:id="@+id/txtvendedor"
-                        android:layout_width="wrap_content"
+                            <TextView
+                                android:id="@+id/textView4"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="ACAE APP"
+                                android:textColor="@color/colorPrimaryDark"
+                                android:textSize="35sp"
+                                android:textStyle="bold" />
+
+                            <TextView
+                                android:id="@+id/textView2"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_marginTop="4dp"
+                                android:text="MENÚ PRINCIPAL"
+                                android:textColor="@color/colorPrimary"
+                                android:textSize="15sp" />
+
+                        </LinearLayout>
+
+                        <LinearLayout
+                            android:layout_width="0dp"
+                            android:layout_height="match_parent"
+                            android:layout_weight="50"
+                            android:layout_marginEnd="20dp"
+                            android:gravity="end">
+
+                            <ImageView
+                                android:id="@+id/logoSismantec"
+                                android:layout_width="100dp"
+                                android:layout_height="100dp"
+                                app:srcCompat="@drawable/logo_sismantec" />
+                        </LinearLayout>
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:id="@+id/lblvendedor"
+                        android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="120dp"
-                        android:text="BIENVENIDO EMPLEADO DE PRUEBA"
+                        android:orientation="vertical"
                         android:gravity="center_horizontal"
-                        android:textColor="@color/colorPrimaryDark"
-                        android:textSize="15sp"
+                        android:layout_marginTop="10dp"
                         app:layout_constraintEnd_toEndOf="parent"
                         app:layout_constraintStart_toStartOf="parent"
-                        app:layout_constraintTop_toTopOf="parent" />
+                        app:layout_constraintTop_toBottomOf="@+id/linearLayout4">
 
-                    <ImageView
-                        android:id="@+id/logoSismantec"
-                        android:layout_width="100dp"
-                        android:layout_height="100dp"
-                        android:layout_marginTop="15dp"
-                        app:layout_constraintEnd_toEndOf="parent"
-                        app:layout_constraintHorizontal_bias="0.864"
-                        app:layout_constraintStart_toStartOf="parent"
-                        app:layout_constraintTop_toTopOf="parent"
-                        app:srcCompat="@drawable/logo_sismantec" />
+                        <TextView
+                            android:id="@+id/txtvendedor"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="16dp"
+                            android:layout_marginEnd="16dp"
+                            android:textColor="@color/moderado"
+                            android:textStyle="bold"
+                            android:textSize="16sp"/>
+                    </LinearLayout>
 
                     <LinearLayout
                         android:id="@+id/opcion1"
@@ -108,7 +129,7 @@
                         app:layout_constraintEnd_toEndOf="parent"
                         app:layout_constraintHorizontal_bias="0.0"
                         app:layout_constraintStart_toStartOf="parent"
-                        app:layout_constraintTop_toBottomOf="@+id/txtvendedor">
+                        app:layout_constraintTop_toBottomOf="@+id/lblvendedor">
 
                         <androidx.cardview.widget.CardView
                             android:id="@+id/cvcuentas"
@@ -130,7 +151,7 @@
                                 android:text="CUENTAS x C."
                                 android:textAlignment="center"
                                 android:textColor="@color/colorPrimaryDark"
-                                android:textSize="16dp"
+                                android:textSize="16sp"
                                 android:textStyle="bold" />
 
                             <ImageView
@@ -161,7 +182,7 @@
                                 android:layout_marginTop="35dp"
                                 android:text="PEDIDOS"
                                 android:textColor="@color/colorPrimaryDark"
-                                android:textSize="16dp"
+                                android:textSize="16sp"
                                 android:textStyle="bold" />
 
                             <ImageView
@@ -204,7 +225,7 @@
                                 android:text="INVENTARIO"
                                 android:textAlignment="center"
                                 android:textColor="@color/colorPrimaryDark"
-                                android:textSize="16dp"
+                                android:textSize="16sp"
                                 android:textStyle="bold" />
 
                             <ImageView
@@ -235,7 +256,7 @@
                                 android:layout_marginTop="35dp"
                                 android:text="CLIENTES"
                                 android:textColor="@color/colorPrimaryDark"
-                                android:textSize="16dp"
+                                android:textSize="16sp"
                                 android:textStyle="bold" />
 
                             <ImageView
@@ -278,7 +299,7 @@
                                 android:text="CARGA DE DATOS"
                                 android:textAlignment="center"
                                 android:textColor="@color/colorPrimaryDark"
-                                android:textSize="16dp"
+                                android:textSize="16sp"
                                 android:textStyle="bold" />
 
                             <ImageView
@@ -309,7 +330,7 @@
                                 android:layout_marginTop="35dp"
                                 android:text="CONFIGURACIÓN"
                                 android:textColor="@color/colorPrimaryDark"
-                                android:textSize="16dp"
+                                android:textSize="16sp"
                                 android:textStyle="bold" />
 
                             <ImageView
@@ -329,50 +350,27 @@
                         android:layout_height="wrap_content"
                         android:layout_marginLeft="20dp"
                         android:layout_marginRight="20dp"
-                        android:orientation="horizontal"
+                        android:orientation="vertical"
+                        android:gravity="center_horizontal"
                         app:layout_constraintTop_toBottomOf="@+id/opcion2">
-
-
-                        <Button
-                            android:id="@+id/btnsalir"
-                            android:layout_width="wrap_content"
-                            android:layout_height="35dp"
-                            android:layout_gravity="center_vertical"
-                            android:layout_weight="1"
-                            android:background="@drawable/border_salir"
-                            android:drawableStart="@drawable/ic_baseline_exit"
-                            android:text="  CERRAR SESIÓN  "
-                            android:textColor="@color/colorAccent"
-                            android:textSize="10dp"
-                            android:textStyle="bold"
-                            tools:ignore="TouchTargetSizeCheck" />
-
-                        <LinearLayout
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_weight="1"
-                            android:orientation="vertical"
-                            android:gravity="center_horizontal">
 
                             <TextView
                                 android:id="@+id/textView6"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:text="ACTUALIZACIÓN INVENTARIO"
-                                android:textSize="12dp"
+                                android:textSize="16sp"
                                 android:textColor="@color/colorPrimaryDark"/>
 
                             <TextView
                                 android:id="@+id/lblupdate"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:layout_marginLeft="5dp"
+                                android:layout_marginStart="5dp"
                                 android:text="00-00-0000"
-                                android:textSize="13dp"
+                                android:textSize="16sp"
                                 android:textColor="@color/colorPrimary"
                                 android:textStyle="bold" />
-                        </LinearLayout>
-
                     </LinearLayout>
 
                 </androidx.constraintlayout.widget.ConstraintLayout>

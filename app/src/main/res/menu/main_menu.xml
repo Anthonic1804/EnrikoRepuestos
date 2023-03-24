@@ -11,5 +11,10 @@
             android:icon="@drawable/token"
             android:title="@string/token"
             />
+        <item
+            android:id="@+id/nav_salir"
+            android:icon="@drawable/logout"
+            android:title="@string/cerrar_sesi_n"
+            />
     </group>
 </menu>

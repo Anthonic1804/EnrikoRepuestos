@@ -46,7 +46,6 @@ class Inicio : AppCompatActivity(), NavigationView.OnNavigationItemSelectedListe
     private var cvpedido: CardView? = null
     private var cvcuenta: CardView? = null
     private var funciones: Funciones? = null
-    private var btnsalir: Button? = null
     private var preferencias: SharedPreferences? = null
     private val instancia = "CONFIG_SERVIDOR"
     private var database: Database? = null
@@ -84,7 +83,6 @@ class Inicio : AppCompatActivity(), NavigationView.OnNavigationItemSelectedListe
         cvinventario = findViewById(R.id.cvinventario)
         cvpedido = findViewById(R.id.cvpedido)
         cvcuenta = findViewById(R.id.cvcuentas)
-        btnsalir = findViewById(R.id.btnsalir)
         fechaUpdate = findViewById(R.id.lblupdate)
         preferencias = getSharedPreferences(instancia, Context.MODE_PRIVATE)
         funciones!!.VendedorVerific(this) //valida que haya sesion y que haya configuracion
@@ -96,8 +94,8 @@ class Inicio : AppCompatActivity(), NavigationView.OnNavigationItemSelectedListe
         ip = preferencias!!.getString("ip", "").toString()
         puerto = preferencias!!.getInt("puerto", 0)
 
-        var nombre_vendedor = preferencias!!.getString("Vendedor", "")
-        txtvendedor.setText("BIENVENIDO $nombre_vendedor")
+        val nombre_vendedor =  preferencias!!.getString("Vendedor", "")
+        txtvendedor.text = "BIENVENIDO " + nombre_vendedor?.trim()
 
 
         //IMPLEMENTANDO MENU SLIDE
@@ -258,11 +256,6 @@ class Inicio : AppCompatActivity(), NavigationView.OnNavigationItemSelectedListe
             startActivity(intento)
             finish()
         }
-        btnsalir!!.setOnClickListener {
-
-            salir()
-
-        } //boton salir
     }//acciones de los botones del menu
 
     private fun salir(){
@@ -526,6 +519,7 @@ class Inicio : AppCompatActivity(), NavigationView.OnNavigationItemSelectedListe
         when(item.itemId){
             R.id.nav_pedido -> historicoPedidos()
             R.id.nav_token -> crearTokens()
+            R.id.nav_salir -> salir()
         }
         //drawerLayout.closeDrawer(GravityCompat.START)
         return true

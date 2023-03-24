@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="colorPrimary">#004c8c</color>
-    <color name="colorPrimaryDark">#004c8c</color>
+    <color name="colorPrimary">#064870</color>
+    <color name="colorPrimaryDark">#064870</color>
     <color name="colorAccent">#FFFFFF</color>
     <color name="colordark">#2A3132</color>
     <color name="moderado">#762626</color>
@@ -13,4 +13,8 @@
     <color name="black">#000000</color>
 
     <color name="colorPrimaryOld">#0288d1</color>
+    <color name="colorPrimaryDarkOld">#004c8c</color>
+    <color name="SEGUNDOCOLORLOGO">#6ba3bc</color>
+    <color name="PRIMERCOLORLOGO">#064870</color>
+    <color name="cartOLD">#e3f2fd</color>
 </resources>
