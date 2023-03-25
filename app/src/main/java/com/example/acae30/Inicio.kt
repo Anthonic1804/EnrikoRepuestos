@@ -548,7 +548,9 @@ class Inicio : AppCompatActivity(), NavigationView.OnNavigationItemSelectedListe
         Toast.makeText(this, "FUNCION EN DESARROLLO", Toast.LENGTH_LONG).show()
     }
     fun crearTokens(){
-        Toast.makeText(this, "FUNCION EN DESARROLLO", Toast.LENGTH_LONG).show()
+        val intent = Intent(this@Inicio, NuevoToken::class.java)
+        startActivity(intent)
+        finish()
     }
 
 }

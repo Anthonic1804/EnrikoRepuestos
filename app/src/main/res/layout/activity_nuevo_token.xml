@@ -1,0 +1,197 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/recicler"
+    tools:context=".NuevoToken">
+
+
+    <LinearLayout
+        android:id="@+id/cardView8"
+        android:layout_width="0dp"
+        android:layout_height="55dp"
+        android:orientation="horizontal"
+        android:gravity="center"
+        android:padding="5dp"
+        android:background="@color/colorPrimary"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <TextView
+            android:id="@+id/textView5"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="APROBACION DE CAMBIO DE PRECIO"
+            android:textAlignment="center"
+            android:textColor="@color/colorAccent"
+            android:textSize="18sp"
+            android:textStyle="bold"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.223"
+            app:layout_constraintStart_toEndOf="@+id/imgatras"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintVertical_bias="0.466" />
+    </LinearLayout>
+
+    <androidx.cardview.widget.CardView
+        android:id="@+id/cvFormulario"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="16dp"
+        android:layout_marginRight="16dp"
+        android:layout_marginTop="16dp"
+        app:cardCornerRadius="10dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.4"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/cardView8">
+
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+
+            <LinearLayout
+                android:id="@+id/llform"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="16dp"
+                android:layout_marginEnd="16dp"
+                android:layout_marginTop="16dp"
+                android:orientation="vertical"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent">
+
+
+                <TextView
+                    android:id="@+id/lblProducto"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="16dp"
+                    android:textStyle="bold"
+                    android:textSize="18sp"
+                    android:text="PRODUCTO" />
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal">
+
+                    <EditText
+                        android:id="@+id/edtProducto"
+                        android:layout_width="0dp"
+                        android:layout_height="50dp"
+                        android:layout_weight="1"
+                        android:background="@drawable/border_textbox"
+                        android:ems="10"
+                        android:inputType="text"
+                        android:textSize="16sp"
+                        android:textColor="@color/moderado"
+                        android:paddingStart="7dp"/>
+
+                    <ImageButton
+                        android:id="@+id/btnProductoToken"
+                        android:layout_width="50dp"
+                        android:layout_height="50dp"
+                        android:layout_marginBottom="13dp"
+                        android:backgroundTint="@android:color/holo_green_dark"
+                        app:srcCompat="@drawable/ic_baseline_add_box_24" />
+                </LinearLayout>
+                <TextView
+                    android:id="@+id/lblReferencia"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:textStyle="bold"
+                    android:textSize="18sp"
+                    android:text="REFERENCIA" />
+
+                <EditText
+                    android:id="@+id/edtReferencia"
+                    android:layout_width="300dp"
+                    android:layout_height="50dp"
+                    android:background="@drawable/border_textbox"
+                    android:ems="10"
+                    android:inputType="text"
+                    android:textSize="16sp"
+                    android:textColor="@color/moderado"
+                    android:paddingStart="7dp"/>
+
+                <TextView
+                    android:id="@+id/lblVendedor"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="16dp"
+                    android:textStyle="bold"
+                    android:textSize="18sp"
+                    android:text="VENDEDOR" />
+
+                <Spinner
+                    android:id="@+id/spVendedor"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content" />
+
+                <TextView
+                    android:id="@+id/lblPrecio"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="16dp"
+                    android:textStyle="bold"
+                    android:textSize="18sp"
+                    android:text="PRECIO" />
+
+                <EditText
+                    android:id="@+id/edtPrecio"
+                    android:layout_width="200dp"
+                    android:layout_height="50dp"
+                    android:background="@drawable/border_textbox"
+                    android:ems="10"
+                    android:inputType="numberDecimal"
+                    android:paddingLeft="7dp"/>
+
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/llbutton"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:gravity="center"
+                android:orientation="vertical"
+                android:layout_marginStart="16dp"
+                android:layout_marginEnd="16dp"
+                android:layout_marginVertical="16dp"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/llform">
+
+                <Button
+                    android:id="@+id/btnProcesarToken"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:background="@drawable/border_btnactualizar"
+                    android:textColor="@color/colorAccent"
+                    android:textStyle="bold"
+                    android:text="VALIDAR PRECIO"/>
+
+                <Button
+                    android:id="@+id/btnatras_token"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="16dp"
+                    android:background="@drawable/btn_eliminarpedido"
+                    android:textColor="@color/colorAccent"
+                    android:layout_marginTop="10dp"
+                    android:textStyle="bold"
+                    android:text="CANCELAR PROCESO"/>
+            </LinearLayout>
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+    </androidx.cardview.widget.CardView>
+
+
+</androidx.constraintlayout.widget.ConstraintLayout>

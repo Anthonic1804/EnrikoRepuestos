@@ -797,7 +797,7 @@ class Detallepedido : AppCompatActivity() {
                     intento.putExtra("idapi", idapi)
                     startActivity(intento)
                     finish()
-
+                    dialogo.dismiss()
                 } catch (e: Exception) {
                     dialogo.dismiss()
                     val alert: Snackbar = Snackbar.make(

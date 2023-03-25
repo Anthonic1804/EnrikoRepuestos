@@ -45,6 +45,9 @@ class Inventario : AppCompatActivity() {
     private var idapi = 0
     private var scanner: ImageButton? = null
 
+    //VARIABLE MODULO TOKEN
+    private var busquedaToken : Boolean = false
+
     //VARIABLES TABLA CONFIG DE LA APP
     private var vistaInventario: Int? = null //INVENTARIO 1 -> VISTA MINIATURA  2-> VISTA EN LISTA
     private var sinExistencias: Int? = null  // 1 -> Si    0 -> no
@@ -64,6 +67,8 @@ class Inventario : AppCompatActivity() {
         busqueda = findViewById(R.id.busquedainv)
 
         busquedaProducto = intent.getBooleanExtra("busqueda", false)
+        busquedaToken = intent.getBooleanExtra("tokenBusqueda", false)
+
         idcliente = intent.getIntExtra("idcliente", 0)
         nombrecliente = intent.getStringExtra("nombrecliente")
         idpedido = intent.getIntExtra("idpedido", 0)
@@ -282,11 +287,18 @@ class Inventario : AppCompatActivity() {
             startActivity(intento)
         } else {
 
-            eliminarBusqueda()
+            if(busquedaToken){
+                val intent = Intent(this@Inventario, NuevoToken::class.java)
+                startActivity(intent)
+                finish()
+            }else{
+                eliminarBusqueda()
 
-            val intento = Intent(this, Inicio::class.java)
-            startActivity(intento)
-            finish()
+                val intento = Intent(this, Inicio::class.java)
+                startActivity(intento)
+                finish()
+            }
+
         }
 
     }
@@ -323,11 +335,20 @@ class Inventario : AppCompatActivity() {
                                 }
                             } else {
 
-                                buscarProducto(busqueda!!.query.toString())
+                                if(busquedaToken){
+                                    val intent = Intent(this@Inventario, NuevoToken::class.java)
+                                    intent.putExtra("codigo", list.get(position).Codigo.toString())
+                                    intent.putExtra("producto", list.get(position).descripcion.toString())
+                                    intent.putExtra("precio", list.get(position).Precio_iva)
+                                    startActivity(intent)
+                                    finish()
+                                }else{
+                                    buscarProducto(busqueda!!.query.toString())
 
-                                val intento = Intent(this@Inventario, Inventariodetalle::class.java)
-                                intento.putExtra("idproducto", list.get(position).Id)
-                                startActivity(intento)
+                                    val intento = Intent(this@Inventario, Inventariodetalle::class.java)
+                                    intento.putExtra("idproducto", list.get(position).Id)
+                                    startActivity(intento)
+                                }
                             }
                         }
                         recicle!!.adapter = adapter
@@ -359,11 +380,20 @@ class Inventario : AppCompatActivity() {
                                 }
                             } else {
 
-                                buscarProducto(busqueda!!.query.toString())
+                                if(busquedaToken){
+                                    val intent = Intent(this@Inventario, NuevoToken::class.java)
+                                    intent.putExtra("codigo", list.get(position).Codigo.toString())
+                                    intent.putExtra("producto", list.get(position).descripcion.toString())
+                                    intent.putExtra("precio", list.get(position).Precio_iva)
+                                    startActivity(intent)
+                                    finish()
+                                }else{
+                                    buscarProducto(busqueda!!.query.toString())
 
-                                val intento = Intent(this@Inventario, Inventariodetalle::class.java)
-                                intento.putExtra("idproducto", list.get(position).Id)
-                                startActivity(intento)
+                                    val intento = Intent(this@Inventario, Inventariodetalle::class.java)
+                                    intento.putExtra("idproducto", list.get(position).Id)
+                                    startActivity(intento)
+                                }
                             }
                         }
                         recicle!!.adapter = adapter
