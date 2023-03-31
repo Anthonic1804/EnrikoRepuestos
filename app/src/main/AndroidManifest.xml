@@ -26,6 +26,9 @@
         android:theme="@style/AppTheme"
         android:usesCleartextTraffic="true">
         <activity
+            android:name=".Tokens"
+            android:exported="false" />
+        <activity
             android:name=".NuevoToken"
             android:exported="false" />
         <activity

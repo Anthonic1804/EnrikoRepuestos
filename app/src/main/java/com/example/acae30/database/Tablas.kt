@@ -161,10 +161,8 @@ class Tablas {
     //CREANDO LA TABLA EMPLEADOS
     fun Empleados(): String{
         val tblEmpleados = "CREATE TABLE empleado(" +
-                "Id INTEGER PRIMARY KEY NOT NULL," +
                 "id_empleado INTEGER NOT NULL," +
-                "nombre_empleado VARCHAR(50) NOT NULL," +
-                "generaToken INTEGER DEFAULT 0);"
+                "nombre_empleado VARCHAR(50) NOT NULL);"
         return tblEmpleados
     }
 
