@@ -20,6 +20,7 @@ class NuevoToken : AppCompatActivity() {
     private lateinit var edtProducto : EditText
     private lateinit var edtPrecio : EditText
     private lateinit var edtReferencia : EditText
+    private lateinit var edtPrecioOld : EditText
     private lateinit var spEmpleado : Spinner
     var codigoProducto : String? = ""
     var nombreProducto : String? = ""
@@ -36,6 +37,7 @@ class NuevoToken : AppCompatActivity() {
         btnBuscarProducto = findViewById(R.id.btnProductoToken)
         edtProducto = findViewById(R.id.edtProducto)
         edtPrecio = findViewById(R.id.edtPrecio)
+        edtPrecioOld = findViewById(R.id.edtPrecioOld)
         edtReferencia = findViewById(R.id.edtReferencia)
         codigoProducto = intento.getStringExtra("codigo")
         nombreProducto = intento.getStringExtra("producto")
@@ -46,11 +48,12 @@ class NuevoToken : AppCompatActivity() {
 
         edtProducto.isEnabled = false
         edtReferencia.isEnabled = false
+        edtPrecioOld.isEnabled = false
 
         if(codigoProducto != ""){
             edtProducto.setText(nombreProducto)
             edtReferencia.setText(codigoProducto)
-            edtPrecio.setText(precioProducto)
+            edtPrecioOld.setText("$ " + precioProducto)
         }
 
         btnBuscarProducto.setOnClickListener {
@@ -64,7 +67,7 @@ class NuevoToken : AppCompatActivity() {
             mensajeCancelar()
         }
 
-        //IMPLEMENTANDO LOGICA DE SUCURSAL SELECCIONADA EN SPINNER
+        //IMPLEMENTANDO LOGICA DE EMPLEADO SELECCIONADA EN SPINNER
         spEmpleado.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
             override fun onItemSelected(
                 parent: AdapterView<*>?,

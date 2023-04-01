@@ -103,24 +103,63 @@
                         android:backgroundTint="@android:color/holo_green_dark"
                         app:srcCompat="@drawable/ic_baseline_add_box_24" />
                 </LinearLayout>
-                <TextView
-                    android:id="@+id/lblReferencia"
+                <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:textStyle="bold"
-                    android:textSize="18sp"
-                    android:text="REFERENCIA" />
+                    android:orientation="horizontal">
 
-                <EditText
-                    android:id="@+id/edtReferencia"
-                    android:layout_width="300dp"
-                    android:layout_height="50dp"
-                    android:background="@drawable/border_textbox"
-                    android:ems="10"
-                    android:inputType="text"
-                    android:textSize="16sp"
-                    android:textColor="@color/moderado"
-                    android:paddingStart="7dp"/>
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:orientation="vertical">
+                        <TextView
+                            android:id="@+id/lblReferencia"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:textStyle="bold"
+                            android:textSize="18sp"
+                            android:text="REFERENCIA" />
+
+                        <EditText
+                            android:id="@+id/edtReferencia"
+                            android:layout_width="match_parent"
+                            android:layout_height="50dp"
+                            android:background="@drawable/border_textbox"
+                            android:ems="10"
+                            android:inputType="text"
+                            android:textSize="16sp"
+                            android:textColor="@color/moderado"
+                            android:paddingStart="7dp"/>
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:orientation="vertical">
+                        <TextView
+                            android:id="@+id/lblPrecioOld"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:textStyle="bold"
+                            android:textSize="18sp"
+                            android:text="PRECIO" />
+
+                        <EditText
+                            android:id="@+id/edtPrecioOld"
+                            android:layout_width="match_parent"
+                            android:layout_height="50dp"
+                            android:background="@drawable/border_textbox"
+                            android:ems="10"
+                            android:inputType="text"
+                            android:textSize="16sp"
+                            android:textColor="@color/moderado"
+                            android:paddingStart="7dp"/>
+                    </LinearLayout>
+
+                </LinearLayout>
+
 
                 <TextView
                     android:id="@+id/lblVendedor"
@@ -143,7 +182,7 @@
                     android:layout_marginTop="16dp"
                     android:textStyle="bold"
                     android:textSize="18sp"
-                    android:text="PRECIO" />
+                    android:text="NUEVO PRECIO" />
 
                 <EditText
                     android:id="@+id/edtPrecio"
