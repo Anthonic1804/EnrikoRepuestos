@@ -174,6 +174,7 @@ class Tablas {
                 "Id_admin INTEGER NOT NULL," +
                 "cod_producto VARCHAR(25) NOT NULL," +
                 "precio_asig NUMERIC(18,4) NOT NULL," +
+                "" +
                 "id_server INTEGER);"
         return tblToken
     }

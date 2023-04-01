@@ -22,9 +22,9 @@ class NuevoToken : AppCompatActivity() {
     private lateinit var edtReferencia : EditText
     private lateinit var edtPrecioOld : EditText
     private lateinit var spEmpleado : Spinner
-    var codigoProducto : String? = ""
-    var nombreProducto : String? = ""
-    var precioProducto : String? = ""
+    private var codigoProducto : String? = ""
+    private var nombreProducto : String? = ""
+    private var precioProducto : String? = ""
     private var empleadoName: String = ""
     private var db: Database? = null
 
