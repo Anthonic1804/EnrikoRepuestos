@@ -813,8 +813,6 @@ class Visita : AppCompatActivity() {
             //inserta el encabezado del pedido
             idpedido = id.toInt()
 
-            //base.execSQL("UPDATE visitas SET Pedido = 'TRUE', Idpedido = ${idpedido} WHERE Id=${idvisitaGLOBAL}")
-
             base.setTransactionSuccessful()
         } catch (e: Exception) {
             idpedido = 0

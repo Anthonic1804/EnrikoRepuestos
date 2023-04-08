@@ -1,14 +1,29 @@
 package com.example.acae30
 
 import android.app.Dialog
+import android.content.ContentValues
+import android.content.Context
 import android.content.Intent
-import androidx.appcompat.app.AppCompatActivity
+import android.content.SharedPreferences
 import android.os.Bundle
 import android.view.View
 import android.widget.*
+import androidx.appcompat.app.AppCompatActivity
 import com.example.acae30.database.Database
 import com.example.acae30.modelos.Empleados
-import com.example.acae30.modelos.Sucursales
+import com.example.acae30.modelos.JSONmodels.TokenDataClass
+import com.google.gson.Gson
+import org.json.JSONObject
+import java.io.BufferedReader
+import java.io.InputStreamReader
+import java.io.OutputStreamWriter
+import java.io.Reader
+import java.net.HttpURLConnection
+import java.net.URL
+import java.nio.charset.StandardCharsets
+import java.text.SimpleDateFormat
+import java.util.*
+import kotlin.collections.ArrayList
 
 class NuevoToken : AppCompatActivity() {
 
@@ -27,6 +42,12 @@ class NuevoToken : AppCompatActivity() {
     private var precioProducto : String? = ""
     private var empleadoName: String = ""
     private var db: Database? = null
+    private var empleadoId : Int = 0
+    private var adminId : Int = 0
+
+    private var url: String? = null
+    private var preferencias: SharedPreferences? = null
+    private val instancia = "CONFIG_SERVIDOR"
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -43,6 +64,11 @@ class NuevoToken : AppCompatActivity() {
         nombreProducto = intento.getStringExtra("producto")
         precioProducto = intento.getFloatExtra("precio", 0f).toString()
         db = Database(this)
+
+        preferencias = getSharedPreferences(instancia, Context.MODE_PRIVATE)
+        adminId = preferencias!!.getInt("Idvendedor", 0)
+
+        getApiUrl()
 
         cargarEmpleado()
 
@@ -67,6 +93,12 @@ class NuevoToken : AppCompatActivity() {
             mensajeCancelar()
         }
 
+        btnProcesar.setOnClickListener {
+            val precioNuevo : Float = edtPrecio.text.toString().toFloat()
+            validadToken(empleadoId, adminId, codigoProducto!!, precioNuevo)
+            //Toast.makeText(this@NuevoToken, "FUNCION EN DESARROLLO", Toast.LENGTH_SHORT).show()
+        }
+
         //IMPLEMENTANDO LOGICA DE EMPLEADO SELECCIONADA EN SPINNER
         spEmpleado.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
             override fun onItemSelected(
@@ -84,8 +116,7 @@ class NuevoToken : AppCompatActivity() {
                     btnProcesar.isEnabled = true
                     btnProcesar.setBackgroundResource(R.drawable.border_btnactualizar)
 
-                   // getSucursalPosition = spSucursal!!.selectedItemPosition
-                    //println("Sucursal Seleccioada: $getSucursalPosition")
+                    getEmpleadoId(empleadoName)
                 }
             }
 
@@ -93,6 +124,44 @@ class NuevoToken : AppCompatActivity() {
                 //NADA IMPLEMENTADO
             }
 
+        }
+    }
+
+    private fun getApiUrl() {
+        val ip = preferencias!!.getString("ip", "")
+        val puerto = preferencias!!.getInt("puerto", 0)
+        if (ip!!.length > 0 && puerto > 0) {
+            url = "http://$ip:$puerto/"
+        }
+    }
+
+    private fun getEmpleadoId(nombre : String){
+        val db = db!!.readableDatabase
+        val listaEmpleados = ArrayList<Empleados>()
+        try {
+
+            val dataEmpleado = db.rawQuery("SELECT * FROM empleado WHERE nombre_empleado='$nombre'", null)
+            if(dataEmpleado.count > 0){
+                dataEmpleado.moveToFirst()
+                do{
+                    val data = Empleados(
+                        dataEmpleado.getString(0),
+                        dataEmpleado.getString(1)
+                    )
+                    listaEmpleados.add(data)
+                }while (dataEmpleado.moveToNext())
+
+                for(data in listaEmpleados){
+                    empleadoId = data.idEmpleado.toInt()
+                }
+            }else{
+                Toast.makeText(this@NuevoToken, "NO SE ENCONTRARON VENDEDORES REGISTRADOS", Toast.LENGTH_LONG).show()
+            }
+            dataEmpleado.close()
+        }catch (e: Exception) {
+            throw Exception(e.message)
+        } finally {
+            db!!.close()
         }
     }
 
@@ -180,4 +249,113 @@ class NuevoToken : AppCompatActivity() {
         }
         return listaEmpleados
     }
+
+    private fun validadToken(id_empleado:Int, id_admin:Int, cod_producto:String, precio_asig:Float){
+        try {
+            val datos = TokenDataClass(
+                id_empleado,
+                id_admin,
+                cod_producto,
+                precio_asig
+            )
+            val objecto =
+                Gson().toJson(datos)
+            val ruta: String = url!! + "token"
+            println(ruta)
+            val url = URL(ruta)
+            with(url.openConnection() as HttpURLConnection) {
+                try {
+                    connectTimeout = 20000
+                    setRequestProperty(
+                        "Content-Type",
+                        "application/json;charset=utf-8"
+                    )
+                    requestMethod = "POST"
+                    val or = OutputStreamWriter(outputStream, StandardCharsets.UTF_8)
+                    or.write(objecto) //escribo el json
+                    or.flush() //se envia el json
+                    if (responseCode == 201) {
+                        BufferedReader(InputStreamReader(inputStream) as Reader?).use {
+                            try {
+                                val respuesta = StringBuffer()
+                                var inpuline = it.readLine()
+                                while (inpuline != null) {
+                                    respuesta.append(inpuline)
+                                    inpuline = it.readLine()
+                                }
+                                it.close()
+                                val res: JSONObject =
+                                    JSONObject(respuesta.toString())
+                                if (res.length() > 0) {
+                                    if (res.getInt("id_token") > 0 && !res.isNull("response")) {
+                                        val idTokenServer: Int = res.getInt("id_token").toInt()
+                                        when (res.getString("response")) {
+                                                "TOKEN_OK" -> {
+                                                    confirmarToken(id_empleado,
+                                                        id_admin,
+                                                        cod_producto,
+                                                        precio_asig,
+                                                        idTokenServer)
+                                                }
+                                                "ERROR_TOKEN" -> {
+                                                    runOnUiThread {
+                                                        Toast.makeText(this@NuevoToken, "ERROR AL AUTORIZAR EL TOKEN", Toast.LENGTH_SHORT).show()
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    } else {
+                                        throw Exception("Error al procesar la solicitud")
+                                    }
+                            } catch (e: Exception) {
+                                throw Exception(e.message)
+                            }
+                        }
+                    }else {
+                        throw Exception("Error de comunicacion con el servidor")
+                    }
+
+                } catch (e: Exception) {
+                    throw  Exception(e.message)
+                }
+            }
+        } catch (e: Exception) {
+            throw Exception(e.message)
+        }
+    }
+
+    private fun confirmarToken(id_empleado:Int, id_admin:Int, cod_producto:String, precio_asig:Float, idServer: Int) {
+        val base = db!!.writableDatabase
+        try {
+            base.beginTransaction()
+            val fechanow = getDateTime()
+            val contenido = ContentValues()
+            contenido.put("Id_vendedor", id_empleado)
+            contenido.put("Id_admin", id_admin)
+            contenido.put("cod_producto", cod_producto)
+            contenido.put("precio_asig", precio_asig)
+            contenido.put("fecha_registrado", fechanow)
+            contenido.put("id_server", idServer)
+            val id = base.insert("pedidos", null, contenido)
+            base.setTransactionSuccessful()
+        } catch (e: Exception) {
+            throw Exception(e.message)
+        } finally {
+            base.endTransaction()
+            base.close()
+
+            val Intent = Intent(this@NuevoToken, Tokens::class.java)
+            startActivity(Intent)
+            finish()
+        }
+    }
+
+    private fun getDateTime(): String? {
+        val dateFormat = SimpleDateFormat(
+            "yyyy-MM-dd'T'HH:mm:ss", Locale.getDefault()
+        )
+        val date = Date()
+        return dateFormat.format(date)
+    }
+
 }
