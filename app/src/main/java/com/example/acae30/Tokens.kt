@@ -7,17 +7,28 @@ import android.content.Intent
 import android.content.SharedPreferences
 import android.os.Bundle
 import android.os.StrictMode
+import android.view.View
 import android.widget.ImageButton
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.constraintlayout.widget.ConstraintLayout
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import com.example.acae30.database.Database
+import com.example.acae30.listas.InventarioDetalleAdapter
+import com.example.acae30.listas.TokenAdapter
+import com.example.acae30.modelos.InventarioPrecios
+import com.example.acae30.modelos.TokenData
+import com.example.acae30.modelos.TokenDataClass
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.google.android.material.snackbar.Snackbar
 import kotlinx.coroutines.*
 import org.json.JSONArray
 import java.net.HttpURLConnection
 import java.net.URL
+import java.text.SimpleDateFormat
+import java.util.*
+import kotlin.collections.ArrayList
 
 class Tokens : AppCompatActivity() {
 
@@ -26,6 +37,8 @@ class Tokens : AppCompatActivity() {
     private lateinit var btnAtras : ImageButton
     private lateinit var tvUpdate : TextView
     private lateinit var tvCancel : TextView
+    private lateinit var rvTokenResgistrados : RecyclerView
+    private lateinit var lblNoData : TextView
 
     private var database: Database? = null
     private var funciones: Funciones? = null
@@ -42,12 +55,17 @@ class Tokens : AppCompatActivity() {
         btnEmpleado = findViewById(R.id.btn_floatEmpleados)
         btnNuevo = findViewById(R.id.btn_floatNuevo)
         btnAtras = findViewById(R.id.imgbtnatras)
+        rvTokenResgistrados = findViewById(R.id.rvTokenRegistrados)
+        lblNoData = findViewById(R.id.lblNoData)
         preferencias = getSharedPreferences(instancia, Context.MODE_PRIVATE)
         funciones = Funciones()
         database = Database(this)
         alert = AlertDialogo(this)
 
+        lblNoData.visibility = View.GONE
+
         getApiUrl()
+        validarDatos();
 
         val policy = StrictMode.ThreadPolicy.Builder().permitAll().build()
         StrictMode.setThreadPolicy(policy)
@@ -68,6 +86,73 @@ class Tokens : AppCompatActivity() {
         btnEmpleado.setOnClickListener {
             mensajeEmpleados()
         }
+    }
+
+    //OBTENIENDO LA FECHA CON EL FORMATO CORRECTO
+    private fun getDateTime(): String? {
+        val dateFormat = SimpleDateFormat(
+            "yyyy-MM-dd", Locale.getDefault()
+        )
+        val date = Date()
+        return dateFormat.format(date)
+    }
+
+    //MOSTRANDOS LOS TOKEN REGISTRADO EN LA FECHA ACTUAL
+    private fun getTokenByDate(): ArrayList<TokenData>{
+        val data = database!!.readableDatabase
+        val fechanow = getDateTime()
+        val list = ArrayList<TokenData>()
+
+        try {
+            val cursor = data.rawQuery("SELECT T.Id, T.cod_producto, I.Descripcion, E.nombre_empleado, T.precio_asig FROM token T " +
+                    "INNER JOIN inventario I ON I.Codigo = T.cod_producto " +
+                    "INNER JOIN empleado E ON E.id_empleado = T.Id_vendedor " +
+                    "WHERE fecha_registrado='$fechanow'", null)
+            if(cursor.count > 0){
+                cursor.moveToFirst()
+                do {
+                    val dataToken = TokenData(
+                        cursor.getInt(0),
+                        cursor.getString(1),
+                        cursor.getString(2),
+                        cursor.getString(3),
+                        cursor.getFloat(4)
+                    )
+                    list.add(dataToken)
+                }while (cursor.moveToNext())
+            }
+        }catch (e: Exception) {
+            throw Exception(e.message)
+        } finally {
+            data.close()
+        }
+        return list
+    }
+
+    fun validarDatos(){
+        try{
+            val lista = getTokenByDate()
+            if(lista.size > 0){
+                ArmarLista(lista)
+            }else{
+                lblNoData.visibility = View.VISIBLE
+                lblNoData.text = "NO SE ENCONTRARON DATOS REGISTRADOS"
+            }
+        }catch (e: Exception){
+                throw Exception(e.message)
+        }
+    }
+    private fun ArmarLista(lista: java.util.ArrayList<TokenData>) {
+
+        var mLayoutManager = LinearLayoutManager(
+            this@Tokens,
+            LinearLayoutManager.VERTICAL,
+            false
+        )
+        rvTokenResgistrados.layoutManager = mLayoutManager
+        val adapter = TokenAdapter(lista, this@Tokens)
+        rvTokenResgistrados.adapter = adapter
+
     }
 
     //MOSTRANDO DIALOGO DE CARGA DE INFORMACION

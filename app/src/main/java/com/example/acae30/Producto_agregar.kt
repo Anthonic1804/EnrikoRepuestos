@@ -2,7 +2,9 @@ package com.example.acae30
 
 import android.app.Dialog
 import android.content.ContentValues
+import android.content.Context
 import android.content.Intent
+import android.content.SharedPreferences
 import android.os.Bundle
 import android.text.Editable
 import android.text.InputFilter
@@ -17,12 +19,23 @@ import com.example.acae30.database.Database
 import com.example.acae30.modelos.Config
 import com.example.acae30.modelos.DetallePedido
 import com.example.acae30.modelos.InventarioPrecios
+import com.example.acae30.modelos.JSONmodels.TokenDataClassJSON
+import com.example.acae30.modelos.JSONmodels.UpdateTokenDataClassJSON
 import com.google.android.material.snackbar.Snackbar
+import com.google.gson.Gson
 import kotlinx.android.synthetic.main.activity_producto_agregar.*
 import kotlinx.android.synthetic.main.alerta_precio.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
+import org.json.JSONObject
+import java.io.BufferedReader
+import java.io.InputStreamReader
+import java.io.OutputStreamWriter
+import java.io.Reader
+import java.net.HttpURLConnection
+import java.net.URL
+import java.nio.charset.StandardCharsets
 import java.text.DecimalFormatSymbols
 import java.util.*
 
@@ -64,6 +77,15 @@ class Producto_agregar : AppCompatActivity() {
     private var existenciaProducto: Float = 0f
     private var getSucursalPosition: Int? = null
 
+
+    private var preferencias: SharedPreferences? = null
+    private val instancia = "CONFIG_SERVIDOR"
+    private var precioAutorizado: Float = 0f
+    private var codEmpleado: Int = 0
+    private var url: String? = null
+
+    var contexto = this
+
     override fun onCreate(savedInstanceState: Bundle?) {
 
         super.onCreate(savedInstanceState)
@@ -79,6 +101,9 @@ class Producto_agregar : AppCompatActivity() {
         idvisita = intent.getIntExtra("visitaid", 0)
         codigo = intent.getStringExtra("codigo").toString()
         idapi = intent.getIntExtra("idapi", 0)
+
+        preferencias = getSharedPreferences(instancia, Context.MODE_PRIVATE)
+        codEmpleado = preferencias!!.getInt("Idvendedor", 0)
 
         //CAPTURANDO SUCURSAL
         getSucursalPosition = intent.getIntExtra("sucursalPosition", 0)
@@ -112,8 +137,7 @@ class Producto_agregar : AppCompatActivity() {
         //OBTENIDO DATOS DE LA TABLA CONFIGURACION
         getConfig()
 
-
-        var contexto = this
+        getApiUrl()
 
         // Validar que la cantidad sea con hasta dos decimales
         //ACTUALIZADOS LA VALIDACION QUE SEA HASTA CON 4 DECIMAES
@@ -254,7 +278,8 @@ class Producto_agregar : AppCompatActivity() {
 
         btneditarprecio!!.setOnClickListener {
 
-            AlertaPrecio(contexto)  //muestra la alerta
+            validarToken(codEmpleado, codigo)
+              //muestra la alerta
 
         }//cuando se carga los inventarios
 
@@ -1009,7 +1034,6 @@ class Producto_agregar : AppCompatActivity() {
 
     }//anula el boton atras
 
-
     private fun getPedidodetalle(id: Int): DetallePedido? {
         val base = db!!.writableDatabase
         try {
@@ -1058,8 +1082,6 @@ class Producto_agregar : AppCompatActivity() {
         }
 
     } //obtiene el detalle del pedido
-
-
 
     private fun updateDetalle(iddetalle: Int?, esPrecioEditado: Boolean) {
         val base = db!!.writableDatabase
@@ -1117,10 +1139,6 @@ class Producto_agregar : AppCompatActivity() {
             base.close()
         }
     } //ACTUALIZA EL DETALLE DEL PRODUCTO
-
-
-
-
 
     private fun deleteDetalle(iddetalle: Int?) {
         val base = db!!.writableDatabase
@@ -1204,8 +1222,6 @@ class Producto_agregar : AppCompatActivity() {
         }
     }
 
-
-
     //MODIFICADA LA CANTIDAD DE DECIMALES A 4
     private fun precioFromList(cadena: String): Float {
         var nuevoValor = 0.toFloat()
@@ -1232,7 +1248,8 @@ class Producto_agregar : AppCompatActivity() {
     private fun AlertaPrecio(contexto: com.example.acae30.Producto_agregar) {
         val dialogo = Dialog(this)
         dialogo.setContentView(R.layout.alerta_precio)
-        var nuevoprecio = dialogo.findViewById<EditText>(R.id.nuevoprecio)
+        val nuevoprecio = dialogo.findViewById<EditText>(R.id.nuevoprecio)
+        nuevoprecio.isEnabled = false
 
 
         var cadena_precio = spprecio!!.selectedItem.toString()
@@ -1247,7 +1264,7 @@ class Producto_agregar : AppCompatActivity() {
             nuevo_precio = precioFromList(cadena_precio)
         }
 
-        nuevoprecio!!.setText("${String.format("%.4f", nuevo_precio)}")
+        nuevoprecio!!.setText("${String.format("%.4f", precioAutorizado)}")
 
         // Actualizar el total cuando cambie la cantidad
         nuevoprecio.addTextChangedListener(object : TextWatcher {
@@ -1382,5 +1399,70 @@ class Producto_agregar : AppCompatActivity() {
         dialogo.show()
 
     } //muestra la alerta para agregar precio
+
+    private fun getApiUrl() {
+        val ip = preferencias!!.getString("ip", "")
+        val puerto = preferencias!!.getInt("puerto", 0)
+        if (ip!!.length > 0 && puerto > 0) {
+            url = "http://$ip:$puerto/"
+        }
+    }
+    private fun validarToken(id_empleado:Int, cod_producto:String){
+        try {
+            val ruta: String = url!! + "token/$id_empleado/$cod_producto"
+            val url = URL(ruta)
+            println(ruta)
+            with(url.openConnection() as HttpURLConnection) {
+                try {
+                    connectTimeout = 20000
+                    requestMethod = "GET"
+                    if (responseCode == 201) {
+                        BufferedReader(InputStreamReader(inputStream) as Reader?).use {
+                            try {
+                                val respuesta = StringBuffer()
+                                var inpuline = it.readLine()
+                                while (inpuline != null) {
+                                    respuesta.append(inpuline)
+                                    inpuline = it.readLine()
+                                }
+                                it.close()
+                                val res: JSONObject =
+                                    JSONObject(respuesta.toString())
+                                if (res.length() > 0) {
+                                    if (!res.isNull("response")) {
+                                        val precioAu : Float = res.getString("precio_asig") as Float
+                                        when (res.getString("response")) {
+                                            "SEARCH_TOKEN_OK" -> {
+                                                runOnUiThread {
+                                                    precioAutorizado = precioAu
+                                                    AlertaPrecio(contexto)
+                                                }
+                                            }
+                                            "SEARCH_TOKEN_ERROR" -> {
+                                                runOnUiThread {
+                                                    Toast.makeText(this@Producto_agregar, "ERROR NO SE ENCONTRO PRECIO AUTORIZADO", Toast.LENGTH_SHORT).show()
+                                                }
+                                            }
+                                        }
+                                    }
+                                } else {
+                                    throw Exception("Error al procesar la solicitud")
+                                }
+                            } catch (e: Exception) {
+                                throw Exception(e.message)
+                            }
+                        }
+                    }else {
+                        throw Exception("Error de comunicacion con el servidor")
+                    }
+
+                } catch (e: Exception) {
+                    throw  Exception(e.message)
+                }
+            }
+        } catch (e: Exception) {
+            throw Exception(e.message)
+        }
+    }
 
 }

@@ -11,7 +11,7 @@ import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
 import com.example.acae30.database.Database
 import com.example.acae30.modelos.Empleados
-import com.example.acae30.modelos.JSONmodels.TokenDataClass
+import com.example.acae30.modelos.JSONmodels.TokenDataClassJSON
 import com.google.gson.Gson
 import org.json.JSONObject
 import java.io.BufferedReader
@@ -23,7 +23,6 @@ import java.net.URL
 import java.nio.charset.StandardCharsets
 import java.text.SimpleDateFormat
 import java.util.*
-import kotlin.collections.ArrayList
 
 class NuevoToken : AppCompatActivity() {
 
@@ -32,6 +31,8 @@ class NuevoToken : AppCompatActivity() {
     private lateinit var btnBuscarProducto : ImageButton
     private lateinit var tvUpdate : TextView
     private lateinit var tvCancel : TextView
+    private lateinit var tvTitulo : TextView
+    private lateinit var tvMensaje : TextView
     private lateinit var edtProducto : EditText
     private lateinit var edtPrecio : EditText
     private lateinit var edtReferencia : EditText
@@ -252,7 +253,7 @@ class NuevoToken : AppCompatActivity() {
 
     private fun validadToken(id_empleado:Int, id_admin:Int, cod_producto:String, precio_asig:Float){
         try {
-            val datos = TokenDataClass(
+            val datos = TokenDataClassJSON(
                 id_empleado,
                 id_admin,
                 cod_producto,
@@ -261,7 +262,6 @@ class NuevoToken : AppCompatActivity() {
             val objecto =
                 Gson().toJson(datos)
             val ruta: String = url!! + "token"
-            println(ruta)
             val url = URL(ruta)
             with(url.openConnection() as HttpURLConnection) {
                 try {
@@ -336,7 +336,8 @@ class NuevoToken : AppCompatActivity() {
             contenido.put("precio_asig", precio_asig)
             contenido.put("fecha_registrado", fechanow)
             contenido.put("id_server", idServer)
-            val id = base.insert("pedidos", null, contenido)
+
+            base.insert("token", null, contenido)
             base.setTransactionSuccessful()
         } catch (e: Exception) {
             throw Exception(e.message)
@@ -344,18 +345,42 @@ class NuevoToken : AppCompatActivity() {
             base.endTransaction()
             base.close()
 
-            val Intent = Intent(this@NuevoToken, Tokens::class.java)
-            startActivity(Intent)
-            finish()
+            mensajeCreado()
         }
     }
 
     private fun getDateTime(): String? {
         val dateFormat = SimpleDateFormat(
-            "yyyy-MM-dd'T'HH:mm:ss", Locale.getDefault()
+            "yyyy-MM-dd", Locale.getDefault()
         )
         val date = Date()
         return dateFormat.format(date)
+    }
+
+    fun mensajeCreado(){
+
+        val updateDialog = Dialog(this, R.style.Theme_Dialog)
+        updateDialog.setCancelable(false)
+
+        updateDialog.setContentView(R.layout.dialog_cancelar)
+        tvUpdate = updateDialog.findViewById(R.id.tvUpdate)
+        tvCancel = updateDialog.findViewById(R.id.tvCancel)
+        tvMensaje = updateDialog.findViewById(R.id.tvMensaje)
+        tvTitulo = updateDialog.findViewById(R.id.tvTitulo)
+
+        tvTitulo.text = "INFORMACIÓN"
+        tvMensaje.text = "PROCESO REALIZADO CORRECTAMENTE"
+        tvUpdate.text = "ACEPTAR"
+
+        tvUpdate.setOnClickListener {
+            atras()
+            updateDialog.dismiss()
+        }
+
+        tvCancel.visibility = View.GONE
+
+        updateDialog.show()
+
     }
 
 }

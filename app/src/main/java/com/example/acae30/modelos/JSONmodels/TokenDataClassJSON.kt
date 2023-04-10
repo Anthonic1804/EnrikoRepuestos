@@ -1,6 +1,6 @@
 package com.example.acae30.modelos.JSONmodels
 
-data class TokenDataClass(
+data class TokenDataClassJSON(
     val id_empleado : Int,
     val id_admin : Int,
     val cod_producto : String,

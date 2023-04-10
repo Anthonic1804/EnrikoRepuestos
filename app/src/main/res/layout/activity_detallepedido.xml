@@ -289,7 +289,7 @@
                         android:id="@+id/btnenviar"
                         android:layout_width="175dp"
                         android:layout_height="wrap_content"
-                        android:background="@drawable/border_btnenviar"
+                        android:background="@drawable/border_btnactualizar"
                         android:text="ENVIAR"
                         android:textAlignment="center"
                         android:textColor="@color/colorAccent"
