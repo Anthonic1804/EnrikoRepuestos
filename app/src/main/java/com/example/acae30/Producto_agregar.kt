@@ -21,6 +21,7 @@ import com.example.acae30.modelos.DetallePedido
 import com.example.acae30.modelos.InventarioPrecios
 import com.example.acae30.modelos.JSONmodels.TokenDataClassJSON
 import com.example.acae30.modelos.JSONmodels.UpdateTokenDataClassJSON
+import com.example.acae30.modelos.TokenData
 import com.google.android.material.snackbar.Snackbar
 import com.google.gson.Gson
 import kotlinx.android.synthetic.main.activity_producto_agregar.*
@@ -1409,13 +1410,25 @@ class Producto_agregar : AppCompatActivity() {
     }
     private fun validarToken(id_empleado:Int, cod_producto:String){
         try {
-            val ruta: String = url!! + "token/$id_empleado/$cod_producto"
+            val datos = UpdateTokenDataClassJSON(
+                id_empleado,
+                cod_producto
+            )
+            val objecto =
+                Gson().toJson(datos)
+            val ruta: String = url!! + "token"
             val url = URL(ruta)
-            println(ruta)
             with(url.openConnection() as HttpURLConnection) {
                 try {
                     connectTimeout = 20000
-                    requestMethod = "GET"
+                    setRequestProperty(
+                        "Content-Type",
+                        "application/json;charset=utf-8"
+                    )
+                    requestMethod = "POST"
+                    val or = OutputStreamWriter(outputStream, StandardCharsets.UTF_8)
+                    or.write(objecto) //escribo el json
+                    or.flush() //se envia el json
                     if (responseCode == 201) {
                         BufferedReader(InputStreamReader(inputStream) as Reader?).use {
                             try {
@@ -1429,18 +1442,16 @@ class Producto_agregar : AppCompatActivity() {
                                 val res: JSONObject =
                                     JSONObject(respuesta.toString())
                                 if (res.length() > 0) {
-                                    if (!res.isNull("response")) {
+                                    if (res.getInt("id_token") > 0 && !res.isNull("response")) {
                                         val precioAu : Float = res.getString("precio_asig") as Float
                                         when (res.getString("response")) {
-                                            "SEARCH_TOKEN_OK" -> {
-                                                runOnUiThread {
-                                                    precioAutorizado = precioAu
-                                                    AlertaPrecio(contexto)
-                                                }
+                                            "TOKEN_OK" -> {
+                                                precioAutorizado = precioAu
+                                                AlertaPrecio(contexto)
                                             }
-                                            "SEARCH_TOKEN_ERROR" -> {
+                                            "ERROR_TOKEN" -> {
                                                 runOnUiThread {
-                                                    Toast.makeText(this@Producto_agregar, "ERROR NO SE ENCONTRO PRECIO AUTORIZADO", Toast.LENGTH_SHORT).show()
+                                                    Toast.makeText(this@Producto_agregar, "ERROR AL AUTORIZAR EL TOKEN", Toast.LENGTH_SHORT).show()
                                                 }
                                             }
                                         }
