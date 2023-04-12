@@ -84,6 +84,7 @@ class Producto_agregar : AppCompatActivity() {
     private var precioAutorizado: Float = 0f
     private var codEmpleado: Int = 0
     private var url: String? = null
+    private var codigoProducto: String = ""
 
     var contexto = this
 
@@ -279,7 +280,7 @@ class Producto_agregar : AppCompatActivity() {
 
         btneditarprecio!!.setOnClickListener {
 
-            validarToken(codEmpleado, codigo)
+            validarToken(codEmpleado, codigoProducto)
               //muestra la alerta
 
         }//cuando se carga los inventarios
@@ -726,6 +727,7 @@ class Producto_agregar : AppCompatActivity() {
                         spiner!!.adapter = adapter
 
                         txtcodigo!!.text = datos.Codigo
+                        codigoProducto = datos.Codigo.toString()
                         txtdescripcion!!.text = datos.descripcion
 
                         precio = datos.Precio_iva!!
@@ -1416,7 +1418,7 @@ class Producto_agregar : AppCompatActivity() {
             )
             val objecto =
                 Gson().toJson(datos)
-            val ruta: String = url!! + "token"
+            val ruta: String = url!! + "token/search"
             val url = URL(ruta)
             with(url.openConnection() as HttpURLConnection) {
                 try {
@@ -1439,36 +1441,25 @@ class Producto_agregar : AppCompatActivity() {
                                     inpuline = it.readLine()
                                 }
                                 it.close()
-                                val res: JSONObject =
-                                    JSONObject(respuesta.toString())
-                                if (res.length() > 0) {
-                                    if (res.getInt("id_token") > 0 && !res.isNull("response")) {
-                                        val precioAu : Float = res.getString("precio_asig") as Float
-                                        when (res.getString("response")) {
-                                            "TOKEN_OK" -> {
-                                                precioAutorizado = precioAu
-                                                AlertaPrecio(contexto)
-                                            }
-                                            "ERROR_TOKEN" -> {
-                                                runOnUiThread {
-                                                    Toast.makeText(this@Producto_agregar, "ERROR AL AUTORIZAR EL TOKEN", Toast.LENGTH_SHORT).show()
-                                                }
-                                            }
-                                        }
-                                    }
-                                } else {
-                                    throw Exception("Error al procesar la solicitud")
+
+                                val res: JSONObject = JSONObject(respuesta.toString())
+                                val precioAu : Float = res.getString("precio_asig").toString().toFloat();
+
+                                runOnUiThread {
+                                    precioAutorizado = precioAu
+                                    AlertaPrecio(contexto)
                                 }
                             } catch (e: Exception) {
                                 throw Exception(e.message)
                             }
                         }
                     }else {
-                        throw Exception("Error de comunicacion con el servidor")
+                        runOnUiThread {
+                            Toast.makeText(this@Producto_agregar, "ERROR NO SE ENCONTRO PRECIO AUTORIZADO", Toast.LENGTH_SHORT).show()
+                        }
                     }
-
                 } catch (e: Exception) {
-                    throw  Exception(e.message)
+                    throw  Exception("error: " + e.message)
                 }
             }
         } catch (e: Exception) {
