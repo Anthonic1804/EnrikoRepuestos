@@ -417,7 +417,7 @@ class Detallepedido : AppCompatActivity() {
                 }else{
                     btnguardar!!.isEnabled = true
                     btnenviar!!.isEnabled = true
-                    btnenviar!!.setBackgroundResource(R1.drawable.border_btnenviar)
+                    btnenviar!!.setBackgroundResource(R1.drawable.border_btnactualizar)
                     btnguardar!!.setBackgroundResource(R1.drawable.border_btnenviar)
 
                     getSucursalPosition = spSucursal!!.selectedItemPosition
