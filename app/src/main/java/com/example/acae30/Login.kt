@@ -319,6 +319,7 @@ class Login : AppCompatActivity() {
                                         val nombreEmpleado : String = res.getString("nombreEmpleado")
                                         val identidad_param: String = res.getString("identidad")
                                         val estado: String = res.getString("estado")
+                                        val generaToken : Int = res.getInt("generaToken")
 
                                         if (coderror > 0) {
                                             val editor = preferencias!!.edit()
@@ -326,6 +327,7 @@ class Login : AppCompatActivity() {
                                             editor.putString("Vendedor", nombreEmpleado.uppercase()) //MODIFICACION OBTENIENDO EL NOMBRE DEL EMPLEADO
                                             editor.putString("Usuario", usuario.uppercase())
                                             editor.putString("Identidad", identidad)
+                                            editor.putInt("generaToken", generaToken)//VALIDACION PARA INGRESO EN MODULO DE GENERAR TOKEN 1-> SI  0->NO
                                             editor.putBoolean("sesion", true)
                                             editor.commit()
                                             val inte = Intent(this@Login, Inicio::class.java)

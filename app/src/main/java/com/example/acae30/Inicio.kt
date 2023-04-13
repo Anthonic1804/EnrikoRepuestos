@@ -56,6 +56,7 @@ class Inicio : AppCompatActivity(), NavigationView.OnNavigationItemSelectedListe
     private lateinit var toogle: ActionBarDrawerToggle
 
     private lateinit var txtvendedor : TextView
+    private var generaToken: Int = 0
 
     private var ip = ""
     private var puerto = 0
@@ -93,10 +94,10 @@ class Inicio : AppCompatActivity(), NavigationView.OnNavigationItemSelectedListe
 
         ip = preferencias!!.getString("ip", "").toString()
         puerto = preferencias!!.getInt("puerto", 0)
+        generaToken = preferencias!!.getInt("generaToken", 0)
 
         val nombre_vendedor =  preferencias!!.getString("Vendedor", "")
         txtvendedor.text = "BIENVENIDO " + nombre_vendedor?.trim()
-
 
         //IMPLEMENTANDO MENU SLIDE
         val toolbar: androidx.appcompat.widget.Toolbar = findViewById(R.id.toolbar_main)
@@ -109,6 +110,11 @@ class Inicio : AppCompatActivity(), NavigationView.OnNavigationItemSelectedListe
 
         val navigationView: NavigationView = findViewById(R.id.nav_view)
         navigationView.setNavigationItemSelectedListener(this)
+
+        //OCULTANDO EL MENU TOKEN
+        if(generaToken == 0){
+            navigationView.menu.setGroupVisible(R.id.group_admin, false)
+        }
 
         //FIN DE LA IMPLEAMENTACION DEL MENU
 
@@ -264,6 +270,7 @@ class Inicio : AppCompatActivity(), NavigationView.OnNavigationItemSelectedListe
         dialogo.findViewById<Button>(R.id.btncerrar).setOnClickListener {
             updateSesionServer()
             cerrarSesion()
+            dialogo.dismiss()
         }
         dialogo.findViewById<Button>(R.id.btncancelar).setOnClickListener {
             dialogo.dismiss()
@@ -423,6 +430,7 @@ class Inicio : AppCompatActivity(), NavigationView.OnNavigationItemSelectedListe
         editor.putString("Vendedor", "")
         editor.putString("Usuario", "")
         editor.putString("Identidad", "")
+        editor.putInt("generaToken", 0)
         editor.putBoolean("sesion", false)
         editor.commit()
         val intento = Intent(this, Login::class.java)
