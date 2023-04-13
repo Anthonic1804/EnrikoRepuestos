@@ -80,7 +80,6 @@ class Producto_agregar : AppCompatActivity() {
     private var preferencias: SharedPreferences? = null
     private val instancia = "CONFIG_SERVIDOR"
     private var precioAutorizado: Float = 0f
-    private var idToken : Int = 0
     private var codEmpleado: Int = 0
     private var url: String? = null
     private var codigoProducto: String = ""
@@ -195,21 +194,19 @@ class Producto_agregar : AppCompatActivity() {
                     if (listPrecios!!.size > 0) {
                         if (unidad == "UNIDAD") {
 
-                            precioss.add("${String.format("%.4f", datosProducto!!.Precio_iva)}") //PRECIO AGREGADO DEL PRODUCTO DE LA TABLA INVENTARIO
+                            precioss.add(String.format("%.4f", datosProducto!!.Precio_iva)) //PRECIO AGREGADO DEL PRODUCTO DE LA TABLA INVENTARIO
                             listPrecios!!.forEach {
                                 if (it.Unidad == "UNI" || it.Unidad == "") {
                                     var unidad_cantidad = ""
                                     if (it.Cantidad!! > 0.toFloat()) {
                                         unidad_cantidad =
-                                            " (" + "${String.format("%.4f", it.Cantidad)}" + ")"
+                                            " (" + String.format("%.4f", it.Cantidad) + ")"
                                     }
                                     precioss.add(
-                                        "${
-                                            String.format(
-                                                "%.4f",
-                                                it.Precio_iva
-                                            )
-                                        }" + " ${it.Nombre}" + unidad_cantidad
+                                        String.format(
+                                            "%.4f",
+                                            it.Precio_iva
+                                        ) + " ${it.Nombre}" + unidad_cantidad
                                     )
 
                                 }
@@ -222,15 +219,13 @@ class Producto_agregar : AppCompatActivity() {
                                     var unidad_cantidad = ""
                                     if (it.Cantidad!! > 0.toFloat()) {
                                         unidad_cantidad =
-                                            " (" + "${String.format("%.4f", it.Cantidad)}" + ")"
+                                            " (" + String.format("%.4f", it.Cantidad) + ")"
                                     }
                                     precioss.add(
-                                        "${
-                                            String.format(
-                                                "%.4f",
-                                                it.Precio_iva
-                                            )
-                                        }" + " ${it.Nombre}" + unidad_cantidad
+                                        String.format(
+                                            "%.4f",
+                                            it.Precio_iva
+                                        ) + " ${it.Nombre}" + unidad_cantidad
                                     )
                                 }
                             }
@@ -989,7 +984,7 @@ class Producto_agregar : AppCompatActivity() {
             cadena.toInt()
             return  true
         }catch (nfe: NumberFormatException){
-            txtcantidad!!.setText("${String.format("", cantidad)}");
+            txtcantidad!!.setText(String.format("", cantidad));
             return false
         }
     }
@@ -1002,10 +997,10 @@ class Producto_agregar : AppCompatActivity() {
             nuevoValor = cadena.toFloat()
         } else {
             listPrecios!!.forEach {
-                var valorPrecio = "${String.format("%.4f", it.Precio_iva)}"
+                var valorPrecio = String.format("%.4f", it.Precio_iva)
                 var unidad_cantidad = ""
                 if (it.Cantidad!! > 0.toFloat()) {
-                    unidad_cantidad = " (" + "${String.format("%.4f", it.Cantidad)}" + ")"
+                    unidad_cantidad = " (" + String.format("%.4f", it.Cantidad) + ")"
                 }
                 if (cadena == valorPrecio + " ${it.Nombre}" + unidad_cantidad) {
                     nuevoValor = valorPrecio.toFloat()
@@ -1127,7 +1122,7 @@ class Producto_agregar : AppCompatActivity() {
                                     var unidad_cantidad = ""
                                     if (it.Cantidad!! > 0.toFloat()) {
                                         unidad_cantidad =
-                                            " (" + "${String.format("%.4f", it.Cantidad)}" + ")"
+                                            " (" + String.format("%.4f", it.Cantidad) + ")"
                                     }
                                     precioss.add(
                                         String.format(
@@ -1214,11 +1209,9 @@ class Producto_agregar : AppCompatActivity() {
                                 it.close()
 
                                 val res: JSONObject = JSONObject(respuesta.toString())
-                                idToken = res.getInt("id_token").toInt()
-                                val precioAu : Float = res.getString("precio_asig").toString().toFloat();
+                                precioAutorizado = res.getString("precio_asig").toString().toFloat();
 
                                 runOnUiThread {
-                                    precioAutorizado = precioAu
                                     AlertaPrecio(contexto)
                                 }
                             } catch (e: Exception) {
@@ -1289,9 +1282,9 @@ class Producto_agregar : AppCompatActivity() {
         tvMensaje = updateDialog.findViewById(R.id.tvMensaje)
         tvTitulo = updateDialog.findViewById(R.id.tvTitulo)
 
-        tvTitulo.text = "INFORMACIÓN"
+        tvTitulo.text = getString(R.string.error_titulo)
         tvMensaje.text = "NO ENCONTRÓ PRECIO AUTORIZADO"
-        tvUpdate.text = "ACEPTAR"
+        tvUpdate.text = getString(R.string.error_aceptar)
 
         tvUpdate.setOnClickListener {
             updateDialog.dismiss()
@@ -1315,9 +1308,9 @@ class Producto_agregar : AppCompatActivity() {
         tvMensaje = updateDialog.findViewById(R.id.tvMensaje)
         tvTitulo = updateDialog.findViewById(R.id.tvTitulo)
 
-        tvTitulo.text = "INFORMACIÓN"
+        tvTitulo.text = getString(R.string.error_titulo)
         tvMensaje.text = "ERROR AL AGREGAR EL PRODUCTO AL PEDIDO"
-        tvUpdate.text = "ACEPTAR"
+        tvUpdate.text = getString(R.string.error_aceptar)
 
         tvUpdate.setOnClickListener {
             updateDialog.dismiss()

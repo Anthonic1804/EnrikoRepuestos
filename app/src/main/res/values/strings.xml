@@ -78,4 +78,6 @@
     <string name="simboloDolar">$</string>
     <string name="qwerty1234">QWERTY1234</string>
     <string name="_0_0000">0.0000</string>
+    <string name="error_titulo">INFORMACIÓN</string>
+    <string name="error_aceptar">ACEPTAR</string>
 </resources>
