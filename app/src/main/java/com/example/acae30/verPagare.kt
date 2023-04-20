@@ -24,6 +24,9 @@ class verPagare : AppCompatActivity() {
     private var nombreCliente : String = ""
     private var direccionCliente : String = ""
     private var duiCliente : String = ""
+    private var limiteCredito : Float = 0f
+    private var porcentaje : Float = 0f
+    private var plazo : Long = 0
 
 
     @RequiresApi(Build.VERSION_CODES.O)
@@ -35,6 +38,8 @@ class verPagare : AppCompatActivity() {
         nombreCliente = intent.getStringExtra("nombreCliente").toString()
         direccionCliente = intent.getStringExtra("direccionCliente").toString()
         duiCliente = intent.getStringExtra("duiCliente").toString()
+        limiteCredito = intent.getFloatExtra("limiteCredito", 0f)
+        plazo = intent.getLongExtra("plazoCredito", 0)
 
         textPagare = findViewById(R.id.textoPagare)
         tvFecha = findViewById(R.id.tvFecha)
@@ -44,12 +49,23 @@ class verPagare : AppCompatActivity() {
         tvFecha.text = LocalDate.now()
             .format(DateTimeFormatter.ofPattern("dd MMM yyyy"))
 
+        //CALCULANDO LA FECHA DE VENCIMIENTO DE ACUERDO AL PLAZO DADO EN EL CREDITO.
+        //val fechaVencimiento = LocalDate.now().plusDays(plazo).format(DateTimeFormatter.ofPattern("dd MMM yyyy"))
+
+        //ASIGNADO PORCENTAJES DE INTERES SEGUN TABLA PROPORCIONADA POR EL CLIENTE
+        porcentaje = when(limiteCredito){
+            in 1.00..4380.00 -> 6.9f
+            in 4381.00..8760.00 -> 4.5f
+            in 8761.00..14965.00 -> 3.0f
+            else -> 2.1f
+        }
+
         textPagare.isEnabled = false
-        textPagare.setText("Por _______; PAGARÉ  en forma incondicional a la ordel del señor: ARMANDO ANTONIO" +
+        textPagare.setText("Por $ ${String.format("%.2f", limiteCredito)}; PAGARÉ  en forma incondicional a la ordel del señor: ARMANDO ANTONIO" +
                 " LOPEZ VIERA: con Documento Único de Identidad número: 01664366-2, propietario de " +
                 "AGROFERRETERIA EL REY Y FORJADOS E INSERTOS EL SALVADOR, en cualquiera de sus " +
-                "sucursales, en la ciudad de La Unión, la cantidad de _____ DÓLARES DE LOS " +
-                "ESTADOS UNIDOS DE AMÉRICA, más el interés convencional de _____ por ciento mensual, " +
+                "sucursales, en la ciudad de La Unión, la cantidad de $ ${String.format("%.2f", limiteCredito)} DÓLARES DE LOS " +
+                "ESTADOS UNIDOS DE AMÉRICA, más el interés convencional del $porcentaje por ciento mensual, " +
                 "teniendo como fecha de vencimiento para el pago de la deuda, el día ____ de ______ del " +
                 " _____; calculados a partir de la fecha de suscripción del presente documento y en " +
                 "caso que no fueren cubiertos el capital más los interés a su vencimiento, pagaré además a partir de " +
@@ -88,6 +104,8 @@ class verPagare : AppCompatActivity() {
         intent.putExtra("nombreCliente", nombreCliente)
         intent.putExtra("direccionCliente", direccionCliente)
         intent.putExtra("duiCliente", duiCliente)
+        intent.putExtra("limiteCredito", limiteCredito)
+        intent.putExtra("plazoCredito", plazo)
         startActivity(intent)
         finish()
     }

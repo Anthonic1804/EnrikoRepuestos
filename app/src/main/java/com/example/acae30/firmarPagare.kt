@@ -36,10 +36,15 @@ class firmarPagare : AppCompatActivity() {
     private lateinit var btnCancelar : Button
     private lateinit var btnLimpiar : Button
     private lateinit var btnFirmar : Button
+
     private var idcliente : Int = 0
     private var nombreCliente : String = ""
     private var direccionCliente : String = ""
     private var duiCliente : String = ""
+    private var limiteCredito : Float = 0f
+    private var porcentaje : Float = 0f
+    private var plazo : Long = 0
+    private var textoPagare : String = ""
 
     private lateinit var imagenBitmap: Bitmap
     private lateinit var imageFinal : ByteArray
@@ -63,26 +68,6 @@ class firmarPagare : AppCompatActivity() {
     @RequiresApi(Build.VERSION_CODES.O)
     var fechaDoc = ""
 
-
-    val textoPagare = "Por _______; PAGARÉ  en forma incondicional a la ordel del señor: ARMANDO ANTONIO" +
-            " LOPEZ VIERA: con Documento Único de Identidad número: 01664366-2, propietario de " +
-            "AGROFERRETERIA EL REY Y FORJADOS E INSERTOS EL SALVADOR, en cualquiera de sus " +
-            "sucursales, en la ciudad de La Unión, la cantidad de _____ DÓLARES DE LOS " +
-            "ESTADOS UNIDOS DE AMÉRICA, más el interés convencional de _____ por ciento mensual, " +
-            "teniendo como fecha de vencimiento para el pago de la deuda, el día ____ de ______ del " +
-            " _____; calculados a partir de la fecha de suscripción del presente documento y en " +
-            "caso que no fueren cubiertos el capital más los interés a su vencimiento, pagaré además a partir de " +
-            "esta última fecha, el interés moratorio del ________________. El tipo de interés " +
-            "quedara sujeto a aumento o disminución de acuerdo a las fluctuaciones del mercado. Para los " +
-            "efectos legales de esta obligación mercantil, tomamos como domicilio especial la Ciudad de La " +
-            "Unión, y en caso de acción judicial renuncio al derecho de apelar del decreto de embargo, sentencia " +
-            "de remate y de toda providencia apelable que se dictare en el Juicio Mercantil Ejecutivo o sus " +
-            "incidentes, siendo a mi cargo cualquier gasto que hiciere el cobro de este pagaré, inclusive los " +
-            "llamados personales y aun por regla general no hubiere condenación por costas procesales y " +
-            "faculto a mi acreedor para que designe la persona depositaria de los bienes que se me embarguen " +
-            "a quien relevo de la obligación de rendir fianza y cuenta de administración."
-
-
     @RequiresApi(Build.VERSION_CODES.O)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -94,6 +79,8 @@ class firmarPagare : AppCompatActivity() {
         nombreCliente = intent.getStringExtra("nombreCliente").toString()
         direccionCliente = intent.getStringExtra("direccionCliente").toString()
         duiCliente = intent.getStringExtra("duiCliente").toString()
+        limiteCredito = intent.getFloatExtra("limiteCredito", 0f)
+        plazo = intent.getLongExtra("plazoCredito", 0)
 
         btnCancelar.setOnClickListener {
             mensajeCancelar()
@@ -102,6 +89,36 @@ class firmarPagare : AppCompatActivity() {
         btnLimpiar.setOnClickListener {
             signatureView.signatureClear()
         }
+
+        //CALCULANDO LA FECHA DE VENCIMIENTO DE ACUERDO AL PLAZO DADO EN EL CREDITO.
+        //val fechaVencimiento = LocalDate.now().plusDays(plazo).format(DateTimeFormatter.ofPattern("dd MMM yyyy"))
+
+        //ASIGNADO PORCENTAJES DE INTERES SEGUN TABLA PROPORCIONADA POR EL CLIENTE
+        porcentaje = when(limiteCredito){
+            in 1.00..4380.00 -> 6.9f
+            in 4381.00..8760.00 -> 4.5f
+            in 8761.00..14965.00 -> 3.0f
+            else -> 2.1f
+        }
+
+        textoPagare = "Por $ ${String.format("%.2f", limiteCredito)}; PAGARÉ  en forma incondicional a la ordel del señor: ARMANDO ANTONIO" +
+                " LOPEZ VIERA: con Documento Único de Identidad número: 01664366-2, propietario de " +
+                "AGROFERRETERIA EL REY Y FORJADOS E INSERTOS EL SALVADOR, en cualquiera de sus " +
+                "sucursales, en la ciudad de La Unión, la cantidad de $ ${String.format("%.2f", limiteCredito)} DÓLARES DE LOS " +
+                "ESTADOS UNIDOS DE AMÉRICA, más el interés convencional del $porcentaje por ciento mensual, " +
+                "teniendo como fecha de vencimiento para el pago de la deuda, el día el día ____ de ______ del " +
+                " _____; calculados a partir de la fecha de suscripción del presente documento y en " +
+                "caso que no fueren cubiertos el capital más los interés a su vencimiento, pagaré además a partir de " +
+                "esta última fecha, el interés moratorio del ________________. El tipo de interés " +
+                "quedara sujeto a aumento o disminución de acuerdo a las fluctuaciones del mercado. Para los " +
+                "efectos legales de esta obligación mercantil, tomamos como domicilio especial la Ciudad de La " +
+                "Unión, y en caso de acción judicial renuncio al derecho de apelar del decreto de embargo, sentencia " +
+                "de remate y de toda providencia apelable que se dictare en el Juicio Mercantil Ejecutivo o sus " +
+                "incidentes, siendo a mi cargo cualquier gasto que hiciere el cobro de este pagaré, inclusive los " +
+                "llamados personales y aun por regla general no hubiere condenación por costas procesales y " +
+                "faculto a mi acreedor para que designe la persona depositaria de los bienes que se me embarguen " +
+                "a quien relevo de la obligación de rendir fianza y cuenta de administración."
+
 
         btnFirmar.setOnClickListener {
             fechaDoc = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy_MM_dd_HH_mm_ss"))

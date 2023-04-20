@@ -31,9 +31,12 @@ class ClientesDetalle : AppCompatActivity() {
     private lateinit var txtDui : TextView
     private lateinit var btnPagare : Button
     private lateinit var txtnombre : TextView
+
     private var nombreCliente : String = ""
     private var direccionCliente : String = ""
     private var duiCliente : String = ""
+    private var limiteCredito : Float = 0f
+    private var plazo : Long = 0
 
     private var idcliente = 0
 
@@ -90,6 +93,8 @@ class ClientesDetalle : AppCompatActivity() {
                         nombreCliente = data.Cliente.toString()
                         direccionCliente = data.Direccion.toString()
                         duiCliente = data.Dui.toString()
+                        limiteCredito = data.Limite_credito!!
+                        plazo = data.Plazo_credito!!.toLong()
 
                     }
                 }
@@ -171,6 +176,8 @@ class ClientesDetalle : AppCompatActivity() {
         intent.putExtra("nombreCliente", nombreCliente)
         intent.putExtra("direccionCliente", direccionCliente)
         intent.putExtra("duiCliente", duiCliente)
+        intent.putExtra("limiteCredito", limiteCredito)
+        intent.putExtra("plazoCredito", plazo)
         startActivity(intent)
         finish()
     }

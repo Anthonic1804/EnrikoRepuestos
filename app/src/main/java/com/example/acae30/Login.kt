@@ -53,8 +53,6 @@ class Login : AppCompatActivity() {
     private lateinit var tvTitulo : TextView
     private lateinit var tvMensaje : TextView
 
-    private var dispositivoDesconocido = ""
-
     @RequiresApi(Build.VERSION_CODES.O)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -87,7 +85,6 @@ class Login : AppCompatActivity() {
                 ), 101
             )
         }
-        val context = this
 
         btnlogin!!.setOnClickListener {
             var identidad = ""
@@ -124,7 +121,7 @@ class Login : AppCompatActivity() {
                         } else if (respuesta_val == "Invalido") {
                             runOnUiThread {
                                 alerta!!.dismisss()
-                                errorDispositivo(respuesta_val)
+                                mensaje(respuesta_val)
                             }
                             // Incorrecto y mostrar mensaje de error
 
@@ -143,7 +140,7 @@ class Login : AppCompatActivity() {
                         }else if(respuesta_val == "noAutorizado"){
                             runOnUiThread {
                                 alerta!!.dismisss()
-                                errorDispositivo(respuesta_val)
+                                mensaje(respuesta_val)
                             }
                         }
                         runOnUiThread {
@@ -187,7 +184,7 @@ class Login : AppCompatActivity() {
 
 
     //FUNCION PARA MENSAJE DE ERROR DISPOSITVO NO AUTORIZADO
-    fun errorDispositivo(respuesta:String){
+    private fun mensaje(respuesta:String){
 
         val updateDialog = Dialog(this, R.style.Theme_Dialog)
         updateDialog.setCancelable(false)
@@ -273,7 +270,7 @@ class Login : AppCompatActivity() {
                                         println(response)
 
                                         if (respuestaVal == "Valido") {
-                                            if (estado == "ACTIVO" && identidad != identidad_param && identidad_param != "") {
+                                            if (estado == "ACTIVO" && identidad == identidad_param && identidad_param != "") {
                                                 respuestaVal =
                                                     "Cerrar" //Estado para sugerir cerrar sesion en otros dispositivos e iniciar en el actual
                                             }
