@@ -1,6 +1,7 @@
 package com.example.acae30
 
 import android.Manifest
+import android.annotation.SuppressLint
 import android.app.Dialog
 import android.content.Context
 import android.content.Intent
@@ -9,6 +10,7 @@ import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
 import android.os.StrictMode
+import android.view.View
 import android.widget.Button
 import android.widget.TextView
 import androidx.annotation.RequiresApi
@@ -20,6 +22,7 @@ import com.example.acae30.database.Database
 import com.example.acae30.modelos.JSONmodels.Login
 import com.google.android.material.snackbar.Snackbar
 import com.google.gson.Gson
+import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
@@ -44,6 +47,13 @@ class Login : AppCompatActivity() {
     private var ip = ""
     private var puerto = 0
     private var alerta: AlertDialogo? = null
+
+    private lateinit var tvUpdate : TextView
+    private lateinit var tvCancel : TextView
+    private lateinit var tvTitulo : TextView
+    private lateinit var tvMensaje : TextView
+
+    private var dispositivoDesconocido = ""
 
     @RequiresApi(Build.VERSION_CODES.O)
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -81,12 +91,9 @@ class Login : AppCompatActivity() {
 
         btnlogin!!.setOnClickListener {
             var identidad = ""
-            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
-                identidad =
-                    Build.DEVICE + " " + Build.MODEL + " " + Build.HARDWARE + " " + Build.USER
-                println("El numero de identificacion: " + identidad)
-            }
-            Login(identidad, context)
+            identidad = Build.DEVICE + " " + Build.MODEL + " " + Build.HARDWARE + " " + Build.USER
+            //println("El numero de identificacion: " + identidad)
+            Login(identidad)
         }  //funciones!!.VendedorVerific(this)
 
     }
@@ -96,7 +103,9 @@ class Login : AppCompatActivity() {
         //super.onBackPressed();
     }//anula el boton atras
 
-    private fun Login(identidad: String, thiscontext: com.example.acae30.Login) {
+    @OptIn(DelicateCoroutinesApi::class)
+    @SuppressLint("NotConstructor")
+    private fun Login(identidad: String) {
         var usuario: String = txtusuario!!.text.toString()
         var clave = txtclave!!.text.toString()
         var contexto = this
@@ -113,21 +122,11 @@ class Login : AppCompatActivity() {
                             // Correcto y enviar datos para registrar
                             IniciarSesion(usuario, clave, identidad)
                         } else if (respuesta_val == "Invalido") {
+                            runOnUiThread {
+                                alerta!!.dismisss()
+                                errorDispositivo(respuesta_val)
+                            }
                             // Incorrecto y mostrar mensaje de error
-
-                            val alert: Snackbar =
-                                Snackbar.make(
-                                    lienzo!!,
-                                    "Usario o contraseña no son correctos.",
-                                    Snackbar.LENGTH_LONG
-                                )
-                            alert.view.setBackgroundColor(
-                                ContextCompat.getColor(
-                                    thiscontext,
-                                    R.color.moderado
-                                )
-                            )
-                            alert.show()
 
                         } else if (respuesta_val == "Cerrar") {
                             // Correcto y sugerir cerrar sesion en otros dispositivos para iniciar en el actual
@@ -140,6 +139,11 @@ class Login : AppCompatActivity() {
                             runOnUiThread {
                                 alerta!!.dismisss()
                                 AlertaMaxSesiones()
+                            }
+                        }else if(respuesta_val == "noAutorizado"){
+                            runOnUiThread {
+                                alerta!!.dismisss()
+                                errorDispositivo(respuesta_val)
                             }
                         }
                         runOnUiThread {
@@ -180,6 +184,38 @@ class Login : AppCompatActivity() {
             alert.show()
         }
     } //valida la utenticacion del usuario
+
+
+    //FUNCION PARA MENSAJE DE ERROR DISPOSITVO NO AUTORIZADO
+    fun errorDispositivo(respuesta:String){
+
+        val updateDialog = Dialog(this, R.style.Theme_Dialog)
+        updateDialog.setCancelable(false)
+
+        updateDialog.setContentView(R.layout.dialog_cancelar)
+        tvUpdate = updateDialog.findViewById(R.id.tvUpdate)
+        tvCancel = updateDialog.findViewById(R.id.tvCancel)
+        tvMensaje = updateDialog.findViewById(R.id.tvMensaje)
+        tvTitulo = updateDialog.findViewById(R.id.tvTitulo)
+        var mensaje = ""
+        when(respuesta){
+            "Invalido" -> mensaje = "USUARIO O CONTRASENA SON INCORRECTOS"
+            "noAutorizado" -> mensaje = "DISPOSITIVO NO AUTORIZADO"
+        }
+
+        tvTitulo.text = getString(R.string.error_titulo)
+        tvMensaje.text = mensaje
+        tvUpdate.text = getString(R.string.error_aceptar)
+
+        tvUpdate.setOnClickListener {
+            updateDialog.dismiss()
+        }
+
+        tvCancel.visibility = View.GONE
+
+        updateDialog.show()
+
+    }
 
     private fun ValidarCredenciales(usuario: String, clave: String, identidad: String): String {
         var respuestaVal = ""
@@ -231,11 +267,10 @@ class Login : AppCompatActivity() {
                                                 "Invalido" // Usuario y contraseña no validos
                                             "Se ha llegado al maximo de sesiones activas" -> respuestaVal =
                                                 "Max sesiones" // Validar si sobrepasa el numero de sesiones
+                                           "Dispositivo no autorizado" -> respuestaVal = "noAutorizado"
                                         }
-                                        println("respuestaVal: " + respuestaVal)
-                                        println("estado: " + estado)
-                                        println("identidad: " + identidad)
-                                        println("identidad_param: " + identidad_param)
+
+                                        println(response)
 
                                         if (respuestaVal == "Valido") {
                                             if (estado == "ACTIVO" && identidad != identidad_param && identidad_param != "") {
@@ -243,7 +278,7 @@ class Login : AppCompatActivity() {
                                                     "Cerrar" //Estado para sugerir cerrar sesion en otros dispositivos e iniciar en el actual
                                             }
                                         }
-                                        println("respuestaVal: " + respuestaVal)
+
                                     } else {
                                         throw Exception("Error al procesar la solicitud")
                                     }//valido si el json contiene esas variables
@@ -257,7 +292,8 @@ class Login : AppCompatActivity() {
                     } else if (responseCode == 204) {
                         throw Exception("No se han recibido parametros")
                     } else {
-                        throw Exception("Error de comunicacion con el servidor")
+                        //throw Exception("Error de comunicacion con el servidor 1111")
+                        respuestaVal = "Invalido"
                     } //valido que la respuesta sea la correcta
 
                 } catch (e: Exception) {
@@ -349,7 +385,7 @@ class Login : AppCompatActivity() {
                     } else if (responseCode == 204) {
                         throw Exception("No se han recibido parametros")
                     } else {
-                        throw Exception("Error de comunicacion con el servidor")
+                        throw Exception("Error de comunicacion con el servidor RESPONSE CODE $responseCode")
                     } //valido que la respuesta sea la correcta
 
                 } catch (e: Exception) {
