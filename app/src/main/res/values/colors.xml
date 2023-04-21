@@ -12,6 +12,8 @@
     <color name="recicler">#EFEFEF</color>
     <color name="black">#000000</color>
 
+    <color name="colorHint">#7E7E7E</color>
+
     <color name="colorPrimaryOld">#0288d1</color>
     <color name="colorPrimaryDarkOld">#004c8c</color>
     <color name="SEGUNDOCOLORLOGO">#6ba3bc</color>

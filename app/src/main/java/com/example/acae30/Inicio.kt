@@ -553,7 +553,9 @@ class Inicio : AppCompatActivity(), NavigationView.OnNavigationItemSelectedListe
 
     //REDIRECCIONES DEL MENU SLIDE
     fun historicoPedidos(){
-        Toast.makeText(this, "FUNCION EN DESARROLLO", Toast.LENGTH_LONG).show()
+        val intent = Intent(this@Inicio, Historico_pedidos::class.java)
+        startActivity(intent)
+        finish()
     }
     fun crearTokens(){
         val intent = Intent(this@Inicio, Tokens::class.java)

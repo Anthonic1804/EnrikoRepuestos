@@ -88,10 +88,13 @@
                         android:layout_width="0dp"
                         android:layout_height="50dp"
                         android:layout_weight="1"
+                        android:layout_marginEnd="4dp"
                         android:background="@drawable/border_textbox"
                         android:ems="10"
                         android:inputType="text"
                         android:textSize="16sp"
+                        android:clickable="false"
+                        android:focusable="false"
                         android:textColor="@color/moderado"
                         android:paddingStart="7dp"/>
 
@@ -100,6 +103,7 @@
                         android:layout_width="50dp"
                         android:layout_height="50dp"
                         android:layout_marginBottom="13dp"
+                        android:layout_marginStart="4dp"
                         android:backgroundTint="@android:color/holo_green_dark"
                         app:srcCompat="@drawable/ic_baseline_add_box_24" />
                 </LinearLayout>
@@ -126,10 +130,13 @@
                             android:id="@+id/edtReferencia"
                             android:layout_width="match_parent"
                             android:layout_height="50dp"
+                            android:layout_marginEnd="4dp"
                             android:background="@drawable/border_textbox"
                             android:ems="10"
                             android:inputType="text"
                             android:textSize="16sp"
+                            android:clickable="false"
+                            android:focusable="false"
                             android:textColor="@color/moderado"
                             android:paddingStart="7dp"/>
                     </LinearLayout>
@@ -151,10 +158,13 @@
                             android:id="@+id/edtPrecioOld"
                             android:layout_width="match_parent"
                             android:layout_height="50dp"
+                            android:layout_marginStart="4dp"
                             android:background="@drawable/border_textbox"
                             android:ems="10"
                             android:inputType="text"
                             android:textSize="16sp"
+                            android:clickable="false"
+                            android:focusable="false"
                             android:textColor="@color/moderado"
                             android:paddingStart="7dp"/>
                     </LinearLayout>

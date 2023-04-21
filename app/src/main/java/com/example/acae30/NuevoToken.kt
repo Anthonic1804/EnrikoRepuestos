@@ -73,10 +73,6 @@ class NuevoToken : AppCompatActivity() {
 
         cargarEmpleado()
 
-        edtProducto.isEnabled = false
-        edtReferencia.isEnabled = false
-        edtPrecioOld.isEnabled = false
-
         if(codigoProducto != ""){
             edtProducto.setText(nombreProducto)
             edtReferencia.setText(codigoProducto)
