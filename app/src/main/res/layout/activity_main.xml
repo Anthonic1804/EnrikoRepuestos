@@ -1,52 +1,43 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/colorAccent"
+    android:background="@color/recicler"
+    android:orientation="vertical"
+    android:gravity="center"
     tools:context=".MainActivity">
 
     <androidx.cardview.widget.CardView
         android:id="@+id/cardView2"
-        android:layout_width="0dp"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginStart="15dp"
-        android:layout_marginTop="50dp"
         android:layout_marginEnd="15dp"
         android:layout_marginBottom="8dp"
-        app:cardBackgroundColor="@color/cart"
+        app:cardBackgroundColor="@color/colorAccent"
         app:cardCornerRadius="7dp"
         app:cardElevation="5dp"
-        app:contentPadding="5dp"
-        app:layout_constraintBottom_toTopOf="@+id/btnguardar"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent">
+        app:contentPadding="5dp">
 
         <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="match_parent"
-            android:layout_height="368dp">
+            android:layout_height="wrap_content">
 
-            <EditText
-                android:id="@+id/txtip"
+            <ImageView
+                android:id="@+id/imageView2"
                 android:layout_width="0dp"
-                android:layout_height="45dp"
-                android:layout_marginStart="5dp"
+                android:layout_height="108dp"
+                android:layout_marginStart="50dp"
                 android:layout_marginTop="16dp"
-                android:layout_marginEnd="5dp"
-                android:backgroundTint="@color/colordark"
-                android:ems="10"
-                android:hint="Direccion/Ip"
-                android:inputType="textPersonName"
-                android:textColor="@color/colordark"
-                android:textColorHighlight="@color/moderado"
-                android:textColorHint="@color/colordark"
-                android:textColorLink="@color/colordark"
+                android:layout_marginEnd="50dp"
                 app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintHorizontal_bias="0.0"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/textView" />
+                app:layout_constraintTop_toTopOf="parent"
+                app:srcCompat="@drawable/logo_sismantec2"
+                tools:srcCompat="@drawable/logo_sismantec2"
+                android:contentDescription="TODO" />
 
             <TextView
                 android:id="@+id/textView"
@@ -67,71 +58,69 @@
                 app:layout_constraintTop_toBottomOf="@+id/imageView2" />
 
             <EditText
+                android:id="@+id/txtip"
+                android:layout_width="0dp"
+                android:layout_height="55dp"
+                android:layout_marginStart="16dp"
+                android:layout_marginTop="16dp"
+                android:layout_marginEnd="16dp"
+                android:background="@drawable/border_textbox"
+                android:drawableStart="@drawable/ic_computer"
+                android:paddingStart="10dp"
+                android:drawablePadding="10dp"
+                android:ems="10"
+                android:hint="SERVIDOR / IP"
+                android:inputType="textPersonName"
+                android:textColor="@color/colorHint"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintHorizontal_bias="0.0"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/textView" />
+
+
+            <EditText
                 android:id="@+id/txtpuerto"
                 android:layout_width="0dp"
-                android:layout_height="45dp"
-                android:layout_marginStart="5dp"
+                android:layout_height="55dp"
+                android:layout_marginStart="16dp"
                 android:layout_marginTop="16dp"
-                android:layout_marginEnd="5dp"
-                android:backgroundTint="@color/colordark"
+                android:layout_marginEnd="16dp"
+                android:background="@drawable/border_textbox"
+                android:drawableStart="@drawable/ic_network"
+                android:drawablePadding="10dp"
+                android:paddingStart="10dp"
                 android:ems="10"
-                android:hint="Puerto"
+                android:hint="PUERTO"
                 android:inputType="textPersonName"
-                android:textColor="@color/colordark"
-                android:textColorHighlight="@color/colordark"
-                android:textColorHint="@color/colordark"
-                android:textColorLink="@color/colordark"
+                android:textColor="@color/colorHint"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintHorizontal_bias="0.0"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/txtip" />
 
-            <ImageView
-                android:id="@+id/imageView2"
+            <Button
+                android:id="@+id/btnguardar"
                 android:layout_width="0dp"
-                android:layout_height="108dp"
-                android:layout_marginStart="50dp"
-                android:layout_marginTop="16dp"
-                android:layout_marginEnd="50dp"
+                android:layout_height="wrap_content"
+                android:layout_margin="16dp"
+                android:background="@drawable/border_btnenviar"
+                android:text="Guardar"
+                android:textColor="#FFFFFF"
+                android:textSize="18sp"
+                android:textStyle="bold"
+                app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent"
-                app:srcCompat="@drawable/logo_sismantec2"
-                tools:srcCompat="@drawable/logo_sismantec2" />
+                app:layout_constraintTop_toBottomOf="@+id/txtpuerto" />
 
         </androidx.constraintlayout.widget.ConstraintLayout>
     </androidx.cardview.widget.CardView>
 
-    <Button
-        android:id="@+id/btnguardar"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="20dp"
-        android:layout_marginTop="22dp"
-        android:layout_marginEnd="20dp"
-        android:layout_marginBottom="153dp"
-        android:background="@drawable/border_btnenviar"
-        android:elevation="5dp"
-        android:text="Guardar"
-        android:textColor="#FFFFFF"
-        android:textSize="18sp"
-        android:textStyle="bold"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/cardView2" />
-
     <view
         android:id="@+id/alerta"
         class="androidx.appcompat.widget.ActionMenuView"
-        android:layout_width="0dp"
+        android:layout_width="match_parent"
         android:layout_height="50dp"
-        android:layout_marginStart="8dp"
-        android:layout_marginTop="8dp"
-        android:layout_marginEnd="8dp"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/btnguardar" />
+        android:layout_margin="16dp"/>
 
-</androidx.constraintlayout.widget.ConstraintLayout>
+</LinearLayout>

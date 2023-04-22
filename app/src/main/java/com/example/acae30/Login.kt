@@ -12,6 +12,7 @@ import android.os.Bundle
 import android.os.StrictMode
 import android.view.View
 import android.widget.Button
+import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
@@ -43,7 +44,7 @@ class Login : AppCompatActivity() {
     private var funciones: Funciones? = null
     private var txtusuario: TextView? = null
     private var txtclave: TextView? = null
-    private var lienzo: ConstraintLayout? = null
+    private var lienzo: LinearLayout? = null
     private var ip = ""
     private var puerto = 0
     private var alerta: AlertDialogo? = null
@@ -175,10 +176,7 @@ class Login : AppCompatActivity() {
             //val inte= Intent(this,Inicio::class.java)
             //startActivity(inte)
         } else {
-            val alert: Snackbar =
-                Snackbar.make(lienzo!!, "Ingresa tus Credenciales", Snackbar.LENGTH_LONG)
-            alert.view.setBackgroundColor(ContextCompat.getColor(this, R.color.moderado))
-            alert.show()
+            mensaje("Credenciales")
         }
     } //valida la utenticacion del usuario
 
@@ -198,6 +196,7 @@ class Login : AppCompatActivity() {
         when(respuesta){
             "Invalido" -> mensaje = "USUARIO O CONTRASENA SON INCORRECTOS"
             "noAutorizado" -> mensaje = "DISPOSITIVO NO AUTORIZADO"
+            "Credenciales" -> mensaje = "INGRESA TUS CREDENCIALES"
         }
 
         tvTitulo.text = getString(R.string.error_titulo)

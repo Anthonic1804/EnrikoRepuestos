@@ -392,38 +392,8 @@ class Inicio : AppCompatActivity(), NavigationView.OnNavigationItemSelectedListe
     } // CONSULTAR ESTADO EN EL SERVIDOR DE LA SESION
 
     private fun cerrarSesion() {
-
-        // BORRAR TODAS LAS TABLAS
-        val bd = database!!.writableDatabase
-        try {
-            bd!!.beginTransaction() //inicio la transaccion
-
-            /* borra todos los datos del usuario
-            val tablas = arrayOf(
-                "detalle_pedidos", "pedidos",
-                "rubros", "lineas", "inventario_unidades", "inventario_precios",
-                "inventario", "clientes", "cuentas", "visitas"
-            )
-             */
-
-            val tablas = arrayOf(
-                "detalle_pedidos", "pedidos", "visitas"
-            )
-            tablas.forEach { key ->
-                val sql = "DELETE FROM $key"
-                bd.execSQL(sql)
-
-                val sql2 = "DELETE FROM SQLITE_SEQUENCE WHERE NAME =  '${key}'"
-                bd.execSQL(sql2)
-            }
-            bd.setTransactionSuccessful()
-        } catch (e: Exception) {
-            throw Exception(e.message)
-        } finally {
-            bd!!.endTransaction()
-            bd.close()
-        }
-
+        //SE ELIMINO LA FUNCION DE ELIMINADO DE DATOS DE LA TABLA PEDIDOS Y PEDIDOS_DETALLE
+        //22/04/2023
         // BORRAR DATOS DE SESION Y SALIR A LA PANTALLA DE LOGIN
         val editor = preferencias!!.edit()
         editor.putInt("Idvendedor", 0)
@@ -432,7 +402,8 @@ class Inicio : AppCompatActivity(), NavigationView.OnNavigationItemSelectedListe
         editor.putString("Identidad", "")
         editor.putInt("generaToken", 0)
         editor.putBoolean("sesion", false)
-        editor.commit()
+        editor.apply()
+
         val intento = Intent(this, Login::class.java)
         startActivity(intento)
         finish()
@@ -443,7 +414,7 @@ class Inicio : AppCompatActivity(), NavigationView.OnNavigationItemSelectedListe
         var identidad = preferencias!!.getString("Identidad", "")
         try {
             val credenciales = com.example.acae30.modelos.JSONmodels.Logout(
-                usuario!!.toUpperCase(),
+                usuario!!.uppercase(),
                 identidad!!
             ) //se crea el modelo con los datos    que se enviaran
 
@@ -552,12 +523,12 @@ class Inicio : AppCompatActivity(), NavigationView.OnNavigationItemSelectedListe
     }
 
     //REDIRECCIONES DEL MENU SLIDE
-    fun historicoPedidos(){
+    private fun historicoPedidos(){
         val intent = Intent(this@Inicio, Historico_pedidos::class.java)
         startActivity(intent)
         finish()
     }
-    fun crearTokens(){
+    private fun crearTokens(){
         val intent = Intent(this@Inicio, Tokens::class.java)
         startActivity(intent)
         finish()
