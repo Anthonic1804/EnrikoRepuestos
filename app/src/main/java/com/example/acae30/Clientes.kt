@@ -31,6 +31,9 @@ class Clientes : AppCompatActivity() {
     private var preferences: SharedPreferences? = null
     private val instancia = "CONFIG_SERVIDOR"
     private var dSearch : String? = null
+
+    private var clienteHistorio : Boolean = false
+
     override fun onCreate(savedInstanceState: Bundle?) {
 
         super.onCreate(savedInstanceState)
@@ -39,6 +42,7 @@ class Clientes : AppCompatActivity() {
         busquedaPedido = intent.getBooleanExtra("busqueda", false)
         cuentas = intent.getBooleanExtra("cuentas", false)
         visita = intent.getBooleanExtra("visita", false)
+        clienteHistorio = intent.getBooleanExtra("Historico", false)
 
         preferences = getSharedPreferences(instancia, Context.MODE_PRIVATE)
 
@@ -101,6 +105,12 @@ class Clientes : AppCompatActivity() {
             eliminarBusqueda()
 
             val intento = Intent(this, Inicio::class.java)
+            startActivity(intento)
+            finish()
+        }
+
+        if(clienteHistorio){
+            val intento = Intent(this@Clientes, HistoricoPedidos::class.java)
             startActivity(intento)
             finish()
         }
@@ -295,8 +305,13 @@ class Clientes : AppCompatActivity() {
                         }
 
                     } else {
-                        if (!cuentas) {
-
+                        if(clienteHistorio){
+                            val intento = Intent(this@Clientes, HistoricoPedidos::class.java)
+                            intento.putExtra("idCliente", cliente.Id!!)
+                            intento.putExtra("nombreCliente", cliente.Cliente)
+                            startActivity(intento)
+                            finish()
+                        }else{
                             busquedaCliente(busqueda!!.query.toString())
 
                             val intento = Intent(this@Clientes, ClientesDetalle::class.java)
