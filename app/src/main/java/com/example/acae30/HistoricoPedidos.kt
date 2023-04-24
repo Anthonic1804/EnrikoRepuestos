@@ -24,7 +24,8 @@ class HistoricoPedidos : AppCompatActivity() {
     }
     private fun onDateSelectedDesde(day: Int, month:Int, year:Int){
         val mes = month + 1
-        etFecha1.setText("$year/$mes/$day")
+        val date = "$year/$mes/$day"
+        etFecha1.setText(date)
     }
 
     private fun calendarDialogHasta() {
@@ -33,7 +34,8 @@ class HistoricoPedidos : AppCompatActivity() {
     }
     private fun onDateSelectedHasta(day: Int, month:Int, year:Int){
         val mes = month + 1
-        etFecha2.setText("$year/$mes/$day")
+        val date = "$year/$mes/$day"
+        etFecha2.setText(date)
     }
 
     private fun regresarInicio(){
