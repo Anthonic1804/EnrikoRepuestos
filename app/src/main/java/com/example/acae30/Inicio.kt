@@ -524,7 +524,7 @@ class Inicio : AppCompatActivity(), NavigationView.OnNavigationItemSelectedListe
 
     //REDIRECCIONES DEL MENU SLIDE
     private fun historicoPedidos(){
-        val intent = Intent(this@Inicio, Historico_pedidos::class.java)
+        val intent = Intent(this@Inicio, HistoricoPedidos::class.java)
         startActivity(intent)
         finish()
     }

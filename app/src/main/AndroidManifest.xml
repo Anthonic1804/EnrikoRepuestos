@@ -16,7 +16,7 @@
     <uses-permission android:name="android.permission.REQUEST_INSTALL_PACKAGES" />
 
     <application
-        android:allowBackup="false"
+        android:allowBackup="true"
         android:hardwareAccelerated="true"
         android:icon="@mipmap/ic_main_round"
         android:label="ACAE APP"
@@ -26,17 +26,21 @@
         android:theme="@style/AppTheme"
         android:usesCleartextTraffic="true">
         <activity
-            android:name=".Historico_pedidos"
-            android:exported="false" />
+            android:name=".HistoricoPedidos"
+            android:exported="false"
+            android:screenOrientation="portrait"/>
         <activity
             android:name=".Tokens"
-            android:exported="false" />
+            android:exported="false"
+            android:screenOrientation="portrait"/>
         <activity
             android:name=".NuevoToken"
-            android:exported="false" />
+            android:exported="false"
+            android:screenOrientation="portrait"/>
         <activity
             android:name=".firmarPagare"
-            android:exported="false" />
+            android:exported="false"
+            android:screenOrientation="portrait"/>
         <activity
             android:name=".Visita"
             android:screenOrientation="portrait" />

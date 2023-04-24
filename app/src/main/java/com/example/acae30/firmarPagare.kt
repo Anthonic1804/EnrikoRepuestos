@@ -5,7 +5,6 @@ import android.app.Dialog
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.Bitmap
-import android.os.Build
 import android.os.Bundle
 import android.os.Environment
 import android.view.View
@@ -13,7 +12,6 @@ import android.widget.Button
 import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
@@ -33,6 +31,8 @@ class firmarPagare : AppCompatActivity() {
 
     private lateinit var tvUpdate : TextView
     private lateinit var tvCancel : TextView
+    private lateinit var tvMsj : TextView
+    private lateinit var tvTitulo : TextView
     private lateinit var btnCancelar : Button
     private lateinit var btnLimpiar : Button
     private lateinit var btnFirmar : Button
@@ -63,12 +63,9 @@ class firmarPagare : AppCompatActivity() {
     }
 
     private val tituloText = "PAGARÉ SIN PROTESTO"
-    @RequiresApi(Build.VERSION_CODES.O)
     val fechaPagare = "La Unión, " + LocalDate.now().format(DateTimeFormatter.ofPattern("dd MMM yyyy"))
-    @RequiresApi(Build.VERSION_CODES.O)
     var fechaDoc = ""
 
-    @RequiresApi(Build.VERSION_CODES.O)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_firmar_pagare)
@@ -83,11 +80,11 @@ class firmarPagare : AppCompatActivity() {
         plazo = intent.getLongExtra("plazoCredito", 0)
 
         btnCancelar.setOnClickListener {
-            mensajeCancelar()
+            mensaje("Cancelar")
         }
 
         btnLimpiar.setOnClickListener {
-            signatureView.signatureClear()
+            signatureView.clearCanvas()
         }
 
         //CALCULANDO LA FECHA DE VENCIMIENTO DE ACUERDO AL PLAZO DADO EN EL CREDITO.
@@ -122,13 +119,13 @@ class firmarPagare : AppCompatActivity() {
 
         btnFirmar.setOnClickListener {
             fechaDoc = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy_MM_dd_HH_mm_ss"))
-            imageFirmada = signatureView.isSignature()
+            imageFirmada = signatureView.isBitmapEmpty
             if(imageFirmada){
-                imagenBitmap = signatureView.getSignatureBitmap()!!
+                Toast.makeText(this, "POR FAVOR INGRESE SU FIRMA", Toast.LENGTH_LONG).show()
+            }else{
+                imagenBitmap = signatureView.signatureBitmap
                 imageFinal = bitmapToByteArray(imagenBitmap)
                 verificarPermisos(it)
-            }else{
-                Toast.makeText(this, "POR FAVOR INGRESE SU FIRMA", Toast.LENGTH_LONG).show()
             }
         }
 
@@ -140,7 +137,6 @@ class firmarPagare : AppCompatActivity() {
         return stream.toByteArray()
     }
 
-    @RequiresApi(Build.VERSION_CODES.O)
     private fun verificarPermisos(view: View) {
         when{
             ContextCompat.checkSelfPermission(
@@ -168,7 +164,6 @@ class firmarPagare : AppCompatActivity() {
         }
     }
 
-    @RequiresApi(Build.VERSION_CODES.O)
     private fun generarPDF(nombreCliente : String, direccionCliente : String, duiCliente : String) {
         try {
             val carpeta = "/archivospdf"
@@ -231,7 +226,7 @@ class firmarPagare : AppCompatActivity() {
 
             documento.close()
 
-            mensajeYaFirmado()
+            mensaje("Firmado")
 
         }catch (e: FileNotFoundException){
             e.printStackTrace()
@@ -253,7 +248,7 @@ class firmarPagare : AppCompatActivity() {
         finish()
     }
 
-    fun mensajeCancelar(){
+    private fun mensaje(msj: String){
 
         val updateDialog = Dialog(this, R.style.Theme_Dialog)
         updateDialog.setCancelable(false)
@@ -261,33 +256,48 @@ class firmarPagare : AppCompatActivity() {
         updateDialog.setContentView(R.layout.dialog_cancelar)
         tvUpdate = updateDialog.findViewById(R.id.tvUpdate)
         tvCancel = updateDialog.findViewById(R.id.tvCancel)
+        tvMsj = updateDialog.findViewById(R.id.tvMensaje)
+        tvTitulo = updateDialog.findViewById(R.id.tvTitulo)
 
+        var tituloDialogo = ""
+        var mensajeDialogo = ""
+        var mensajeBotonAceptar = ""
 
-        tvUpdate.setOnClickListener {
-            atras()
-            updateDialog.dismiss()
-        }
+        when(msj){
+            "Cancelar" -> {
+                tituloDialogo = "CANCELAR PROCESO"
+                mensajeDialogo = "Está seguro de Cancelar el Proceso"
+                mensajeBotonAceptar = "SALIR"
 
-        tvCancel.setOnClickListener {
-            updateDialog.dismiss()
-        }
+                tvUpdate.setOnClickListener {
+                    atras()
+                    updateDialog.dismiss()
+                }
 
-        updateDialog.show()
+                tvMsj.text = mensajeDialogo
+                tvTitulo.text = tituloDialogo
+                tvUpdate.text = mensajeBotonAceptar
 
-    }
+                tvCancel.setOnClickListener {
+                    updateDialog.dismiss()
+                }
+            }
+            "Firmado" -> {
+                tvCancel.visibility = View.GONE
 
-    fun mensajeYaFirmado(){
+                tituloDialogo = "PROCESO COMPLETO"
+                mensajeDialogo = "El Proceso fue Generado Correctamente, Regresando a Detalle del Cliente"
+                mensajeBotonAceptar = "ACEPTAR"
 
-        val updateDialog = Dialog(this, R.style.Theme_Dialog)
-        updateDialog.setCancelable(false)
+                tvUpdate.setOnClickListener {
+                    pagareYaFirmado()
+                    updateDialog.dismiss()
+                }
 
-        updateDialog.setContentView(R.layout.dialog_firmado)
-        tvUpdate = updateDialog.findViewById(R.id.tvUpdate)
-
-
-        tvUpdate.setOnClickListener {
-            pagareYaFirmado()
-            updateDialog.dismiss()
+                tvMsj.text = mensajeDialogo
+                tvTitulo.text = tituloDialogo
+                tvUpdate.text = mensajeBotonAceptar
+            }
         }
 
         updateDialog.show()

@@ -26,8 +26,6 @@ android {
         }
     }
     compileOptions {
-        sourceCompatibility = 1.8
-        targetCompatibility = 1.8
         sourceCompatibility JavaVersion.VERSION_1_8
         targetCompatibility JavaVersion.VERSION_1_8
     }
@@ -62,7 +60,7 @@ dependencies {
     implementation 'com.journeyapps:zxing-android-embedded:4.1.0'
 
     //LIBRERIA PARA EL USUARIO DE LA SIGNATURE VIEW
-    implementation 'com.github.nsmarinro.SignatureView:librarySignature:0.1.2'
+    implementation 'com.kyanogen.signatureview:signature-view:1.2'
 
     //LIBRERIA PARA EXPORTAR PDF
     implementation 'com.itextpdf:itextpdf:5.5.13.2'
