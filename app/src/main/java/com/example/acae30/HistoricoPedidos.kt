@@ -5,7 +5,7 @@ import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import kotlinx.android.synthetic.main.activity_historico_pedidos.*
 
-class Historico_pedidos : AppCompatActivity() {
+class HistoricoPedidos : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_historico_pedidos)
@@ -37,7 +37,7 @@ class Historico_pedidos : AppCompatActivity() {
     }
 
     private fun regresarInicio(){
-        val intent = Intent(this@Historico_pedidos, Inicio::class.java)
+        val intent = Intent(this@HistoricoPedidos, Inicio::class.java)
         startActivity(intent)
         finish()
     }
