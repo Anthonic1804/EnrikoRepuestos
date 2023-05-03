@@ -46,6 +46,7 @@
         android:background="@color/colorAccent"
         android:padding="16dp"
         android:orientation="vertical"
+        android:gravity="center"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/llHeader">
@@ -113,7 +114,7 @@
             android:layout_height="wrap_content">
 
             <EditText
-                android:id="@+id/etFecha1"
+                android:id="@+id/etFechaDesde"
                 android:layout_width="0dp"
                 android:layout_height="55dp"
                 android:layout_marginEnd="4dp"
@@ -130,7 +131,7 @@
                 android:text="@string/date_default" />
 
             <EditText
-                android:id="@+id/etFecha2"
+                android:id="@+id/etFechaHasta"
                 android:layout_width="0dp"
                 android:layout_height="55dp"
                 android:layout_marginStart="4dp"
@@ -146,6 +147,20 @@
                 android:textColor="@color/colorHint"
                 android:text="@string/date_default" />
         </LinearLayout>
+
+        <Button
+            android:id="@+id/btnProcesarBusqueda"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:background="@drawable/border_btnactualizar"
+            android:paddingStart="25dp"
+            android:paddingEnd="30dp"
+            android:drawableStart="@drawable/ic_search"
+            android:text="REALIZAR BUSQUEDA"
+            android:textColor="@color/colorAccent"
+            android:textSize="16sp"
+            android:textStyle="bold" />
     </LinearLayout>
 
     <androidx.recyclerview.widget.RecyclerView
