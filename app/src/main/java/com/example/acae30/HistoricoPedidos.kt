@@ -113,7 +113,8 @@ class HistoricoPedidos : AppCompatActivity() {
     }
 
     private fun cargarPedidos(){
-
+        Toast.makeText(this@HistoricoPedidos, "PEDIDOS CARGADOS CORRECTAMENTE", Toast.LENGTH_LONG)
+            .show()
     }
 
     //FUNCION PARA LA URL DEL SERVIDOR
