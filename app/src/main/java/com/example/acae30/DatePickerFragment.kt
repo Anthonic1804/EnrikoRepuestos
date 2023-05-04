@@ -17,7 +17,7 @@ class DatePickerFragment(val listener: (day: Int, month: Int, year:Int) -> Unit)
         val month = calendario.get(Calendar.MONTH)
         val year = calendario.get(Calendar.YEAR)
 
-        val picker = DatePickerDialog(activity as Context, R.style.datePickerTheme, this, year, month, day)
+        val picker = DatePickerDialog(activity as Context, this, year, month, day)
         return picker
 
     }
