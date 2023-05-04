@@ -56,8 +56,7 @@ class HistoricoPedidos : AppCompatActivity() {
 
         getApiUrl()
 
-        edtDesde.setOnClickListener { //calendarDialogDesde()
-
+        edtDesde.setOnClickListener {
             val builder = MaterialDatePicker.Builder.datePicker()
             val picker = builder.build()
 
@@ -69,11 +68,9 @@ class HistoricoPedidos : AppCompatActivity() {
             }
 
             picker.show(supportFragmentManager, picker.toString())
-
         }
 
         edtHasta.setOnClickListener {
-           // calendarDialogHasta()
             val builder = MaterialDatePicker.Builder.datePicker()
             val picker = builder.build()
 
@@ -99,11 +96,6 @@ class HistoricoPedidos : AppCompatActivity() {
 
     //FUNCION PARA REALIZAR LA BUSQUEDA DE PEDIDOS
     private fun obtenerPedidos(id_cliente: Int, desde: String, hasta: String, id_vendedor: Int, nombre_vendedor: String) {
-        println("IDCLIENTE: $idCliente")
-        println("FECHADESDE: $desde")
-        println("FECHA HASTA: $hasta")
-        println("IDVENDEDOR: $id_vendedor")
-        println("NOMBRE VENDEDOR: $nombre_vendedor")
         try {
             val datos = BusquedaPedidoJSON(
                 id_cliente,
@@ -129,14 +121,12 @@ class HistoricoPedidos : AppCompatActivity() {
                     or.write(objecto) //escribo el json
                     or.flush() //se envia el json
                     println("CODIGO DE RESPUESTA DEL SERVIDOR: $responseCode")
-                    if (responseCode == 200) {
-                        cargarPedidos()
-                    }else if(responseCode == 400){
-                        errorCargarPedidos()
-                    }else {
-                        throw Exception("Error de comunicacion con el servidor")
+                    when(responseCode){
+                        200 -> {cargarPedidos()}
+                        400 -> {errorCargarPedidos()}
+                        404 -> {pedidosNoEncontrados()}
+                        else -> {throw Exception("Error de comunicacion con el servidor")}
                     }
-
                 } catch (e: Exception) {
                     throw  Exception(e.message)
                 }
@@ -154,6 +144,10 @@ class HistoricoPedidos : AppCompatActivity() {
         Toast.makeText(this@HistoricoPedidos, "ERROR AL CARGAR LOS PEDIDOS", Toast.LENGTH_LONG)
             .show()
     }
+    private fun pedidosNoEncontrados(){
+        Toast.makeText(this@HistoricoPedidos, "NO SE ENCONTRARON PEDIDOS REGISTRADOS", Toast.LENGTH_LONG)
+            .show()
+    }
 
     //FUNCION PARA LA URL DEL SERVIDOR
     private fun getApiUrl() {
@@ -164,29 +158,7 @@ class HistoricoPedidos : AppCompatActivity() {
         }
     }
 
-
-    //FUNCIONES PARA CALENDARIOS
-    private fun calendarDialogDesde() {
-        val datePicker = DatePickerFragment{day, month, year -> onDateSelectedDesde(day, month, year)}
-        datePicker.show(supportFragmentManager, "datePicker")
-    }
-    private fun onDateSelectedDesde(day: Int, month:Int, year:Int){
-        val mes = month + 1
-        val date = "$year-$mes-$day"
-        edtDesde.setText(date)
-    }
-
-    private fun calendarDialogHasta() {
-        val datePicker = DatePickerFragment{day, month, year -> onDateSelectedHasta(day, month, year)}
-        datePicker.show(supportFragmentManager, "datePicker")
-    }
-    private fun onDateSelectedHasta(day: Int, month:Int, year:Int){
-        val mes = month + 1
-        val date = "$year-$mes-$day"
-        edtHasta.setText(date)
-    }
-    //FUNCIONES PARA CALENDARIOS
-
+    //FUNCIONES DE INTERFAZ
     private fun regresarInicio(){
         val intent = Intent(this@HistoricoPedidos, Inicio::class.java)
         startActivity(intent)
@@ -199,4 +171,5 @@ class HistoricoPedidos : AppCompatActivity() {
         startActivity(intent)
         finish()
     }
+    //FUNCIONES DE INTERFAZ
 }
