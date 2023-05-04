@@ -8,19 +8,14 @@ import android.os.Bundle
 import android.widget.Button
 import android.widget.EditText
 import android.widget.Toast
-import androidx.core.widget.doAfterTextChanged
 import com.example.acae30.modelos.JSONmodels.BusquedaPedidoJSON
-import com.example.acae30.modelos.JSONmodels.TokenDataClassJSON
 import com.google.gson.Gson
 import kotlinx.android.synthetic.main.activity_historico_pedidos.*
-import org.json.JSONObject
-import java.io.BufferedReader
-import java.io.InputStreamReader
 import java.io.OutputStreamWriter
-import java.io.Reader
 import java.net.HttpURLConnection
 import java.net.URL
 import java.nio.charset.StandardCharsets
+import java.time.format.DateTimeFormatter
 
 class HistoricoPedidos : AppCompatActivity() {
 
@@ -51,8 +46,9 @@ class HistoricoPedidos : AppCompatActivity() {
         idCliente = intent.getIntExtra("idCliente", 0)
         nombreCliente = intent.getStringExtra("nombreCliente")
 
-        val fechaDesde = edtDesde.text.toString()
-        val fechaHasta = edtHasta.text.toString()
+        val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd")
+
+
 
         if(nombreCliente != ""){
             edtCliente.setText(nombreCliente)
@@ -68,12 +64,19 @@ class HistoricoPedidos : AppCompatActivity() {
 
         imgBuscarCliente.setOnClickListener { buscarCliente() }
 
-        btnBuscarPedidos.setOnClickListener { obtenerPedidos(idCliente, fechaDesde, fechaHasta, idVendedor, nombreVendedor) }
+        btnBuscarPedidos.setOnClickListener {
+            obtenerPedidos(idCliente, edtDesde.text.toString(), edtHasta.text.toString(), idVendedor, nombreVendedor)
+        }
 
     }
 
     //FUNCION PARA REALIZAR LA BUSQUEDA DE PEDIDOS
     private fun obtenerPedidos(idCliente: Int, fechaDesde: String, fechaHasta: String, idVendedor: Int, nombreVendedor: String) {
+        println("IDCLIENTE: $idCliente")
+        println("FECHADESDE: $fechaDesde")
+        println("FECHA HASTA: $fechaHasta")
+        println("IDVENDEDOR: $idVendedor")
+        println("NOMBRE VENDEDOR: $nombreVendedor")
         try {
             val datos = BusquedaPedidoJSON(
                 idCliente,
@@ -86,6 +89,7 @@ class HistoricoPedidos : AppCompatActivity() {
                 Gson().toJson(datos)
             val ruta: String = url!! + "pedido/search"
             val url = URL(ruta)
+            println("DIRECCION DEL SERVIDOR: $ruta")
             with(url.openConnection() as HttpURLConnection) {
                 try {
                     connectTimeout = 20000
@@ -97,8 +101,11 @@ class HistoricoPedidos : AppCompatActivity() {
                     val or = OutputStreamWriter(outputStream, StandardCharsets.UTF_8)
                     or.write(objecto) //escribo el json
                     or.flush() //se envia el json
+                    println("CODIGO DE RESPUESTA DEL SERVIDOR: $responseCode")
                     if (responseCode == 200) {
                         cargarPedidos()
+                    }else if(responseCode == 400){
+                        errorCargarPedidos()
                     }else {
                         throw Exception("Error de comunicacion con el servidor")
                     }
@@ -114,6 +121,10 @@ class HistoricoPedidos : AppCompatActivity() {
 
     private fun cargarPedidos(){
         Toast.makeText(this@HistoricoPedidos, "PEDIDOS CARGADOS CORRECTAMENTE", Toast.LENGTH_LONG)
+            .show()
+    }
+    private fun errorCargarPedidos(){
+        Toast.makeText(this@HistoricoPedidos, "ERROR AL CARGAR LOS PEDIDOS", Toast.LENGTH_LONG)
             .show()
     }
 
@@ -134,7 +145,7 @@ class HistoricoPedidos : AppCompatActivity() {
     }
     private fun onDateSelectedDesde(day: Int, month:Int, year:Int){
         val mes = month + 1
-        val date = "$year/$mes/$day"
+        val date = "$year-$mes-$day"
         edtDesde.setText(date)
     }
 
@@ -144,7 +155,7 @@ class HistoricoPedidos : AppCompatActivity() {
     }
     private fun onDateSelectedHasta(day: Int, month:Int, year:Int){
         val mes = month + 1
-        val date = "$year/$mes/$day"
+        val date = "$year-$mes-$day"
         edtHasta.setText(date)
     }
     //FUNCIONES PARA CALENDARIOS

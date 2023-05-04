@@ -128,7 +128,7 @@
                 android:inputType="date"
                 android:paddingStart="10dp"
                 android:textColor="@color/colorHint"
-                android:text="@string/date_default" />
+                android:hint="@string/date_default" />
 
             <EditText
                 android:id="@+id/etFechaHasta"
@@ -145,7 +145,7 @@
                 android:inputType="date"
                 android:paddingStart="10dp"
                 android:textColor="@color/colorHint"
-                android:text="@string/date_default" />
+                android:hint="@string/date_default" />
         </LinearLayout>
 
         <Button
