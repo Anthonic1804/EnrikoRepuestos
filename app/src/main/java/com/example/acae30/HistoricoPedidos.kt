@@ -210,17 +210,26 @@ class HistoricoPedidos : AppCompatActivity() {
                 valor.put("total", funciones!!.validate(dato.getString("total").toFloat()))
                 valor.put("numero", dato.getInt("numero"))
 
-                val detalleVen = dato.getString("detalleVentas")
+                val detalleVen = dato.getJSONObject("detalleVentas")//ERROR AL CONVERTIR EN JSONOBJECT
                 println("VENTA DETALLE ENCONTRADA \n $detalleVen")
 
+                for(x in 0 until detalleVen.length()){
+                    val item = ContentValues()
+                    val data = detalleVen.getJSONObject(x.toString())
+                    item.put("id_ventas", data.getInt("id_ventas"))
+                    item.put("id_producto", data.getInt("id_producto"))
+                    item.put("producto", funciones!!.validateJsonIsnullString(data,"producto"))
+                    item.put("cantidad", data.getInt("cantidad"))
+                    item.put("total_iva", funciones!!.validate(data.getString("total_iva").toFloat()))
+
+                    bd.insert("ventasDetalleTemp", null, item)
+                }
                 runOnUiThread {
                     Toast.makeText(this@HistoricoPedidos, "DATOS CARGADOS CORRECTAMENTE", Toast.LENGTH_LONG)
                         .show()
                 }
 
-
-
-                //bd.insert("ventasTemp", null, valor)
+                bd.insert("ventasTemp", null, valor)
                 contador += talla
                 //val mensaje = contador + 50.toFloat()
                 //messageAsync("Cargando ${mensaje.toInt()}%")
