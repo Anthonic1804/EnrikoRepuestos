@@ -13,7 +13,11 @@ import com.google.android.material.datepicker.MaterialDatePicker
 import com.google.gson.Gson
 import kotlinx.android.synthetic.main.activity_historico_pedidos.imgBuscarCliente
 import kotlinx.android.synthetic.main.activity_historico_pedidos.imgRegresar
+import org.json.JSONArray
+import java.io.BufferedReader
+import java.io.InputStreamReader
 import java.io.OutputStreamWriter
+import java.io.Reader
 import java.net.HttpURLConnection
 import java.net.URL
 import java.nio.charset.StandardCharsets
@@ -122,9 +126,29 @@ class HistoricoPedidos : AppCompatActivity() {
                     or.flush() //se envia el json
                     println("CODIGO DE RESPUESTA DEL SERVIDOR: $responseCode")
                     when(responseCode){
-                        200 -> {cargarPedidos()}
-                        400 -> {errorCargarPedidos()}
-                        404 -> {pedidosNoEncontrados()}
+                        200 -> {
+                            BufferedReader(InputStreamReader(inputStream) as Reader?).use {
+                                try {
+                                    val respuesta = StringBuffer()
+                                    var inpuline = it.readLine()
+                                    while (inpuline != null) {
+                                        respuesta.append(inpuline)
+                                        inpuline = it.readLine()
+                                    }
+                                    it.close()
+                                    val res: JSONArray = JSONArray(respuesta.toString())
+                                    if (res.length() > 0) {
+                                        cargarPedidos(res)
+                                    } else {
+                                        mensajeError("NO_ENCONTRADO")
+                                    }
+                                } catch (e: Exception) {
+                                    throw Exception(e.message)
+                                }
+                            }
+                        }
+                        400 -> {mensajeError("ERROR_CARGAR")}
+                        404 -> {mensajeError("NO_ENCONTRADO")}
                         else -> {throw Exception("Error de comunicacion con el servidor")}
                     }
                 } catch (e: Exception) {
@@ -136,17 +160,23 @@ class HistoricoPedidos : AppCompatActivity() {
         }
     }
 
-    private fun cargarPedidos(){
+    private fun cargarPedidos(json: JSONArray){
+        println("DATOS RECOLECTADOS DEL JSON_ARRAY: \n $json")
         Toast.makeText(this@HistoricoPedidos, "PEDIDOS CARGADOS CORRECTAMENTE", Toast.LENGTH_LONG)
             .show()
     }
-    private fun errorCargarPedidos(){
-        Toast.makeText(this@HistoricoPedidos, "ERROR AL CARGAR LOS PEDIDOS", Toast.LENGTH_LONG)
-            .show()
-    }
-    private fun pedidosNoEncontrados(){
-        Toast.makeText(this@HistoricoPedidos, "NO SE ENCONTRARON PEDIDOS REGISTRADOS", Toast.LENGTH_LONG)
-            .show()
+    private fun mensajeError(mensaje: String){
+        when(mensaje){
+            "ERROR_CARGAR" -> {
+                Toast.makeText(this@HistoricoPedidos, "ERROR AL CARGAR LOS PEDIDOS", Toast.LENGTH_LONG)
+                    .show()
+            }
+            "NO_ENCONTRADO" -> {
+                Toast.makeText(this@HistoricoPedidos, "NO SE ENCONTRARON PEDIDOS REGISTRADOS", Toast.LENGTH_LONG)
+                    .show()
+            }
+        }
+
     }
 
     //FUNCION PARA LA URL DEL SERVIDOR

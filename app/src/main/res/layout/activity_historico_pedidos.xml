@@ -78,7 +78,7 @@
             <ImageButton
                 android:id="@+id/imgBuscarCliente"
                 android:layout_width="0dp"
-                android:layout_height="40dp"
+                android:layout_height="48dp"
                 android:layout_weight="15"
                 android:background="@drawable/border_btnactualizar"
                 app:srcCompat="@drawable/ic_baseline_add_box_24"

@@ -207,7 +207,7 @@ class Tokens : AppCompatActivity() {
 
     //OBTENIENDO LOS EMPLEADOS DEL SERVIDOR
     suspend fun getEmpleados() {
-        //IMPORTANDO DATOS DE TABLA SUCURSALES CLIENTE
+        //IMPORTANDO DATOS DE TABLA EMPLEADOS
         try {
             val direccion = url!! + "empleados"
             val url = URL(direccion)
