@@ -638,8 +638,7 @@ class carga_datos : AppCompatActivity() {
                     funciones!!.validate(dato.getString("terminos_cliente"))
                 )
                 data.put("Plazo_credito", funciones!!.validate(dato.getInt("plazo_credito")))
-                data.put(
-                    "Limite_credito",
+                data.put("Limite_credito",
                     funciones!!.validate(dato.getString("limite_credito").toFloat())
                 )
                 data.put("Balance", funciones!!.validate(dato.getString("balance").toFloat()))

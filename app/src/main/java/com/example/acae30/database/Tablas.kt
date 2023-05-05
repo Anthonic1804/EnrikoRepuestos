@@ -216,6 +216,30 @@ class Tablas {
         return pedido
     } //tabla pedidos
 
+    //TABLA VENTAS TEMP
+    fun VentasTemp():String{
+        val ventasTemp = "CREATE TABLE ventasTemp (" +
+                "Id INTEGER NOT NULL," +
+                "Fecha TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL," +
+                "Id_cliente INTEGER NOT NULL," +
+                "Id_Sucursal INTEGER NOT NULL," +
+                "Id_vendedor INTEGER NOT NULL," +
+                "Total NUMERIC(20,6) NOT NULL," +
+                "Numero INTEGER NOT NULL);"
+        return ventasTemp
+    }
+
+    fun VentasDetalleTemp(): String{
+        val ventasDetalle = "CREATE TABLE ventasDetalleTemp (" +
+                "Id_venta INTEGER NOT NULL," +
+                "Id_producto INTEGER NOT NULL," +
+                "Producto VARCHAR(50) NOT NULL," +
+                "Precio_u_iva NUMERIC(20,6) NOT NULL," +
+                "Cantidad INTEGER NOT NULL," +
+                "Total_iva NUMERIC(20,6) NOT NULL)"
+        return ventasDetalle
+    }
+
     fun Cuentas(): String {
         val cuenta = "CREATE TABLE cuentas(" +
                 "Id INTEGER NOT NULL," +

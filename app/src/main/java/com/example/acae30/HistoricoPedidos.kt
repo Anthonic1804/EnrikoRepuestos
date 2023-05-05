@@ -1,5 +1,6 @@
 package com.example.acae30
 
+import android.content.ContentValues
 import android.content.Context
 import android.content.Intent
 import android.content.SharedPreferences
@@ -8,11 +9,15 @@ import android.widget.Button
 import android.widget.EditText
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import com.example.acae30.database.Database
 import com.example.acae30.modelos.JSONmodels.BusquedaPedidoJSON
 import com.google.android.material.datepicker.MaterialDatePicker
 import com.google.gson.Gson
 import kotlinx.android.synthetic.main.activity_historico_pedidos.imgBuscarCliente
 import kotlinx.android.synthetic.main.activity_historico_pedidos.imgRegresar
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 import org.json.JSONArray
 import java.io.BufferedReader
 import java.io.InputStreamReader
@@ -40,6 +45,10 @@ class HistoricoPedidos : AppCompatActivity() {
     private var preferencias: SharedPreferences? = null
     private val instancia = "CONFIG_SERVIDOR"
     private var url: String? = null
+    private var alert: AlertDialogo? = null
+    private var funciones: Funciones? = null
+    private var database: Database? = null
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_historico_pedidos)
@@ -48,6 +57,9 @@ class HistoricoPedidos : AppCompatActivity() {
         edtDesde = findViewById(R.id.etFechaDesde)
         edtHasta = findViewById(R.id.etFechaHasta)
         btnBuscarPedidos = findViewById(R.id.btnProcesarBusqueda)
+        alert = AlertDialogo(this@HistoricoPedidos)
+        funciones = Funciones()
+        database = Database(this@HistoricoPedidos)
 
         nombreVendedor = preferencias!!.getString("Vendedor", "").toString()
         idVendedor = preferencias!!.getInt("Idvendedor", 0)
@@ -59,6 +71,11 @@ class HistoricoPedidos : AppCompatActivity() {
         }
 
         getApiUrl()
+
+    }
+
+    override fun onStart() {
+        super.onStart()
 
         edtDesde.setOnClickListener {
             val builder = MaterialDatePicker.Builder.datePicker()
@@ -93,9 +110,19 @@ class HistoricoPedidos : AppCompatActivity() {
         imgBuscarCliente.setOnClickListener { buscarCliente() }
 
         btnBuscarPedidos.setOnClickListener {
-            obtenerPedidos(idCliente, edtDesde.text.toString(), edtHasta.text.toString(), idVendedor, nombreVendedor)
+            if (url != null) {
+                if (funciones!!.isNetworkConneted(this)) {
+                    alert!!.Cargando() //muestra la alerta
+                    GlobalScope.launch(Dispatchers.IO) {
+                        obtenerPedidos(idCliente, edtDesde.text.toString(), edtHasta.text.toString(), idVendedor, nombreVendedor)
+                    } //COURUTINA PARA OBTENER CLIENTES Y SUCURSALES
+                } else {
+                    //ShowAlert("Enciende tus datos o el wifi")
+                }
+            } else {
+                //ShowAlert("No hay configuracion del Servidor")
+            }
         }
-
     }
 
     //FUNCION PARA REALIZAR LA BUSQUEDA DE PEDIDOS
@@ -161,9 +188,51 @@ class HistoricoPedidos : AppCompatActivity() {
     }
 
     private fun cargarPedidos(json: JSONArray){
-        println("DATOS RECOLECTADOS DEL JSON_ARRAY: \n $json")
-        Toast.makeText(this@HistoricoPedidos, "PEDIDOS CARGADOS CORRECTAMENTE", Toast.LENGTH_LONG)
-            .show()
+        val bd = database!!.writableDatabase
+        val total = json.length()
+        val talla = (50.toFloat() / total.toFloat()).toFloat()
+        var contador: Float = 0.toFloat()
+        try {
+            bd!!.beginTransaction() //INICIANDO TRANSACCION DE REGISTRO
+            bd.execSQL("DELETE FROM ventasTemp") //LIMPIANDO TABLA VENTAS_TEMP
+
+            val sql2 = "DELETE FROM SQLITE_SEQUENCE WHERE NAME = 'ventasTemp'"
+            bd.execSQL(sql2)
+
+            for (i in 0 until json.length()) {
+                val dato = json.getJSONObject(i)
+                val valor = ContentValues()
+                valor.put("Id", dato.getInt("id"))
+                valor.put("fecha", funciones!!.validateJsonIsnullString(dato, "fecha"))
+                valor.put("Id_cliente", dato.getInt("id_cliente"))
+                valor.put("id_sucursal", dato.getInt("id_sucursal"))
+                valor.put("id_vendedor", dato.getInt("id_vendedor"))
+                valor.put("total", funciones!!.validate(dato.getString("total").toFloat()))
+                valor.put("numero", dato.getInt("numero"))
+
+                val detalleVen = dato.getString("detalleVentas")
+                println("VENTA DETALLE ENCONTRADA \n $detalleVen")
+
+                runOnUiThread {
+                    Toast.makeText(this@HistoricoPedidos, "DATOS CARGADOS CORRECTAMENTE", Toast.LENGTH_LONG)
+                        .show()
+                }
+
+
+
+                //bd.insert("ventasTemp", null, valor)
+                contador += talla
+                //val mensaje = contador + 50.toFloat()
+                //messageAsync("Cargando ${mensaje.toInt()}%")
+            } //FINALIZANDO ITERACION FOR
+            bd.setTransactionSuccessful() //TRANSACCION COMPLETA
+            alert!!.dismisss()
+        } catch (e: Exception) {
+            throw  Exception(e.message)
+        } finally {
+            bd!!.endTransaction()
+            bd.close()
+        }
     }
     private fun mensajeError(mensaje: String){
         when(mensaje){
@@ -200,6 +269,14 @@ class HistoricoPedidos : AppCompatActivity() {
         intent.putExtra("Historico", true)
         startActivity(intent)
         finish()
+    }
+
+    private fun messageAsync(mensaje: String) {
+        if (alert != null) {
+            runOnUiThread {
+                alert!!.changeText(mensaje)
+            }
+        }
     }
     //FUNCIONES DE INTERFAZ
 }
