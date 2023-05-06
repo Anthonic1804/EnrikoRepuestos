@@ -1,12 +1,15 @@
 package com.example.acae30
 
+import android.app.Dialog
 import android.content.ContentValues
 import android.content.Context
 import android.content.Intent
 import android.content.SharedPreferences
 import android.os.Bundle
+import android.view.View
 import android.widget.Button
 import android.widget.EditText
+import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.example.acae30.database.Database
@@ -15,6 +18,7 @@ import com.google.android.material.datepicker.MaterialDatePicker
 import com.google.gson.Gson
 import kotlinx.android.synthetic.main.activity_historico_pedidos.imgBuscarCliente
 import kotlinx.android.synthetic.main.activity_historico_pedidos.imgRegresar
+import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
@@ -49,6 +53,14 @@ class HistoricoPedidos : AppCompatActivity() {
     private var funciones: Funciones? = null
     private var database: Database? = null
 
+    private lateinit var tvUpdate : TextView
+    private lateinit var tvCancel : TextView
+    private lateinit var tvMsj : TextView
+    private lateinit var tvTitulo : TextView
+    private lateinit var btnCancelar : Button
+    private lateinit var btnLimpiar : Button
+    private lateinit var btnFirmar : Button
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_historico_pedidos)
@@ -74,6 +86,7 @@ class HistoricoPedidos : AppCompatActivity() {
 
     }
 
+    @OptIn(DelicateCoroutinesApi::class)
     override fun onStart() {
         super.onStart()
 
@@ -112,15 +125,15 @@ class HistoricoPedidos : AppCompatActivity() {
         btnBuscarPedidos.setOnClickListener {
             if (url != null) {
                 if (funciones!!.isNetworkConneted(this)) {
-                    alert!!.Cargando() //muestra la alerta
+                    alert!!.Cargando() //MUESTRA EL MENSAJE DE CARGA
                     GlobalScope.launch(Dispatchers.IO) {
                         obtenerPedidos(idCliente, edtDesde.text.toString(), edtHasta.text.toString(), idVendedor, nombreVendedor)
-                    } //COURUTINA PARA OBTENER CLIENTES Y SUCURSALES
+                    } //COURUTINA PARA OBTENER EL HISTORIAL DE PEDIDOS
                 } else {
-                    //ShowAlert("Enciende tus datos o el wifi")
+                    mensajeError("WIFI")
                 }
             } else {
-                //ShowAlert("No hay configuracion del Servidor")
+                mensajeError("SERVIDOR")
             }
         }
     }
@@ -139,7 +152,7 @@ class HistoricoPedidos : AppCompatActivity() {
                 Gson().toJson(datos)
             val ruta: String = url!! + "pedido/search"
             val url = URL(ruta)
-            println("DIRECCION DEL SERVIDOR: $ruta")
+            //println("DIRECCION DEL SERVIDOR: $ruta")
             with(url.openConnection() as HttpURLConnection) {
                 try {
                     connectTimeout = 20000
@@ -149,8 +162,8 @@ class HistoricoPedidos : AppCompatActivity() {
                     )
                     requestMethod = "POST"
                     val or = OutputStreamWriter(outputStream, StandardCharsets.UTF_8)
-                    or.write(objecto) //escribo el json
-                    or.flush() //se envia el json
+                    or.write(objecto) //SE ESCRIBE EL OBJ JSON
+                    or.flush() //SE ENVIA EL OBJ JSON
                     println("CODIGO DE RESPUESTA DEL SERVIDOR: $responseCode")
                     when(responseCode){
                         200 -> {
@@ -167,16 +180,30 @@ class HistoricoPedidos : AppCompatActivity() {
                                     if (res.length() > 0) {
                                         cargarPedidos(res)
                                     } else {
-                                        mensajeError("NO_ENCONTRADO")
+                                        runOnUiThread {
+                                            mensajeError("NO_ENCONTRADO")
+                                        }
                                     }
                                 } catch (e: Exception) {
                                     throw Exception(e.message)
                                 }
                             }
                         }
-                        400 -> {mensajeError("ERROR_CARGAR")}
-                        404 -> {mensajeError("NO_ENCONTRADO")}
-                        else -> {throw Exception("Error de comunicacion con el servidor")}
+                        400 -> {
+                            runOnUiThread {
+                                mensajeError("ERROR_CARGAR")
+                            }
+                        }
+                        404 -> {
+                            runOnUiThread {
+                                mensajeError("NO_ENCONTRADO")
+                            }
+                        }
+                        else -> {
+                            runOnUiThread {
+                                mensajeError("SERVIDOR")
+                            }
+                        }
                     }
                 } catch (e: Exception) {
                     throw  Exception(e.message)
@@ -187,17 +214,15 @@ class HistoricoPedidos : AppCompatActivity() {
         }
     }
 
-    private fun cargarPedidos(json: JSONArray){
+   private fun cargarPedidos(json: JSONArray){
         val bd = database!!.writableDatabase
         val total = json.length()
         val talla = (50.toFloat() / total.toFloat()).toFloat()
         var contador: Float = 0.toFloat()
         try {
             bd!!.beginTransaction() //INICIANDO TRANSACCION DE REGISTRO
-            bd.execSQL("DELETE FROM ventasTemp") //LIMPIANDO TABLA VENTAS_TEMP
-
-            val sql2 = "DELETE FROM SQLITE_SEQUENCE WHERE NAME = 'ventasTemp'"
-            bd.execSQL(sql2)
+            bd.delete("ventasTemp", null, null) //LIMPIANDO LA TABLA VENTASTEMP
+            bd.delete("ventasDetalleTemp", null, null) //LIMPIANDO LA TABLA VENTASDETALLETEMP
 
             for (i in 0 until json.length()) {
                 val dato = json.getJSONObject(i)
@@ -210,29 +235,26 @@ class HistoricoPedidos : AppCompatActivity() {
                 valor.put("total", funciones!!.validate(dato.getString("total").toFloat()))
                 valor.put("numero", dato.getInt("numero"))
 
-                val detalleVen = dato.getJSONObject("detalleVentas")//ERROR AL CONVERTIR EN JSONOBJECT
-                println("VENTA DETALLE ENCONTRADA \n $detalleVen")
+                //ASIGNADO EL JSON INTERNO A UNA VARIABLE
+                val detalleVen = dato.getJSONArray("detalleVentas")// EXTRAEMOS EL JSON INTERNO
 
+                //RECORRIENDO EL JSON DETALLEVENTAS
                 for(x in 0 until detalleVen.length()){
+                    val detalle = detalleVen.getJSONObject(x)
                     val item = ContentValues()
-                    val data = detalleVen.getJSONObject(x.toString())
-                    item.put("id_ventas", data.getInt("id_ventas"))
-                    item.put("id_producto", data.getInt("id_producto"))
-                    item.put("producto", funciones!!.validateJsonIsnullString(data,"producto"))
-                    item.put("cantidad", data.getInt("cantidad"))
-                    item.put("total_iva", funciones!!.validate(data.getString("total_iva").toFloat()))
+                    item.put("id_venta", detalle.getInt("id_ventas"))
+                    item.put("id_producto", detalle.getInt("id_producto"))
+                    item.put("producto", funciones!!.validateJsonIsnullString(detalle,"producto"))
+                    item.put("precio_u_iva", funciones!!.validate(detalle.getString("precio_u_iva").toFloat()))
+                    item.put("cantidad", detalle.getInt("cantidad"))
+                    item.put("total_iva", funciones!!.validate(detalle.getString("total_iva").toFloat()))
 
-                    bd.insert("ventasDetalleTemp", null, item)
+                    bd.insert("ventasDetalleTemp", null, item) //INSERTANDO EN VENTASDETALLETEMP
                 }
-                runOnUiThread {
-                    Toast.makeText(this@HistoricoPedidos, "DATOS CARGADOS CORRECTAMENTE", Toast.LENGTH_LONG)
-                        .show()
-                }
-
-                bd.insert("ventasTemp", null, valor)
+                bd.insert("ventasTemp", null, valor) //INSERTANDO EN VENTASDETALLE
                 contador += talla
-                //val mensaje = contador + 50.toFloat()
-                //messageAsync("Cargando ${mensaje.toInt()}%")
+                val mensaje = contador + 50.toFloat()
+                messageAsync("Cargando ${mensaje.toInt()}%")
             } //FINALIZANDO ITERACION FOR
             bd.setTransactionSuccessful() //TRANSACCION COMPLETA
             alert!!.dismisss()
@@ -242,19 +264,6 @@ class HistoricoPedidos : AppCompatActivity() {
             bd!!.endTransaction()
             bd.close()
         }
-    }
-    private fun mensajeError(mensaje: String){
-        when(mensaje){
-            "ERROR_CARGAR" -> {
-                Toast.makeText(this@HistoricoPedidos, "ERROR AL CARGAR LOS PEDIDOS", Toast.LENGTH_LONG)
-                    .show()
-            }
-            "NO_ENCONTRADO" -> {
-                Toast.makeText(this@HistoricoPedidos, "NO SE ENCONTRARON PEDIDOS REGISTRADOS", Toast.LENGTH_LONG)
-                    .show()
-            }
-        }
-
     }
 
     //FUNCION PARA LA URL DEL SERVIDOR
@@ -272,20 +281,89 @@ class HistoricoPedidos : AppCompatActivity() {
         startActivity(intent)
         finish()
     }
-
     private fun buscarCliente(){
         val intent = Intent(this@HistoricoPedidos, Clientes::class.java)
         intent.putExtra("Historico", true)
         startActivity(intent)
         finish()
     }
-
     private fun messageAsync(mensaje: String) {
         if (alert != null) {
             runOnUiThread {
                 alert!!.changeText(mensaje)
             }
         }
+    }
+    private fun mensajeError(msj: String){
+
+        val updateDialog = Dialog(this, R.style.Theme_Dialog)
+        updateDialog.setCancelable(false)
+
+        updateDialog.setContentView(R.layout.dialog_cancelar)
+        tvUpdate = updateDialog.findViewById(R.id.tvUpdate)
+        tvCancel = updateDialog.findViewById(R.id.tvCancel)
+        tvMsj = updateDialog.findViewById(R.id.tvMensaje)
+        tvTitulo = updateDialog.findViewById(R.id.tvTitulo)
+
+        var tituloDialogo = ""
+        var mensajeDialogo = ""
+        var mensajeBotonAceptar = ""
+
+        when(msj){
+            "ERROR_CARGAR" -> {
+                tituloDialogo = "INFORMACIÓN"
+                mensajeDialogo = "Error al Cargar los Pedidos"
+                mensajeBotonAceptar = "SALIR"
+
+                tvUpdate.visibility = View.GONE
+                tvMsj.text = mensajeDialogo
+                tvTitulo.text = tituloDialogo
+                tvUpdate.text = mensajeBotonAceptar
+
+                tvCancel.setOnClickListener {
+                    updateDialog.dismiss()
+                }
+            }
+            "NO_ENCONTRADO" -> {
+                tvCancel.visibility = View.GONE
+
+                tituloDialogo = "INFORMACIÓN"
+                mensajeDialogo = "No se Encontraron pedidos Registrados"
+                mensajeBotonAceptar = "SALIR"
+
+                tvUpdate.visibility = View.GONE
+                tvMsj.text = mensajeDialogo
+                tvTitulo.text = tituloDialogo
+                tvUpdate.text = mensajeBotonAceptar
+            }
+            "SERVIDOR" -> {
+                tvCancel.visibility = View.GONE
+
+                tituloDialogo = "INFORMACIÓN"
+                mensajeDialogo = "Error al intentar conectarse con el Servior"
+                mensajeBotonAceptar = "SALIR"
+
+                tvUpdate.visibility = View.GONE
+                tvMsj.text = mensajeDialogo
+                tvTitulo.text = tituloDialogo
+                tvUpdate.text = mensajeBotonAceptar
+            }
+            "WIFI" -> {
+                tvCancel.visibility = View.GONE
+
+                tituloDialogo = "INFORMACIÓN"
+                mensajeDialogo = "ENCIENDE TUS WIFI/DATOS MÓVILES POR FAVOR"
+                mensajeBotonAceptar = "SALIR"
+
+                tvUpdate.visibility = View.GONE
+                tvMsj.text = mensajeDialogo
+                tvTitulo.text = tituloDialogo
+                tvUpdate.text = mensajeBotonAceptar
+            }
+        }
+
+        updateDialog.show()
+
     }
     //FUNCIONES DE INTERFAZ
 }
