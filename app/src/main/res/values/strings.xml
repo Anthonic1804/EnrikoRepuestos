@@ -83,4 +83,6 @@
     <string name="historico_de_pedidos">HISTORICO DE PEDIDOS</string>
     <string name="regresar">Regresar</string>
     <string name="date_default">1900/01/01</string>
+    <string name="titulo_msj_informacion">INFORMACIÓN</string>
+    <string name="btn_salir">SALIR</string>
 </resources>

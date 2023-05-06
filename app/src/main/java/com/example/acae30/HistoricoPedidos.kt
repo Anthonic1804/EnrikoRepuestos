@@ -10,14 +10,12 @@ import android.view.View
 import android.widget.Button
 import android.widget.EditText
 import android.widget.TextView
-import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.example.acae30.database.Database
 import com.example.acae30.modelos.JSONmodels.BusquedaPedidoJSON
 import com.google.android.material.datepicker.MaterialDatePicker
 import com.google.gson.Gson
-import kotlinx.android.synthetic.main.activity_historico_pedidos.imgBuscarCliente
-import kotlinx.android.synthetic.main.activity_historico_pedidos.imgRegresar
+import kotlinx.android.synthetic.main.activity_historico_pedidos.*
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
@@ -31,8 +29,7 @@ import java.net.HttpURLConnection
 import java.net.URL
 import java.nio.charset.StandardCharsets
 import java.text.SimpleDateFormat
-import java.util.Locale
-import java.util.TimeZone
+import java.util.*
 
 class HistoricoPedidos : AppCompatActivity() {
 
@@ -57,9 +54,6 @@ class HistoricoPedidos : AppCompatActivity() {
     private lateinit var tvCancel : TextView
     private lateinit var tvMsj : TextView
     private lateinit var tvTitulo : TextView
-    private lateinit var btnCancelar : Button
-    private lateinit var btnLimpiar : Button
-    private lateinit var btnFirmar : Button
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -176,7 +170,7 @@ class HistoricoPedidos : AppCompatActivity() {
                                         inpuline = it.readLine()
                                     }
                                     it.close()
-                                    val res: JSONArray = JSONArray(respuesta.toString())
+                                    val res = JSONArray(respuesta.toString())
                                     if (res.length() > 0) {
                                         cargarPedidos(res)
                                     } else {
@@ -216,9 +210,6 @@ class HistoricoPedidos : AppCompatActivity() {
 
    private fun cargarPedidos(json: JSONArray){
         val bd = database!!.writableDatabase
-        val total = json.length()
-        val talla = (50.toFloat() / total.toFloat()).toFloat()
-        var contador: Float = 0.toFloat()
         try {
             bd!!.beginTransaction() //INICIANDO TRANSACCION DE REGISTRO
             bd.delete("ventasTemp", null, null) //LIMPIANDO LA TABLA VENTASTEMP
@@ -252,9 +243,6 @@ class HistoricoPedidos : AppCompatActivity() {
                     bd.insert("ventasDetalleTemp", null, item) //INSERTANDO EN VENTASDETALLETEMP
                 }
                 bd.insert("ventasTemp", null, valor) //INSERTANDO EN VENTASDETALLE
-                contador += talla
-                val mensaje = contador + 50.toFloat()
-                messageAsync("Cargando ${mensaje.toInt()}%")
             } //FINALIZANDO ITERACION FOR
             bd.setTransactionSuccessful() //TRANSACCION COMPLETA
             alert!!.dismisss()
@@ -287,13 +275,6 @@ class HistoricoPedidos : AppCompatActivity() {
         startActivity(intent)
         finish()
     }
-    private fun messageAsync(mensaje: String) {
-        if (alert != null) {
-            runOnUiThread {
-                alert!!.changeText(mensaje)
-            }
-        }
-    }
     private fun mensajeError(msj: String){
 
         val updateDialog = Dialog(this, R.style.Theme_Dialog)
@@ -305,61 +286,23 @@ class HistoricoPedidos : AppCompatActivity() {
         tvMsj = updateDialog.findViewById(R.id.tvMensaje)
         tvTitulo = updateDialog.findViewById(R.id.tvTitulo)
 
-        var tituloDialogo = ""
-        var mensajeDialogo = ""
-        var mensajeBotonAceptar = ""
+        alert!!.dismisss()
 
-        when(msj){
-            "ERROR_CARGAR" -> {
-                tituloDialogo = "INFORMACIÓN"
-                mensajeDialogo = "Error al Cargar los Pedidos"
-                mensajeBotonAceptar = "SALIR"
+        val mensajeDialogo: String = when(msj){
+            "ERROR_CARGAR" -> { "Error al Cargar los Pedidos" }
+            "NO_ENCONTRADO" -> { "No se Encontraron pedidos Registrados" }
+            "SERVIDOR" -> { "Error al intentar conectarse con el Servidor" }
+            "WIFI" -> { "ENCIENDE TUS WIFI/DATOS MÓVILES POR FAVOR" }
+            else -> { "ERROR AL CONECTARSE CON EL SERVIDOR" }
+        }
 
-                tvUpdate.visibility = View.GONE
-                tvMsj.text = mensajeDialogo
-                tvTitulo.text = tituloDialogo
-                tvUpdate.text = mensajeBotonAceptar
+        tvMsj.text = mensajeDialogo
+        tvTitulo.text = getString(R.string.titulo_msj_informacion)
+        tvCancel.text = getString(R.string.btn_salir)
+        tvUpdate.visibility = View.GONE
 
-                tvCancel.setOnClickListener {
-                    updateDialog.dismiss()
-                }
-            }
-            "NO_ENCONTRADO" -> {
-                tvCancel.visibility = View.GONE
-
-                tituloDialogo = "INFORMACIÓN"
-                mensajeDialogo = "No se Encontraron pedidos Registrados"
-                mensajeBotonAceptar = "SALIR"
-
-                tvUpdate.visibility = View.GONE
-                tvMsj.text = mensajeDialogo
-                tvTitulo.text = tituloDialogo
-                tvUpdate.text = mensajeBotonAceptar
-            }
-            "SERVIDOR" -> {
-                tvCancel.visibility = View.GONE
-
-                tituloDialogo = "INFORMACIÓN"
-                mensajeDialogo = "Error al intentar conectarse con el Servior"
-                mensajeBotonAceptar = "SALIR"
-
-                tvUpdate.visibility = View.GONE
-                tvMsj.text = mensajeDialogo
-                tvTitulo.text = tituloDialogo
-                tvUpdate.text = mensajeBotonAceptar
-            }
-            "WIFI" -> {
-                tvCancel.visibility = View.GONE
-
-                tituloDialogo = "INFORMACIÓN"
-                mensajeDialogo = "ENCIENDE TUS WIFI/DATOS MÓVILES POR FAVOR"
-                mensajeBotonAceptar = "SALIR"
-
-                tvUpdate.visibility = View.GONE
-                tvMsj.text = mensajeDialogo
-                tvTitulo.text = tituloDialogo
-                tvUpdate.text = mensajeBotonAceptar
-            }
+        tvCancel.setOnClickListener {
+            updateDialog.dismiss()
         }
 
         updateDialog.show()
