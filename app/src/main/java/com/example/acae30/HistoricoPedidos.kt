@@ -11,9 +11,20 @@ import android.widget.Button
 import android.widget.EditText
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.lifecycleScope
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import com.example.acae30.database.Database
+import com.example.acae30.listas.ClienteAdapter
+import com.example.acae30.listas.PedidosAdapter
+import com.example.acae30.listas.TokenAdapter
+import com.example.acae30.listas.VentasTempAdapter
+import com.example.acae30.modelos.Cliente
 import com.example.acae30.modelos.JSONmodels.BusquedaPedidoJSON
+import com.example.acae30.modelos.TokenData
+import com.example.acae30.modelos.VentasTemp
 import com.google.android.material.datepicker.MaterialDatePicker
+import com.google.android.material.snackbar.Snackbar
 import com.google.gson.Gson
 import kotlinx.android.synthetic.main.activity_historico_pedidos.*
 import kotlinx.coroutines.DelicateCoroutinesApi
@@ -30,6 +41,7 @@ import java.net.URL
 import java.nio.charset.StandardCharsets
 import java.text.SimpleDateFormat
 import java.util.*
+import kotlin.collections.ArrayList
 
 class HistoricoPedidos : AppCompatActivity() {
 
@@ -39,6 +51,7 @@ class HistoricoPedidos : AppCompatActivity() {
     private lateinit var edtHasta: EditText
     private lateinit var edtDesde: EditText
     private lateinit var btnBuscarPedidos: Button
+    private lateinit var rvVentasTemp: RecyclerView
 
     private var idVendedor = 0
     private var nombreVendedor: String = ""
@@ -63,6 +76,7 @@ class HistoricoPedidos : AppCompatActivity() {
         edtDesde = findViewById(R.id.etFechaDesde)
         edtHasta = findViewById(R.id.etFechaHasta)
         btnBuscarPedidos = findViewById(R.id.btnProcesarBusqueda)
+        rvVentasTemp = findViewById(R.id.rvPedidos)
         alert = AlertDialogo(this@HistoricoPedidos)
         funciones = Funciones()
         database = Database(this@HistoricoPedidos)
@@ -71,6 +85,8 @@ class HistoricoPedidos : AppCompatActivity() {
         idVendedor = preferencias!!.getInt("Idvendedor", 0)
         idCliente = intent.getIntExtra("idCliente", 0)
         nombreCliente = intent.getStringExtra("nombreCliente")
+
+        tvNoRegistros.visibility = View.GONE
 
          if(nombreCliente != ""){
             edtCliente.setText(nombreCliente)
@@ -83,6 +99,20 @@ class HistoricoPedidos : AppCompatActivity() {
     @OptIn(DelicateCoroutinesApi::class)
     override fun onStart() {
         super.onStart()
+        this@HistoricoPedidos.lifecycleScope.launch {
+            try {
+                val lista = obtenerPedidosAlmacenados()
+                if (lista.size > 0) {
+                    ArmarLista(lista)
+                }else{
+                    tvNoRegistros.visibility = View.VISIBLE
+                }
+            } catch (e: Exception) {
+                runOnUiThread {
+                    mensajeError("PEDIDOS")
+                }
+            }
+        }
 
         edtDesde.setOnClickListener {
             val builder = MaterialDatePicker.Builder.datePicker()
@@ -146,7 +176,6 @@ class HistoricoPedidos : AppCompatActivity() {
                 Gson().toJson(datos)
             val ruta: String = url!! + "pedido/search"
             val url = URL(ruta)
-            //println("DIRECCION DEL SERVIDOR: $ruta")
             with(url.openConnection() as HttpURLConnection) {
                 try {
                     connectTimeout = 20000
@@ -158,7 +187,6 @@ class HistoricoPedidos : AppCompatActivity() {
                     val or = OutputStreamWriter(outputStream, StandardCharsets.UTF_8)
                     or.write(objecto) //SE ESCRIBE EL OBJ JSON
                     or.flush() //SE ENVIA EL OBJ JSON
-                    println("CODIGO DE RESPUESTA DEL SERVIDOR: $responseCode")
                     when(responseCode){
                         200 -> {
                             BufferedReader(InputStreamReader(inputStream) as Reader?).use {
@@ -173,6 +201,11 @@ class HistoricoPedidos : AppCompatActivity() {
                                     val res = JSONArray(respuesta.toString())
                                     if (res.length() > 0) {
                                         cargarPedidos(res)
+                                        //CARGAR LISTADO ENCONTRADO
+                                        runOnUiThread {
+                                            val lista = obtenerPedidosAlmacenados()
+                                            ArmarLista(lista)
+                                        }
                                     } else {
                                         runOnUiThread {
                                             mensajeError("NO_ENCONTRADO")
@@ -207,7 +240,7 @@ class HistoricoPedidos : AppCompatActivity() {
             throw Exception(e.message)
         }
     }
-
+    //FUNCION PARA CARGAR LOS PEDIDOS A SQLITE
    private fun cargarPedidos(json: JSONArray){
         val bd = database!!.writableDatabase
         try {
@@ -253,7 +286,6 @@ class HistoricoPedidos : AppCompatActivity() {
             bd.close()
         }
     }
-
     //FUNCION PARA LA URL DEL SERVIDOR
     private fun getApiUrl() {
         val ip = preferencias!!.getString("ip", "")
@@ -261,6 +293,64 @@ class HistoricoPedidos : AppCompatActivity() {
         if (ip!!.isNotEmpty() && puerto > 0) {
             url = "http://$ip:$puerto/"
         }
+    }
+    //FUNCION PARA OBTENER TODOS LOS PEDIDOS DE SQLITE
+    private fun obtenerPedidosAlmacenados(): ArrayList<VentasTemp>{
+        val db = database!!.readableDatabase
+        val lista = ArrayList<VentasTemp>()
+
+        try {
+            val consulta = db.rawQuery("SELECT VT.id, " +
+                    "VT.fecha, " +
+                    "C.Cliente, " +
+                    "CS.nombre_sucursal, " +
+                    "VT.total," +
+                    "VT.numero FROM ventasTemp VT " +
+                    "INNER JOIN clientes C ON VT.id_cliente = C.id " +
+                    "INNER JOIN cliente_sucursal CS ON VT.id_sucursal = CS.id", null)
+            if(consulta.count > 0){
+                consulta.moveToFirst()
+                do {
+                    val listado = VentasTemp(
+                        consulta.getInt(0),
+                        consulta.getString(1),
+                        consulta.getString(2),
+                        consulta.getString(3),
+                        consulta.getFloat(4),
+                        consulta.getInt(5)
+                    )
+                    lista.add(listado)
+                }while (consulta.moveToNext())
+                consulta.close()
+            }else{
+                tvNoRegistros.visibility = View.VISIBLE
+                consulta.close()
+            }
+        }catch (e: Exception) {
+            throw Exception(e.message)
+        } finally {
+            db!!.close()
+        }
+        return lista
+    }
+    //FUNCION PARA MOSTRAR EL LISTADO DE BUSQUEDA
+    private fun ArmarLista(lista: java.util.ArrayList<VentasTemp>) {
+
+        if (lista.isNotEmpty()){
+            tvNoRegistros.visibility = View.GONE
+        }
+        val mLayoutManager = LinearLayoutManager(this@HistoricoPedidos, LinearLayoutManager.VERTICAL, false)
+        rvVentasTemp.layoutManager = mLayoutManager
+        val adapter = VentasTempAdapter(lista, this@HistoricoPedidos) { position ->
+                val data = lista[position]
+
+                val intento = Intent(this@HistoricoPedidos, Detallepedido::class.java)
+                intento.putExtra("id_ventas", data.id_venta)
+                startActivity(intento)
+                finish()
+        }
+
+        rvVentasTemp.adapter = adapter
     }
 
     //FUNCIONES DE INTERFAZ
@@ -293,6 +383,7 @@ class HistoricoPedidos : AppCompatActivity() {
             "NO_ENCONTRADO" -> { "No se Encontraron pedidos Registrados" }
             "SERVIDOR" -> { "Error al intentar conectarse con el Servidor" }
             "WIFI" -> { "ENCIENDE TUS WIFI/DATOS MÓVILES POR FAVOR" }
+            "PEDIDOS" -> { "ERROR AL CARGAR LOS PEDIDOS ALMACENADOS" }
             else -> { "ERROR AL CONECTARSE CON EL SERVIDOR" }
         }
 
@@ -307,6 +398,10 @@ class HistoricoPedidos : AppCompatActivity() {
 
         updateDialog.show()
 
+    }
+    @Deprecated("Deprecated in Java")
+    override fun onBackPressed() {
+        //super.onBackPressed();
     }
     //FUNCIONES DE INTERFAZ
 }

@@ -85,4 +85,6 @@
     <string name="date_default">1900/01/01</string>
     <string name="titulo_msj_informacion">INFORMACIÓN</string>
     <string name="btn_salir">SALIR</string>
+    <string name="no_registros">SIN DATOS QUE MOSTRAR</string>
+    <string name="realizar_busqueda">REALIZAR BUSQUEDA</string>
 </resources>
