@@ -15,7 +15,7 @@ class Database(context: Context) :
 
     companion object {
         //BASE ACTUAL DE FERRETERIA EL REY : 11
-        private const val DATABASE_VERSION = 13 //version de la base
+        private const val DATABASE_VERSION = 1 //version de la base
         private const val DATABASE_NAME = "Acae.db" //nombre de la bd
     } //configuracion general de la bd
 
@@ -51,8 +51,8 @@ class Database(context: Context) :
         if(oldVersion < newVersion){
             //db?.execSQL(tbl!!.Empleados()) //CREANDO LA TABLA EMPLEADOS
             //db?.execSQL(tbl!!.Token()) //CREANDO LA TABLA TOKEN
-            db?.execSQL(tbl!!.VentasTemp())
-            db?.execSQL(tbl!!.VentasDetalleTemp())
+            //db?.execSQL(tbl!!.VentasTemp())
+            //db?.execSQL(tbl!!.VentasDetalleTemp())
         }
     }
 }
