@@ -91,8 +91,14 @@ class NuevoToken : AppCompatActivity() {
         }
 
         btnProcesar.setOnClickListener {
-            val precioNuevo : Float = edtPrecio.text.toString().toFloat()
-            validadToken(empleadoId, adminId, codigoProducto!!, precioNuevo)
+            if(validarFormulario()){
+                val precioNuevo : Float = edtPrecio.text.toString().toFloat()
+                if(precioNuevo <= 0f){
+                    Toast.makeText(this@NuevoToken, "EL NUEVO PRECIO INGRESADO ES INCORRECTO", Toast.LENGTH_LONG).show()
+                }else{
+                    validadToken(empleadoId, adminId, codigoProducto!!, precioNuevo)
+                }
+            }
             //Toast.makeText(this@NuevoToken, "FUNCION EN DESARROLLO", Toast.LENGTH_SHORT).show()
         }
 
@@ -122,6 +128,18 @@ class NuevoToken : AppCompatActivity() {
             }
 
         }
+    }
+
+    private fun validarFormulario(): Boolean{
+        val producto = edtProducto.text.toString()
+        val nuevoPrecio = edtPrecio.text.toString()
+
+        if(producto.isEmpty() || nuevoPrecio.isEmpty()){
+            Toast.makeText(this@NuevoToken, "LOS CAMPOS PRODUCTO Y NUEVO PRECIO SON REQUERIDOS", Toast.LENGTH_LONG).show()
+            return false
+        }
+
+        return true
     }
 
     private fun getApiUrl() {
@@ -377,6 +395,10 @@ class NuevoToken : AppCompatActivity() {
 
         updateDialog.show()
 
+    }
+    @Deprecated("Deprecated in Java")
+    override fun onBackPressed() {
+        //super.onBackPressed();
     }
 
 }

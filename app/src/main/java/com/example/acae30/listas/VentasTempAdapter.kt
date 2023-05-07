@@ -1,17 +1,13 @@
 package com.example.acae30.listas
 
-import android.app.Activity
 import android.content.Context
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
-import androidx.cardview.widget.CardView
 import androidx.recyclerview.widget.RecyclerView
 import com.example.acae30.Funciones
 import com.example.acae30.R
-import com.example.acae30.modelos.Cliente
-import com.example.acae30.modelos.Pedidos
 import com.example.acae30.modelos.VentasTemp
 
 class VentasTempAdapter(

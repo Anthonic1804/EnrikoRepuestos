@@ -87,4 +87,5 @@
     <string name="btn_salir">SALIR</string>
     <string name="no_registros">SIN DATOS QUE MOSTRAR</string>
     <string name="realizar_busqueda">REALIZAR BUSQUEDA</string>
+    <string name="detalle_del_pedido">DETALLE DEL PEDIDO</string>
 </resources>

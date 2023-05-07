@@ -6,8 +6,9 @@ import android.content.Context
 import android.content.Intent
 import android.content.SharedPreferences
 import android.os.Bundle
+import android.text.Editable
+import android.text.TextWatcher
 import android.view.View
-import android.widget.Button
 import android.widget.EditText
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
@@ -15,16 +16,10 @@ import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.acae30.database.Database
-import com.example.acae30.listas.ClienteAdapter
-import com.example.acae30.listas.PedidosAdapter
-import com.example.acae30.listas.TokenAdapter
 import com.example.acae30.listas.VentasTempAdapter
-import com.example.acae30.modelos.Cliente
 import com.example.acae30.modelos.JSONmodels.BusquedaPedidoJSON
-import com.example.acae30.modelos.TokenData
 import com.example.acae30.modelos.VentasTemp
 import com.google.android.material.datepicker.MaterialDatePicker
-import com.google.android.material.snackbar.Snackbar
 import com.google.gson.Gson
 import kotlinx.android.synthetic.main.activity_historico_pedidos.*
 import kotlinx.coroutines.DelicateCoroutinesApi
@@ -41,16 +36,14 @@ import java.net.URL
 import java.nio.charset.StandardCharsets
 import java.text.SimpleDateFormat
 import java.util.*
-import kotlin.collections.ArrayList
 
 class HistoricoPedidos : AppCompatActivity() {
 
     private var idCliente: Int = 0
     private var nombreCliente: String? = ""
-    private lateinit var edtCliente : EditText
+    private lateinit var edtCliente: EditText
     private lateinit var edtHasta: EditText
     private lateinit var edtDesde: EditText
-    private lateinit var btnBuscarPedidos: Button
     private lateinit var rvVentasTemp: RecyclerView
 
     private var idVendedor = 0
@@ -63,10 +56,10 @@ class HistoricoPedidos : AppCompatActivity() {
     private var funciones: Funciones? = null
     private var database: Database? = null
 
-    private lateinit var tvUpdate : TextView
-    private lateinit var tvCancel : TextView
-    private lateinit var tvMsj : TextView
-    private lateinit var tvTitulo : TextView
+    private lateinit var tvUpdate: TextView
+    private lateinit var tvCancel: TextView
+    private lateinit var tvMsj: TextView
+    private lateinit var tvTitulo: TextView
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -75,7 +68,6 @@ class HistoricoPedidos : AppCompatActivity() {
         edtCliente = findViewById(R.id.edtCliente)
         edtDesde = findViewById(R.id.etFechaDesde)
         edtHasta = findViewById(R.id.etFechaHasta)
-        btnBuscarPedidos = findViewById(R.id.btnProcesarBusqueda)
         rvVentasTemp = findViewById(R.id.rvPedidos)
         alert = AlertDialogo(this@HistoricoPedidos)
         funciones = Funciones()
@@ -88,7 +80,7 @@ class HistoricoPedidos : AppCompatActivity() {
 
         tvNoRegistros.visibility = View.GONE
 
-         if(nombreCliente != ""){
+        if (nombreCliente != "") {
             edtCliente.setText(nombreCliente)
         }
 
@@ -96,15 +88,14 @@ class HistoricoPedidos : AppCompatActivity() {
 
     }
 
-    @OptIn(DelicateCoroutinesApi::class)
     override fun onStart() {
         super.onStart()
         this@HistoricoPedidos.lifecycleScope.launch {
             try {
                 val lista = obtenerPedidosAlmacenados()
                 if (lista.size > 0) {
-                    ArmarLista(lista)
-                }else{
+                    armarLista(lista)
+                } else {
                     tvNoRegistros.visibility = View.VISIBLE
                 }
             } catch (e: Exception) {
@@ -146,19 +137,80 @@ class HistoricoPedidos : AppCompatActivity() {
 
         imgBuscarCliente.setOnClickListener { buscarCliente() }
 
-        btnBuscarPedidos.setOnClickListener {
-            if (url != null) {
-                if (funciones!!.isNetworkConneted(this)) {
-                    alert!!.Cargando() //MUESTRA EL MENSAJE DE CARGA
-                    GlobalScope.launch(Dispatchers.IO) {
-                        obtenerPedidos(idCliente, edtDesde.text.toString(), edtHasta.text.toString(), idVendedor, nombreVendedor)
-                    } //COURUTINA PARA OBTENER EL HISTORIAL DE PEDIDOS
-                } else {
-                    mensajeError("WIFI")
-                }
-            } else {
-                mensajeError("SERVIDOR")
+        edtDesde.addTextChangedListener(object : TextWatcher {
+            override fun beforeTextChanged(s: CharSequence, start: Int, count: Int, after: Int) {
+
             }
+            override fun onTextChanged(s: CharSequence, start: Int, before: Int, count: Int) {
+
+            }
+            override fun afterTextChanged(s: Editable) {
+                if(validarFormulario()){
+                    generarBusqueda()
+                }
+            }
+        })
+
+        edtHasta.addTextChangedListener(object : TextWatcher {
+            override fun beforeTextChanged(s: CharSequence, start: Int, count: Int, after: Int) {
+
+            }
+            override fun onTextChanged(s: CharSequence, start: Int, before: Int, count: Int) {
+
+            }
+            override fun afterTextChanged(s: Editable) {
+                if(validarFormulario()){
+                    generarBusqueda()
+                }
+            }
+        })
+
+    }
+
+    private fun validarFormulario(): Boolean{
+        val dateFormat = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
+        val desde = edtDesde.text.toString()
+        val hasta = edtHasta.text.toString()
+        val cliente = edtCliente.text.toString()
+
+        if (cliente.isEmpty()) {
+            mensajeError("ERROR_FORMULARIO_CLIENTE")
+            return false
+        }
+
+        if((hasta.isNotEmpty() && cliente.isNotEmpty() && desde.isEmpty()) || (hasta.isEmpty() && cliente.isNotEmpty() && desde.isNotEmpty())){
+            return false
+        }
+
+        if (hasta.isNotEmpty() && desde.isNotEmpty() && cliente.isNotEmpty()) {
+            val fechaDesde = dateFormat.parse(desde)
+            val fechaHasta = dateFormat.parse(hasta)
+            if (fechaDesde > fechaHasta) {
+                mensajeError("ERROR_FORMULARIO_FECHA")
+                return false
+            }
+        }
+        return true
+    }
+    @OptIn(DelicateCoroutinesApi::class)
+    private fun generarBusqueda(){
+        if (url != null) {
+            if (funciones!!.isNetworkConneted(this)) {
+                alert!!.Cargando() //MUESTRA EL MENSAJE DE CARGA
+                GlobalScope.launch(Dispatchers.IO) {
+                    obtenerPedidos(
+                        idCliente,
+                        edtDesde.text.toString(),
+                        edtHasta.text.toString(),
+                        idVendedor,
+                        nombreVendedor
+                    )
+                } //COURUTINA PARA OBTENER EL HISTORIAL DE PEDIDOS
+            } else {
+                mensajeError("WIFI")
+            }
+        } else {
+            mensajeError("SERVIDOR")
         }
     }
 
@@ -187,7 +239,7 @@ class HistoricoPedidos : AppCompatActivity() {
                     val or = OutputStreamWriter(outputStream, StandardCharsets.UTF_8)
                     or.write(objecto) //SE ESCRIBE EL OBJ JSON
                     or.flush() //SE ENVIA EL OBJ JSON
-                    when(responseCode){
+                    when (responseCode) {
                         200 -> {
                             BufferedReader(InputStreamReader(inputStream) as Reader?).use {
                                 try {
@@ -204,10 +256,11 @@ class HistoricoPedidos : AppCompatActivity() {
                                         //CARGAR LISTADO ENCONTRADO
                                         runOnUiThread {
                                             val lista = obtenerPedidosAlmacenados()
-                                            ArmarLista(lista)
+                                            armarLista(lista)
                                         }
                                     } else {
                                         runOnUiThread {
+                                            alert!!.dismisss()
                                             mensajeError("NO_ENCONTRADO")
                                         }
                                     }
@@ -216,32 +269,30 @@ class HistoricoPedidos : AppCompatActivity() {
                                 }
                             }
                         }
+
                         400 -> {
-                            runOnUiThread {
-                                mensajeError("ERROR_CARGAR")
-                            }
+                            runOnUiThread { mensajeError("ERROR_CARGAR") }
                         }
+
                         404 -> {
-                            runOnUiThread {
-                                mensajeError("NO_ENCONTRADO")
-                            }
+                            runOnUiThread { mensajeError("NO_ENCONTRADO") }
                         }
+
                         else -> {
-                            runOnUiThread {
-                                mensajeError("SERVIDOR")
-                            }
+                            runOnUiThread { mensajeError("SERVIDOR") }
                         }
                     }
                 } catch (e: Exception) {
-                    throw  Exception(e.message)
+                    throw Exception(e.message)
                 }
             }
         } catch (e: Exception) {
             throw Exception(e.message)
         }
     }
+
     //FUNCION PARA CARGAR LOS PEDIDOS A SQLITE
-   private fun cargarPedidos(json: JSONArray){
+    private fun cargarPedidos(json: JSONArray) {
         val bd = database!!.writableDatabase
         try {
             bd!!.beginTransaction() //INICIANDO TRANSACCION DE REGISTRO
@@ -263,15 +314,21 @@ class HistoricoPedidos : AppCompatActivity() {
                 val detalleVen = dato.getJSONArray("detalleVentas")// EXTRAEMOS EL JSON INTERNO
 
                 //RECORRIENDO EL JSON DETALLEVENTAS
-                for(x in 0 until detalleVen.length()){
+                for (x in 0 until detalleVen.length()) {
                     val detalle = detalleVen.getJSONObject(x)
                     val item = ContentValues()
                     item.put("id_venta", detalle.getInt("id_ventas"))
                     item.put("id_producto", detalle.getInt("id_producto"))
-                    item.put("producto", funciones!!.validateJsonIsnullString(detalle,"producto"))
-                    item.put("precio_u_iva", funciones!!.validate(detalle.getString("precio_u_iva").toFloat()))
+                    item.put("producto", funciones!!.validateJsonIsnullString(detalle, "producto"))
+                    item.put(
+                        "precio_u_iva",
+                        funciones!!.validate(detalle.getString("precio_u_iva").toFloat())
+                    )
                     item.put("cantidad", detalle.getInt("cantidad"))
-                    item.put("total_iva", funciones!!.validate(detalle.getString("total_iva").toFloat()))
+                    item.put(
+                        "total_iva",
+                        funciones!!.validate(detalle.getString("total_iva").toFloat())
+                    )
 
                     bd.insert("ventasDetalleTemp", null, item) //INSERTANDO EN VENTASDETALLETEMP
                 }
@@ -280,12 +337,13 @@ class HistoricoPedidos : AppCompatActivity() {
             bd.setTransactionSuccessful() //TRANSACCION COMPLETA
             alert!!.dismisss()
         } catch (e: Exception) {
-            throw  Exception(e.message)
+            throw Exception(e.message)
         } finally {
             bd!!.endTransaction()
             bd.close()
         }
     }
+
     //FUNCION PARA LA URL DEL SERVIDOR
     private fun getApiUrl() {
         val ip = preferencias!!.getString("ip", "")
@@ -294,21 +352,25 @@ class HistoricoPedidos : AppCompatActivity() {
             url = "http://$ip:$puerto/"
         }
     }
+
     //FUNCION PARA OBTENER TODOS LOS PEDIDOS DE SQLITE
-    private fun obtenerPedidosAlmacenados(): ArrayList<VentasTemp>{
+    private fun obtenerPedidosAlmacenados(): ArrayList<VentasTemp> {
         val db = database!!.readableDatabase
         val lista = ArrayList<VentasTemp>()
 
         try {
-            val consulta = db.rawQuery("SELECT VT.id, " +
-                    "VT.fecha, " +
-                    "C.Cliente, " +
-                    "CS.nombre_sucursal, " +
-                    "VT.total," +
-                    "VT.numero FROM ventasTemp VT " +
-                    "INNER JOIN clientes C ON VT.id_cliente = C.id " +
-                    "INNER JOIN cliente_sucursal CS ON VT.id_sucursal = CS.id", null)
-            if(consulta.count > 0){
+            val consulta = db.rawQuery(
+                "SELECT VT.id, " +
+                        "VT.fecha, " +
+                        "C.Cliente, " +
+                        "CS.nombre_sucursal, " +
+                        "VT.total," +
+                        "VT.numero FROM ventasTemp VT " +
+                        "INNER JOIN clientes C ON VT.id_cliente = C.id " +
+                        "INNER JOIN cliente_sucursal CS ON VT.id_sucursal = CS.id " +
+                        "ORDER BY VT.id DESC", null
+            )
+            if (consulta.count > 0) {
                 consulta.moveToFirst()
                 do {
                     val listado = VentasTemp(
@@ -320,52 +382,60 @@ class HistoricoPedidos : AppCompatActivity() {
                         consulta.getInt(5)
                     )
                     lista.add(listado)
-                }while (consulta.moveToNext())
+                } while (consulta.moveToNext())
                 consulta.close()
-            }else{
+            } else {
                 tvNoRegistros.visibility = View.VISIBLE
                 consulta.close()
             }
-        }catch (e: Exception) {
+        } catch (e: Exception) {
             throw Exception(e.message)
         } finally {
             db!!.close()
         }
         return lista
     }
-    //FUNCION PARA MOSTRAR EL LISTADO DE BUSQUEDA
-    private fun ArmarLista(lista: java.util.ArrayList<VentasTemp>) {
 
-        if (lista.isNotEmpty()){
+    //FUNCION PARA MOSTRAR EL LISTADO DE BUSQUEDA
+    private fun armarLista(lista: ArrayList<VentasTemp>) {
+
+        if (lista.isNotEmpty()) {
             tvNoRegistros.visibility = View.GONE
         }
-        val mLayoutManager = LinearLayoutManager(this@HistoricoPedidos, LinearLayoutManager.VERTICAL, false)
+        val mLayoutManager =
+            LinearLayoutManager(this@HistoricoPedidos, LinearLayoutManager.VERTICAL, false)
         rvVentasTemp.layoutManager = mLayoutManager
         val adapter = VentasTempAdapter(lista, this@HistoricoPedidos) { position ->
-                val data = lista[position]
+            val data = lista[position]
 
-                val intento = Intent(this@HistoricoPedidos, Detallepedido::class.java)
-                intento.putExtra("id_ventas", data.id_venta)
-                startActivity(intento)
-                finish()
+            val intento = Intent(this@HistoricoPedidos, HistoricoPedidoDetalles::class.java)
+            intento.putExtra("id_ventas", data.id_venta)
+            intento.putExtra("correlativo", data.numero)
+            intento.putExtra("fecha", data.fecha)
+            intento.putExtra("cliente", data.cliente)
+            intento.putExtra("sucursal", data.sucursal)
+            intento.putExtra("total", data.total)
+            startActivity(intento)
+            finish()
         }
-
         rvVentasTemp.adapter = adapter
     }
 
     //FUNCIONES DE INTERFAZ
-    private fun regresarInicio(){
+    private fun regresarInicio() {
         val intent = Intent(this@HistoricoPedidos, Inicio::class.java)
         startActivity(intent)
         finish()
     }
-    private fun buscarCliente(){
+
+    private fun buscarCliente() {
         val intent = Intent(this@HistoricoPedidos, Clientes::class.java)
         intent.putExtra("Historico", true)
         startActivity(intent)
         finish()
     }
-    private fun mensajeError(msj: String){
+
+    private fun mensajeError(msj: String) {
 
         val updateDialog = Dialog(this, R.style.Theme_Dialog)
         updateDialog.setCancelable(false)
@@ -376,15 +446,40 @@ class HistoricoPedidos : AppCompatActivity() {
         tvMsj = updateDialog.findViewById(R.id.tvMensaje)
         tvTitulo = updateDialog.findViewById(R.id.tvTitulo)
 
-        alert!!.dismisss()
+        //alert!!.dismisss()
 
-        val mensajeDialogo: String = when(msj){
-            "ERROR_CARGAR" -> { "Error al Cargar los Pedidos" }
-            "NO_ENCONTRADO" -> { "No se Encontraron pedidos Registrados" }
-            "SERVIDOR" -> { "Error al intentar conectarse con el Servidor" }
-            "WIFI" -> { "ENCIENDE TUS WIFI/DATOS MÓVILES POR FAVOR" }
-            "PEDIDOS" -> { "ERROR AL CARGAR LOS PEDIDOS ALMACENADOS" }
-            else -> { "ERROR AL CONECTARSE CON EL SERVIDOR" }
+        val mensajeDialogo: String = when (msj) {
+            "ERROR_CARGAR" -> {
+                "Error al Cargar los Pedidos"
+            }
+
+            "NO_ENCONTRADO" -> {
+                "No se Encontraron pedidos Registrados"
+            }
+
+            "SERVIDOR" -> {
+                "Error al intentar conectarse con el Servidor"
+            }
+
+            "WIFI" -> {
+                "ENCIENDE TUS WIFI/DATOS MÓVILES POR FAVOR"
+            }
+
+            "PEDIDOS" -> {
+                "ERROR AL CARGAR LOS PEDIDOS ALMACENADOS"
+            }
+
+            "ERROR_FORMULARIO_CLIENTE" -> {
+                "DEBE DE SELECCIONAR UN CLIENTE"
+            }
+
+            "ERROR_FORMULARIO_FECHA" -> {
+                "FECHA SELECCIONADAS INCORRECTAMENTE"
+            }
+
+            else -> {
+                "ERROR AL CONECTARSE CON EL SERVIDOR"
+            }
         }
 
         tvMsj.text = mensajeDialogo
@@ -399,6 +494,7 @@ class HistoricoPedidos : AppCompatActivity() {
         updateDialog.show()
 
     }
+
     @Deprecated("Deprecated in Java")
     override fun onBackPressed() {
         //super.onBackPressed();

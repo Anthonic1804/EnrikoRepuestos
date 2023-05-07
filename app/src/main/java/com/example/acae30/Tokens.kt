@@ -15,11 +15,8 @@ import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.acae30.database.Database
-import com.example.acae30.listas.InventarioDetalleAdapter
 import com.example.acae30.listas.TokenAdapter
-import com.example.acae30.modelos.InventarioPrecios
 import com.example.acae30.modelos.TokenData
-import com.example.acae30.modelos.TokenDataClass
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.google.android.material.snackbar.Snackbar
 import kotlinx.coroutines.*
@@ -315,11 +312,14 @@ class Tokens : AppCompatActivity() {
         startActivity(Intent)
         finish()
     }
-
     private fun atras(){
         val Intent = Intent(this@Tokens, Inicio::class.java)
         startActivity(Intent)
         finish()
+    }
+    @Deprecated("Deprecated in Java")
+    override fun onBackPressed() {
+        //super.onBackPressed();
     }
 
 

@@ -73,7 +73,7 @@
                 android:inputType="textPersonName"
                 android:paddingStart="10dp"
                 android:textColor="@color/colorHint"
-                android:text="CLIENTE" />
+                android:hint="CLIENTE" />
 
             <ImageButton
                 android:id="@+id/imgBuscarCliente"
@@ -148,19 +148,6 @@
                 android:hint="@string/date_default" />
         </LinearLayout>
 
-        <Button
-            android:id="@+id/btnProcesarBusqueda"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="16dp"
-            android:background="@drawable/border_btnactualizar"
-            android:paddingStart="25dp"
-            android:paddingEnd="30dp"
-            android:drawableStart="@drawable/ic_search"
-            android:text="@string/realizar_busqueda"
-            android:textColor="@color/colorAccent"
-            android:textSize="16sp"
-            android:textStyle="bold" />
     </LinearLayout>
 
     <androidx.recyclerview.widget.RecyclerView

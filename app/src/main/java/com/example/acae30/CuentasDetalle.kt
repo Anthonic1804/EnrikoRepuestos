@@ -46,7 +46,6 @@ class CuentasDetalle : AppCompatActivity() {
         txtnombre!!.text = nombrecliente
         btnatras!!.setOnClickListener {
             Regresar()
-            finish()
         }
         //GlobalScope.launch(Dispatchers.IO) {
         this@CuentasDetalle.lifecycleScope.launch {
@@ -68,7 +67,7 @@ class CuentasDetalle : AppCompatActivity() {
 
     @Deprecated("Deprecated in Java")
     override fun onBackPressed() {
-        Regresar()
+        //super.onBackPressed();
     }
 
     private fun Regresar() {

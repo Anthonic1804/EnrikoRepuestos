@@ -7,10 +7,7 @@ import android.view.ViewGroup
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.example.acae30.R
-import com.example.acae30.modelos.Cuenta
 import com.example.acae30.modelos.TokenData
-import com.example.acae30.modelos.TokenDataClass
-import java.text.SimpleDateFormat
 
 class TokenAdapter(private var list: ArrayList<TokenData>, private val context: Context) :
     RecyclerView.Adapter<TokenAdapter.MyViewHolder>() {

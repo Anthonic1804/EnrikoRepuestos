@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginTop="4dp"
+    android:layout_marginBottom="4dp"
+    android:orientation="horizontal">
+
+    <TextView
+        android:id="@+id/tvCantidadTemp"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="20"
+        android:text="txtCantidad"
+        android:textSize="14sp"
+        android:textAlignment="center"/>
+
+    <TextView
+        android:id="@+id/tvDescripcionTemp"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="60"
+        android:text="txtDescripcion"
+        android:textSize="14sp"
+        android:textAlignment="center"/>
+
+    <TextView
+        android:id="@+id/tvPrecioTemp"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="20"
+        android:text="txtTotal"
+        android:textSize="14sp"
+        android:textAlignment="textEnd"/>
+</LinearLayout>

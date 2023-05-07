@@ -1,7 +1,5 @@
 package com.example.acae30.modelos
 
-import java.util.*
-
 data class Visitas(
     var Id:Int,
     var Id_cliente:Int,

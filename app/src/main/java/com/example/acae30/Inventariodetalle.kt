@@ -2,25 +2,18 @@ package com.example.acae30
 
 import android.app.Dialog
 import android.content.Intent
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import android.text.Editable
-import android.text.InputFilter
-import android.text.Spanned
-import android.text.TextWatcher
 import android.widget.*
+import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.acae30.database.Database
 import com.example.acae30.listas.InventarioDetalleAdapter
 import com.example.acae30.modelos.Inventario
 import com.example.acae30.modelos.InventarioPrecios
-import com.google.android.material.snackbar.Snackbar
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
-import java.text.DecimalFormatSymbols
-import java.util.ArrayList
 
 class Inventariodetalle : AppCompatActivity() {
 

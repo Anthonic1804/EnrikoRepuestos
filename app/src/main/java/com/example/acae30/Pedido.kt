@@ -257,7 +257,7 @@ class Pedido : AppCompatActivity() {
 
                     println("Error 13: " + e.message)
                 } finally {
-                    base.close()
+                    base_v_final.close()
                 }
 
                 try {
