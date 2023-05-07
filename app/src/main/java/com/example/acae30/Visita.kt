@@ -730,21 +730,13 @@ class Visita : AppCompatActivity() {
         lifecycleScope.cancel()
     }
 
-    private fun parsearFecha(fecha: String): String {
-        val DATE_INPUT_FORMAT = "dd-MMM-yy HH:mm:ss"
-        val formato = SimpleDateFormat(DATE_INPUT_FORMAT)
-        val fe = formato.parse(fecha)
-        formato.applyPattern("yyyy-MM-ddTHH:mm:ss")
-        return formato.format(fe).toString()
-    }
-
     private fun getDateTime(): String? {
         val dateFormat = SimpleDateFormat(
-            "yyyy-MM-dd'T'HH:mm:ss", Locale.getDefault()
+            "yyyy-MM-dd", Locale.getDefault()
         )
         val date = Date()
         return dateFormat.format(date)
-    } //retorna la fecha en formato
+    }
 
     private fun Sendfinal(data: JSONObject) {
         try {

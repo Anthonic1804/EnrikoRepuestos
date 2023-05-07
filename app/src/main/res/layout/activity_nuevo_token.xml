@@ -152,7 +152,7 @@
                             android:layout_height="wrap_content"
                             android:textStyle="bold"
                             android:textSize="18sp"
-                            android:text="PRECIO" />
+                            android:text="PRECIO VIÑETA" />
 
                         <EditText
                             android:id="@+id/edtPrecioOld"

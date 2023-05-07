@@ -18,6 +18,9 @@ import kotlinx.coroutines.*
 import org.json.JSONArray
 import java.net.HttpURLConnection
 import java.net.URL
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 
 class carga_datos : AppCompatActivity() {
 
@@ -58,8 +61,6 @@ class carga_datos : AppCompatActivity() {
 
     override fun onStart() {
         super.onStart()
-
-        cvpedidos!!.visibility = View.GONE //DESHABILITANDO LA CARDVIEW DE BORRAR PEDIDOS ANTIGUOS
 
         btnatras!!.setOnClickListener {
             val intento = Intent(this, Inicio::class.java)
@@ -859,11 +860,13 @@ class carga_datos : AppCompatActivity() {
         }
     } //inserta las cxc en la tabla
 
+    //FUNCION PARA ELIMINAR PEDIDOS ANTIGUOS
     private fun deletePedido() {
+        val fechanow = getDateTime()
         val bd = database!!.writableDatabase
         try {
             bd.beginTransaction()
-            val cursor = bd.rawQuery("SELECT * FROM pedidos where Enviado=1", null)
+            val cursor = bd.rawQuery("SELECT * FROM pedidos where Enviado=1 AND Fecha_creado != '$fechanow'", null)
             if (cursor.count > 0) {
                 cursor.moveToFirst()
                 do {
@@ -882,7 +885,16 @@ class carga_datos : AppCompatActivity() {
             bd.close()
         }
 
-    }//elimina los pedidos que no han sido enviados
+    }
+
+    //OBTENIENDO LA FECHA CON EL FORMATO CORRECTO
+    private fun getDateTime(): String? {
+        val dateFormat = SimpleDateFormat(
+            "yyyy-MM-dd", Locale.getDefault()
+        )
+        val date = Date()
+        return dateFormat.format(date)
+    }
 
     @Deprecated("Deprecated in Java")
     override fun onBackPressed() {

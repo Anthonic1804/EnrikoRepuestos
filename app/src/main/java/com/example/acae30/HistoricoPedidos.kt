@@ -201,9 +201,7 @@ class HistoricoPedidos : AppCompatActivity() {
                     obtenerPedidos(
                         idCliente,
                         edtDesde.text.toString(),
-                        edtHasta.text.toString(),
-                        idVendedor,
-                        nombreVendedor
+                        edtHasta.text.toString()
                     )
                 } //COURUTINA PARA OBTENER EL HISTORIAL DE PEDIDOS
             } else {
@@ -215,14 +213,12 @@ class HistoricoPedidos : AppCompatActivity() {
     }
 
     //FUNCION PARA REALIZAR LA BUSQUEDA DE PEDIDOS
-    private fun obtenerPedidos(id_cliente: Int, desde: String, hasta: String, id_vendedor: Int, nombre_vendedor: String) {
+    private fun obtenerPedidos(id_cliente: Int, desde: String, hasta: String) {
         try {
             val datos = BusquedaPedidoJSON(
                 id_cliente,
                 desde,
-                hasta,
-                id_vendedor,
-                nombre_vendedor
+                hasta
             )
             val objecto =
                 Gson().toJson(datos)
@@ -364,10 +360,12 @@ class HistoricoPedidos : AppCompatActivity() {
                         "VT.fecha, " +
                         "C.Cliente, " +
                         "CS.nombre_sucursal, " +
-                        "VT.total," +
-                        "VT.numero FROM ventasTemp VT " +
+                        "VT.total, " +
+                        "VT.numero, " +
+                        "E.nombre_empleado FROM ventasTemp VT " +
                         "INNER JOIN clientes C ON VT.id_cliente = C.id " +
                         "INNER JOIN cliente_sucursal CS ON VT.id_sucursal = CS.id " +
+                        "INNER JOIN empleado E ON E.id_empleado = VT.Id_vendedor " +
                         "ORDER BY VT.id DESC", null
             )
             if (consulta.count > 0) {
@@ -379,7 +377,8 @@ class HistoricoPedidos : AppCompatActivity() {
                         consulta.getString(2),
                         consulta.getString(3),
                         consulta.getFloat(4),
-                        consulta.getInt(5)
+                        consulta.getInt(5),
+                        consulta.getString(6)
                     )
                     lista.add(listado)
                 } while (consulta.moveToNext())
@@ -415,6 +414,7 @@ class HistoricoPedidos : AppCompatActivity() {
             intento.putExtra("cliente", data.cliente)
             intento.putExtra("sucursal", data.sucursal)
             intento.putExtra("total", data.total)
+            intento.putExtra("vendedor", data.vendedor)
             startActivity(intento)
             finish()
         }

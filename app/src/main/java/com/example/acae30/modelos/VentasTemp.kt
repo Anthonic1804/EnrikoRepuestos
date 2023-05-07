@@ -6,5 +6,6 @@ data class VentasTemp(
     val cliente: String,
     val sucursal: String,
     val total: Float,
-    val numero: Int
+    val numero: Int,
+    val vendedor: String
 )

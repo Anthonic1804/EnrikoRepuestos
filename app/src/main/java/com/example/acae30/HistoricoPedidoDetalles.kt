@@ -14,6 +14,7 @@ import kotlinx.android.synthetic.main.activity_historico_pedido_detalles.tvCorre
 import kotlinx.android.synthetic.main.activity_historico_pedido_detalles.tvFecha
 import kotlinx.android.synthetic.main.activity_historico_pedido_detalles.tvSucursal
 import kotlinx.android.synthetic.main.activity_historico_pedido_detalles.tvTotal
+import kotlinx.android.synthetic.main.activity_historico_pedido_detalles.tvVendedor
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
@@ -27,6 +28,7 @@ class HistoricoPedidoDetalles : AppCompatActivity() {
     private var cliente: String = ""
     private var sucursal: String = ""
     private var total: Float = 0f
+    private var vendedor: String = ""
 
     private var base: Database? = null
     private lateinit var rvListadoTemporal: RecyclerView
@@ -43,6 +45,7 @@ class HistoricoPedidoDetalles : AppCompatActivity() {
         cliente = intent.getStringExtra("cliente").toString()
         sucursal = intent.getStringExtra("sucursal").toString()
         total = intent.getFloatExtra("total", 0f)
+        vendedor = intent.getStringExtra("vendedor").toString()
     }
 
     @OptIn(DelicateCoroutinesApi::class)
@@ -54,6 +57,7 @@ class HistoricoPedidoDetalles : AppCompatActivity() {
         tvCliente.text = cliente
         tvSucursal.text = sucursal
         tvTotal.text = "$ " + "${String.format("%.4f", total)}"
+        tvVendedor.text = vendedor
 
         GlobalScope.launch(Dispatchers.IO) {
             try {
