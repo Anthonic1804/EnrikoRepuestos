@@ -224,6 +224,7 @@ class Tablas {
                 "Id_cliente INTEGER NOT NULL," +
                 "Id_Sucursal INTEGER NOT NULL," +
                 "Id_vendedor INTEGER NOT NULL," +
+                "Vendedor VARCHAR(25) NOT NULL," +
                 "Total NUMERIC(20,6) NOT NULL," +
                 "Numero INTEGER NOT NULL);"
         return ventasTemp

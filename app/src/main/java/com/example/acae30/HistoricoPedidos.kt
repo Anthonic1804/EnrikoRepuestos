@@ -303,6 +303,7 @@ class HistoricoPedidos : AppCompatActivity() {
                 valor.put("Id_cliente", dato.getInt("id_cliente"))
                 valor.put("id_sucursal", dato.getInt("id_sucursal"))
                 valor.put("id_vendedor", dato.getInt("id_vendedor"))
+                valor.put("vendedor", funciones!!.validateJsonIsnullString(dato, "vendedor"))
                 valor.put("total", funciones!!.validate(dato.getString("total").toFloat()))
                 valor.put("numero", dato.getInt("numero"))
 
@@ -362,10 +363,9 @@ class HistoricoPedidos : AppCompatActivity() {
                         "CS.nombre_sucursal, " +
                         "VT.total, " +
                         "VT.numero, " +
-                        "E.nombre_empleado FROM ventasTemp VT " +
+                        "VT.Vendedor FROM ventasTemp VT " +
                         "INNER JOIN clientes C ON VT.id_cliente = C.id " +
                         "INNER JOIN cliente_sucursal CS ON VT.id_sucursal = CS.id " +
-                        "INNER JOIN empleado E ON E.id_empleado = VT.Id_vendedor " +
                         "ORDER BY VT.id DESC", null
             )
             if (consulta.count > 0) {
