@@ -19,6 +19,7 @@ import com.example.acae30.database.Database
 import com.example.acae30.listas.VentasTempAdapter
 import com.example.acae30.modelos.JSONmodels.BusquedaPedidoJSON
 import com.example.acae30.modelos.VentasTemp
+import com.example.acae30.modelos.VentasTempSucursal
 import com.google.android.material.datepicker.MaterialDatePicker
 import com.google.gson.Gson
 import kotlinx.android.synthetic.main.activity_historico_pedidos.*
@@ -61,6 +62,8 @@ class HistoricoPedidos : AppCompatActivity() {
     private lateinit var tvMsj: TextView
     private lateinit var tvTitulo: TextView
 
+    private var ventasSucursal : Int = 0
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_historico_pedidos)
@@ -90,13 +93,23 @@ class HistoricoPedidos : AppCompatActivity() {
 
     override fun onStart() {
         super.onStart()
+        getSucursalEnHistorial()
         this@HistoricoPedidos.lifecycleScope.launch {
             try {
-                val lista = obtenerPedidosAlmacenados()
-                if (lista.size > 0) {
-                    armarLista(lista)
-                } else {
-                    tvNoRegistros.visibility = View.VISIBLE
+                if(ventasSucursal > 0){
+                    val lista : ArrayList<VentasTemp> = obtenerPedidosAlmacenadosConSucursal()
+                    if (lista.size > 0) {
+                        armarLista(lista)
+                    } else {
+                        tvNoRegistros.visibility = View.VISIBLE
+                    }
+                }else{
+                    val lista : ArrayList<VentasTemp> = obtenerPedidosAlmacenadosSinSucursal()
+                    if (lista.size > 0) {
+                        armarLista(lista)
+                    } else {
+                        tvNoRegistros.visibility = View.VISIBLE
+                    }
                 }
             } catch (e: Exception) {
                 runOnUiThread {
@@ -211,6 +224,29 @@ class HistoricoPedidos : AppCompatActivity() {
             mensajeError("SERVIDOR")
         }
     }
+    //FUNCION PARA VERFICAR SI HAY O NO SUCURSAL EN LOS PEDIDOS
+    private fun getSucursalEnHistorial(){
+        val db = database!!.readableDatabase
+        val lista = ArrayList<VentasTempSucursal>()
+
+        try {
+            val verificar = db.rawQuery("SELECT id_sucursal FROM ventasTemp LIMIT 1", null)
+            if(verificar.count > 0){
+                verificar.moveToFirst()
+                val consulta = VentasTempSucursal(
+                    verificar.getInt(0)
+                )
+                lista.add(consulta)
+
+                for(data in lista){
+                    ventasSucursal = data.sucursal
+                }
+                verificar.close()
+            }
+        }catch (e: Exception) {
+            throw Exception(e.message)
+        }
+    }
 
     //FUNCION PARA REALIZAR LA BUSQUEDA DE PEDIDOS
     private fun obtenerPedidos(id_cliente: Int, desde: String, hasta: String) {
@@ -251,8 +287,25 @@ class HistoricoPedidos : AppCompatActivity() {
                                         cargarPedidos(res)
                                         //CARGAR LISTADO ENCONTRADO
                                         runOnUiThread {
-                                            val lista = obtenerPedidosAlmacenados()
-                                            armarLista(lista)
+                                            //val lista = obtenerPedidosAlmacenadosConSucursal()
+                                            //armarLista(lista)
+                                            getSucursalEnHistorial()
+
+                                            if(ventasSucursal > 0){
+                                                val lista : ArrayList<VentasTemp> = obtenerPedidosAlmacenadosConSucursal()
+                                                if (lista.size > 0) {
+                                                    armarLista(lista)
+                                                } else {
+                                                    tvNoRegistros.visibility = View.VISIBLE
+                                                }
+                                            }else{
+                                                val lista : ArrayList<VentasTemp> = obtenerPedidosAlmacenadosSinSucursal()
+                                                if (lista.size > 0) {
+                                                    armarLista(lista)
+                                                } else {
+                                                    tvNoRegistros.visibility = View.VISIBLE
+                                                }
+                                            }
                                         }
                                     } else {
                                         runOnUiThread {
@@ -351,10 +404,9 @@ class HistoricoPedidos : AppCompatActivity() {
     }
 
     //FUNCION PARA OBTENER TODOS LOS PEDIDOS DE SQLITE
-    private fun obtenerPedidosAlmacenados(): ArrayList<VentasTemp> {
+    private fun obtenerPedidosAlmacenadosConSucursal(): ArrayList<VentasTemp> {
         val db = database!!.readableDatabase
         val lista = ArrayList<VentasTemp>()
-
         try {
             val consulta = db.rawQuery(
                 "SELECT VT.id, " +
@@ -366,6 +418,48 @@ class HistoricoPedidos : AppCompatActivity() {
                         "VT.Vendedor FROM ventasTemp VT " +
                         "INNER JOIN clientes C ON VT.id_cliente = C.id " +
                         "INNER JOIN cliente_sucursal CS ON VT.id_sucursal = CS.id " +
+                        "ORDER BY VT.id DESC", null
+            )
+            if (consulta.count > 0) {
+                consulta.moveToFirst()
+                do {
+                    val listado = VentasTemp(
+                        consulta.getInt(0),
+                        consulta.getString(1),
+                        consulta.getString(2),
+                        consulta.getString(3),
+                        consulta.getFloat(4),
+                        consulta.getInt(5),
+                        consulta.getString(6)
+                    )
+                    lista.add(listado)
+                } while (consulta.moveToNext())
+                consulta.close()
+            } else {
+                tvNoRegistros.visibility = View.VISIBLE
+                consulta.close()
+            }
+        } catch (e: Exception) {
+            throw Exception(e.message)
+        } finally {
+            db!!.close()
+        }
+        return lista
+    }
+
+    private fun obtenerPedidosAlmacenadosSinSucursal(): ArrayList<VentasTemp> {
+        val db = database!!.readableDatabase
+        val lista = ArrayList<VentasTemp>()
+        try {
+            val consulta = db.rawQuery(
+                "SELECT VT.id, " +
+                        "VT.fecha, " +
+                        "C.Cliente, " +
+                        "'SIN SUCURSAL' AS SUCURSAL, " +
+                        "VT.total, " +
+                        "VT.numero, " +
+                        "VT.Vendedor FROM ventasTemp VT " +
+                        "INNER JOIN clientes C ON VT.id_cliente = C.id " +
                         "ORDER BY VT.id DESC", null
             )
             if (consulta.count > 0) {
