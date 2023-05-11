@@ -88,18 +88,19 @@ class HistoricoPedidos : AppCompatActivity() {
         }
 
         getApiUrl()
+        getSucursalEnHistorial()
 
     }
 
     override fun onStart() {
         super.onStart()
-        getSucursalEnHistorial()
         this@HistoricoPedidos.lifecycleScope.launch {
             try {
                 if(ventasSucursal > 0){
                     val lista : ArrayList<VentasTemp> = obtenerPedidosAlmacenadosConSucursal()
                     if (lista.size > 0) {
                         armarLista(lista)
+                        alert?.dismisss()
                     } else {
                         tvNoRegistros.visibility = View.VISIBLE
                     }
@@ -107,14 +108,16 @@ class HistoricoPedidos : AppCompatActivity() {
                     val lista : ArrayList<VentasTemp> = obtenerPedidosAlmacenadosSinSucursal()
                     if (lista.size > 0) {
                         armarLista(lista)
+                        alert?.dismisss()
                     } else {
                         tvNoRegistros.visibility = View.VISIBLE
                     }
                 }
             } catch (e: Exception) {
-                runOnUiThread {
+                println("EXEPCION $e")
+               /* runOnUiThread {
                     mensajeError("PEDIDOS")
-                }
+                }*/
             }
         }
 
@@ -295,6 +298,7 @@ class HistoricoPedidos : AppCompatActivity() {
                                                 val lista : ArrayList<VentasTemp> = obtenerPedidosAlmacenadosConSucursal()
                                                 if (lista.size > 0) {
                                                     armarLista(lista)
+                                                    alert?.dismisss()
                                                 } else {
                                                     tvNoRegistros.visibility = View.VISIBLE
                                                 }
@@ -302,6 +306,7 @@ class HistoricoPedidos : AppCompatActivity() {
                                                 val lista : ArrayList<VentasTemp> = obtenerPedidosAlmacenadosSinSucursal()
                                                 if (lista.size > 0) {
                                                     armarLista(lista)
+                                                    alert?.dismisss()
                                                 } else {
                                                     tvNoRegistros.visibility = View.VISIBLE
                                                 }
