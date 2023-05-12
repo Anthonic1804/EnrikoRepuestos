@@ -69,4 +69,7 @@ dependencies {
     def picassoVersion = "2.71828"
     implementation "com.squareup.picasso:picasso:$picassoVersion"
 
+    //Lottie
+    implementation "com.airbnb.android:lottie:6.0.0"
+
 }

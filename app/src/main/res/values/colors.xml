@@ -19,4 +19,17 @@
     <color name="SEGUNDOCOLORLOGO">#6ba3bc</color>
     <color name="PRIMERCOLORLOGO">#064870</color>
     <color name="cartOLD">#e3f2fd</color>
+
+    <!-- COLORES PARA BOTONES -->
+    <!-- AZUL -->
+    <color name="btnAzul">#064870</color>
+    <color name="btnAzulActivo">#026296</color>
+
+    <!-- VERDE -->
+    <color name="btnVerde">#308C34</color>
+    <color name="btnVerdeActivo">#34AC39</color>
+
+    <!-- ROJO -->
+    <color name="btnRojo">#BF2727</color>
+    <color name="btnRojoActivo">@android:color/holo_red_light</color>
 </resources>
