@@ -8,20 +8,39 @@ import android.widget.TextView
 
 class AlertDialogo(act: Activity) {
 
-    lateinit var actividad: Activity
+    var actividad: Activity
     lateinit var dialogo: Dialog
 
     //lateinit var textocarga:TextView
     init {
         actividad = act
-
     }
 
     fun Cargando() {
         val ale: AlertDialog.Builder = AlertDialog.Builder(actividad)
         val ly: LayoutInflater = actividad.layoutInflater
         ale.setView(ly.inflate(R.layout.alerta_carga, null))
-        ale.setCancelable(true)
+        ale.setCancelable(false)
+        dialogo = ale.create()
+
+        dialogo.show()
+    }
+
+    fun pedidoEnviado() {
+        val ale: AlertDialog.Builder = AlertDialog.Builder(actividad)
+        val ly: LayoutInflater = actividad.layoutInflater
+        ale.setView(ly.inflate(R.layout.alerta_enviado, null))
+        ale.setCancelable(false)
+        dialogo = ale.create()
+
+        dialogo.show()
+    }
+
+    fun pedidoGuardado() {
+        val ale: AlertDialog.Builder = AlertDialog.Builder(actividad)
+        val ly: LayoutInflater = actividad.layoutInflater
+        ale.setView(ly.inflate(R.layout.alerta_guardado, null))
+        ale.setCancelable(false)
         dialogo = ale.create()
 
         dialogo.show()
@@ -37,6 +56,5 @@ class AlertDialogo(act: Activity) {
             textocarga.text = mensaje
         }
     }
-
 
 }

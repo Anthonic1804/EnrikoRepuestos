@@ -10,6 +10,7 @@ import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
 import android.os.Environment
+import android.os.Handler
 import android.view.View
 import android.widget.*
 import android.widget.AdapterView.OnItemSelectedListener
@@ -33,10 +34,7 @@ import com.itextpdf.text.pdf.PdfPCell
 import com.itextpdf.text.pdf.PdfPTable
 import com.itextpdf.text.pdf.PdfWriter
 import kotlinx.android.synthetic.main.activity_inicio.*
-import kotlinx.coroutines.DelicateCoroutinesApi
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.*
 import org.json.JSONObject
 import java.io.*
 import java.net.HttpURLConnection
@@ -45,6 +43,9 @@ import java.nio.charset.StandardCharsets
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
+import java.util.*
+import kotlin.collections.ArrayList
+import kotlin.concurrent.schedule
 import com.example.acae30.R as R1
 
 
@@ -105,15 +106,12 @@ class Detallepedido : AppCompatActivity() {
         }
     }
 
-    @RequiresApi(Build.VERSION_CODES.O)
-    val fecha = LocalDate.now()
+    val fecha: String = LocalDate.now()
         .format(DateTimeFormatter.ofPattern("dd MMM yyyy"))
 
-    @RequiresApi(Build.VERSION_CODES.O)
     var fechaDoc = ""
     private val tituloText = "DETALLE DEL PEDIDO"
 
-    @RequiresApi(Build.VERSION_CODES.O)
     @SuppressLint("MissingInflatedId")
     override fun onCreate(savedInstanceState: Bundle?) {
 
@@ -268,35 +266,36 @@ class Detallepedido : AppCompatActivity() {
                         //this@Detallepedido.lifecycleScope.launch {
                         try {
                             runOnUiThread {
-                                alerta!!.Cargando()
-                                alerta!!.changeText("Enviando Pedido")
+                                alerta!!.pedidoEnviado()
                             }
-                            var pedido = getPedidoSend(idpedido) //retorna el pedido
-                            pedido!!.Idvendedor = idvendedor
-                            pedido.Vendedor = vendedor
-                            //agregamos los datos del vendedor
-                            SendPedido(pedido, idpedido)
-                            //envia el pedido y actualiza el estado del pedido en el cel
-                            runOnUiThread {
-                                alerta!!.dismisss()
-                                var visitaAbierta = getEstadoVisita()
+                            Timer().schedule(2300){
+                                var pedido = getPedidoSend(idpedido) //retorna el pedido
+                                pedido!!.Idvendedor = idvendedor
+                                pedido.Vendedor = vendedor
+                                //agregamos los datos del vendedor
+                                SendPedido(pedido, idpedido)
+                                //envia el pedido y actualiza el estado del pedido en el cel
+                                runOnUiThread {
+                                    alerta!!.dismisss()
+                                    var visitaAbierta = getEstadoVisita()
 
-                                if (visitaAbierta == 1) {
-                                    val intento = Intent(this@Detallepedido, Visita::class.java)
-                                    intento.putExtra("id", idcliente)
-                                    intento.putExtra("nombrecliente", nombre)
-                                    intento.putExtra("idpedido", idpedido)
-                                    intento.putExtra("visitaid", idvisita)
-                                    intento.putExtra("codigo", codigo)
-                                    intento.putExtra("idapi", idapi)
-                                    startActivity(intento)
-                                    finish()
-                                } else {
-                                    val intento = Intent(this@Detallepedido, Pedido::class.java)
-                                    startActivity(intento)
-                                    finish()
+                                    if (visitaAbierta == 1) {
+                                        val intento = Intent(this@Detallepedido, Visita::class.java)
+                                        intento.putExtra("id", idcliente)
+                                        intento.putExtra("nombrecliente", nombre)
+                                        intento.putExtra("idpedido", idpedido)
+                                        intento.putExtra("visitaid", idvisita)
+                                        intento.putExtra("codigo", codigo)
+                                        intento.putExtra("idapi", idapi)
+                                        startActivity(intento)
+                                        finish()
+                                    } else {
+                                        val intento = Intent(this@Detallepedido, Pedido::class.java)
+                                        startActivity(intento)
+                                        finish()
+                                    }
+
                                 }
-
                             }
 
                         } catch (e: Exception) {
@@ -341,32 +340,32 @@ class Detallepedido : AppCompatActivity() {
 
                     try {
                         runOnUiThread {
-                            alerta!!.Cargando()
+                            alerta!!.pedidoGuardado()
                             alerta!!.changeText("Guardando Pedido")
                         }
+                        Timer().schedule(2300){
+                            runOnUiThread {
+                                alerta!!.dismisss()
+                                var visitaAbierta = getEstadoVisita()
 
-                        runOnUiThread {
-                            alerta!!.dismisss()
-                            var visitaAbierta = getEstadoVisita()
+                                if (visitaAbierta == 1) {
+                                    val intento = Intent(this@Detallepedido, Visita::class.java)
+                                    intento.putExtra("id", idcliente)
+                                    intento.putExtra("nombrecliente", nombre)
+                                    intento.putExtra("idpedido", idpedido)
+                                    intento.putExtra("visitaid", idvisita)
+                                    intento.putExtra("codigo", codigo)
+                                    intento.putExtra("idapi", idapi)
+                                    startActivity(intento)
+                                    finish()
+                                } else {
+                                    val intento = Intent(this@Detallepedido, Pedido::class.java)
+                                    startActivity(intento)
+                                    finish()
+                                }
 
-                            if (visitaAbierta == 1) {
-                                val intento = Intent(this@Detallepedido, Visita::class.java)
-                                intento.putExtra("id", idcliente)
-                                intento.putExtra("nombrecliente", nombre)
-                                intento.putExtra("idpedido", idpedido)
-                                intento.putExtra("visitaid", idvisita)
-                                intento.putExtra("codigo", codigo)
-                                intento.putExtra("idapi", idapi)
-                                startActivity(intento)
-                                finish()
-                            } else {
-                                val intento = Intent(this@Detallepedido, Pedido::class.java)
-                                startActivity(intento)
-                                finish()
                             }
-
                         }
-
                     } catch (e: Exception) {
                         runOnUiThread {
                             alerta!!.dismisss()

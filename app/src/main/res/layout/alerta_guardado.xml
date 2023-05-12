@@ -18,14 +18,14 @@
         app:layout_constraintTop_toTopOf="parent"
         app:lottie_autoPlay="true"
         app:lottie_loop="true"
-        app:lottie_rawRes="@raw/time" />
+        app:lottie_rawRes="@raw/save" />
 
     <TextView
         android:id="@+id/txtcargando"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="16dp"
-        android:text="Cargando..."
+        android:text="Guadado Pedido..."
         android:textAlignment="center"
         android:textColor="@color/colorPrimaryDark"
         android:textSize="18sp"
@@ -33,4 +33,5 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/progressBar" />
+
 </androidx.constraintlayout.widget.ConstraintLayout>
