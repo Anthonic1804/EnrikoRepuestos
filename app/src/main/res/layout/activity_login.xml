@@ -56,39 +56,48 @@
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/imageView" />
 
-            <EditText
-                android:id="@+id/txtusuario"
-                android:layout_width="0dp"
-                android:layout_height="55dp"
+            <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/lyUsuario"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
                 android:layout_margin="16dp"
-                android:background="@drawable/border_textbox"
-                android:drawableStart="@drawable/ic_user"
-                android:drawablePadding="10dp"
-                android:ems="10"
-                android:hint="Usuario"
-                android:inputType="textPersonName|textCapCharacters"
-                android:paddingStart="10dp"
-                android:textColor="@color/colorHint"
+                app:startIconDrawable="@drawable/ic_user"
+                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                android:hint="@string/usuario"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/textView3" />
+                app:layout_constraintTop_toBottomOf="@+id/textView3">
 
-            <EditText
-                android:id="@+id/txtclave"
-                android:layout_width="0dp"
-                android:layout_height="55dp"
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/txtusuario"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:inputType="text|textCapCharacters"
+                    android:textSize="18sp"
+                    android:textColor="@color/colorHint"/>
+            </com.google.android.material.textfield.TextInputLayout>
+
+            <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/lyClave"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
                 android:layout_margin="16dp"
-                android:background="@drawable/border_textbox"
-                android:drawableStart="@drawable/ic_pass"
-                android:drawablePadding="10dp"
-                android:ems="10"
-                android:hint="Clave"
-                android:inputType="textPassword|textCapCharacters"
-                android:paddingStart="10dp"
-                android:textColor="@color/colorHint"
+                app:startIconDrawable="@drawable/ic_pass"
+                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                android:hint="@string/contrase_a"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/txtusuario" />
+                app:layout_constraintTop_toBottomOf="@+id/lyUsuario">
+
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/txtclave"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:inputType="textPassword|textCapCharacters"
+                    android:textSize="18sp"
+                    android:textColor="@color/colorHint"/>
+            </com.google.android.material.textfield.TextInputLayout>
+
 
             <androidx.appcompat.widget.AppCompatButton
                 android:id="@+id/btnlogin"
@@ -104,7 +113,7 @@
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/txtclave" />
+                app:layout_constraintTop_toBottomOf="@+id/lyClave" />
 
         </androidx.constraintlayout.widget.ConstraintLayout>
     </androidx.cardview.widget.CardView>

@@ -88,4 +88,7 @@
     <string name="no_registros">SIN DATOS QUE MOSTRAR</string>
     <string name="realizar_busqueda">REALIZAR BUSQUEDA</string>
     <string name="detalle_del_pedido">DETALLE DEL PEDIDO</string>
+    <string name="usuario">USUARIO</string>
+    <string name="server">SERVIDOR / IP</string>
+    <string name="puerto">PUERTO</string>
 </resources>

@@ -56,46 +56,48 @@
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/imageView2" />
 
-            <EditText
-                android:id="@+id/txtip"
-                android:layout_width="0dp"
-                android:layout_height="55dp"
-                android:layout_marginStart="16dp"
-                android:layout_marginTop="16dp"
-                android:layout_marginEnd="16dp"
-                android:background="@drawable/border_textbox"
-                android:drawableStart="@drawable/ic_computer"
-                android:paddingStart="10dp"
-                android:drawablePadding="10dp"
-                android:ems="10"
-                android:hint="SERVIDOR / IP"
-                android:inputType="textPersonName"
-                android:textColor="@color/colorHint"
+            <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/lyIp"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_margin="16dp"
+                app:startIconDrawable="@drawable/ic_computer"
+                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                android:hint="@string/server"
                 app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintHorizontal_bias="0.0"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/textView" />
+                app:layout_constraintTop_toBottomOf="@+id/textView">
+
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/txtip"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:inputType="text"
+                    android:textSize="18sp"
+                    android:textColor="@color/colorHint"/>
+            </com.google.android.material.textfield.TextInputLayout>
 
 
-            <EditText
-                android:id="@+id/txtpuerto"
-                android:layout_width="0dp"
-                android:layout_height="55dp"
-                android:layout_marginStart="16dp"
-                android:layout_marginTop="16dp"
-                android:layout_marginEnd="16dp"
-                android:background="@drawable/border_textbox"
-                android:drawableStart="@drawable/ic_network"
-                android:drawablePadding="10dp"
-                android:paddingStart="10dp"
-                android:ems="10"
-                android:hint="PUERTO"
-                android:inputType="textPersonName"
-                android:textColor="@color/colorHint"
+            <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/lyPuerto"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_margin="16dp"
+                app:startIconDrawable="@drawable/ic_network"
+                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                android:hint="@string/puerto"
                 app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintHorizontal_bias="0.0"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/txtip" />
+                app:layout_constraintTop_toBottomOf="@+id/lyIp">
+
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/txtpuerto"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:inputType="text"
+                    android:textSize="18sp"
+                    android:textColor="@color/colorHint"/>
+            </com.google.android.material.textfield.TextInputLayout>
 
             <Button
                 android:id="@+id/btnguardar"
@@ -110,7 +112,7 @@
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/txtpuerto" />
+                app:layout_constraintTop_toBottomOf="@+id/lyPuerto" />
 
         </androidx.constraintlayout.widget.ConstraintLayout>
     </androidx.cardview.widget.CardView>
