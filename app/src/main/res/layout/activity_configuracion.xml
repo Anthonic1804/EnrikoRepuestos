@@ -122,6 +122,8 @@
                                 android:layout_height="wrap_content"
                                 android:inputType="text"
                                 android:textSize="18sp"
+                                android:focusable="false"
+                                android:clickable="false"
                                 android:textColor="@color/colorHint"/>
                         </com.google.android.material.textfield.TextInputLayout>
 
@@ -144,6 +146,8 @@
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
                                 android:inputType="text"
+                                android:focusable="false"
+                                android:clickable="false"
                                 android:textColor="@color/colorHint"
                                 android:textSize="18sp" />
                         </com.google.android.material.textfield.TextInputLayout>
