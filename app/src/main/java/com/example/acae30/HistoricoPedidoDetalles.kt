@@ -4,17 +4,11 @@ import android.content.Intent
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.RecyclerView
 import com.example.acae30.database.Database
+import com.example.acae30.databinding.ActivityHistoricoPedidoDetallesBinding
 import com.example.acae30.listas.VentaDetalleTempAdapter
 import com.example.acae30.modelos.VentasDetalleTemp
-import kotlinx.android.synthetic.main.activity_historico_pedido_detalles.imgRegresar
-import kotlinx.android.synthetic.main.activity_historico_pedido_detalles.tvCliente
-import kotlinx.android.synthetic.main.activity_historico_pedido_detalles.tvCorrelativo
-import kotlinx.android.synthetic.main.activity_historico_pedido_detalles.tvFecha
-import kotlinx.android.synthetic.main.activity_historico_pedido_detalles.tvSucursal
-import kotlinx.android.synthetic.main.activity_historico_pedido_detalles.tvTotal
-import kotlinx.android.synthetic.main.activity_historico_pedido_detalles.tvVendedor
+import kotlinx.android.synthetic.main.activity_historico_pedido_detalles.*
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
@@ -22,6 +16,7 @@ import kotlinx.coroutines.launch
 
 class HistoricoPedidoDetalles : AppCompatActivity() {
 
+    private lateinit var binding: ActivityHistoricoPedidoDetallesBinding
     private var idVentas: Int = 0
     private var correlativo: Int = 0
     private var fecha: String = ""
@@ -31,13 +26,13 @@ class HistoricoPedidoDetalles : AppCompatActivity() {
     private var vendedor: String = ""
 
     private var base: Database? = null
-    private lateinit var rvListadoTemporal: RecyclerView
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_historico_pedido_detalles)
+        binding = ActivityHistoricoPedidoDetallesBinding.inflate(layoutInflater)
+        setContentView(binding.root)
+
         base = Database(this@HistoricoPedidoDetalles)
-        rvListadoTemporal = findViewById(R.id.rvListadoTemporal)
 
         idVentas = intent.getIntExtra("id_ventas", 0)
         correlativo = intent.getIntExtra("correlativo", 0)
@@ -51,13 +46,14 @@ class HistoricoPedidoDetalles : AppCompatActivity() {
     @OptIn(DelicateCoroutinesApi::class)
     override fun onStart() {
         super.onStart()
-
-        tvCorrelativo.text = "PE$correlativo"
-        tvFecha.text = fecha
-        tvCliente.text = cliente
-        tvSucursal.text = sucursal
-        tvTotal.text = "$ " + "${String.format("%.4f", total)}"
-        tvVendedor.text = vendedor
+        with(binding){
+            tvCorrelativo.text = "PE$correlativo"
+            tvFecha.text = fecha
+            tvCliente.text = cliente
+            tvSucursal.text = sucursal
+            tvTotal.text = "$ " + "${kotlin.String.format("%.4f", total)}"
+            tvVendedor.text = vendedor
+        }
 
         GlobalScope.launch(Dispatchers.IO) {
             try {
@@ -109,9 +105,9 @@ class HistoricoPedidoDetalles : AppCompatActivity() {
             LinearLayoutManager.VERTICAL,
             false
         )
-        rvListadoTemporal.layoutManager = mLayoutManager
+        binding.rvListadoTemporal.layoutManager = mLayoutManager
         val adapter = VentaDetalleTempAdapter(lista, this@HistoricoPedidoDetalles)
-        rvListadoTemporal.adapter = adapter
+        binding.rvListadoTemporal.adapter = adapter
 
     }
 

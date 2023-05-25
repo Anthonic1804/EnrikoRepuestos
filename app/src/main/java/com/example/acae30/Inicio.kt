@@ -20,6 +20,7 @@ import androidx.cardview.widget.CardView
 import androidx.core.app.ActivityCompat
 import androidx.drawerlayout.widget.DrawerLayout
 import com.example.acae30.database.Database
+import com.example.acae30.databinding.ActivityInicioBinding
 import com.google.android.material.navigation.NavigationView
 import com.google.gson.Gson
 import kotlinx.coroutines.DelicateCoroutinesApi
@@ -38,23 +39,16 @@ import java.nio.charset.StandardCharsets
 @Suppress("DEPRECATION")
 class Inicio : AppCompatActivity(), NavigationView.OnNavigationItemSelectedListener {
 
-    private var load: CardView? = null
-    private var cvconf: CardView? = null
-    private var cvcliente: CardView? = null
-    private var cvinventario: CardView? = null
-    private var cvpedido: CardView? = null
-    private var cvcuenta: CardView? = null
+    private lateinit var binding: ActivityInicioBinding
+
     private var funciones: Funciones? = null
     private var preferencias: SharedPreferences? = null
     private val instancia = "CONFIG_SERVIDOR"
     private var database: Database? = null
-    private var fechaUpdate: TextView? = null
 
     //VARIABLES PARA UN SLIDE MENU
     private lateinit var  drawerLayout: DrawerLayout
     private lateinit var toogle: ActionBarDrawerToggle
-
-    private lateinit var txtvendedor : TextView
     private var generaToken: Int = 0
 
     private var ip = ""
@@ -74,29 +68,20 @@ class Inicio : AppCompatActivity(), NavigationView.OnNavigationItemSelectedListe
     @OptIn(DelicateCoroutinesApi::class)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_inicio)
-        //supportActionBar?.title = "ACAE APP INICIO"
+        binding = ActivityInicioBinding.inflate(layoutInflater)
+        setContentView(binding.root)
+
         funciones = Funciones()
-        load = findViewById(R.id.cvData)
-        cvconf = findViewById(R.id.cvconfig)
-        cvcliente = findViewById(R.id.cvcliente)
-        cvinventario = findViewById(R.id.cvinventario)
-        cvpedido = findViewById(R.id.cvpedido)
-        cvcuenta = findViewById(R.id.cvcuentas)
-        fechaUpdate = findViewById(R.id.lblupdate)
         preferencias = getSharedPreferences(instancia, Context.MODE_PRIVATE)
         funciones!!.VendedorVerific(this) //valida que haya sesion y que haya configuracion
         database = Database(this)
-
-        txtvendedor = findViewById(R.id.txtvendedor)
-
 
         ip = preferencias!!.getString("ip", "").toString()
         puerto = preferencias!!.getInt("puerto", 0)
         generaToken = preferencias!!.getInt("generaToken", 0)
 
         val nombre_vendedor =  preferencias!!.getString("Vendedor", "")
-        txtvendedor.text = "BIENVENIDO " + nombre_vendedor?.trim()
+        binding.includeBar.txtvendedor.text = "BIENVENIDO " + nombre_vendedor?.trim()
 
         //IMPLEMENTANDO MENU SLIDE
         val toolbar: androidx.appcompat.widget.Toolbar = findViewById(R.id.toolbar_main)
@@ -218,9 +203,9 @@ class Inicio : AppCompatActivity(), NavigationView.OnNavigationItemSelectedListe
                 for(data in list){
                     fecha = data.Fecha_inventario.toString()
                 }
-                fechaUpdate!!.text = fecha
+                binding.includeBar.lblupdate.text = fecha
             }else{
-                fechaUpdate!!.visibility = View.GONE
+                binding.includeBar.lblupdate.visibility = View.GONE
             }
         } catch (e: Exception) {
             println("ERROR AL MOSTRAR FECHA DE INVENTARIO")
@@ -228,38 +213,40 @@ class Inicio : AppCompatActivity(), NavigationView.OnNavigationItemSelectedListe
     }
 
     private fun menu() {
-        load!!.setOnClickListener {
-            val intento = Intent(this, carga_datos::class.java)
-            startActivity(intento)
-            finish()
-        }
+        with(binding.includeBar){
+            cvData.setOnClickListener {
+                val intento = Intent(this@Inicio, carga_datos::class.java)
+                startActivity(intento)
+                finish()
+            }
 
-        cvconf!!.setOnClickListener {
-            val intento = Intent(this, Configuracion::class.java)
-            startActivity(intento)
-            finish()
-        }
-        cvcliente!!.setOnClickListener {
-            val intento = Intent(this, Clientes::class.java)
-            startActivity(intento)
-            finish()
-        }
-        cvinventario!!.setOnClickListener {
-            val intento = Intent(this, Inventario::class.java)
-            startActivity(intento)
-            finish()
-        }
-        cvpedido!!.setOnClickListener {
-            val intento = Intent(this, Pedido::class.java)
-            intento.putExtra("proviene", "inicio")
-            startActivity(intento)
-            finish()
-        }
-        cvcuenta!!.setOnClickListener {
-            val intento = Intent(this, Cuentas_list::class.java)
-            intento.putExtra("cuentas", true)
-            startActivity(intento)
-            finish()
+            cvconfig.setOnClickListener {
+                val intento = Intent(this@Inicio, Configuracion::class.java)
+                startActivity(intento)
+                finish()
+            }
+            cvcliente.setOnClickListener {
+                val intento = Intent(this@Inicio, Clientes::class.java)
+                startActivity(intento)
+                finish()
+            }
+            cvinventario.setOnClickListener {
+                val intento = Intent(this@Inicio, Inventario::class.java)
+                startActivity(intento)
+                finish()
+            }
+            cvpedido.setOnClickListener {
+                val intento = Intent(this@Inicio, Pedido::class.java)
+                intento.putExtra("proviene", "inicio")
+                startActivity(intento)
+                finish()
+            }
+            cvcuentas.setOnClickListener {
+                val intento = Intent(this@Inicio, Cuentas_list::class.java)
+                intento.putExtra("cuentas", true)
+                startActivity(intento)
+                finish()
+            }
         }
     }//acciones de los botones del menu
 
@@ -279,10 +266,10 @@ class Inicio : AppCompatActivity(), NavigationView.OnNavigationItemSelectedListe
     }
 
     private fun comprobarSesion() {
-        var usuario = preferencias!!.getString("Usuario", "")
-        var identidad = preferencias!!.getString("Identidad", "")
+        val usuario = preferencias!!.getString("Usuario", "")
+        val identidad = preferencias!!.getString("Identidad", "")
 
-        var comprobarEstado = comprobarEstado(usuario!!, identidad!!)
+        val comprobarEstado = comprobarEstado(usuario!!, identidad!!)
 
         if (comprobarEstado == "Invalido") {
             // BORRAR TODOS LOS DATOS
@@ -295,7 +282,7 @@ class Inicio : AppCompatActivity(), NavigationView.OnNavigationItemSelectedListe
         var respuestaVal = ""
         try {
             val credenciales = com.example.acae30.modelos.JSONmodels.LoginComprobar(
-                usuario.toUpperCase()
+                usuario.uppercase()
             ) //se crea el modelo con los datos    que se enviaran
 
             val objecto =
@@ -339,10 +326,6 @@ class Inicio : AppCompatActivity(), NavigationView.OnNavigationItemSelectedListe
                                             "Clave o Usuario Invalidos" -> respuestaVal =
                                                 "Invalido" // Usuario y contraseña no validos
                                         }
-                                        println("respuestaVal: " + respuestaVal)
-                                        println("estado: " + estado)
-                                        println("identidad: " + identidad)
-                                        println("identidad_param: " + identidad_param)
 
                                         if (respuestaVal == "Valido") {
                                             if (estado == "INACTIVO") {
@@ -355,7 +338,6 @@ class Inicio : AppCompatActivity(), NavigationView.OnNavigationItemSelectedListe
                                                 }
                                             }
                                         }
-                                        println("respuestaVal: " + respuestaVal)
                                     } else {
                                         throw Exception("Error al procesar la solicitud")
                                     }//valido si el json contiene esas variables
@@ -409,7 +391,7 @@ class Inicio : AppCompatActivity(), NavigationView.OnNavigationItemSelectedListe
     } // ELIMINAR TODOS LOS DATOS Y CIERRA SESION
 
     private fun updateSesionServer() {
-        var usuario = preferencias!!.getString("Usuario", "")
+        val usuario = preferencias!!.getString("Usuario", "")
         var identidad = preferencias!!.getString("Identidad", "")
         try {
             val credenciales = com.example.acae30.modelos.JSONmodels.Logout(
@@ -449,7 +431,6 @@ class Inicio : AppCompatActivity(), NavigationView.OnNavigationItemSelectedListe
                                     if (!res.isNull("error") && !res.isNull("response")) {
                                         val coderror: Int = res.getInt("error")
                                         val response: String = res.getString("response")
-                                        println("Respuesta: " + response)
                                     } else {
                                         throw Exception("Error al procesar la solicitud")
                                     }//valido si el json contiene esas variables

@@ -6,7 +6,7 @@ android {
     compileSdkVersion 33
 
     buildFeatures {
-        viewBinding = true
+        viewBinding true
     }
 
     defaultConfig {
@@ -66,8 +66,7 @@ dependencies {
     implementation 'com.itextpdf:itextpdf:5.5.13.2'
 
     //Picasso
-    def picassoVersion = "2.71828"
-    implementation "com.squareup.picasso:picasso:$picassoVersion"
+    implementation "com.squareup.picasso:picasso:2.71828"
 
     //Lottie
     implementation "com.airbnb.android:lottie:6.0.0"

@@ -6,50 +6,33 @@ import android.os.Bundle
 import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.RecyclerView
 import com.example.acae30.database.Database
+import com.example.acae30.databinding.ActivityInventariodetalleBinding
 import com.example.acae30.listas.InventarioDetalleAdapter
 import com.example.acae30.modelos.Inventario
 import com.example.acae30.modelos.InventarioPrecios
+import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 
 class Inventariodetalle : AppCompatActivity() {
 
-    private var btnatras: ImageButton? = null
+    private lateinit var binding: ActivityInventariodetalleBinding
     private var bd: Database? = null
     private var idinventario = 0
-    private var txtcodigo: TextView? = null
-    private var txtdescripcion: TextView? = null
-    private var txtexistencia: TextView? = null
-    private var txtprecio: TextView? = null
-    private var btncosto: ImageButton? = null
-
-    private var listaprecios: RecyclerView? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_inventariodetalle)
-        supportActionBar?.hide()
-        bd = Database(this)
+        binding = ActivityInventariodetalleBinding.inflate(layoutInflater)
+        setContentView(binding.root)
+
+        bd = Database(this@Inventariodetalle)
         idinventario = intent.getIntExtra("idproducto", 0)
-        txtcodigo = findViewById(R.id.txtcodigo)
-        btnatras = findViewById(R.id.imgbtnatras)
-        txtdescripcion = findViewById(R.id.txtdescripcion)
-        txtprecio = findViewById(R.id.txtprecio)
-        txtexistencia = findViewById(R.id.txtexistencia)
-        listaprecios = findViewById(R.id.listaprecios)
-        btncosto = findViewById(R.id.imageView7) //IMAGEN DEL SIGNO DE DOLAR
+        val contexto = this@Inventariodetalle
 
-
-        var contexto = this
-
-
-        btncosto!!.setOnClickListener {
-
+        binding.imageView7.setOnClickListener {
             AlertaPrecio(contexto)  //muestra la alerta
-
         }
 
     }
@@ -61,10 +44,11 @@ class Inventariodetalle : AppCompatActivity() {
         //   finish()
     }//anula el boton atras
 
+    @OptIn(DelicateCoroutinesApi::class)
     override fun onStart() {
         super.onStart()
 
-        btnatras!!.setOnClickListener {
+        binding.imgbtnatras.setOnClickListener {
             val intento = Intent(this, com.example.acae30.Inventario::class.java)
             startActivity(intento)
             finish()
@@ -74,15 +58,18 @@ class Inventariodetalle : AppCompatActivity() {
             GlobalScope.launch(Dispatchers.IO) {
                 try {
                     val producto = getProducto(idinventario)
-
-                    txtcodigo!!.text = producto!!.Codigo
-                    txtdescripcion!!.text = producto.descripcion
-                    txtprecio!!.text = "$" + String.format("%.4f", producto.Precio_iva)
-                    txtexistencia!!.text = producto.Existencia!!.toInt().toString() + " UNI"
+                    with(binding){
+                        txtcodigo.text = producto!!.Codigo
+                        txtdescripcion.text = producto.descripcion
+                        txtprecio.text = "$" + String.format("%.4f", producto.Precio_iva)
+                        txtexistencia.text = producto.Existencia!!.toInt().toString() + " UNI"
+                    }
 
                     validarDatos();
                 } catch (e: Exception) {
-
+                    runOnUiThread {
+                        Toast.makeText(this@Inventariodetalle, "ERROR AL CARGAR EL DETALLE DEL PRODUCTO", Toast.LENGTH_LONG).show()
+                    }
                 }
 
             }
@@ -202,14 +189,14 @@ class Inventariodetalle : AppCompatActivity() {
 
     private fun ArmarLista(lista: ArrayList<InventarioPrecios>) {
 
-        var mLayoutManager = LinearLayoutManager(
+        val mLayoutManager = LinearLayoutManager(
             this@Inventariodetalle,
             LinearLayoutManager.VERTICAL,
             false
         )
-        listaprecios!!.layoutManager = mLayoutManager
+        binding.listaprecios.layoutManager = mLayoutManager
         val adapter = InventarioDetalleAdapter(lista, this@Inventariodetalle)
-        listaprecios!!.adapter = adapter
+        binding.listaprecios.adapter = adapter
 
     }
 
@@ -218,11 +205,11 @@ class Inventariodetalle : AppCompatActivity() {
     private fun AlertaPrecio(contexto: com.example.acae30.Inventariodetalle) {
         val dialogo = Dialog(this)
         dialogo.setContentView(R.layout.alerta_costo)
-        var costoProducto = dialogo.findViewById<TextView>(R.id.txtcosto)
+        val costoProducto = dialogo.findViewById<TextView>(R.id.txtcosto)
 
         val producto = getProducto(idinventario)
 
-        costoProducto!!.setText("${String.format("%.4f", producto!!.costo_iva)}")
+        costoProducto!!.text = String.format("%.4f", producto!!.costo_iva)
 
 
 

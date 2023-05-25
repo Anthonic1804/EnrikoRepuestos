@@ -55,7 +55,7 @@
 
     <string name="acae_app">ACAE APP</string>
     <string name="men_principal">MENÚ PRINCIPAL</string>
-    <string name="historico_pedido">HISTORICO PEDIDO</string>
+    <string name="historico_pedido">HISTÓRICO DE PEDIDOS</string>
     <string name="token">TOKENS</string>
     <string name="cerrar_sesi_n">CERRAR SESIÓN</string>
 
@@ -63,7 +63,7 @@
     <string name="navigation_drawer_open">OPEN</string>
     <string name="navigation_drawer_close">CLOSE</string>
 
-    <string name="menu_principal">MENU PRINCIPAL</string>
+    <string name="menu_principal">MENÚ PRINCIPAL</string>
     <string name="logo_sismantec">Logo_sismantec</string>
     <string name="crear_token">CREAR TOKEN</string>
     <string name="boton_de_regreso">Boton de Regreso</string>

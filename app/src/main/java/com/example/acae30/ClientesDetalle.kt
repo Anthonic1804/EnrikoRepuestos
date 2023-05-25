@@ -2,72 +2,41 @@ package com.example.acae30
 
 import android.content.Intent
 import android.os.Bundle
-import android.widget.Button
-import android.widget.ImageButton
-import android.widget.TextView
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.example.acae30.database.Database
+import com.example.acae30.databinding.ActivityClientesDetalleBinding
 import com.example.acae30.modelos.Cliente
+import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 
 class ClientesDetalle : AppCompatActivity() {
+
+    private lateinit var binding: ActivityClientesDetalleBinding
+
     private var bd: Database? = null
     private var funciones: Funciones? = null
-    private var txtcodigo: TextView? = null
-    private var txtdirec: TextView? = null
-    private var txtdepa: TextView? = null
-    private var txtmuni: TextView? = null
-    private var txtestadocredito: TextView? = null
-    private var txtbalance: TextView? = null
-    private var txtlimite: TextView? = null
-    private var txtplazo: TextView? = null
-    private var txtnit: TextView? = null
-    private var txtnrc: TextView? = null
-    private var txtteleuno: TextView? = null
-    private var txtteledos: TextView? = null
-    private var btnatras: ImageButton? = null
-    private lateinit var txtDui : TextView
-    private lateinit var btnPagare : Button
-    private lateinit var txtnombre : TextView
-
     private var nombreCliente : String = ""
     private var direccionCliente : String = ""
     private var duiCliente : String = ""
     private var limiteCredito : Float = 0f
     private var plazo : Long = 0
-
     private var idcliente = 0
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_clientes_detalle)
-       // supportActionBar!!.title = "DETALLE DE CLIENTE"
+        binding = ActivityClientesDetalleBinding.inflate(layoutInflater)
+        setContentView(binding.root)
+
         bd = Database(this)
         idcliente = intent.getIntExtra("idcliente", 0)
         funciones = Funciones()
 
-        txtcodigo = findViewById(R.id.txtcodigo)
-        txtnombre = findViewById(R.id.txtnombre)
-        txtdirec = findViewById(R.id.txtdirec)
-        txtdepa = findViewById(R.id.txtdepa)
-        txtmuni = findViewById(R.id.txtmunic)
-        txtestadocredito = findViewById(R.id.txtestadocredito)
-        txtbalance = findViewById(R.id.txtbalance)
-        txtlimite = findViewById(R.id.txtlimite)
-        txtplazo = findViewById(R.id.txtplazo)
-        txtnit = findViewById(R.id.txtnit)
-        txtnrc = findViewById(R.id.txtnrc)
-        txtteleuno = findViewById(R.id.txtteluno)
-        txtteledos = findViewById(R.id.txtteldos)
-        txtDui = findViewById(R.id.txtDui)
-
-        btnatras = findViewById(R.id.imgatras)
-        btnPagare = findViewById(R.id.btnPagare)
-
     }
 
+    @OptIn(DelicateCoroutinesApi::class)
     override fun onStart() {
         super.onStart()
         GlobalScope.launch(Dispatchers.IO) {
@@ -75,21 +44,22 @@ class ClientesDetalle : AppCompatActivity() {
                 if (idcliente > 0) {
                     val data = getClient(idcliente)
                     if (data != null) {
-                        txtcodigo!!.text = data.Codigo
-                        txtnombre.text = data.Cliente
-                        txtdirec!!.text =  data.Direccion
-                        txtdepa!!.text = data.Departamento
-                        txtmuni!!.text = data.Municipio
-                        txtestadocredito!!.text = data.Estado_credito
-                        txtbalance!!.text = "$ " + data.Balance.toString()
-                        txtlimite!!.text = "$ " + data.Limite_credito.toString()
-                        txtplazo!!.text = data.Plazo_credito.toString() + " días"
-                        txtDui.text = data.Dui
-                        txtnit!!.text = data.Nit
-                        txtnrc!!.text = data.Nrc
-                        txtteleuno!!.text = data.Telefono_1
-                        txtteledos!!.text = data.Telefono_2
-
+                        with(binding){
+                            txtcodigo.text = data.Codigo
+                            txtnombre.text = data.Cliente
+                            txtdirec.text = data.Direccion
+                            txtdepa.text = data.Departamento
+                            txtmunic.text = data.Municipio
+                            txtestadocredito.text = data.Estado_credito
+                            txtbalance.text = "$ " + data.Balance.toString()
+                            txtlimite.text = "$ " + data.Limite_credito.toString()
+                            txtplazo.text = data.Plazo_credito.toString() + " días"
+                            txtDui.text = data.Dui
+                            txtnit.text = data.Nit
+                            txtnrc.text = data.Nrc
+                            txtteluno.text = data.Telefono_1
+                            txtteldos.text = data.Telefono_2
+                        }
                         nombreCliente = data.Cliente.toString()
                         direccionCliente = data.Direccion.toString()
                         duiCliente = data.Dui.toString()
@@ -100,23 +70,19 @@ class ClientesDetalle : AppCompatActivity() {
                 }
 
             } catch (e: Exception) {
-              /*  runOnUiThread {
-                    val alert: Snackbar =
-                        Snackbar.make(lienzo!!, e.message.toString(), Snackbar.LENGTH_LONG)
-                    alert.view.setBackgroundColor(resources.getColor(R.color.moderado))
-                    alert.show()
-                }*/
+               runOnUiThread{
+                   Toast.makeText(this@ClientesDetalle, "ERROR AL CARGAR LOS DATOS DEL CLIENTE", Toast.LENGTH_LONG).show()
+               }
             }
         }
 
-        btnatras!!.setOnClickListener {
+        binding.imgatras.setOnClickListener {
             Regresar()
         }
 
-        btnPagare.setOnClickListener {
+        binding.btnPagare.setOnClickListener {
             pagare()
         }
-
     }
 
     fun getClient(id: Int): Cliente? {
