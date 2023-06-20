@@ -56,7 +56,6 @@
     <ScrollView
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:layout_marginTop="10dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.0"
@@ -74,34 +73,27 @@
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="16dp">
 
-                <TextView
-                    android:id="@+id/textView17"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_marginStart="16dp"
-                    android:layout_marginEnd="16dp"
-                    android:text=" NOMBRE DEL CLIENTE"
-                    android:textAlignment="viewStart"
-                    android:textColor="@color/colordark"
-                    android:textSize="18sp"
-                    android:textStyle="bold"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toTopOf="parent" />
-
-                <EditText
-                    android:id="@+id/txtcliente"
+                <com.google.android.material.textfield.TextInputLayout
+                    android:id="@+id/lyCliente"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginStart="16dp"
-                    android:layout_marginEnd="16dp"
-                    android:ems="10"
-                    android:focusable="false"
-                    android:hint="Nombre del Cliente"
-                    android:inputType="textPersonName"
-                    app:layout_constraintHorizontal_bias="1.0"
+                    android:layout_margin="16dp"
+                    style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                    android:hint="NOMBRE DEL CLIENTE"
+                    app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toBottomOf="@+id/textView17" />
+                    app:layout_constraintTop_toTopOf="parent">
+
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/txtCliente"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:inputType="text"
+                        android:textSize="18sp"
+                        android:focusable="false"
+                        android:clickable="false"
+                        android:textColor="@color/colorHint"/>
+                </com.google.android.material.textfield.TextInputLayout>
 
                 <TextView
                     android:id="@+id/tvsucursal"
@@ -109,13 +101,14 @@
                     android:layout_height="wrap_content"
                     android:layout_marginStart="16dp"
                     android:layout_marginEnd="16dp"
+                    android:layout_marginTop="8dp"
                     android:text="SUCURSAL"
                     android:textColor="@color/colordark"
                     android:textSize="18sp"
                     android:textStyle="bold"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toBottomOf="@+id/txtcliente" />
+                    app:layout_constraintTop_toBottomOf="@+id/lyCliente" />
 
                 <TextView
                     android:id="@+id/sinSucursal"
@@ -143,60 +136,93 @@
                     tools:layout_editor_absoluteX="41dp"
                     tools:layout_editor_absoluteY="160dp" />
 
-                <TextView
-                    android:id="@+id/tvenvio"
-                    android:layout_width="0dp"
+                <LinearLayout
+                    android:id="@+id/lyFormatos"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
+                    android:orientation="horizontal"
                     android:layout_marginStart="16dp"
-                    android:layout_marginTop="35dp"
                     android:layout_marginEnd="16dp"
-                    android:text="TIPO DE ENVIO"
-                    android:textColor="@color/colordark"
-                    android:textSize="18sp"
-                    android:textStyle="bold"
+                    android:layout_marginTop="8dp"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toBottomOf="@+id/tvsucursal" />
+                    app:layout_constraintTop_toBottomOf="@+id/sinSucursal">
 
-                <Switch
-                    android:id="@+id/swcaes"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="ENCOMIENDA  "
-                    android:textStyle="bold"
-                    android:thumb="@drawable/thumb"
-                    android:track="@drawable/track"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintHorizontal_bias="0.075"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toBottomOf="@+id/tvenvio" />
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:layout_weight="1"
+                        android:orientation="vertical">
 
-                <Switch
-                    android:id="@+id/swruta"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="RUTA  "
-                    android:textStyle="bold"
-                    android:thumb="@drawable/thumb"
-                    android:track="@drawable/track"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintHorizontal_bias="0.18"
-                    app:layout_constraintStart_toEndOf="@+id/swcaes"
-                    app:layout_constraintTop_toBottomOf="@+id/tvenvio" />
+                        <TextView
+                            android:id="@+id/tvenvio"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:text="TIPO DE ENVIO"
+                            android:textColor="@color/colordark"
+                            android:textSize="18sp"
+                            android:textStyle="bold"/>
+
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            android:orientation="vertical"
+                            android:layout_marginEnd="24dp"
+                            android:layout_marginStart="8dp">
+
+                            <Switch
+                                android:id="@+id/swcaes"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:layout_marginTop="8dp"
+                                android:text="ENCOMIENDA  "
+                                android:textStyle="bold"
+                                android:thumb="@drawable/thumb"
+                                android:track="@drawable/track"/>
+
+                            <Switch
+                                android:id="@+id/swruta"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:layout_marginTop="8dp"
+                                android:text="RUTA  "
+                                android:textStyle="bold"
+                                android:thumb="@drawable/thumb"
+                                android:track="@drawable/track"/>
+                        </LinearLayout>
+
+                    </LinearLayout>
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:layout_weight="1"
+                        android:orientation="vertical">
+
+                        <TextView
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:text="DOCUMENTO"
+                            android:textSize="18sp"
+                            android:textStyle="bold"
+                            android:textColor="@color/colordark"/>
+
+                    </LinearLayout>
+
+                </LinearLayout>
 
                 <TextView
                     android:id="@+id/textView18"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginStart="16dp"
-                    android:layout_marginTop="40dp"
+                    android:layout_marginTop="8dp"
                     android:text="DETALLE DEL PEDIDO"
                     android:textAlignment="viewStart"
                     android:textColor="@color/colordark"
                     android:textSize="18sp"
                     android:textStyle="bold"
                     app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toBottomOf="@+id/tvenvio" />
+                    app:layout_constraintTop_toBottomOf="@+id/lyFormatos" />
 
                 <TextView
                     android:id="@+id/fecha_creacion"
