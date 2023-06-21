@@ -212,9 +212,19 @@ class Tablas {
                 "id_sucursal INTEGER NOT NULL DEFAULT 0," +
                 "codigo_sucursal VARCHAR(25) NOT NULL DEFAULT ''," +
                 "nombre_sucursal VARCHAR(45) NOT NULL DEFAULT ''," +
-                "tipo_envio INTEGER NOT NULL DEFAULT 0 );" //AGREGAR CAMPO A LA BD SQL
+                "tipo_documento VARCHAR(2) NOT NULL DEFAULT 'FC'," +
+                "tipo_envio INTEGER NOT NULL DEFAULT 0);" //AGREGAR CAMPO A LA BD SQL
         return pedido
     } //tabla pedidos
+
+    //TABLA REPORTE TEMP
+    fun ReporteTemp():String{
+        val reporteTemp = "CREATE TABLE reporteTemp(" +
+                "Cliente VARCHAR(50) NOT NULL," +
+                "Sucursal VARCHAR(50) NOT NULL," +
+                "Total NUMERIC(20,6) NOT NULL)"
+        return reporteTemp
+    }
 
     //TABLA VENTAS TEMP
     fun VentasTemp():String{

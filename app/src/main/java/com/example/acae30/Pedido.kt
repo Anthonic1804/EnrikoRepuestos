@@ -5,18 +5,19 @@ import android.app.Dialog
 import android.content.ContentValues
 import android.content.Intent
 import android.content.SharedPreferences
+import android.content.pm.PackageManager
 import android.net.ConnectivityManager
 import android.os.Build
 import android.os.Bundle
+import android.os.Environment
 import android.os.StrictMode
 import android.text.Editable
 import android.text.InputFilter
 import android.text.Spanned
 import android.text.TextWatcher
-import android.widget.ArrayAdapter
-import android.widget.Button
-import android.widget.EditText
-import android.widget.ImageButton
+import android.view.View
+import android.widget.*
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.app.ActivityCompat
@@ -27,27 +28,38 @@ import androidx.recyclerview.widget.RecyclerView
 import com.example.acae30.database.Database
 import com.example.acae30.listas.PedidosAdapter
 import com.example.acae30.modelos.DetallePedido
+import com.example.acae30.modelos.JSONmodels.BusquedaPedidoJSON
+import com.example.acae30.modelos.JSONmodels.BusquedaReporteJSON
 import com.example.acae30.modelos.JSONmodels.CabezeraPedidoSend
+import com.example.acae30.modelos.JSONmodels.DatosReporteJSON
 import com.example.acae30.modelos.Pedidos
+import com.example.acae30.modelos.VentasTemp
 import com.example.acae30.modelos.Visitas
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.google.android.material.snackbar.Snackbar
+import com.google.gson.Gson
 import com.google.gson.JsonArray
 import com.google.gson.JsonObject
+import com.itextpdf.text.*
+import com.itextpdf.text.pdf.PdfPCell
+import com.itextpdf.text.pdf.PdfPTable
+import com.itextpdf.text.pdf.PdfWriter
+import kotlinx.android.synthetic.main.activity_historico_pedidos.*
 import kotlinx.android.synthetic.main.activity_producto_agregar.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
+import org.json.JSONArray
 import org.json.JSONObject
-import java.io.BufferedReader
-import java.io.InputStreamReader
-import java.io.OutputStreamWriter
-import java.io.Reader
+import java.io.*
 import java.net.HttpURLConnection
 import java.net.URL
 import java.nio.charset.StandardCharsets
 import java.text.DecimalFormatSymbols
+import java.time.LocalDate
+import java.time.LocalDateTime
+import java.time.format.DateTimeFormatter
 import java.util.*
 import kotlin.collections.ArrayList
 
@@ -66,6 +78,30 @@ class Pedido : AppCompatActivity() {
     private var ip = ""
     private var puerto = 0
     private var proviene: String? = ""
+    var fechaDoc = ""
+
+    val fecha: String = LocalDate.now()
+        .format(DateTimeFormatter.ofPattern("yyyy-MM-dd"))
+
+    private val tituloText = "DETALLE DE PEDIDOS ENVIADOS"
+
+    private lateinit var btnReporte: FloatingActionButton
+    private lateinit var tvUpdate : TextView
+    private lateinit var tvCancel : TextView
+    private lateinit var lblMensaje: TextView
+    private lateinit var lblTitulo: TextView
+
+    private val requestPermissionLauncher = registerForActivityResult(
+        ActivityResultContracts.RequestPermission()
+    ){
+            isAceptado ->
+        if(isAceptado){
+            Toast.makeText(this, "PERMISOS CONCEDIDOS", Toast.LENGTH_LONG).show()
+        }else{
+            Toast.makeText(this, "PERMISOS DENEGADOS", Toast.LENGTH_LONG).show()
+        }
+    }
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -79,6 +115,7 @@ class Pedido : AppCompatActivity() {
         proviene = intent.getStringExtra("proviene")
 
         btnatras = findViewById(R.id.imbtnatras)
+        btnReporte = findViewById(R.id.btnReporte)
 
         val policy = StrictMode.ThreadPolicy.Builder().permitAll().build()
         StrictMode.setThreadPolicy(policy)
@@ -480,6 +517,12 @@ class Pedido : AppCompatActivity() {
                 }
             }
         }
+
+        //BOTON PARA GENERAR EL REPORTE DE PEDIDOS EN PDF
+        btnReporte.setOnClickListener {
+            fechaDoc = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy_MM_dd_HH_mm_ss"))
+            mensajeReporte(it)
+        }
     }
 
     override fun onDestroy() {
@@ -608,8 +651,6 @@ class Pedido : AppCompatActivity() {
         }
     } //envia la data al servidor
 
-
-
     private fun updateCheckIn(idvisitaServer: Int, idvisita: Int) {
         val base = bd!!.writableDatabase
         try {
@@ -639,8 +680,6 @@ class Pedido : AppCompatActivity() {
             base.close()
         }
     } //ACTUALIZA CON EL ID DEL PEDIDO DE LA BD
-
-
 
     @Deprecated("Deprecated in Java")
     override fun onBackPressed() {
@@ -676,7 +715,8 @@ class Pedido : AppCompatActivity() {
                     pedido.getInt(12),
                     pedido.getString(13),
                     pedido.getString(14),
-                    pedido.getInt(15),
+                    pedido.getInt(16),
+                    pedido.getString(15),
                     0,
                     "",
                     null
@@ -730,9 +770,6 @@ class Pedido : AppCompatActivity() {
             base.close()
         }
     }//obtiene el pedido
-
-
-
     private fun SendPedido(pedido: CabezeraPedidoSend, idpedido: Int) {
         try {
             val objecto = convertToJson(pedido, idpedido) //convertimos a json el objecto pedido
@@ -814,9 +851,6 @@ class Pedido : AppCompatActivity() {
             bd!!.close()
         }
     } //actualiza el pedido y confirma que se envio
-
-
-
 
     private fun convertToJson(pedido: CabezeraPedidoSend, idpedido_param: Int): JsonObject {
         // CONSULTAR EL ID DE LA VISITA EN EL SERVIDOR
@@ -963,4 +997,318 @@ class Pedido : AppCompatActivity() {
         dialogo.show()
 
     } //muestra la alerta para agregar precio
+
+
+    //FUNCIONES PARA REPORTE DE PEDIDOS ENVIADOS DIARIMENTE DESDE LA APP
+    //MODIFICACION 21/06/2023
+    //FUNCION PARA EL MENSAJE DE ADVERTENCIA DE REPORTE
+    private fun mensajeReporte(view: View){
+        val updateDialog = Dialog(this, R.style.Theme_Dialog)
+        updateDialog.setCancelable(false)
+
+        updateDialog.setContentView(R.layout.dialog_cargar_empleados)
+        lblMensaje = updateDialog.findViewById(R.id.lblMensaje)
+        lblTitulo = updateDialog.findViewById(R.id.lblTitulo)
+        tvUpdate = updateDialog.findViewById(R.id.tvUpdate)
+        tvCancel = updateDialog.findViewById(R.id.tvCancel)
+
+        lblTitulo.text = "REPORTE DE PEDIDOS DIARIOS"
+        lblMensaje.text = "¿Desea generar el Reporte de Pedidos?"
+        tvUpdate.text = "ACEPTAR"
+
+        tvUpdate.setOnClickListener {
+            updateDialog.dismiss()
+            obtenerPedidos(idvendedor, fecha, view)
+        }
+
+        tvCancel.setOnClickListener {
+            updateDialog.dismiss()
+        }
+
+        updateDialog.show()
+    }
+    //FUNCION PARA OBTENER LOS PEDIDOS DESDE EL SERVIDOR
+    private fun obtenerPedidos(Idvendedor: Int, Fecha: String, view: View) {
+        try {
+            val datos = BusquedaReporteJSON(
+                Idvendedor,
+                Fecha
+            )
+            val objecto =
+                Gson().toJson(datos)
+            val ruta: String = "http://$ip:$puerto/pedido/reporte"
+            val url = URL(ruta)
+            with(url.openConnection() as HttpURLConnection) {
+                try {
+                    connectTimeout = 20000
+                    setRequestProperty(
+                        "Content-Type",
+                        "application/json;charset=utf-8"
+                    )
+                    requestMethod = "POST"
+                    val or = OutputStreamWriter(outputStream, StandardCharsets.UTF_8)
+                    or.write(objecto) //SE ESCRIBE EL OBJ JSON
+                    or.flush() //SE ENVIA EL OBJ JSON
+                    when (responseCode) {
+                        200 -> {
+                            BufferedReader(InputStreamReader(inputStream) as Reader?).use {
+                                try {
+                                    val respuesta = StringBuffer()
+                                    var inpuline = it.readLine()
+                                    while (inpuline != null) {
+                                        respuesta.append(inpuline)
+                                        inpuline = it.readLine()
+                                    }
+                                    it.close()
+                                    val res = JSONArray(respuesta.toString())
+                                    if (res.length() > 0) {
+                                        cargarPedidos(res, view)
+                                    } else {
+                                        runOnUiThread {
+                                            Toast.makeText(this@Pedido, "NO SE ENCONTRARON PEDIDOS ENVIADOS 1", Toast.LENGTH_LONG).show()
+                                        }
+                                    }
+                                } catch (e: Exception) {
+                                    throw Exception(e.message)
+                                }
+                            }
+                        }
+
+                        400 -> {
+                            runOnUiThread { Toast.makeText(this@Pedido, "PARAMETROS ERRONEOS", Toast.LENGTH_LONG).show() }
+                        }
+
+                        404 -> {
+                            runOnUiThread { Toast.makeText(this@Pedido, "NO SE ENCONTRARON PEDIDOS ENVIADOS", Toast.LENGTH_LONG).show() }
+                        }
+
+                        else -> {
+                            runOnUiThread { Toast.makeText(this@Pedido, "ERROR DE CONEXION CON EL SERVIDOR", Toast.LENGTH_LONG).show() }
+                        }
+                    }
+                } catch (e: Exception) {
+                    throw Exception(e.message)
+                }
+            }
+        } catch (e: Exception) {
+            throw Exception(e.message)
+        }
+    }
+    //FUNCION PARA CARGAR LOS PEDIDOS ENVIADOS EN LA BD
+    private fun cargarPedidos(json: JSONArray, view: View) {
+        val bd = bd!!.writableDatabase
+        try {
+            bd!!.beginTransaction() //INICIANDO TRANSACCION DE REGISTRO
+            bd.delete("reporteTemp", null, null) //LIMPIANDO LA TABLA VENTASTEMP
+
+            for (i in 0 until json.length()) {
+                val dato = json.getJSONObject(i)
+                val valor = ContentValues()
+                valor.put("Cliente", funciones!!.validateJsonIsnullString(dato, "cliente"))
+                valor.put("Sucursal", funciones!!.validateJsonIsnullString(dato, "sucursal"))
+                valor.put("Total", funciones!!.validate(dato.getString("total").toFloat()))
+
+                bd.insert("reporteTemp", null, valor) //INSERTANDO EN VENTASDETALLE
+            } //FINALIZANDO ITERACION FOR
+            bd.setTransactionSuccessful() //TRANSACCION COMPLETA
+        } catch (e: Exception) {
+            throw Exception(e.message)
+        } finally {
+            bd!!.endTransaction()
+            bd.close()
+
+            verificarPermisos(view)
+        }
+    }
+
+    //FUNCION PARA VERIFICAR PERMISOS DE CREACION DE DIRECTORIO Y DOCUMENTOS
+    private fun verificarPermisos(view: View) {
+        when{
+            ContextCompat.checkSelfPermission(
+                this,
+                Manifest.permission.WRITE_EXTERNAL_STORAGE
+            ) == PackageManager.PERMISSION_GRANTED -> {
+                generarPDF()
+            }
+
+            ActivityCompat.shouldShowRequestPermissionRationale(
+                this,
+                Manifest.permission.WRITE_EXTERNAL_STORAGE
+            ) -> {
+                Snackbar.make(view, "ESTE PERMISO ES NECESARIO PARA CREAR EL ARCHIVO", Snackbar.LENGTH_INDEFINITE).setAction("Ok"){
+                    requestPermissionLauncher.launch(Manifest.permission.WRITE_EXTERNAL_STORAGE)
+                }.show()
+            }
+
+            else -> {
+                requestPermissionLauncher.launch(Manifest.permission.WRITE_EXTERNAL_STORAGE)
+            }
+        }
+    }
+    //FUNCION PARA GENERAR EL REPORTE EN PDF
+    private fun generarPDF() {
+        try {
+            val carpeta = "/reportespdf"
+            val path = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS).absolutePath + carpeta
+
+            val dir = File(path)
+            if(!dir.exists()){
+                dir.mkdirs()
+                Toast.makeText(this, "CARPETA CREADA CON EXITO", Toast.LENGTH_LONG).show()
+            }
+
+            val archivo = File(dir, vendedor + "_$fechaDoc.pdf")
+            val fos = FileOutputStream(archivo)
+
+            val documento = Document(PageSize.LETTER, 2.5f, 2.5f, 3.5f, 3.5f)
+            PdfWriter.getInstance(documento, fos)
+
+            documento.open()
+
+            //ESPACIOS
+            val espaciosDocumento = Paragraph(
+                "\n\n\n"
+            )
+            documento.add(espaciosDocumento)
+
+            //AGREGANDO TITULO PEDIDO
+            val fechaDocumento = Paragraph(
+                "$tituloText\n\n",
+                FontFactory.getFont("arial", 14f, Font.BOLD, BaseColor.BLACK)
+            )
+            fechaDocumento.alignment = Element.ALIGN_CENTER
+            documento.add(fechaDocumento)
+
+            //DATOS DEL VENDEDOR
+            val tablaCliente = PdfPTable(1)
+            tablaCliente.widthPercentage = 80f
+            val cellInforCliente = PdfPCell(
+                Paragraph("VENDEDOR: $vendedor\n" +
+                    "FECHA: $fecha\n\n\n",
+                FontFactory.getFont("arial", 12f, Font.NORMAL, BaseColor.BLACK)
+            )
+            )
+            cellInforCliente.horizontalAlignment = Element.ALIGN_LEFT
+            cellInforCliente.border = 0
+            tablaCliente.addCell(cellInforCliente)
+            documento.add(tablaCliente)
+
+            //DATOS DEL PEDIDO
+            val tablaPedido = PdfPTable(3)
+            tablaPedido.widthPercentage = 80f
+
+            val cellReferencia = PdfPCell(
+                Paragraph("CLIENTE",
+                FontFactory.getFont("arial", 12f, Font.BOLD, BaseColor.BLACK)
+            )
+            )
+            cellReferencia.horizontalAlignment = Element.ALIGN_CENTER
+            tablaPedido.addCell(cellReferencia)
+
+            val cellDescripcion = PdfPCell(
+                Paragraph("SUCURSAL",
+                FontFactory.getFont("arial", 12f, Font.BOLD, BaseColor.BLACK)
+            )
+            )
+            cellDescripcion.horizontalAlignment = Element.ALIGN_CENTER
+            tablaPedido.addCell(cellDescripcion)
+
+            val cellTotal = PdfPCell(
+                Paragraph("TOTAL",
+                FontFactory.getFont("arial", 12f, Font.BOLD, BaseColor.BLACK)
+            )
+            )
+            cellTotal.horizontalAlignment = Element.ALIGN_CENTER
+            tablaPedido.addCell(cellTotal)
+
+            //AGREGANDO EL CONTENIDO DEL PEDIDO
+            val lista = getReporte()
+            var total = 0f
+
+            for(data in lista){
+
+                val cellReferenciaP = PdfPCell(
+                    Paragraph(""+data.Cliente,
+                    FontFactory.getFont("arial", 10f, Font.NORMAL, BaseColor.BLACK)
+                )
+                )
+                cellReferenciaP.horizontalAlignment = Element.ALIGN_CENTER
+                tablaPedido.addCell(cellReferenciaP)
+
+                val cellDescripcionP = PdfPCell(
+                    Paragraph(""+data.Sucursal,
+                    FontFactory.getFont("arial", 10f, Font.NORMAL, BaseColor.BLACK)
+                )
+                )
+                cellDescripcionP.horizontalAlignment = Element.ALIGN_CENTER
+                tablaPedido.addCell(cellDescripcionP)
+
+                val cellTotalP = PdfPCell(
+                    Paragraph("$ "+data.Total,
+                    FontFactory.getFont("arial", 10f, Font.NORMAL, BaseColor.BLACK)
+                )
+                )
+                cellTotalP.horizontalAlignment = Element.ALIGN_RIGHT
+                tablaPedido.addCell(cellTotalP)
+
+                total += data.Total
+            }
+
+            val cellReferenciaP = PdfPCell(Paragraph(""))
+            cellReferenciaP.border = 0
+            tablaPedido.addCell(cellReferenciaP)
+
+            val cellCantidadP = PdfPCell(
+                Paragraph("TOTAL",
+                FontFactory.getFont("arial", 14f, Font.BOLD, BaseColor.BLACK)
+            )
+            )
+            cellCantidadP.horizontalAlignment = Element.ALIGN_RIGHT
+            tablaPedido.addCell(cellCantidadP)
+
+            val cellTotalP = PdfPCell(
+                Paragraph("$ "+ total,
+                FontFactory.getFont("arial", 14f, Font.BOLD, BaseColor.BLACK)
+            )
+            )
+            cellTotalP.horizontalAlignment = Element.ALIGN_RIGHT
+            tablaPedido.addCell(cellTotalP)
+            documento.add(tablaPedido)
+
+            documento.close()
+
+            Toast.makeText(this, "REPORTE GENERADO CORRECTAMENTE", Toast.LENGTH_LONG).show()
+
+        }catch (e: FileNotFoundException){
+            e.printStackTrace()
+        }catch (e: DocumentException){
+            e.printStackTrace()
+        }
+    }
+    //FUNCION PARA OBTENER LOS DATOS PARA EL REPORTE
+    private fun getReporte(): ArrayList<DatosReporteJSON> {
+        val base = bd!!.writableDatabase
+        try {
+            val cursor = base.rawQuery("SELECT *  FROM reporteTemp", null)
+            val lista = ArrayList<DatosReporteJSON>()
+            if (cursor.count > 0) {
+                cursor.moveToFirst()
+                do {
+                    val detalle = DatosReporteJSON(
+                        cursor.getString(0),
+                        cursor.getString(1),
+                        cursor.getFloat(2)
+                    )
+                    lista.add(detalle)
+                } while (cursor.moveToNext())
+                cursor.close()
+            }
+            return lista
+        } catch (e: Exception) {
+            throw Exception(e.message)
+        } finally {
+            base!!.close()
+        }
+
+    }
 }

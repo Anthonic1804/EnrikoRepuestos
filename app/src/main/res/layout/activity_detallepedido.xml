@@ -77,7 +77,9 @@
                     android:id="@+id/lyCliente"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_margin="16dp"
+                    android:layout_marginTop="8dp"
+                    android:layout_marginStart="16dp"
+                    android:layout_marginEnd="16dp"
                     style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
                     android:hint="NOMBRE DEL CLIENTE"
                     app:layout_constraintEnd_toEndOf="parent"
@@ -89,7 +91,7 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:inputType="text"
-                        android:textSize="18sp"
+                        android:textSize="16sp"
                         android:focusable="false"
                         android:clickable="false"
                         android:textColor="@color/colorHint"/>
@@ -140,13 +142,13 @@
                     android:id="@+id/lyFormatos"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:orientation="horizontal"
+                    android:layout_marginTop="30dp"
                     android:layout_marginStart="16dp"
                     android:layout_marginEnd="16dp"
-                    android:layout_marginTop="8dp"
+                    android:orientation="horizontal"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toBottomOf="@+id/sinSucursal">
+                    app:layout_constraintTop_toBottomOf="@+id/tvsucursal">
 
                     <LinearLayout
                         android:layout_width="match_parent"
@@ -161,24 +163,14 @@
                             android:text="TIPO DE ENVIO"
                             android:textColor="@color/colordark"
                             android:textSize="18sp"
-                            android:textStyle="bold"/>
+                            android:textStyle="bold" />
 
                         <LinearLayout
                             android:layout_width="match_parent"
                             android:layout_height="match_parent"
-                            android:orientation="vertical"
+                            android:layout_marginStart="8dp"
                             android:layout_marginEnd="24dp"
-                            android:layout_marginStart="8dp">
-
-                            <Switch
-                                android:id="@+id/swcaes"
-                                android:layout_width="match_parent"
-                                android:layout_height="wrap_content"
-                                android:layout_marginTop="8dp"
-                                android:text="ENCOMIENDA  "
-                                android:textStyle="bold"
-                                android:thumb="@drawable/thumb"
-                                android:track="@drawable/track"/>
+                            android:orientation="vertical">
 
                             <Switch
                                 android:id="@+id/swruta"
@@ -188,10 +180,21 @@
                                 android:text="RUTA  "
                                 android:textStyle="bold"
                                 android:thumb="@drawable/thumb"
-                                android:track="@drawable/track"/>
+                                android:track="@drawable/track" />
+
+                            <Switch
+                                android:id="@+id/swcaes"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:layout_marginTop="8dp"
+                                android:text="ENCOMIENDA  "
+                                android:textStyle="bold"
+                                android:thumb="@drawable/thumb"
+                                android:track="@drawable/track" />
                         </LinearLayout>
 
                     </LinearLayout>
+
                     <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="match_parent"
@@ -202,9 +205,37 @@
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:text="DOCUMENTO"
+                            android:textColor="@color/colordark"
                             android:textSize="18sp"
-                            android:textStyle="bold"
-                            android:textColor="@color/colordark"/>
+                            android:textStyle="bold" />
+
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            android:layout_marginStart="8dp"
+                            android:layout_marginEnd="24dp"
+                            android:orientation="vertical">
+
+                            <Switch
+                                android:id="@+id/swFactura"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:layout_marginTop="8dp"
+                                android:text="FACTURA  "
+                                android:textStyle="bold"
+                                android:thumb="@drawable/thumb"
+                                android:track="@drawable/track" />
+
+                            <Switch
+                                android:id="@+id/swCredito"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:layout_marginTop="8dp"
+                                android:text="CREDITO FISCAL  "
+                                android:textStyle="bold"
+                                android:thumb="@drawable/thumb"
+                                android:track="@drawable/track" />
+                        </LinearLayout>
 
                     </LinearLayout>
 
@@ -215,7 +246,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginStart="16dp"
-                    android:layout_marginTop="8dp"
+                    android:layout_marginTop="16dp"
                     android:text="DETALLE DEL PEDIDO"
                     android:textAlignment="viewStart"
                     android:textColor="@color/colordark"
@@ -249,7 +280,6 @@
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintHorizontal_bias="1.0"
                     app:layout_constraintStart_toEndOf="@+id/textView18"
-                    app:layout_constraintTop_toBottomOf="@+id/swruta"
                     app:layout_constraintVertical_bias="0.876"
                     app:srcCompat="@drawable/ic_baseline_add_box_24" />
 

@@ -15,6 +15,7 @@ data class CabezeraPedidoSend (
     var CodigoSucursal: String?,
     var NombreSucursal: String?,
     var TipoEnvio: Int?,
+    var TipoDocumento:String?,
     var Idvendedor:Int?,
     var Vendedor:String?,
     var detalle:ArrayList<DetallePedido>?

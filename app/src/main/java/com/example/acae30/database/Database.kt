@@ -42,6 +42,7 @@ class Database(context: Context) :
         db.execSQL(tbl!!.Token()) // CREANDO LA TABLA TOKEN
         db.execSQL(tbl!!.VentasTemp())//CREANDO LA TABLA VENTAS TEMP
         db.execSQL(tbl!!.VentasDetalleTemp())//CREADNDO LA TABLA VENTAS DETALLE TEMP
+        db.execSQL(tbl!!.ReporteTemp()) //TABLA TEMPORAL PARA EL REPORTE DE VENTAS
 
     } //funcion que crea la base de datos y sus tablas
 

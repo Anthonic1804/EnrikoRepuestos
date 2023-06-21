@@ -54,15 +54,19 @@ class Detallepedido : AppCompatActivity() {
     //AGREGANDO EL SPINNER DE SUCURSALES
     private var spSucursal: Spinner? = null
     private var sinSucursal: TextView? = null
-    private var swcaes: Switch? = null
-    private var swruta: Switch? = null
     private var idSucursal: Int? = null
     private var codigoSucursal: Int? = null
     private var sucursalName: String = ""
-    private var tipoEnvio: Int? = null
     private var nombreSucursalPedido: String? = ""
     private var pedidoEnviado: Boolean = false
     private var getSucursalPosition: Int? = null
+    private lateinit var exportar : Button
+    private lateinit var swcaes: Switch
+    private lateinit var swruta: Switch
+    private var tipoEnvio: Int? = null
+    private lateinit var swFactura: Switch
+    private lateinit var  swCredito: Switch
+    private var tipoDocumento: String = "FC"
 
 
     private var btbuscarProducto: ImageButton? = null
@@ -94,7 +98,6 @@ class Detallepedido : AppCompatActivity() {
     private var codigo = ""
     private var idapi = 0
 
-    private lateinit var exportar : Button
     private val requestPermissionLauncher = registerForActivityResult(
         ActivityResultContracts.RequestPermission()
     ){
@@ -129,7 +132,7 @@ class Detallepedido : AppCompatActivity() {
         idapi = intento.getIntExtra("idapi", 0)
         from = intento.getStringExtra("from").toString()
         txtfecha_creacion = findViewById(R1.id.fecha_creacion)
-        txtcliente = findViewById(R1.id.txtcliente)
+        txtcliente = findViewById(R1.id.txtCliente)
         btbuscarProducto = findViewById(R1.id.imgbtnadd)
         lienzo = findViewById(R1.id.lienzo)
         funciones = Funciones()
@@ -150,34 +153,61 @@ class Detallepedido : AppCompatActivity() {
         //FUNCION PARA OBTENER LA INFORMACION DEL PEDIDO
         getTipoEnvio(idpedido)
 
-        //FUNCIONES AGRAGADAS PARA LOS CONTROLES DE ENVIO
+        //FUNCIONES AGRAGADAS PARA LOS CONTROLES DE ENVIO Y DOCUMENTOS
         swcaes = findViewById(R1.id.swcaes)
         swruta = findViewById(R1.id.swruta)
+        swFactura = findViewById(R1.id.swFactura)
+        swCredito = findViewById(R1.id.swCredito)
 
-        //ACTIVADO EL TIPO DE PEDIDO CORRESPONDIENTE
-        if(tipoEnvio == 0){
-            swruta!!.isChecked = true
+        //ACTIVADO EL TIPO DE ENVIO CORRESPONDIENTE
+        if(tipoEnvio==0){
+            swruta.isChecked = true
         }else{
-            swcaes!!.isChecked = true
+            swcaes.isChecked = true
         }
 
-        swcaes!!.setOnCheckedChangeListener { _, isChecked ->
+        //ACTIVANDO EL TIPO DE DOCUMENTO
+        if(tipoDocumento == "CF"){
+            swCredito.isChecked = true
+        } else {
+            swFactura.isChecked = true
+        }
+
+        //LOGICA DE TIPO DE ENVIO
+        swcaes.setOnCheckedChangeListener { _, isChecked ->
             if (isChecked) {
-                swruta!!.isChecked = false
+                swruta.isChecked = false
                 updateTipoPedido(1, idpedido)
             } else {
-                swruta!!.isChecked = true
-                updateTipoPedido(0, idpedido)
+                swruta.isChecked = true
             }
         }
 
-        swruta!!.setOnCheckedChangeListener { _, isChecked ->
+        swruta.setOnCheckedChangeListener { _, isChecked ->
             if (isChecked) {
-                swcaes!!.isChecked = false
+                swcaes.isChecked = false
                 updateTipoPedido(0, idpedido)
             } else {
-                swcaes!!.isChecked = true
-                updateTipoPedido(1, idpedido)
+                swcaes.isChecked = true
+            }
+        }
+
+        //LOGICA DE TIPO DE DOCUMENTO
+        swFactura.setOnCheckedChangeListener { _, isChecked ->
+            if(isChecked){
+                swCredito.isChecked = false
+                updateTipoDocumento("FC", idpedido)
+            }else{
+                swCredito.isChecked = true
+            }
+        }
+
+        swCredito.setOnCheckedChangeListener { _, isChecked ->
+            if(isChecked){
+                swFactura.isChecked = false
+                updateTipoDocumento("CF", idpedido)
+            }else{
+                swFactura.isChecked = true
             }
         }
 
@@ -445,7 +475,8 @@ class Detallepedido : AppCompatActivity() {
                     val data = dataPedidos(
                         getTipo.getInt(5) == 1,
                         getTipo.getString(14),
-                        getTipo.getInt(15)
+                        getTipo.getInt(16),
+                        getTipo.getString(15)
                     )
                     getPedidoData.add(data)
                 }while (getTipo.moveToNext())
@@ -455,6 +486,7 @@ class Detallepedido : AppCompatActivity() {
                 pedidoEnviado = data.envioPedido!!
                 nombreSucursalPedido = data.nombreSucursalPedido!!.toString()
                 tipoEnvio = data.tipoPedido!!.toInt()
+                tipoDocumento = data.tipoDocumento!!.toString()
             }
             getTipo.close()
         }catch (e: Exception) {
@@ -601,11 +633,13 @@ class Detallepedido : AppCompatActivity() {
 
                                 //DESHABILITANDO LOS TIPOS DE ENVIO
                                 if(pedidoEnviado == true){
-                                    swcaes!!.isEnabled = false
-                                    swruta!!.isEnabled = false
+                                    swcaes.isEnabled = false
+                                    swruta.isEnabled = false
+                                    swFactura.isEnabled = false
+                                    swCredito.isEnabled = false
                                 }else{
-                                    swcaes!!.isEnabled = true
-                                    swruta!!.isEnabled = true
+                                    swcaes.isEnabled = true
+                                    swruta.isEnabled = true
                                 }
 
                             } else {
@@ -852,7 +886,8 @@ class Detallepedido : AppCompatActivity() {
                     pedido.getInt(12),
                     pedido.getString(13),
                     pedido.getString(14),
-                    pedido.getInt(15),
+                    pedido.getInt(16),
+                    pedido.getString(15),
                     0,
                     "",
                     null
@@ -1002,6 +1037,18 @@ class Detallepedido : AppCompatActivity() {
         }
     }
 
+    //FUNCION PARA ACTUALIZAR EL TIPO DE DOCUMENTO SELECCIONADO
+    private fun updateTipoDocumento(tipoDocumento:String, idpedido: Int){
+        val data = db!!.writableDatabase
+        try {
+            data.execSQL("UPDATE pedidos SET tipo_documento='$tipoDocumento' WHERE id=$idpedido")
+        }catch (e: Exception){
+            throw Exception(e.message)
+        }finally {
+            data.close()
+        }
+    }
+
     private fun ConfirmarDetallePedido(): Int {
         val bd = db!!.writableDatabase
         var cantidadDetallepedido = 0.toInt()
@@ -1060,6 +1107,7 @@ class Detallepedido : AppCompatActivity() {
         json.addProperty("CodigoSucursal", pedido.CodigoSucursal)
         json.addProperty("NombreSucursal", pedido.NombreSucursal)
         json.addProperty("TipoEnvio", pedido.TipoEnvio)
+        json.addProperty("Tipo_documento_app", pedido.TipoDocumento)
         json.addProperty("Idvendedor", pedido.Idvendedor)
         json.addProperty("Vendedor", pedido.Vendedor)
         json.addProperty("Idapp", idvisita_v)
@@ -1120,7 +1168,7 @@ class Detallepedido : AppCompatActivity() {
     }
 
 
-    @RequiresApi(Build.VERSION_CODES.O)
+    //FUNCION PARA VERIFICAR PERMISOS DE CREACION DE DIRECTORIO Y DOCUMENTOS
     private fun verificarPermisos(view: View) {
         when{
             ContextCompat.checkSelfPermission(
@@ -1144,7 +1192,8 @@ class Detallepedido : AppCompatActivity() {
             }
         }
     }
-    @RequiresApi(Build.VERSION_CODES.O)
+
+    //FUNCION PARA GENERAR EL REPORTE EN PDF
     private fun generarPDF(nombreCliente : String, nombreVendedor: String) {
         try {
             val carpeta = "/pedidospdf"
