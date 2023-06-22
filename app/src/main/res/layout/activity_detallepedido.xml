@@ -329,47 +329,39 @@
 
                 <LinearLayout
                     android:id="@+id/layout_buttons"
-                    android:layout_width="wrap_content"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="10dp"
+                    android:layout_marginTop="8dp"
+                    android:layout_marginStart="16dp"
+                    android:layout_marginEnd="16dp"
                     android:gravity="center"
                     android:orientation="horizontal"
-                    android:paddingLeft="16dp"
-                    android:paddingRight="16dp"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toBottomOf="@+id/textView19"
-                    tools:ignore="MissingConstraints">
+                    app:layout_constraintTop_toBottomOf="@+id/textView19">
 
                     <Button
                         android:id="@+id/btnenviar"
-                        android:layout_width="175dp"
+                        android:layout_width="match_parent"
                         android:layout_height="wrap_content"
+                        android:layout_weight="1"
                         android:background="@drawable/border_btnactualizar"
                         android:text="ENVIAR"
                         android:textAlignment="center"
                         android:textColor="@color/colorAccent"
-                        android:textStyle="bold"
-                        app:layout_constraintEnd_toEndOf="parent"
-                        app:layout_constraintHorizontal_bias="1.0"
-                        app:layout_constraintStart_toStartOf="parent"
-                        app:layout_constraintTop_toBottomOf="@+id/textView19" />
+                        android:textStyle="bold"/>
 
                     <Button
                         android:id="@+id/btnguardar"
-                        android:layout_width="175dp"
+                        android:layout_width="match_parent"
                         android:layout_height="wrap_content"
+                        android:layout_weight="1"
                         android:layout_marginStart="10dp"
-                        android:layout_marginTop="0dp"
                         android:background="@drawable/border_btnenviar"
                         android:text="ENVIAR MÁS TARDE"
                         android:textAlignment="center"
                         android:textColor="@color/colorAccent"
-                        android:textStyle="bold"
-                        app:layout_constraintEnd_toEndOf="parent"
-                        app:layout_constraintHorizontal_bias="0.0"
-                        app:layout_constraintStart_toStartOf="parent"
-                        app:layout_constraintTop_toBottomOf="@+id/btnenviar" />
+                        android:textStyle="bold" />
 
                 </LinearLayout>
 

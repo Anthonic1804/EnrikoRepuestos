@@ -236,7 +236,7 @@ class firmarPagare : AppCompatActivity() {
     }
 
     fun atras(){
-        val intent = Intent(this, verPagare::class.java)
+        val intent = Intent(this, ClientesDetalle::class.java)
         intent.putExtra("idcliente", idcliente)
         startActivity(intent)
         finish()
