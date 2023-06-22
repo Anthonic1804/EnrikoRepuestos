@@ -1065,7 +1065,7 @@ class Pedido : AppCompatActivity() {
                                         cargarPedidos(res, view)
                                     } else {
                                         runOnUiThread {
-                                            Toast.makeText(this@Pedido, "NO SE ENCONTRARON PEDIDOS ENVIADOS 1", Toast.LENGTH_LONG).show()
+                                            Toast.makeText(this@Pedido, "NO SE ENCONTRARON PEDIDOS DE ESTE DIA", Toast.LENGTH_LONG).show()
                                         }
                                     }
                                 } catch (e: Exception) {
