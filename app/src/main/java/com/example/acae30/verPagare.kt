@@ -50,26 +50,34 @@ class verPagare : AppCompatActivity() {
             .format(DateTimeFormatter.ofPattern("dd MMM yyyy"))
 
         //CALCULANDO LA FECHA DE VENCIMIENTO DE ACUERDO AL PLAZO DADO EN EL CREDITO.
-        //val fechaVencimiento = LocalDate.now().plusDays(plazo).format(DateTimeFormatter.ofPattern("dd MMM yyyy"))
+        val fechaVencimiento = LocalDate.now().plusDays(plazo).format(DateTimeFormatter.ofPattern("dd MMM yyyy"))
 
         //ASIGNADO PORCENTAJES DE INTERES SEGUN TABLA PROPORCIONADA POR EL CLIENTE
-        porcentaje = when(limiteCredito){
+        /*porcentaje = when(limiteCredito){
             in 1.00..4380.00 -> 6.9f
             in 4381.00..8760.00 -> 4.5f
             in 8761.00..14965.00 -> 3.0f
             else -> 2.1f
+        }*/
+
+        //NUEVOS PORCENJES PROPORCIONADOS POR FERRETERIA EL REY
+        //MODIFICACION 06-10-2023
+
+        porcentaje = when(limiteCredito){
+            in 1.00 .. 4380.00 -> 6.8f
+            else -> 2.4f
         }
 
         textPagare.isEnabled = false
-        textPagare.setText("Por $ ${String.format("%.2f", limiteCredito)}; PAGARÉ  en forma incondicional a la ordel del señor: ARMANDO ANTONIO" +
+        textPagare.setText("Por $ ${String.format("%.2f", limiteCredito)}; PAGARÉ SIN PROTESTO  en forma incondicional a la ordel del señor: ARMANDO ANTONIO" +
                 " LOPEZ VIERA: con Documento Único de Identidad número: 01664366-2, propietario de " +
                 "AGROFERRETERIA EL REY Y FORJADOS E INSERTOS EL SALVADOR, en cualquiera de sus " +
                 "sucursales, en la ciudad de La Unión, la cantidad de $ ${String.format("%.2f", limiteCredito)} DÓLARES DE LOS " +
                 "ESTADOS UNIDOS DE AMÉRICA, más el interés convencional del $porcentaje por ciento mensual, " +
-                "teniendo como fecha de vencimiento para el pago de la deuda, el día ____ de ______ del " +
-                " _____; calculados a partir de la fecha de suscripción del presente documento y en " +
+                "teniendo como fecha de vencimiento para el pago de la deuda, el día $fechaVencimiento," +
+                " calculados a partir de la fecha de suscripción del presente documento y en " +
                 "caso que no fueren cubiertos el capital más los interés a su vencimiento, pagaré además a partir de " +
-                "esta última fecha, el interés moratorio del ________________. El tipo de interés " +
+                "esta última fecha. El tipo de interés " +
                 "quedara sujeto a aumento o disminución de acuerdo a las fluctuaciones del mercado. Para los " +
                 "efectos legales de esta obligación mercantil, tomamos como domicilio especial la Ciudad de La " +
                 "Unión, y en caso de acción judicial renuncio al derecho de apelar del decreto de embargo, sentencia " +
