@@ -208,7 +208,10 @@ class Clientes : AppCompatActivity() {
         val lista = ArrayList<Cliente>()
         try {
 
-            val consulta = base.rawQuery("SELECT * FROM Clientes WHERE Id IN (SELECT docid FROM virtualcliente WHERE virtualcliente MATCH '$dato') LIMIT 50", null)
+            //val consulta = base.rawQuery("SELECT * FROM Clientes WHERE Id IN (SELECT docid FROM virtualcliente WHERE virtualcliente MATCH '$dato') LIMIT 50", null)
+
+            //CAMBIO DE CONSULTA 07-10-2023
+            val consulta = base.rawQuery("SELECT * FROM Clientes WHERE Cliente LIKE '%$dato%'", null)
 
             var i = 0
             if (consulta.count > 0) {
