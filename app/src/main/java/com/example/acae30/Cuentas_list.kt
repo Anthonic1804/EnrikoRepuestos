@@ -174,10 +174,13 @@ class Cuentas_list : AppCompatActivity() {
         val base = bd!!.readableDatabase
         val lista = ArrayList<Cliente>()
         try {
-            val consulta = base.rawQuery(
+            /*val consulta = base.rawQuery(
                 "SELECT * FROM Clientes WHERE Id IN (SELECT docid FROM virtualcliente WHERE virtualcliente MATCH '$dato') LIMIT 30",
                 null
-            )
+            )*/
+
+            val consulta = base.rawQuery("SELECT * FROM Clientes WHERE cliente LIKE '%$dato%'", null)
+
             if (consulta.count > 0) {
                 consulta.moveToFirst()
                 do {

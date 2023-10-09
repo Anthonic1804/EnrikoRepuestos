@@ -123,9 +123,13 @@ class Pedido : AppCompatActivity() {
         funciones = Funciones()
         bd = Database(this)
         reciclado = findViewById(R.id.recicler)
-        val list_temp = ArrayList<Pedidos>()
 
-        ShowList(list_temp)
+        //ELIMINADO POR SOBRECARGA
+        //CARGANDO EL CONTENIDO DEL PEDIDO EN UN SEGUNDO HILO
+        /*val listPedidos = ArrayList<Pedidos>()
+        this@Pedido.lifecycleScope.launch {
+            ShowList(listPedidos)
+        }*/
 
         lienzo = findViewById(R.id.lienzo)
         findViewById<FloatingActionButton>(R.id.fab).setOnClickListener { view ->
@@ -180,8 +184,6 @@ class Pedido : AppCompatActivity() {
                                 visitas.getInt(12) == 1,
                                 visitas.getInt(13) == 1
                             )
-
-                            print("Nombre del cliente 0: " + datos.Nombre_cliente)
 
                             list.add(datos)
 

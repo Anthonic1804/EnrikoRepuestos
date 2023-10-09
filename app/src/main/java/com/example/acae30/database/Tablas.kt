@@ -70,14 +70,14 @@ class Tablas {
     }
 
     //CREANDO TABLA VIRTUAL CLIENTES
-    fun virtualCliente(): String{
+    /*fun virtualCliente(): String{
         val virtualCliente = "CREATE VIRTUAL TABLE virtualcliente USING FTS4 (" +
                 "CONTENT='clientes'," +
                 "Cliente" +
         ") ";
 
         return virtualCliente
-    }
+    }*/
 
     fun Inventario(): String {
         val inventario = "CREATE TABLE inventario (" +
@@ -347,14 +347,14 @@ class Tablas {
     }
 
     //TRIGGER PARA LA INSERCION DE DATOS EN TABLA FTS4 VIRTUAL CLIENTE
-    fun triggerClienteVirtual(): String{
+   /* fun triggerClienteVirtual(): String{
 
         val triggerCliente = "CREATE TRIGGER triggerClienteVirtual AFTER INSERT ON clientes BEGIN" +
                 "  INSERT INTO virtualcliente(virtualcliente) VALUES ('rebuild');" +
                 "END;";
 
         return triggerCliente
-    }
+    }*/
 
     //TRIGGER PARA LA INSERCION DE DATOS EN TABLA FTS4 VIRTUAL INVENTARIO
     fun triggerInventarioVirtual(): String{

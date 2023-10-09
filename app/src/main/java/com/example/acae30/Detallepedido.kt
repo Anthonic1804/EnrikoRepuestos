@@ -20,6 +20,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
+import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.acae30.database.Database
@@ -55,7 +56,7 @@ class Detallepedido : AppCompatActivity() {
     private var spSucursal: Spinner? = null
     private var sinSucursal: TextView? = null
     private var idSucursal: Int? = null
-    private var codigoSucursal: Int? = null
+    private var codigoSucursal: String? = null
     private var sucursalName: String = ""
     private var nombreSucursalPedido: String? = ""
     private var pedidoEnviado: Boolean = false
@@ -287,7 +288,7 @@ class Detallepedido : AppCompatActivity() {
             AlertaEliminar()
         }
 
-        validarDatos()
+            validarDatos()
 
         btnenviar!!.setOnClickListener {
             if (idpedido > 0) {
@@ -497,6 +498,8 @@ class Detallepedido : AppCompatActivity() {
     }
 
     //ACTUALIZANDO LA SUCURSAL DEL PEDIDO
+    //CAMBIO EN EL TIPO DE DATO PARA EL CODIGO DE LA SUCURSAL, SE CAMBIO A STRING
+    //09/10/2023
     private fun updatePedidoSucursal(idCliente:Int, nombreSucursal: String, idpedidos: Int){
         val db = db!!.writableDatabase
         try {
@@ -516,9 +519,9 @@ class Detallepedido : AppCompatActivity() {
 
             for (data in listaSucursales) {
                 idSucursal = data.idSucursa.toInt()
-                codigoSucursal = data.codigoSucursal.toInt()
+                codigoSucursal = data.codigoSucursal
             }
-            db!!.execSQL("UPDATE pedidos set id_sucursal=$idSucursal, codigo_sucursal=$codigoSucursal, nombre_sucursal='$nombreSucursal' WHERE id=$idpedidos")
+            db!!.execSQL("UPDATE pedidos set id_sucursal=$idSucursal, codigo_sucursal='$codigoSucursal', nombre_sucursal='$nombreSucursal' WHERE id=$idpedidos")
             dataSucursal.close()
 
         }catch (e: Exception) {
@@ -596,98 +599,98 @@ class Detallepedido : AppCompatActivity() {
             txtcliente!!.isEnabled = false
             txtcliente!!.text = nombre
             GlobalScope.launch(Dispatchers.IO) {
-                //this@Detallepedido.lifecycleScope.launch {
+                this@Detallepedido.lifecycleScope.launch {
+                    try {
+                        val lista = getPedido(idpedido)
+                        if (lista != null && lista.size > 0) {
+                            if (cabezera != null) {
+                                if (cabezera!!.Cerrado == 1) {
+                                    //  btbuscar!!.visibility = View.GONE
+                                    txtcliente!!.isEnabled = false
+                                    btbuscarProducto!!.visibility = View.GONE
+                                    btnenviar!!.visibility = View.GONE
 
-                try {
-                    val lista = getPedido(idpedido)
-                    if (lista != null && lista.size > 0) {
-                        if (cabezera != null) {
-                            if (cabezera!!.Cerrado == 1) {
-                              //  btbuscar!!.visibility = View.GONE
-                                txtcliente!!.isEnabled = false
-                                btbuscarProducto!!.visibility = View.GONE
-                                btnenviar!!.visibility = View.GONE
+                                    exportar.visibility =
+                                        View.GONE //DESHABILITANDO EL BOTON EXPORTAR - FERRETERIA EL REY
 
-                                exportar.visibility = View.GONE //DESHABILITANDO EL BOTON EXPORTAR - FERRETERIA EL REY
+                                    val visitaAbierta = getEstadoVisita()
 
-                                val visitaAbierta = getEstadoVisita()
+                                    if (visitaAbierta == 0 && !cabezera!!.Enviado) {
+                                        //RUTINA PARA SOLO ENVIAR EL PEDIDO
+                                        btnenviar!!.visibility = View.VISIBLE
+                                        exportar.visibility = View.GONE
+                                    }
 
-                                if (visitaAbierta == 0 && !cabezera!!.Enviado) {
-                                    //RUTINA PARA SOLO ENVIAR EL PEDIDO
+                                    btnguardar!!.visibility = View.GONE
+                                    btneliminar!!.visibility = View.GONE
+
+                                    //MOSTRANDO EL NOMBRE DE LA SUCURSAL
+                                    if (nombreSucursalPedido != "") {
+                                        sinSucursal!!.text = nombreSucursalPedido
+                                    } else {
+                                        sinSucursal!!.text = "NO TIENE SUCURSAL REGISTRADA"
+                                    }
+                                    //DESHABILITANDO EL SPINNER DE SUCURSALES
+                                    spSucursal!!.visibility = View.GONE
+
+                                    //DESHABILITANDO LOS TIPOS DE ENVIO
+                                    if (pedidoEnviado == true) {
+                                        swcaes.isEnabled = false
+                                        swruta.isEnabled = false
+                                        swFactura.isEnabled = false
+                                        swCredito.isEnabled = false
+                                    } else {
+                                        swcaes.isEnabled = true
+                                        swruta.isEnabled = true
+                                    }
+
+                                } else {
+
+                                    //  btbuscar!!.visibility = View.VISIBLE
+
+                                    // btbuscar!!.visibility = View.GONE
+                                    //  btbuscar!!.visibility = View.GONE
+                                    txtcliente!!.isEnabled = false
+                                    btbuscarProducto!!.visibility = View.VISIBLE
                                     btnenviar!!.visibility = View.VISIBLE
+                                    btnguardar!!.visibility = View.VISIBLE
+                                    btneliminar!!.visibility = View.VISIBLE
                                     exportar.visibility = View.GONE
                                 }
-
-                                btnguardar!!.visibility = View.GONE
-                                btneliminar!!.visibility = View.GONE
-
-                                //MOSTRANDO EL NOMBRE DE LA SUCURSAL
-                                if(nombreSucursalPedido != ""){
-                                    sinSucursal!!.text = nombreSucursalPedido
-                                }
-                                else{
-                                    sinSucursal!!.text = "NO TIENE SUCURSAL REGISTRADA"
-                                }
-                                //DESHABILITANDO EL SPINNER DE SUCURSALES
-                                spSucursal!!.visibility = View.GONE
-
-                                //DESHABILITANDO LOS TIPOS DE ENVIO
-                                if(pedidoEnviado == true){
-                                    swcaes.isEnabled = false
-                                    swruta.isEnabled = false
-                                    swFactura.isEnabled = false
-                                    swCredito.isEnabled = false
-                                }else{
-                                    swcaes.isEnabled = true
-                                    swruta.isEnabled = true
-                                }
-
-                            } else {
-
-                              //  btbuscar!!.visibility = View.VISIBLE
-
-                               // btbuscar!!.visibility = View.GONE
-                              //  btbuscar!!.visibility = View.GONE
-                                txtcliente!!.isEnabled = false
-                                btbuscarProducto!!.visibility = View.VISIBLE
-                                btnenviar!!.visibility = View.VISIBLE
-                                btnguardar!!.visibility = View.VISIBLE
-                                btneliminar!!.visibility = View.VISIBLE
-                                exportar.visibility = View.GONE
                             }
+                            ArmarLista(lista)
+                        } else if (from == "visita") {
+
+                            //RUTINA PARA AGREGAR NUEVO PEDIDO
+
+                            //  btbuscar!!.visibility = View.VISIBLE
+
+                            //  btbuscar!!.visibility = View.GONE
+                            //  btbuscar!!.visibility = View.GONE
+                            txtcliente!!.isEnabled = false
+                            btbuscarProducto!!.visibility = View.VISIBLE
+                            btnenviar!!.visibility = View.VISIBLE
+                            btnguardar!!.visibility = View.VISIBLE
+                            btneliminar!!.visibility = View.VISIBLE
+                            exportar.visibility = View.GONE
+                        } else {
+                            throw Exception("Error al encontrar el pedido")
                         }
-                        ArmarLista(lista)
-                    } else if (from == "visita") {
 
-                        //RUTINA PARA AGREGAR NUEVO PEDIDO
-
-                      //  btbuscar!!.visibility = View.VISIBLE
-
-                      //  btbuscar!!.visibility = View.GONE
-                      //  btbuscar!!.visibility = View.GONE
-                        txtcliente!!.isEnabled = false
-                        btbuscarProducto!!.visibility = View.VISIBLE
-                        btnenviar!!.visibility = View.VISIBLE
-                        btnguardar!!.visibility = View.VISIBLE
-                        btneliminar!!.visibility = View.VISIBLE
-                        exportar.visibility = View.GONE
-                    } else {
-                        throw Exception("Error al encontrar el pedido")
+                        if (cabezera!!.Cerrado == 1) {
+                            btnatras!!.visibility = View.VISIBLE
+                        } else {
+                            btnatras!!.visibility = View.GONE
+                        }
+                    } catch (e: Exception) {
+                        val alert: Snackbar = Snackbar.make(
+                            lienzo!!,
+                            e.message.toString(),
+                            Snackbar.LENGTH_LONG
+                        )
+                        alert.view.setBackgroundColor(resources.getColor(R1.color.moderado))
+                        alert.show()
                     }
-
-                    if (cabezera!!.Cerrado == 1) {
-                        btnatras!!.visibility = View.VISIBLE
-                    } else {
-                        btnatras!!.visibility = View.GONE
-                    }
-                } catch (e: Exception) {
-                    val alert: Snackbar = Snackbar.make(
-                        lienzo!!,
-                        e.message.toString(),
-                        Snackbar.LENGTH_LONG
-                    )
-                    alert.view.setBackgroundColor(resources.getColor(R1.color.moderado))
-                    alert.show()
                 }
             }
 
