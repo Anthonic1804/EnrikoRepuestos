@@ -291,6 +291,9 @@ class Detallepedido : AppCompatActivity() {
             validarDatos()
 
         btnenviar!!.setOnClickListener {
+
+            btnenviar!!.isEnabled = false
+
             if (idpedido > 0) {
                 if (funciones!!.isNetworkConneted(this)) {
                     GlobalScope.launch(Dispatchers.IO) {
