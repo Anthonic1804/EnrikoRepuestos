@@ -730,9 +730,15 @@ class Visita : AppCompatActivity() {
         lifecycleScope.cancel()
     }
 
+    /*
+     * CAMBIANDO EL TIPO DE TIMESTAMP PARA LA CREACION DEL PEDIDO
+     * MODIFICACION 20/11/2023
+     * ADOLFO HERNANDEZ
+     * */
     private fun getDateTime(): String? {
         val dateFormat = SimpleDateFormat(
             "yyyy-MM-dd", Locale.getDefault()
+        /*TIMESTAMP -> yyyy-MM-dd HH:mm:ss*/
         )
         val date = Date()
         return dateFormat.format(date)

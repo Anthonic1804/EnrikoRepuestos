@@ -118,6 +118,7 @@ class Tokens : AppCompatActivity() {
                     list.add(dataToken)
                 }while (cursor.moveToNext())
             }
+            cursor.close()
         }catch (e: Exception) {
             throw Exception(e.message)
         } finally {
@@ -186,7 +187,6 @@ class Tokens : AppCompatActivity() {
     }
 
     //VALIDANDO LA CARGA DE LOS EMPLEADOS
-    @OptIn(DelicateCoroutinesApi::class)
     private fun cargarEmpleados(){
         if (url != null) {
             if (funciones!!.isNetworkConneted(this)) {

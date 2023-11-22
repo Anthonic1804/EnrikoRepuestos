@@ -1,6 +1,7 @@
 package com.example.acae30.modelos.JSONmodels
 
 import com.example.acae30.modelos.DetallePedido
+import java.util.Date
 
 
 data class CabezeraPedidoSend (
@@ -18,6 +19,7 @@ data class CabezeraPedidoSend (
     var TipoDocumento:String?,
     var Idvendedor:Int?,
     var Vendedor:String?,
+    var fechaCreado: String?, /*AGREGADO PARA ENVIAR LA FECHA Y HORA DE CREACION DEL PEDIDO*/
     var detalle:ArrayList<DetallePedido>?
 
 )

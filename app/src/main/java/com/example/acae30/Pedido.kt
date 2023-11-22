@@ -721,6 +721,7 @@ class Pedido : AppCompatActivity() {
                     pedido.getString(15),
                     0,
                     "",
+                    pedido.getString(11),
                     null
 
                 )

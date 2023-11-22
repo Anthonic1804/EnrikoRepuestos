@@ -896,6 +896,7 @@ class Detallepedido : AppCompatActivity() {
                     pedido.getString(15),
                     0,
                     "",
+                    pedido.getString(11),
                     null
 
                 )
@@ -1116,6 +1117,7 @@ class Detallepedido : AppCompatActivity() {
         json.addProperty("Tipo_documento_app", pedido.TipoDocumento)
         json.addProperty("Idvendedor", pedido.Idvendedor)
         json.addProperty("Vendedor", pedido.Vendedor)
+        json.addProperty("fechaCreado", pedido.fechaCreado)
         json.addProperty("Idapp", idvisita_v)
         //se ordena la cabezera
         val detalle = JsonArray()
@@ -1143,6 +1145,7 @@ class Detallepedido : AppCompatActivity() {
             d.addProperty("Precio_editado", data.Precio_editado)
             d.addProperty("Idunidad", data.Idunidad)
             d.addProperty("Idtalla", data.Id_talla)
+            d.addProperty("fechaCreado", pedido.fechaCreado) /*ENVIANDO LA MISMA FECHA DEL PEDIDO*/
             detalle.add(d)
         }
         json.add("detalle", detalle)
