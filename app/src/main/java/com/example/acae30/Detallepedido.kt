@@ -99,6 +99,7 @@ class Detallepedido : AppCompatActivity() {
     private var codigo = ""
     private var idapi = 0
 
+
     private val requestPermissionLauncher = registerForActivityResult(
         ActivityResultContracts.RequestPermission()
     ){
@@ -954,6 +955,8 @@ class Detallepedido : AppCompatActivity() {
         try {
             val objecto = convertToJson(pedido, idpedido) //convertimos a json el objecto pedido
             val ruta: String = "http://$ip:$puerto/pedido" //ruta para enviar el pedido
+
+            //println("JSON GENERADO: /n $objecto")
             //val ruta="http://192.168.0.103:53272/pedido"
             val url = URL(ruta)
             with(url.openConnection() as HttpURLConnection) {
@@ -1010,10 +1013,10 @@ class Detallepedido : AppCompatActivity() {
                             throw Exception(e.message)
                         }
                     } //se obtiene la respuesta del servidor
-
                 } catch (e: Exception) {
                     throw Exception(e.message)
                 }
+
             }
         } catch (e: Exception) {
             throw Exception("Error: SEGUNDO No hay productos agregados al pedido.")
@@ -1083,6 +1086,8 @@ class Detallepedido : AppCompatActivity() {
 
         var idvisita_v = 0.toInt()
 
+        var horaProceso = funciones?.getFechaHoraProceso()
+
         val base = db!!.writableDatabase
         try {
             val cursor = base!!.rawQuery(
@@ -1117,7 +1122,8 @@ class Detallepedido : AppCompatActivity() {
         json.addProperty("Tipo_documento_app", pedido.TipoDocumento)
         json.addProperty("Idvendedor", pedido.Idvendedor)
         json.addProperty("Vendedor", pedido.Vendedor)
-        json.addProperty("fechaCreado", pedido.fechaCreado)
+        json.addProperty("fechaCreado", pedido.fechaCreado) /*ENVIANDO LA FECHA DESDE EL DISPOSITIVO MOVIL*/
+        json.addProperty("HoraProceso", horaProceso)/*ENVIANDO EL TIMESTAMP DE CREACION DEL PEDIDO*/
         json.addProperty("Idapp", idvisita_v)
         //se ordena la cabezera
         val detalle = JsonArray()
@@ -1145,7 +1151,7 @@ class Detallepedido : AppCompatActivity() {
             d.addProperty("Precio_editado", data.Precio_editado)
             d.addProperty("Idunidad", data.Idunidad)
             d.addProperty("Idtalla", data.Id_talla)
-            d.addProperty("fechaCreado", pedido.fechaCreado) /*ENVIANDO LA MISMA FECHA DEL PEDIDO*/
+            d.addProperty("FechaCreado", pedido.fechaCreado) /*ENVIANDO LA MISMA FECHA DEL PEDIDO DESDE EL CEL*/
             detalle.add(d)
         }
         json.add("detalle", detalle)

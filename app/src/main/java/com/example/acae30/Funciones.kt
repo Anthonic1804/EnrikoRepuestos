@@ -13,9 +13,21 @@ import android.widget.TextView
 import com.example.acae30.database.Database
 import com.example.acae30.modelos.Visitas
 import org.json.JSONObject
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 
 
 class Funciones {
+
+    fun getFechaHoraProceso(): String?{
+        val dateFormat = SimpleDateFormat(
+            "yyyy-MM-dd HH:mm:ss", Locale.getDefault()
+            /*TIMESTAMP -> yyyy-MM-dd HH:mm:ss*/
+        )
+        val date = Date()
+        return dateFormat.format(date)
+    }
 
     fun isNetworkConneted(context: Context): Boolean {
         val connectivityManager =
