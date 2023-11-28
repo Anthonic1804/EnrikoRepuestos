@@ -464,9 +464,14 @@ class Producto_agregar : AppCompatActivity() {
             var detalle = getPedidodetalle(idpedidodetalle!!)
             GlobalScope.launch(Dispatchers.IO) {
                 try {
+                    /*
+                        * COMENTADO YA QUE PROVOCA UN ERROR EN LA APP
+                        * AL PASAR EN SEGUNDO PLANO
+                        * */
+                    /*
                     runOnUiThread {
                         alert!!.Cargando()
-                    }
+                    }*/
                     val datos = datosProducto
                     val datosInvPrecios = listPrecios!!
 
@@ -605,9 +610,13 @@ class Producto_agregar : AppCompatActivity() {
 //                           //Totalizar(cantidad)
 //                       }
 
-                        runOnUiThread {
+                        /*
+                        * COMENTADO YA QUE PROVOCA UN ERROR EN LA APP
+                        * AL PASAR EN SEGUNDO PLANO
+                        * */
+                        /*runOnUiThread {
                             alert!!.dismisss()
-                        }
+                        }*/
                     } else {
                         throw Exception("No se Han encontrado los datos")
                     }
