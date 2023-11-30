@@ -60,6 +60,7 @@ class Clientes : AppCompatActivity() {
 
         //SETEA LA BUSQUEDA DEL SEARCHVIEW
         //SI HAY DATO ALMACENADO EN ESTE
+
         dSearch = preferences!!.getString("clienteBusqueda", "")
         if(dSearch != ""){
             busqueda!!.setQuery("$dSearch", true)
@@ -70,14 +71,14 @@ class Clientes : AppCompatActivity() {
     }
 
     private fun MostrarClientes() {
-        alert!!.Cargando()
+        //alert!!.Cargando()
         //GlobalScope.launch(Dispatchers.IO) {
         this@Clientes.lifecycleScope.launch {
             try {
                 val list: ArrayList<Cliente> = getClient()
                 MostrarLista(list)
             } catch (e: Exception) {
-                alert!!.dismisss()
+                //alert!!.dismisss()
                 Toast.makeText(this@Clientes, e.message, Toast.LENGTH_LONG).show()
             }
         }
@@ -176,13 +177,13 @@ class Clientes : AppCompatActivity() {
     }
 
 
-    private fun messageAsync(mensaje: String) {
+    /*private fun messageAsync(mensaje: String) {
         if (alert != null) {
             runOnUiThread {
                 alert!!.changeText(mensaje)
             }
         }
-    } //obtiene el listado de clientes
+    } //obtiene el listado de clientes*/
 
     private fun Busqueda() {
         busqueda!!.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
@@ -325,10 +326,10 @@ class Clientes : AppCompatActivity() {
                     }
                 }
                 recicle!!.adapter = adapter
-                alert!!.dismisss()
+                //alert!!.dismisss()
             }
         } catch (e: Exception) {
-            alert!!.dismisss()
+            //alert!!.dismisss()
             Toast.makeText(this@Clientes, e.message, Toast.LENGTH_LONG).show()
         }
     }
