@@ -256,7 +256,7 @@ class Tokens : AppCompatActivity() {
             }//termina de obtener los datos
         } catch (e: Exception) {
             alert!!.dismisss()
-            ShowAlert(e.message.toString())
+            //ShowAlert(e.message.toString())
         }
     }
 

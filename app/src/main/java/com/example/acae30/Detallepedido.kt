@@ -292,9 +292,8 @@ class Detallepedido : AppCompatActivity() {
             validarDatos()
 
         btnenviar!!.setOnClickListener {
-
-            btnenviar!!.isEnabled = false
-
+            enviarPedidoaServidor()
+        /*
             if (idpedido > 0) {
                 if (funciones!!.isNetworkConneted(this)) {
                     GlobalScope.launch(Dispatchers.IO) {
@@ -358,6 +357,7 @@ class Detallepedido : AppCompatActivity() {
                     alert.show()
                 } //valida conexion a internet
             }
+            */
         }//boton de enviar pedido
 
         btnguardar!!.setOnClickListener {
@@ -468,6 +468,72 @@ class Detallepedido : AppCompatActivity() {
         }
     }
 
+    //FUNCION PARA ENVIAR EL PEDIDO AL SERVIDOR
+    private fun enviarPedidoaServidor(){
+
+        if(ConfirmarDetallePedido() > 0){
+            alerta!!.pedidoEnviado()
+
+            CoroutineScope(Dispatchers.IO).launch {
+                if(funciones!!.isNetworkConneted(this@Detallepedido)){
+                    try {
+                        Timer().schedule(2300){
+                            val pedido = getPedidoSend(idpedido) //retorna el pedido
+
+                            pedido!!.Idvendedor = idvendedor
+
+                            pedido.Vendedor = vendedor//agregamos los datos del vendedor
+
+                            SendPedido(pedido, idpedido)//envia el pedido y actualiza el estado del pedido en el cel
+
+                            val visitaAbierta = getEstadoVisita()
+
+                            if (visitaAbierta == 1) {
+                                val intento = Intent(this@Detallepedido, Visita::class.java)
+                                intento.putExtra("id", idcliente)
+                                intento.putExtra("nombrecliente", nombre)
+                                intento.putExtra("idpedido", idpedido)
+                                intento.putExtra("visitaid", idvisita)
+                                intento.putExtra("codigo", codigo)
+                                intento.putExtra("idapi", idapi)
+                                startActivity(intento)
+                                finish()
+                            } else {
+                                val intento = Intent(this@Detallepedido, Pedido::class.java)
+                                startActivity(intento)
+                                finish()
+                            }
+
+                        }
+                    }catch (e: Exception){
+                        withContext(Dispatchers.Main){
+                            alerta!!.dismisss()
+
+                            val alert: Snackbar = Snackbar.make(lienzo!!, "ERROR AL ENVIAR EL PEDIDO", Snackbar.LENGTH_LONG)
+                            alert.view.setBackgroundColor(ContextCompat.getColor(this@Detallepedido, R1.color.moderado))
+                            alert.show()
+                        }
+                    }finally {
+                        withContext(Dispatchers.Main){
+                            alerta!!.dismisss()
+                        }
+                    }
+                }else{
+                    withContext(Dispatchers.Main){
+                        alerta!!.dismisss()
+
+                        val alert: Snackbar = Snackbar.make(lienzo!!, "NO TIENES CONEXION A INTERNET", Snackbar.LENGTH_LONG)
+                        alert.view.setBackgroundColor(ContextCompat.getColor(this@Detallepedido, R1.color.moderado))
+                        alert.show()
+                    }
+                }
+            }
+        }else{
+            val alert: Snackbar = Snackbar.make(lienzo!!, "ERROR: NO HAY PROUECTOS AGREGADOS AL PEDIDO", Snackbar.LENGTH_LONG)
+            alert.view.setBackgroundColor(ContextCompat.getColor(this@Detallepedido, R1.color.moderado))
+            alert.show()
+        }
+    }
     //OPTENIENDO INFORMACION DEL PEDIDO
     private fun getTipoEnvio(ipPedido: Int){
         val dataBase = db!!.readableDatabase
@@ -1028,6 +1094,7 @@ class Detallepedido : AppCompatActivity() {
         val bd = db!!.writableDatabase
         try {
             bd!!.execSQL("UPDATE pedidos set Id_pedido_sistema=$idservidor,Enviado=1,Cerrado=1 WHERE Id=$idpedido")
+            //bd!!.execSQL("UPDATE pedidos set Enviado=1,Cerrado=1 WHERE Id=$idpedido")
         } catch (e: Exception) {
             throw Exception(e.message)
         } finally {
