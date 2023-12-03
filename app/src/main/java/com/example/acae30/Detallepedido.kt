@@ -291,139 +291,69 @@ class Detallepedido : AppCompatActivity() {
 
             validarDatos()
 
+        //EVENTRO CLIC DEL BOTON ENVIAR
         btnenviar!!.setOnClickListener {
-            enviarPedidoaServidor()
-        /*
-            if (idpedido > 0) {
-                if (funciones!!.isNetworkConneted(this)) {
-                    GlobalScope.launch(Dispatchers.IO) {
-                        //this@Detallepedido.lifecycleScope.launch {
-                        try {
-                            runOnUiThread {
-                                alerta!!.pedidoEnviado()
-                            }
-                            Timer().schedule(2300){
-                                var pedido = getPedidoSend(idpedido) //retorna el pedido
-                                pedido!!.Idvendedor = idvendedor
-                                pedido.Vendedor = vendedor
-                                //agregamos los datos del vendedor
-                                SendPedido(pedido, idpedido)
-                                //envia el pedido y actualiza el estado del pedido en el cel
-                                runOnUiThread {
-                                    alerta!!.dismisss()
-                                    var visitaAbierta = getEstadoVisita()
+            if(funciones!!.isNetworkConneted(this)){
+                if(ConfirmarDetallePedido() > 0){
+                    alerta!!.pedidoEnviado()
 
-                                    if (visitaAbierta == 1) {
-                                        val intento = Intent(this@Detallepedido, Visita::class.java)
-                                        intento.putExtra("id", idcliente)
-                                        intento.putExtra("nombrecliente", nombre)
-                                        intento.putExtra("idpedido", idpedido)
-                                        intento.putExtra("visitaid", idvisita)
-                                        intento.putExtra("codigo", codigo)
-                                        intento.putExtra("idapi", idapi)
-                                        startActivity(intento)
-                                        finish()
-                                    } else {
-                                        val intento = Intent(this@Detallepedido, Pedido::class.java)
-                                        startActivity(intento)
-                                        finish()
-                                    }
-
-                                }
-                            }
-
-                        } catch (e: Exception) {
-                            runOnUiThread {
-                                alerta!!.dismisss()
-                                val alert: Snackbar = Snackbar.make(
-                                    lienzo!!,
-                                    e.message.toString(),
-                                    Snackbar.LENGTH_LONG
-                                )
-                                alert.view.setBackgroundColor(
-                                    ContextCompat.getColor(
-                                        this@Detallepedido,
-                                        R1.color.moderado
-                                    )
-                                )
-                                alert.show()
-                            }
-                        }
-                    }
-                } else {
-                    val alert: Snackbar =
-                        Snackbar.make(lienzo!!, "Enciende tu wifi", Snackbar.LENGTH_LONG)
-                    alert.view.setBackgroundColor(ContextCompat.getColor(this, R1.color.moderado))
-                    alert.show()
-                } //valida conexion a internet
-            }
-            */
-        }//boton de enviar pedido
-
-        btnguardar!!.setOnClickListener {
-            if (idpedido > 0) {
-
-                if (ConfirmarDetallePedido() > 0.toInt()) {
-                    val bd = db!!.writableDatabase
-                    try {
-                        bd!!.execSQL("UPDATE pedidos set Cerrado=1 WHERE Id=$idpedido")
-                    } catch (e: Exception) {
-                        throw Exception(e.message)
-                    } finally {
-                        bd!!.close()
+                    CoroutineScope(Dispatchers.IO).launch {
+                        enviarPedidoaServidor()
                     }
 
-                    try {
-                        runOnUiThread {
-                            alerta!!.pedidoGuardado()
-                            alerta!!.changeText("Guardando Pedido")
-                        }
-                        Timer().schedule(2300){
-                            runOnUiThread {
-                                alerta!!.dismisss()
-                                var visitaAbierta = getEstadoVisita()
-
-                                if (visitaAbierta == 1) {
-                                    val intento = Intent(this@Detallepedido, Visita::class.java)
-                                    intento.putExtra("id", idcliente)
-                                    intento.putExtra("nombrecliente", nombre)
-                                    intento.putExtra("idpedido", idpedido)
-                                    intento.putExtra("visitaid", idvisita)
-                                    intento.putExtra("codigo", codigo)
-                                    intento.putExtra("idapi", idapi)
-                                    startActivity(intento)
-                                    finish()
-                                } else {
-                                    val intento = Intent(this@Detallepedido, Pedido::class.java)
-                                    startActivity(intento)
-                                    finish()
-                                }
-
-                            }
-                        }
-                    } catch (e: Exception) {
-                        runOnUiThread {
-                            alerta!!.dismisss()
-                            val alert: Snackbar =
-                                Snackbar.make(lienzo!!, e.message.toString(), Snackbar.LENGTH_LONG)
-                            alert.view.setBackgroundColor(
-                                ContextCompat.getColor(
-                                    this@Detallepedido,
-                                    R1.color.moderado
-                                )
-                            )
-                            alert.show()
-                        }
-                    }
-                } else {
-                    val alert: Snackbar = Snackbar.make(
-                        lienzo!!,
-                        "Error: PRIMERO No hay productos agregados al pedido.",
-                        Snackbar.LENGTH_LONG
-                    )
-                    alert.view.setBackgroundColor(ContextCompat.getColor(this, R1.color.moderado))
+                }else{
+                    val alert: Snackbar = Snackbar.make(lienzo!!, "ERROR: NO HAY PRODUCTOS AGREGADOS AL PEDIDO", Snackbar.LENGTH_LONG)
+                    alert.view.setBackgroundColor(ContextCompat.getColor(this@Detallepedido, R1.color.moderado))
                     alert.show()
                 }
+            }else{
+                val alert: Snackbar = Snackbar.make(lienzo!!, "ERROR: NO TIENES CONEXION A INTERNET", Snackbar.LENGTH_LONG)
+                alert.view.setBackgroundColor(ContextCompat.getColor(this@Detallepedido, R1.color.moderado))
+                alert.show()
+            }
+        }
+
+        //EVENTO CLIC DEL BOTON GUARDAR.
+        btnguardar!!.setOnClickListener {
+            if (ConfirmarDetallePedido() > 0) {
+                try {
+                    actualizarEstadoAlGuardar() //FUNCION PARA ACTUALIZAR EL ESTADO
+                    alerta!!.pedidoGuardado()
+                    alerta!!.changeText("Guardando Pedido")
+
+                    Timer().schedule(2300){
+                        runOnUiThread {
+                            alerta!!.dismisss()
+                            val visitaAbierta = getEstadoVisita()
+
+                            if (visitaAbierta == 1) {
+                                val intento = Intent(this@Detallepedido, Visita::class.java)
+                                intento.putExtra("id", idcliente)
+                                intento.putExtra("nombrecliente", nombre)
+                                intento.putExtra("idpedido", idpedido)
+                                intento.putExtra("visitaid", idvisita)
+                                intento.putExtra("codigo", codigo)
+                                intento.putExtra("idapi", idapi)
+                                startActivity(intento)
+                                finish()
+                            } else {
+                                val intento = Intent(this@Detallepedido, Pedido::class.java)
+                                startActivity(intento)
+                                finish()
+                            }
+                        }
+                    }
+                } catch (e: Exception) {
+                    alerta!!.dismisss()
+
+                    val alert: Snackbar = Snackbar.make(lienzo!!, e.message.toString(), Snackbar.LENGTH_LONG)
+                    alert.view.setBackgroundColor(ContextCompat.getColor(this@Detallepedido, R1.color.moderado))
+                    alert.show()
+                }
+            } else {
+                val alert: Snackbar = Snackbar.make(lienzo!!, "ERROR: NO HAY PRODUCTOS AGREGADOS AL PEDIDO", Snackbar.LENGTH_LONG)
+                alert.view.setBackgroundColor(ContextCompat.getColor(this, R1.color.moderado))
+                alert.show()
             }
         }
 
@@ -468,70 +398,60 @@ class Detallepedido : AppCompatActivity() {
         }
     }
 
-    //FUNCION PARA ENVIAR EL PEDIDO AL SERVIDOR
-    private fun enviarPedidoaServidor(){
-
-        if(ConfirmarDetallePedido() > 0){
-            alerta!!.pedidoEnviado()
-
-            CoroutineScope(Dispatchers.IO).launch {
-                if(funciones!!.isNetworkConneted(this@Detallepedido)){
-                    try {
-                        Timer().schedule(2300){
-                            val pedido = getPedidoSend(idpedido) //retorna el pedido
-
-                            pedido!!.Idvendedor = idvendedor
-
-                            pedido.Vendedor = vendedor//agregamos los datos del vendedor
-
-                            SendPedido(pedido, idpedido)//envia el pedido y actualiza el estado del pedido en el cel
-
-                            val visitaAbierta = getEstadoVisita()
-
-                            if (visitaAbierta == 1) {
-                                val intento = Intent(this@Detallepedido, Visita::class.java)
-                                intento.putExtra("id", idcliente)
-                                intento.putExtra("nombrecliente", nombre)
-                                intento.putExtra("idpedido", idpedido)
-                                intento.putExtra("visitaid", idvisita)
-                                intento.putExtra("codigo", codigo)
-                                intento.putExtra("idapi", idapi)
-                                startActivity(intento)
-                                finish()
-                            } else {
-                                val intento = Intent(this@Detallepedido, Pedido::class.java)
-                                startActivity(intento)
-                                finish()
-                            }
-
-                        }
-                    }catch (e: Exception){
-                        withContext(Dispatchers.Main){
-                            alerta!!.dismisss()
-
-                            val alert: Snackbar = Snackbar.make(lienzo!!, "ERROR AL ENVIAR EL PEDIDO", Snackbar.LENGTH_LONG)
-                            alert.view.setBackgroundColor(ContextCompat.getColor(this@Detallepedido, R1.color.moderado))
-                            alert.show()
-                        }
-                    }finally {
-                        withContext(Dispatchers.Main){
-                            alerta!!.dismisss()
-                        }
-                    }
-                }else{
-                    withContext(Dispatchers.Main){
-                        alerta!!.dismisss()
-
-                        val alert: Snackbar = Snackbar.make(lienzo!!, "NO TIENES CONEXION A INTERNET", Snackbar.LENGTH_LONG)
-                        alert.view.setBackgroundColor(ContextCompat.getColor(this@Detallepedido, R1.color.moderado))
-                        alert.show()
-                    }
-                }
-            }
-        }else{
-            val alert: Snackbar = Snackbar.make(lienzo!!, "ERROR: NO HAY PROUECTOS AGREGADOS AL PEDIDO", Snackbar.LENGTH_LONG)
+    //FUNCION PARA ACTUALIZAR EL ESTADO DEL PEDIDO AL GUARDARLO
+    private fun actualizarEstadoAlGuardar(){
+        val bd = db!!.writableDatabase
+        try {
+            bd!!.execSQL("UPDATE pedidos set Cerrado=1 WHERE Id=$idpedido")
+        } catch (e: Exception) {
+            val alert: Snackbar = Snackbar.make(lienzo!!, "ERROR: NO SE ACTUALIZO EL ESTADO DEL PEDIDO AL GUARDARLO", Snackbar.LENGTH_LONG)
             alert.view.setBackgroundColor(ContextCompat.getColor(this@Detallepedido, R1.color.moderado))
             alert.show()
+        } finally {
+            bd!!.close()
+        }
+    }
+
+    //FUNCION PARA ENVIAR EL PEDIDO AL SERVIDOR
+    private suspend fun enviarPedidoaServidor(){
+        try {
+            Timer().schedule(2300){
+                val pedido = getPedidoSend(idpedido) //retorna el pedido
+
+                pedido!!.Idvendedor = idvendedor // ASIGNAMOS EL ID DEL VENDEDOR AL PEDIDO
+
+                pedido.Vendedor = vendedor//agregamos los datos del vendedor
+
+                SendPedido(pedido, idpedido)//envia el pedido y actualiza el estado del pedido en el cel
+                alerta!!.dismisss()
+
+                val visitaAbierta = getEstadoVisita()
+
+                if (visitaAbierta == 1) {
+                    val intento = Intent(this@Detallepedido, Visita::class.java)
+                    intento.putExtra("id", idcliente)
+                    intento.putExtra("nombrecliente", nombre)
+                    intento.putExtra("idpedido", idpedido)
+                    intento.putExtra("visitaid", idvisita)
+                    intento.putExtra("codigo", codigo)
+                    intento.putExtra("idapi", idapi)
+                    startActivity(intento)
+                    finish()
+                } else {
+                    val intento = Intent(this@Detallepedido, Pedido::class.java)
+                    startActivity(intento)
+                    finish()
+                }
+
+            }
+        }catch (e: Exception){
+            withContext(Dispatchers.Main){
+                alerta!!.dismisss()
+
+                val alert: Snackbar = Snackbar.make(lienzo!!, "ERROR AL ENVIAR EL PEDIDO", Snackbar.LENGTH_LONG)
+                alert.view.setBackgroundColor(ContextCompat.getColor(this@Detallepedido, R1.color.moderado))
+                alert.show()
+            }
         }
     }
     //OPTENIENDO INFORMACION DEL PEDIDO
@@ -1017,7 +937,7 @@ class Detallepedido : AppCompatActivity() {
     }//obtiene el pedido
     //obtiene el pedido de la base de datos
 
-    private fun SendPedido(pedido: CabezeraPedidoSend, idpedido: Int) {
+    private fun SendPedido(pedido: CabezeraPedidoSend, idpedido: Int)  {
         try {
             val objecto = convertToJson(pedido, idpedido) //convertimos a json el objecto pedido
             val ruta: String = "http://$ip:$puerto/pedido" //ruta para enviar el pedido
@@ -1056,36 +976,49 @@ class Detallepedido : AppCompatActivity() {
                                             if (idpedidoS > 0) {
                                                 ConfirmarPedido(idpedido, idpedidoS)
                                             } else {
-                                                throw Exception(datosservidor.getString("response"))
+                                                val alert: Snackbar = Snackbar.make(lienzo!!, "ERROR: AL ENVIAR EL PEDIDO", Snackbar.LENGTH_LONG)
+                                                alert.view.setBackgroundColor(ContextCompat.getColor(this@Detallepedido, R1.color.moderado))
+                                                alert.show()
                                             }
                                         }
                                         400 -> {
-                                            throw Exception(datosservidor.getString("response"))
+                                            val alert: Snackbar = Snackbar.make(lienzo!!, "ERROR: RESPUESTA NO ENCONTRADA", Snackbar.LENGTH_LONG)
+                                            alert.view.setBackgroundColor(ContextCompat.getColor(this@Detallepedido, R1.color.moderado))
+                                            alert.show()
                                         }
                                         500 -> {
-                                            throw Exception(datosservidor.getString("response"))
-                                        }
-                                        else -> {
-                                            throw Exception("Ocurrio algo Intenta Nuevamente")
+                                            val alert: Snackbar = Snackbar.make(lienzo!!, "ERROR INTERNO DEL SERVIDOR", Snackbar.LENGTH_LONG)
+                                            alert.view.setBackgroundColor(ContextCompat.getColor(this@Detallepedido, R1.color.moderado))
+                                            alert.show()
                                         }
                                     }
                                 } else {
-                                    throw Exception("No se recibio ninguna respuesta del servidor")
+                                    val alert: Snackbar = Snackbar.make(lienzo!!, "ERROR: NO HEY RESPUESTA DEL SERVIDOR 1", Snackbar.LENGTH_LONG)
+                                    alert.view.setBackgroundColor(ContextCompat.getColor(this@Detallepedido, R1.color.moderado))
+                                    alert.show()
                                 }
                             } else {
-                                throw Exception("No se recibio ninguna respuesta del servidor")
+                                val alert: Snackbar = Snackbar.make(lienzo!!, "ERROR: NO HAY RESPUESTA DEL SERVIDOR 2", Snackbar.LENGTH_LONG)
+                                alert.view.setBackgroundColor(ContextCompat.getColor(this@Detallepedido, R1.color.moderado))
+                                alert.show()
                             }
                         } catch (e: Exception) {
-                            throw Exception(e.message)
+                            val alert: Snackbar = Snackbar.make(lienzo!!, "ERROR: AL LEER LA RESPUESTA DEL SERVER", Snackbar.LENGTH_LONG)
+                            alert.view.setBackgroundColor(ContextCompat.getColor(this@Detallepedido, R1.color.moderado))
+                            alert.show()
                         }
                     } //se obtiene la respuesta del servidor
                 } catch (e: Exception) {
-                    throw Exception(e.message)
+                    val alert: Snackbar = Snackbar.make(lienzo!!, "ERROR: AL ENVIAR EL JSON DEL PEDIDO", Snackbar.LENGTH_LONG)
+                    alert.view.setBackgroundColor(ContextCompat.getColor(this@Detallepedido, R1.color.moderado))
+                    alert.show()
                 }
 
             }
         } catch (e: Exception) {
-            throw Exception("Error: SEGUNDO No hay productos agregados al pedido.")
+            val alert: Snackbar = Snackbar.make(lienzo!!, "ERROR: ENVIO DE PARAMETRO EQUIVOCADOS", Snackbar.LENGTH_LONG)
+            alert.view.setBackgroundColor(ContextCompat.getColor(this@Detallepedido, R1.color.moderado))
+            alert.show()
           //  print(e.message)
         }
     } //funcion que envia el pedido a la bd
