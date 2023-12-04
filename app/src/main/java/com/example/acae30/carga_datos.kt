@@ -71,9 +71,11 @@ class carga_datos : AppCompatActivity() {
             if (url != null) {
                 if (funciones!!.isNetworkConneted(this)) {
                     alert!!.Cargando() //muestra la alerta
-                    GlobalScope.launch(Dispatchers.IO) {
+
+                    CoroutineScope(Dispatchers.IO).launch {
                         getClients()
-                    } //COURUTINA PARA OBTENER CLIENTES Y SUCURSALES
+                    }//COURUTINA PARA OBTENER CLIENTES Y SUCURSALES
+
                 } else {
                     ShowAlert("Enciende tus datos o el wifi")
                 }
@@ -86,9 +88,11 @@ class carga_datos : AppCompatActivity() {
             if (url != null) {
                 if (funciones!!.isNetworkConneted(this)) {
                     alert!!.Cargando() //muestra la alerta
-                    GlobalScope.launch(Dispatchers.IO) {
+
+                    CoroutineScope(Dispatchers.IO).launch {
                         getInventario()
-                    } //courrutina para obtener clientes
+                    }//courrutina para obtener clientes
+
                 } else {
                     ShowAlert("Enciende tus datos o el wifi")
                 }
@@ -101,9 +105,11 @@ class carga_datos : AppCompatActivity() {
             if (url != null) {
                 if (funciones!!.isNetworkConneted(this)) {
                     alert!!.Cargando() //muestra la alerta
-                    GlobalScope.launch(Dispatchers.IO) {
+
+                    CoroutineScope(Dispatchers.IO).launch {
                         getCuentas()
-                    } //courrutina para obtener clientes
+                    }//courrutina para obtener clientes
+
                 } else {
                     ShowAlert("Enciende tus datos o el wifi")
                 }

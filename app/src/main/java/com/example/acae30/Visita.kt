@@ -733,7 +733,6 @@ class Visita : AppCompatActivity() {
     /*
      * CAMBIANDO EL TIPO DE TIMESTAMP PARA LA CREACION DEL PEDIDO
      * MODIFICACION 20/11/2023
-     * ADOLFO HERNANDEZ
      * */
     private fun getDateTime(): String? {
         val dateFormat = SimpleDateFormat(

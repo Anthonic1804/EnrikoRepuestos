@@ -258,7 +258,14 @@ class Detallepedido : AppCompatActivity() {
         }
 
         // Si no hay visita, que no se pueda enviar pedido
-        if (!visita_enviada!!) {
+        /*if (!visita_enviada!!) {
+            btnenviar!!.isEnabled = false
+            btnenviar!!.setBackgroundResource(R1.drawable.border_btndisable)
+        }*/
+
+        //MODIFICACION 04/12/2023
+        // VERIFICAMOS SI TENEMOS CONEXION A INTERNET PARA PODER ENVIAR EL PEDIDO O ALMACENARLO
+        if(!funciones!!.isNetworkConneted(this@Detallepedido)){
             btnenviar!!.isEnabled = false
             btnenviar!!.setBackgroundResource(R1.drawable.border_btndisable)
         }

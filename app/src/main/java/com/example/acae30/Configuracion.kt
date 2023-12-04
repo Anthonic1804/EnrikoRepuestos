@@ -17,6 +17,7 @@ import com.dcastalia.localappupdate.DownloadApk
 import com.example.acae30.database.Database
 import com.example.acae30.modelos.Config
 import com.google.android.material.snackbar.Snackbar
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.delay
@@ -133,14 +134,16 @@ class Configuracion : AppCompatActivity() {
             //getVersionUpdate()
             if (url != null) {
                 if (funciones!!.isNetworkConneted(this)) {
-                    GlobalScope.launch(Dispatchers.IO) {
+
+                    CoroutineScope(Dispatchers.IO).launch {
                         getAppVersion()
-                    } //COURUTINA CARGAR DATOS DE ACTUALIZACION
+                    }//COURUTINA CARGAR DATOS DE ACTUALIZACION
+
                 } else {
-                    ShowAlert("Enciende tus datos o el wifi")
+                    ShowAlert("ERROR: NO TIENES CONEXION A INTERNET")
                 }
             } else {
-                ShowAlert("No hay configuracion del Servidor")
+                ShowAlert("ERROR: NO SE ENCONTRO LA CONFIGURACION DEL SERVIDOR")
             }
         }
 
@@ -236,9 +239,11 @@ class Configuracion : AppCompatActivity() {
         btnGuardar!!.setOnClickListener {
             val contexto = this
             alerta!!.Cargando()
-            GlobalScope.launch(Dispatchers.IO) {
+
+            CoroutineScope(Dispatchers.IO).launch {
                 ValidateConnection(ip!!.text.toString(), puerto!!.text.toString(), contexto)
             }
+
         }//guarda los datos del servidor
     }
 
@@ -277,19 +282,12 @@ class Configuracion : AppCompatActivity() {
                                         editor!!.putInt("puerto", puerto.toInt())
                                         editor.putString("ip", ip)
                                         editor.commit()
+
                                         alerta!!.dismisss()
-                                        val alert: Snackbar = Snackbar.make(
-                                            vista!!,
-                                            res.getString("response"),
-                                            Snackbar.LENGTH_LONG
-                                        )
-                                        alert.view.setBackgroundColor(
-                                            ContextCompat.getColor(
-                                                context,
-                                                R.color.moderado
-                                            )
-                                        )
+                                        val alert: Snackbar = Snackbar.make(vista!!, res.getString("response"), Snackbar.LENGTH_LONG)
+                                        alert.view.setBackgroundColor(ContextCompat.getColor(context, R.color.btnVerde))
                                         alert.show()
+
                                     } else {
                                         throw  Exception(res.getString("response"))
                                     } //valida que la respuesta sea  la correcta
@@ -379,26 +377,30 @@ class Configuracion : AppCompatActivity() {
 
                                 } //termina el for
                             } else {
+                                alerta!!.dismisss()
                                 ShowAlert("NO SE ENCONTRARON DATOS DE ACTUALIZACIOIN")
                             } //caso que la respuesta venga vacia
                         }
                     } else {
+                        alerta!!.dismisss()
                         throw Exception("SERVIDOR: NO SE ENCONTRARON DATOS DE ACTUALIZACION")
                     }
                 } catch (e: Exception) {
+                    alerta!!.dismisss()
                     throw Exception(e.message)
                 }
             }//termina de obtener los datos
         } catch (e: Exception) {
+            alerta!!.dismisss()
             ShowAlert("ERROR AL CONECTARSE CON EL SERVIDOR")
         }
     }
 
     private fun ShowAlert(mensaje: String) {
         val alert: Snackbar = Snackbar.make(vista!!, mensaje, Snackbar.LENGTH_LONG)
-        alert.view.setBackgroundColor(resources.getColor(R.color.moderado))
+        alert.view.setBackgroundColor(ContextCompat.getColor(this@Configuracion, R.color.moderado))
         alert.show()
-    }//
+    }
 
     //FUNCION PARA OBTERNER LA URL DEL SERVER
     private fun getApiUrl() {
