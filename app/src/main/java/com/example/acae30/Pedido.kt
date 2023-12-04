@@ -1280,7 +1280,9 @@ class Pedido : AppCompatActivity() {
 
             documento.close()
 
-            Toast.makeText(this, "REPORTE GENERADO CORRECTAMENTE", Toast.LENGTH_LONG).show()
+            val alert: Snackbar = Snackbar.make(lienzo!!, "REPORTE GENERADO CORRECTAMENTE", Snackbar.LENGTH_LONG)
+            alert.view.setBackgroundColor(ContextCompat.getColor(this@Pedido, R.color.btnVerde))
+            alert.show()
 
         }catch (e: FileNotFoundException){
             e.printStackTrace()

@@ -12,6 +12,7 @@ import android.widget.ImageButton
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.constraintlayout.widget.ConstraintLayout
+import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.acae30.database.Database
@@ -62,7 +63,7 @@ class Tokens : AppCompatActivity() {
         lblNoData.visibility = View.GONE
 
         getApiUrl()
-        validarDatos();
+        validarDatos()
 
         val policy = StrictMode.ThreadPolicy.Builder().permitAll().build()
         StrictMode.setThreadPolicy(policy)
@@ -127,7 +128,7 @@ class Tokens : AppCompatActivity() {
         return list
     }
 
-    fun validarDatos(){
+    private fun validarDatos(){
         try{
             val lista = getTokenByDate()
             if(lista.size > 0){
@@ -142,7 +143,7 @@ class Tokens : AppCompatActivity() {
     }
     private fun ArmarLista(lista: java.util.ArrayList<TokenData>) {
 
-        var mLayoutManager = LinearLayoutManager(
+        val mLayoutManager = LinearLayoutManager(
             this@Tokens,
             LinearLayoutManager.VERTICAL,
             false
@@ -191,19 +192,21 @@ class Tokens : AppCompatActivity() {
         if (url != null) {
             if (funciones!!.isNetworkConneted(this)) {
                 alert!!.Cargando() //muestra la alerta
-                GlobalScope.launch(Dispatchers.IO) {
+
+                CoroutineScope(Dispatchers.IO).launch {
                     getEmpleados()
-                } //courrutina para obtener clientes
+                }
+
             } else {
-                ShowAlert("Enciende tus datos o el wifi")
+                mostrarAlerta("ERROR: NO TIENES CONEXION A INTERNET")
             }
         } else {
-            ShowAlert("No hay configuracion del Servidor")
+            mostrarAlerta("ERROR: NO SE ENCONTRO CONFIGURACION DEL SERVIDOR")
         }
     }
 
     //OBTENIENDO LOS EMPLEADOS DEL SERVIDOR
-    suspend fun getEmpleados() {
+    private suspend fun getEmpleados() {
         //IMPORTANDO DATOS DE TABLA EMPLEADOS
         try {
             val direccion = url!! + "empleados"
@@ -248,20 +251,20 @@ class Tokens : AppCompatActivity() {
                             } //caso que la respuesta venga vacia
                         }
                     } else {
-                        throw Exception("SERVIDOR: NO SE ENCONTRARON VENDEDORES REGISTRADOS")
+                        mostrarAlerta("SERVIDOR: NO SE ENCONTRARON VENDEDORES REGISTRADOS")
                     }
                 } catch (e: Exception) {
-                    throw Exception(e.message)
+                    mostrarAlerta("ERROR: NO SE OBTUVO RESPUESTA DEL SERVIDOR")
                 }
             }//termina de obtener los datos
         } catch (e: Exception) {
             alert!!.dismisss()
-            ShowAlert(e.message.toString())
+            mostrarAlerta("ERROR: NO SE LOGRO CONECTAR CON EL SERVIDOR")
         }
     }
 
     //ALMACENANDO LOS EMPLEADOS EN LA BD SQLITE
-    fun saveEmpleadosDatabase(json: JSONArray) {
+    private fun saveEmpleadosDatabase(json: JSONArray) {
         val bd = database!!.writableDatabase
         val total = json.length()
         val talla = (50.toFloat() / total.toFloat()).toFloat()
@@ -300,21 +303,21 @@ class Tokens : AppCompatActivity() {
         }
     }
 
-    private fun ShowAlert(mensaje: String) {
+    private fun mostrarAlerta(mensaje: String) {
         val alert: Snackbar = Snackbar.make(vista!!, mensaje, Snackbar.LENGTH_LONG)
-        alert.view.setBackgroundColor(resources.getColor(R.color.moderado))
+        alert.view.setBackgroundColor(ContextCompat.getColor(this@Tokens, R.color.moderado))
         alert.show()
     }
 
     //FUNCIONES DE REDIRECCION
     private fun nuevoToken(){
-        val Intent = Intent(this@Tokens, NuevoToken::class.java)
-        startActivity(Intent)
+        val intent = Intent(this@Tokens, NuevoToken::class.java)
+        startActivity(intent)
         finish()
     }
     private fun atras(){
-        val Intent = Intent(this@Tokens, Inicio::class.java)
-        startActivity(Intent)
+        val intent = Intent(this@Tokens, Inicio::class.java)
+        startActivity(intent)
         finish()
     }
     @Deprecated("Deprecated in Java")

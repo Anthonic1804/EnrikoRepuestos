@@ -302,14 +302,10 @@ class Detallepedido : AppCompatActivity() {
                     }
 
                 }else{
-                    val alert: Snackbar = Snackbar.make(lienzo!!, "ERROR: NO HAY PRODUCTOS AGREGADOS AL PEDIDO", Snackbar.LENGTH_LONG)
-                    alert.view.setBackgroundColor(ContextCompat.getColor(this@Detallepedido, R1.color.moderado))
-                    alert.show()
+                    mostrarAlerta("ERROR: NO HAY PRODUCTOS AGREGADOS AL PEDIDO")
                 }
             }else{
-                val alert: Snackbar = Snackbar.make(lienzo!!, "ERROR: NO TIENES CONEXION A INTERNET", Snackbar.LENGTH_LONG)
-                alert.view.setBackgroundColor(ContextCompat.getColor(this@Detallepedido, R1.color.moderado))
-                alert.show()
+                mostrarAlerta("ERROR: NO TIENES CONEXION A INTERNET")
             }
         }
 
@@ -346,14 +342,10 @@ class Detallepedido : AppCompatActivity() {
                 } catch (e: Exception) {
                     alerta!!.dismisss()
 
-                    val alert: Snackbar = Snackbar.make(lienzo!!, e.message.toString(), Snackbar.LENGTH_LONG)
-                    alert.view.setBackgroundColor(ContextCompat.getColor(this@Detallepedido, R1.color.moderado))
-                    alert.show()
+                    mostrarAlerta(e.message.toString())
                 }
             } else {
-                val alert: Snackbar = Snackbar.make(lienzo!!, "ERROR: NO HAY PRODUCTOS AGREGADOS AL PEDIDO", Snackbar.LENGTH_LONG)
-                alert.view.setBackgroundColor(ContextCompat.getColor(this, R1.color.moderado))
-                alert.show()
+                mostrarAlerta("ERROR: NO HAY PRODUCTOS AGREGADOS AL PEDIDO")
             }
         }
 
@@ -404,9 +396,7 @@ class Detallepedido : AppCompatActivity() {
         try {
             bd!!.execSQL("UPDATE pedidos set Cerrado=1 WHERE Id=$idpedido")
         } catch (e: Exception) {
-            val alert: Snackbar = Snackbar.make(lienzo!!, "ERROR: NO SE ACTUALIZO EL ESTADO DEL PEDIDO AL GUARDARLO", Snackbar.LENGTH_LONG)
-            alert.view.setBackgroundColor(ContextCompat.getColor(this@Detallepedido, R1.color.moderado))
-            alert.show()
+            mostrarAlerta("ERROR: NO SE ACTUALIZO EL ESTADO DEL PEDIDO AL GUARDARLO")
         } finally {
             bd!!.close()
         }
@@ -448,12 +438,17 @@ class Detallepedido : AppCompatActivity() {
             withContext(Dispatchers.Main){
                 alerta!!.dismisss()
 
-                val alert: Snackbar = Snackbar.make(lienzo!!, "ERROR AL ENVIAR EL PEDIDO", Snackbar.LENGTH_LONG)
-                alert.view.setBackgroundColor(ContextCompat.getColor(this@Detallepedido, R1.color.moderado))
-                alert.show()
+                mostrarAlerta("ERROR AL ENVIAR EL PEDIDO")
             }
         }
     }
+    //FUNCION DE MENSAJE DE ALERTA
+    private fun mostrarAlerta(mensaje: String){
+        val alert: Snackbar = Snackbar.make(lienzo!!, mensaje, Snackbar.LENGTH_LONG)
+        alert.view.setBackgroundColor(ContextCompat.getColor(this@Detallepedido, R1.color.moderado))
+        alert.show()
+    }
+
     //OPTENIENDO INFORMACION DEL PEDIDO
     private fun getTipoEnvio(ipPedido: Int){
         val dataBase = db!!.readableDatabase
@@ -976,50 +971,33 @@ class Detallepedido : AppCompatActivity() {
                                             if (idpedidoS > 0) {
                                                 ConfirmarPedido(idpedido, idpedidoS)
                                             } else {
-                                                val alert: Snackbar = Snackbar.make(lienzo!!, "ERROR: AL ENVIAR EL PEDIDO", Snackbar.LENGTH_LONG)
-                                                alert.view.setBackgroundColor(ContextCompat.getColor(this@Detallepedido, R1.color.moderado))
-                                                alert.show()
+                                                mostrarAlerta("ERROR: AL ENVIAR EL PEDIDO")
                                             }
                                         }
                                         400 -> {
-                                            val alert: Snackbar = Snackbar.make(lienzo!!, "ERROR: RESPUESTA NO ENCONTRADA", Snackbar.LENGTH_LONG)
-                                            alert.view.setBackgroundColor(ContextCompat.getColor(this@Detallepedido, R1.color.moderado))
-                                            alert.show()
+                                            mostrarAlerta("ERROR: RESPUESTA NO ENCONTRADA")
                                         }
                                         500 -> {
-                                            val alert: Snackbar = Snackbar.make(lienzo!!, "ERROR INTERNO DEL SERVIDOR", Snackbar.LENGTH_LONG)
-                                            alert.view.setBackgroundColor(ContextCompat.getColor(this@Detallepedido, R1.color.moderado))
-                                            alert.show()
+                                            mostrarAlerta("ERROR INTERNO DEL SERVIDOR")
                                         }
                                     }
                                 } else {
-                                    val alert: Snackbar = Snackbar.make(lienzo!!, "ERROR: NO HEY RESPUESTA DEL SERVIDOR 1", Snackbar.LENGTH_LONG)
-                                    alert.view.setBackgroundColor(ContextCompat.getColor(this@Detallepedido, R1.color.moderado))
-                                    alert.show()
+                                    mostrarAlerta("ERROR: NO HEY RESPUESTA DEL SERVIDOR 1")
                                 }
                             } else {
-                                val alert: Snackbar = Snackbar.make(lienzo!!, "ERROR: NO HAY RESPUESTA DEL SERVIDOR 2", Snackbar.LENGTH_LONG)
-                                alert.view.setBackgroundColor(ContextCompat.getColor(this@Detallepedido, R1.color.moderado))
-                                alert.show()
+                                mostrarAlerta("ERROR: NO HAY RESPUESTA DEL SERVIDOR 2")
                             }
                         } catch (e: Exception) {
-                            val alert: Snackbar = Snackbar.make(lienzo!!, "ERROR: AL LEER LA RESPUESTA DEL SERVER", Snackbar.LENGTH_LONG)
-                            alert.view.setBackgroundColor(ContextCompat.getColor(this@Detallepedido, R1.color.moderado))
-                            alert.show()
+                            mostrarAlerta("ERROR: AL LEER LA RESPUESTA DEL SERVER")
                         }
                     } //se obtiene la respuesta del servidor
                 } catch (e: Exception) {
-                    val alert: Snackbar = Snackbar.make(lienzo!!, "ERROR: AL ENVIAR EL JSON DEL PEDIDO", Snackbar.LENGTH_LONG)
-                    alert.view.setBackgroundColor(ContextCompat.getColor(this@Detallepedido, R1.color.moderado))
-                    alert.show()
+                    mostrarAlerta("ERROR: AL ENVIAR EL JSON DEL PEDIDO")
                 }
 
             }
         } catch (e: Exception) {
-            val alert: Snackbar = Snackbar.make(lienzo!!, "ERROR: ENVIO DE PARAMETRO EQUIVOCADOS", Snackbar.LENGTH_LONG)
-            alert.view.setBackgroundColor(ContextCompat.getColor(this@Detallepedido, R1.color.moderado))
-            alert.show()
-          //  print(e.message)
+            mostrarAlerta("ERROR: ENVIO DE PARAMETRO EQUIVOCADOS")
         }
     } //funcion que envia el pedido a la bd
 
@@ -1369,7 +1347,9 @@ class Detallepedido : AppCompatActivity() {
 
             documento.close()
 
-            Toast.makeText(this, "PEDIDO EXPORTADO CORRECTAMENTE", Toast.LENGTH_LONG).show()
+            val alert: Snackbar = Snackbar.make(lienzo!!, "PEDIDO EXPORTADO CORRECTAMENTE", Snackbar.LENGTH_LONG)
+            alert.view.setBackgroundColor(ContextCompat.getColor(this@Detallepedido, R1.color.btnVerdeActivo))
+            alert.show()
 
         }catch (e: FileNotFoundException){
             e.printStackTrace()
