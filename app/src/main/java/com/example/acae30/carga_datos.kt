@@ -11,6 +11,7 @@ import android.widget.ImageButton
 import androidx.appcompat.app.AppCompatActivity
 import androidx.cardview.widget.CardView
 import androidx.constraintlayout.widget.ConstraintLayout
+import androidx.core.content.ContextCompat
 import com.example.acae30.database.Database
 import com.google.android.material.snackbar.Snackbar
 import kotlinx.android.synthetic.main.activity_carga_datos.*
@@ -139,8 +140,9 @@ class carga_datos : AppCompatActivity() {
 
     private fun ShowAlert(mensaje: String) {
         val alert: Snackbar = Snackbar.make(vista!!, mensaje, Snackbar.LENGTH_LONG)
-        alert.view.setBackgroundColor(resources.getColor(R.color.moderado))
+        alert.view.setBackgroundColor(ContextCompat.getColor(this@carga_datos, R.color.moderado))
         alert.show()
+
     }//
 
     //OBTENIENDO SUCURSALES DESDE WEBSERVIS
