@@ -308,6 +308,7 @@ class Tablas {
                 "Descuento Numeric(18,2)not null default 0," +
                 "Precio_editado VARCHAR(10) DEFAULT '' NOT NULL," +
                 "Id_talla INTEGER NOT NULL DEFAULT 0," +
+                "Id_Inventario_Precios INTEGER NOT NULL DEFAULT 0," +
                 "FOREIGN KEY(Id_pedido) REFERENCES pedidos(Id_pedido)" +
                 ")"
         return detalle

@@ -85,6 +85,12 @@ class Producto_agregar : AppCompatActivity() {
     private var codigoProducto: String = ""
     private var modificado: Int = 0
 
+    /*Variable para restriccion
+    * de seleccion de escalas de precios
+    * y unidades vendidas*/
+    private var cantidadEscala: Int? = null
+    private var idEscala: Int = 0
+
     private lateinit var tvUpdate : TextView
     private lateinit var tvCancel : TextView
     private lateinit var tvTitulo : TextView
@@ -146,6 +152,10 @@ class Producto_agregar : AppCompatActivity() {
 
         getApiUrl()
 
+        //TOMANDO LA CANTIDAD DE LAS ESCALA SELECCIONADA.
+        //09/01/2024
+        cantidadEscala = seleccionarCantidadenEscala(idpedido, idproducto!!)
+
         // Validar que la cantidad sea con hasta dos decimales
         //ACTUALIZADOS LA VALIDACION QUE SEA HASTA CON 4 DECIMAES
         txtcantidad!!.filters = arrayOf<InputFilter>(object : InputFilter {
@@ -169,6 +179,7 @@ class Producto_agregar : AppCompatActivity() {
 
         // Actualizar los precios cuando cambie el select de unidad
         //ACTUALIZADOS LOS DECIMALES A 4 ---> 23-08-2022
+        //ACTUALIZADO 08/01/2024
         spiner?.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
             override fun onNothingSelected(parent: AdapterView<*>?) {
 
@@ -197,6 +208,7 @@ class Producto_agregar : AppCompatActivity() {
 
                             precioss.add("${String.format("%.4f", datosProducto!!.Precio_iva)}") //PRECIO AGREGADO DEL PRODUCTO DE LA TABLA INVENTARIO
                             listPrecios!!.forEach {
+
                                 if (it.Unidad == "UNI" || it.Unidad == "") {
                                     var unidad_cantidad = ""
                                     if (it.Cantidad!! > 0.toFloat()) {
@@ -218,6 +230,7 @@ class Producto_agregar : AppCompatActivity() {
 
                         if (unidad == "FRACCIÓN") {
                             listPrecios!!.forEach {
+
                                 if (it.Unidad == "FRA") {
                                     var unidad_cantidad = ""
                                     if (it.Cantidad!! > 0.toFloat()) {
@@ -274,7 +287,6 @@ class Producto_agregar : AppCompatActivity() {
                     precio = precioEditado
                 } else {
                     var nuevoValor = precioFromList(nuevaCadena)
-
                     precio = nuevoValor
                 }
 
@@ -322,8 +334,13 @@ class Producto_agregar : AppCompatActivity() {
                     if (nuevaCantidad != "") {
                         if(isInteger(nuevaCantidad)){
                             cantidad = nuevaCantidad.toFloat()
+                            /*VALIDACION DE CANTIDAD DE ITEM
+                            * EXISTENCIA Y ESCCARLA*/
                             if(cantidad > existenciaProducto || cantidad == 0f){
                                 txtcantidad!!.error = "No puede Agregar una cantidad mayor a las existencias actuales";
+                                btnagregar!!.setBackgroundResource(R.drawable.border_btndisable)
+                            }else if(cantidad < cantidadEscala!!){ //VALIDADO EL PRECIO SELECCIONADO EN LAS ESCALAS.
+                                txtcantidad!!.error = "La cantidad no es válida para el precio seleccionada"
                                 btnagregar!!.setBackgroundResource(R.drawable.border_btndisable)
                             }else{
                                 Totalizar(cantidad)
@@ -782,7 +799,10 @@ class Producto_agregar : AppCompatActivity() {
                 detalle.put("Precio_editado", "")
             }
 
+            detalle.put("Id_Inventario_Precios", idEscala)
+
             val idpedidodetalle = base.insert("detalle_pedidos", null, detalle)
+
             val cursor = base.rawQuery(
                 "SELECT SUM(Subtotal) FROM detalle_pedidos where Id_pedido=$idpedido",
                 null
@@ -1007,6 +1027,7 @@ class Producto_agregar : AppCompatActivity() {
     }
 
     //MODIFICADA LA CANTIDAD DE DECIMALES A 4
+    //MODIFICADA 08/01/2024
     private fun precioFromList(cadena: String): Float {
         var nuevoValor = 0.toFloat()
 
@@ -1014,13 +1035,19 @@ class Producto_agregar : AppCompatActivity() {
             nuevoValor = cadena.toFloat()
         } else {
             listPrecios!!.forEach {
+
                 var valorPrecio = "${String.format("%.4f", it.Precio_iva)}"
                 var unidad_cantidad = ""
                 if (it.Cantidad!! > 0.toFloat()) {
                     unidad_cantidad = " (" + "${String.format("%.4f", it.Cantidad)}" + ")"
+
                 }
                 if (cadena == valorPrecio + " ${it.Nombre}" + unidad_cantidad) {
                     nuevoValor = valorPrecio.toFloat()
+
+                    /*Asignado la canditada para validar Escala*/
+                    cantidadEscala = it.Cantidad!!.toInt()
+                    idEscala = it.Id!!.toInt()
                 }
             }
         }
@@ -1184,6 +1211,8 @@ class Producto_agregar : AppCompatActivity() {
         dialogo.show()
 
     } //muestra la alerta para agregar precio
+
+
 
     //FUNCION PARA OBTENER LA URL DEL SERVIDOR
     private fun getApiUrl() {
@@ -1577,5 +1606,28 @@ class Producto_agregar : AppCompatActivity() {
                 alert.show()
             }
         }
+    }
+
+    //SELECCIONANDO ESCALA PARA EDITAR PRODUCTO EN DETALL
+    private fun seleccionarCantidadenEscala(idPedido: Int, idProducto: Int): Int{
+        val db = db!!.readableDatabase
+        var cantidadEscala = 0
+        try {
+            val cursor = db.rawQuery("SELECT IP.Cantidad FROM detalle_pedidos AS DP " +
+                    "INNER JOIN inventario_precios AS IP " +
+                    "ON DP.Id_Inventario_Precios = IP.Id " +
+                    "WHERE DP.Id_pedido=$idPedido AND DP.Id_producto=$idProducto", null)
+
+            cantidadEscala = if(cursor.count > 0){
+                cursor.moveToFirst()
+                cursor.getInt(0)
+            }else{
+                0
+            }
+            cursor.close()
+        }catch (e: Exception){
+            println("ERROR: AL SELECCIONAR LA ESCALA -> " + e.message)
+        }
+        return cantidadEscala
     }
 }
