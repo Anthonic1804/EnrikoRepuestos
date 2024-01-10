@@ -276,7 +276,7 @@ class Inventario : AppCompatActivity() {
             eliminarBusqueda()
 
             val intento = Intent(this, Detallepedido::class.java)
-            intento.putExtra("id", idcliente)
+            intento.putExtra("idcliente", idcliente)
             intento.putExtra("nombrecliente", nombrecliente)
             intento.putExtra("idpedido", idpedido)
             intento.putExtra("visitaid", idvisita)

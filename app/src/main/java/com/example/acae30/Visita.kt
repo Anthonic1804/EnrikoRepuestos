@@ -146,7 +146,7 @@ class Visita : AppCompatActivity() {
         btnpedido!!.setOnClickListener {
             CreatePedido()
             val intento = Intent(this, Detallepedido::class.java)
-            intento.putExtra("id", idcliente)
+            intento.putExtra("idcliente", idcliente)
             intento.putExtra("nombrecliente", nombre)
             intento.putExtra("codigo", codigo)
             intento.putExtra("idpedido", idpedido)

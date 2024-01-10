@@ -12,18 +12,23 @@ import android.text.Spanned
 import android.text.TextWatcher
 import android.view.View
 import android.view.View.OnFocusChangeListener
-import android.widget.*
+import android.widget.AdapterView
+import android.widget.ArrayAdapter
+import android.widget.Button
+import android.widget.EditText
+import android.widget.ImageButton
+import android.widget.Spinner
+import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.constraintlayout.widget.ConstraintLayout
+import androidx.core.content.ContextCompat
 import com.example.acae30.database.Database
-import com.example.acae30.modelos.Config
 import com.example.acae30.modelos.DetallePedido
 import com.example.acae30.modelos.InventarioPrecios
 import com.example.acae30.modelos.JSONmodels.UpdateTokenDataClassJSON
 import com.google.android.material.snackbar.Snackbar
 import com.google.gson.Gson
-import kotlinx.android.synthetic.main.activity_producto_agregar.*
-import kotlinx.android.synthetic.main.alerta_precio.*
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
@@ -36,7 +41,6 @@ import java.net.HttpURLConnection
 import java.net.URL
 import java.nio.charset.StandardCharsets
 import java.text.DecimalFormatSymbols
-import java.util.*
 
 
 class Producto_agregar : AppCompatActivity() {
@@ -105,6 +109,7 @@ class Producto_agregar : AppCompatActivity() {
         supportActionBar?.hide()
         lienzo = findViewById(R.id.lienzo)
         btnatras = findViewById(R.id.imgbtnatras)
+
         idproducto = intent.getIntExtra("idproducto", 0)
         idpedido = intent.getIntExtra("idpedido", 0)
         idcliente = intent.getIntExtra("idcliente", 0)
@@ -147,14 +152,17 @@ class Producto_agregar : AppCompatActivity() {
 
         txttituloproducto = findViewById(R.id.txttituloproducto)
 
-        //OBTENIDO DATOS DE LA TABLA CONFIGURACION
-        getConfig()
 
+        //OPTENIENDO LA CONFIGURACION DE LAS CONFIGURACIONES
+        sinExistencias = getConfig()
+
+        //OPTENIENDO LA IP DEL SERVIDOR
         getApiUrl()
 
         //TOMANDO LA CANTIDAD DE LAS ESCALA SELECCIONADA.
         //09/01/2024
         cantidadEscala = seleccionarCantidadenEscala(idpedido, idproducto!!)
+
 
         // Validar que la cantidad sea con hasta dos decimales
         //ACTUALIZADOS LA VALIDACION QUE SEA HASTA CON 4 DECIMAES
@@ -361,31 +369,26 @@ class Producto_agregar : AppCompatActivity() {
     } //inicializa todas las variables y los objetos del xml
 
     //FUNCION PARA EXTRAER LOS CAMPOS DE LA TABLA CONFIG
-    private fun getConfig(){
+    private fun getConfig(): Int{
         val dataBase = db!!.readableDatabase
+        var sExistencia : Int = 0
         try {
-            val getConf = dataBase.rawQuery("SELECT * FROM config", null)
-            val getConfData = ArrayList<Config>()
-            if(getConf.count > 0){
+            val getConf = dataBase.rawQuery("SELECT sinExistencias FROM config", null)
+
+            sExistencia = if(getConf.count > 0){
                 getConf.moveToFirst()
-                do {
-                    val data = Config(
-                        getConf.getInt(0),
-                        getConf.getInt(1),
-                        getConf.getString(2)
-                    )
-                    getConfData.add(data)
-                }while (getConf.moveToNext())
+                getConf.getInt(0)
+            }else{
+                0
             }
 
-            for(data in getConfData){
-                sinExistencias = data.sinExistencias!!.toInt()
-            }
+            getConf.close()
         }catch (e: Exception) {
-            throw Exception(e.message)
+            println("ERROR: NO SE EXTRAJO LA INFORMACION DE CONFIG -> ${e.message}")
         } finally {
             dataBase!!.close()
         }
+        return sExistencia
     }
 
     //YA NO REGRESA HASTA EL DETALLE DEL PEDIDO, REGRESA A LA BUSQUEDA DE PRODUCTOS
@@ -408,16 +411,9 @@ class Producto_agregar : AppCompatActivity() {
         //30-08-2022 CORRECCION AL FUNCIONAMIENTO DE LA NAVEGACION DEL BOTON
         btnatras!!.setOnClickListener {
             if(proviene == "editar"){
-                val intento = Intent(this@Producto_agregar, Detallepedido::class.java)
-                intento.putExtra("idcliente", idcliente)
-                intento.putExtra("nombrecliente", nombrecliente)
-                intento.putExtra("busqueda", true)
-                intento.putExtra("idpedido", idpedido)
-                intento.putExtra("visitaid", idvisita)
-                intento.putExtra("codigo", codigo)
-                intento.putExtra("idapi", idapi)
-                intento.putExtra("sucursalPosition", getSucursalPosition)
-                startActivity(intento)
+
+                provieneDetallePedido(idpedido, idcliente, nombrecliente, idvisita, codigo, "visita", idapi, getSucursalPosition)
+
             }else{
                 val intento = Intent(this@Producto_agregar, Inventario::class.java)
                 intento.putExtra("idcliente", idcliente)
@@ -448,31 +444,15 @@ class Producto_agregar : AppCompatActivity() {
         }
 
         btneliminar!!.setOnClickListener {
-            GlobalScope.launch(Dispatchers.Main) {
-                try {
+            try {
+                CoroutineScope(Dispatchers.IO).launch {
                     deleteDetalle(idpedidodetalle!!)
-                    val intento = Intent(this@Producto_agregar, Detallepedido::class.java)
-                    intento.putExtra("idpedido", idpedido)
-                    intento.putExtra("nombrecliente", nombrecliente)
-                    intento.putExtra("idpedido", idpedido)
-                    intento.putExtra("visitaid", idvisita)
-                    intento.putExtra("codigo", codigo)
-                    intento.putExtra("idapi", idapi)
-                    intento.putExtra("from", "visita")
-                    intento.putExtra("sucursalPosition", getSucursalPosition)
-                    startActivity(intento)
-                    finish()
-                } catch (e: Exception) {
-                    runOnUiThread {
-                        val alert: Snackbar = Snackbar.make(
-                            lienzo!!,
-                            e.message.toString(),
-                            Snackbar.LENGTH_LONG
-                        )
-                        alert.view.setBackgroundColor(resources.getColor(R.color.moderado))
-                        alert.show()
-                    }
                 }
+
+                provieneDetallePedido(idpedido, idcliente, nombrecliente, idvisita, codigo, "visita", idapi, getSucursalPosition)
+
+            }catch (e: Exception){
+                mostrarAlerta("ERROR AL ELIMINAR EL PRODUCTO")
             }
         }//boton eliminar
 
@@ -481,14 +461,6 @@ class Producto_agregar : AppCompatActivity() {
             var detalle = getPedidodetalle(idpedidodetalle!!)
             GlobalScope.launch(Dispatchers.IO) {
                 try {
-                    /*
-                        * COMENTADO YA QUE PROVOCA UN ERROR EN LA APP
-                        * AL PASAR EN SEGUNDO PLANO
-                        * */
-                    /*
-                    runOnUiThread {
-                        alert!!.Cargando()
-                    }*/
                     val datos = datosProducto
                     val datosInvPrecios = listPrecios!!
 
@@ -617,23 +589,6 @@ class Producto_agregar : AppCompatActivity() {
                         adapterPrecios.setDropDownViewResource(R.layout.support_simple_spinner_dropdown_item)
                         spprecio!!.adapter = adapterPrecios
 
-//                       if(idpedidodetalle!! > 0){
-//                           val detallee=getPedidodetalle(idpedidodetalle!!)
-//                           txttotal!!.text="${String.format("%.2f", total_param!!)}"
-//                           precio = detalle!!.Precio
-//                           cantidad= detallee!!.Cantidad
-////                           visor!!.text=cantidad.toString()
-//                           txtcantidad!!.setText("${String.format("%.2f", cantidad)}")
-//                           //Totalizar(cantidad)
-//                       }
-
-                        /*
-                        * COMENTADO YA QUE PROVOCA UN ERROR EN LA APP
-                        * AL PASAR EN SEGUNDO PLANO
-                        * */
-                        /*runOnUiThread {
-                            alert!!.dismisss()
-                        }*/
                     } else {
                         throw Exception("No se Han encontrado los datos")
                     }
@@ -651,6 +606,7 @@ class Producto_agregar : AppCompatActivity() {
         }
         CambioCantidad()
     }
+
 
     //MODIFICACION PARA LA PAPELERIA DM
     //EDITAR CANTIDAD DE PRODUCTO SIN BORRAR
@@ -766,7 +722,7 @@ class Producto_agregar : AppCompatActivity() {
         } catch (e: Exception) {
             throw Exception(e.message)
         } finally {
-            db!!.close()
+            base.close()
         }
         return datos
     } // obtiene los precios de la tabla Inventario precio
@@ -1572,38 +1528,16 @@ class Producto_agregar : AppCompatActivity() {
                     //CreatePedido()
                 }
                 runOnUiThread {
-                    val intento = Intent(this@Producto_agregar, Detallepedido::class.java)
-                    intento.putExtra("idpedido", idpedido)
-                    intento.putExtra("id", idcliente)
-                    intento.putExtra("nombrecliente", nombrecliente)
-                    //intento.putExtra("idpedido", idpedido)
-                    intento.putExtra("visitaid", idvisita)
-                    intento.putExtra("codigo", codigo)
-                    intento.putExtra("idapi", idapi)
-                    intento.putExtra("sucursalPosition", getSucursalPosition)
-                    startActivity(intento)
-                    finish()
+                    provieneDetallePedido(idpedido, idcliente, nombrecliente, idvisita, codigo, "visita", idapi, getSucursalPosition)
                 }
             } catch (e: Exception) {
                 runOnUiThread {
-                    val alert: Snackbar = Snackbar.make(
-                        lienzo!!,
-                        e.message.toString(),
-                        Snackbar.LENGTH_LONG
-                    )
-                    alert.view.setBackgroundColor(resources.getColor(R.color.moderado))
-                    alert.show()
+                    mostrarAlerta("ERROR: ${e.message}")
                 }
             }
         } else {
             runOnUiThread {
-                val alert: Snackbar = Snackbar.make(
-                    lienzo!!,
-                    "Precio o cantidad son valores incorrectos.",
-                    Snackbar.LENGTH_LONG
-                )
-                alert.view.setBackgroundColor(resources.getColor(R.color.moderado))
-                alert.show()
+                mostrarAlerta("PRECIO O CANTIDAD SON VALORES INCORRECTOS")
             }
         }
     }
@@ -1629,5 +1563,30 @@ class Producto_agregar : AppCompatActivity() {
             println("ERROR: AL SELECCIONAR LA ESCALA -> " + e.message)
         }
         return cantidadEscala
+    }
+
+    //FUNCION PARA MOSTRAR MENSAJE DE ERROR
+    private fun mostrarAlerta(mensaje: String){
+        val alert: Snackbar = Snackbar.make(lienzo!!, mensaje, Snackbar.LENGTH_LONG)
+        alert.view.setBackgroundColor(ContextCompat.getColor(this@Producto_agregar, R.color.moderado))
+        alert.show()
+    }
+
+    //FUNCION PARA REGRESAR AL DETALLE DEL PEDIDO
+    private fun provieneDetallePedido(idpedido: Int, idcliente: Int?, nombrecliente: String?, idvisita: Int, codigo: String, visita: String,
+        idapi: Int,
+        sucursalPosition: Int?
+    ) {
+        val intento = Intent(this@Producto_agregar, Detallepedido::class.java)
+        intento.putExtra("idpedido", idpedido)
+        intento.putExtra("idcliente", idcliente)
+        intento.putExtra("nombrecliente", nombrecliente)
+        intento.putExtra("visitaid", idvisita)
+        intento.putExtra("codigo", codigo)
+        intento.putExtra("from", visita)
+        intento.putExtra("idapi", idapi)
+        intento.putExtra("sucursalPosition", sucursalPosition)
+        startActivity(intento)
+        finish()
     }
 }

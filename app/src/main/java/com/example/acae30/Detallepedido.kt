@@ -20,6 +20,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
+import androidx.core.view.isVisible
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -126,7 +127,7 @@ class Detallepedido : AppCompatActivity() {
         btnatras = findViewById(R1.id.imbtnatras)
         val intento = intent
         alerta = AlertDialogo(this)
-        idcliente = intento.getIntExtra("id", 0)
+        idcliente = intento.getIntExtra("idcliente", 0)
         nombre = intento.getStringExtra("nombrecliente")
         idpedido = intento.getIntExtra("idpedido", 0)
         idvisita = intento.getIntExtra("visitaid", 0)
@@ -223,7 +224,7 @@ class Detallepedido : AppCompatActivity() {
 
         //CARTURANDO LA SUCURSAL SELECCIONADA
          getSucursalPosition = intento.getIntExtra("sucursalPosition", 0)
-        //println("Sucursal desde Agregar Producto: $getSucursalPosition")
+        //println("Sucursal desde Agregar Producto: $nombreSucursalPedido")
         if(getSucursalPosition != 0){
             spSucursal!!.setSelection(getSucursalPosition!!, true)
         }
@@ -597,7 +598,9 @@ class Detallepedido : AppCompatActivity() {
                         if (lista != null && lista.size > 0) {
                             if (cabezera != null) {
                                 if (cabezera!!.Cerrado == 1) {
-                                    //  btbuscar!!.visibility = View.GONE
+
+                                    sinSucursal!!.visibility = View.VISIBLE
+
                                     txtcliente!!.isEnabled = false
                                     btbuscarProducto!!.visibility = View.GONE
                                     btnenviar!!.visibility = View.GONE
@@ -675,13 +678,7 @@ class Detallepedido : AppCompatActivity() {
                             btnatras!!.visibility = View.GONE
                         }
                     } catch (e: Exception) {
-                        val alert: Snackbar = Snackbar.make(
-                            lienzo!!,
-                            e.message.toString(),
-                            Snackbar.LENGTH_LONG
-                        )
-                        alert.view.setBackgroundColor(resources.getColor(R1.color.moderado))
-                        alert.show()
+                        mostrarAlerta("ERROR: ${e.message}")
                     }
                 }
             }
@@ -782,6 +779,7 @@ class Detallepedido : AppCompatActivity() {
                 if (!cabezera!!.Enviado) {
                     val data = lista.get(i)
                     val intento = Intent(this@Detallepedido, Producto_agregar::class.java)
+
                     intento.putExtra("idpedidodetalle", data.Id)
                     intento.putExtra("idpedido", data.Id_pedido)
                     intento.putExtra("idcliente", idcliente)
