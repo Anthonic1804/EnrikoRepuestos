@@ -91,4 +91,8 @@
     <string name="usuario">USUARIO</string>
     <string name="server">SERVIDOR / IP</string>
     <string name="puerto">PUERTO</string>
+    <string name="desea_firmar_el_pagar">¿Desea Firmar el Pagaré?</string>
+    <string name="firmar_pagar">CLIENTE SIN PAGARÉ FIRMADO</string>
+    <string name="aceptar">ACEPTAR</string>
+    <string name="cancelar">CANCELAR</string>
 </resources>

@@ -668,6 +668,11 @@ class carga_datos : AppCompatActivity() {
                     "Aporte_mensual",
                     funciones!!.validate(dato.getString("aporte_mensual").toFloat())
                 )
+
+                //AGREGADO EL CAMPO PARA VERIFICACION DEL PAGARE
+                val pagareFirmado = if(!funciones!!.validateBoolean(dato.getBoolean("pagare_Firmado_app"))) 0 else 1
+                data.put("Firmar_pagare_app", pagareFirmado)
+
                 bd.insert("clientes", null, data)
                 contador += talla
                 val mensaje = contador + 50.toFloat()

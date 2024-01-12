@@ -50,6 +50,9 @@ class firmarPagare : AppCompatActivity() {
     private lateinit var imageFinal : ByteArray
     private var imageFirmada : Boolean = false
 
+    private var busquedaPedido: Boolean = false
+    private var visita = false
+
 
     private val requestPermissionLauncher = registerForActivityResult(
         ActivityResultContracts.RequestPermission()
@@ -79,6 +82,9 @@ class firmarPagare : AppCompatActivity() {
         duiCliente = intent.getStringExtra("duiCliente").toString()
         limiteCredito = intent.getFloatExtra("limiteCredito", 0f)
         plazo = intent.getLongExtra("plazoCredito", 0)
+
+        busquedaPedido = intent.getBooleanExtra("busqueda", false)
+        visita = intent.getBooleanExtra("visita", false)
 
         btnCancelar.setOnClickListener {
             mensaje("Cancelar")
@@ -244,16 +250,33 @@ class firmarPagare : AppCompatActivity() {
     }
 
     fun atras(){
-        val intent = Intent(this, ClientesDetalle::class.java)
-        intent.putExtra("idcliente", idcliente)
-        startActivity(intent)
-        finish()
+        if(visita){
+            val intent = Intent(this, ClientesDetalle::class.java)
+            intent.putExtra("idcliente", idcliente)
+            intent.putExtra("busqueda", true)
+            intent.putExtra("visita", true)
+            startActivity(intent)
+            finish()
+        }else{
+            val intent = Intent(this, ClientesDetalle::class.java)
+            intent.putExtra("idcliente", idcliente)
+            startActivity(intent)
+            finish()
+        }
     }
     fun pagareYaFirmado(){
-        val intent = Intent(this, ClientesDetalle::class.java)
-        intent.putExtra("idcliente", idcliente)
-        startActivity(intent)
-        finish()
+        if(visita){
+            val intent = Intent(this, Clientes::class.java)
+            intent.putExtra("busqueda", true)
+            intent.putExtra("visita", true)
+            startActivity(intent)
+            finish()
+        }else{
+            val intent = Intent(this, ClientesDetalle::class.java)
+            intent.putExtra("idcliente", idcliente)
+            startActivity(intent)
+            finish()
+        }
     }
 
     private fun mensaje(msj: String){

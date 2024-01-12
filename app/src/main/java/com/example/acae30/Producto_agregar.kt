@@ -21,7 +21,6 @@ import android.widget.Spinner
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.constraintlayout.widget.ConstraintLayout
-import androidx.core.content.ContextCompat
 import com.example.acae30.database.Database
 import com.example.acae30.modelos.DetallePedido
 import com.example.acae30.modelos.InventarioPrecios
@@ -46,7 +45,6 @@ import java.text.DecimalFormatSymbols
 class Producto_agregar : AppCompatActivity() {
     private var btnatras: ImageButton? = null
     private var idproducto: Int? = 0
-    private var funciones: Funciones? = null
     private var db: Database? = null
     private var btnagregar: Button? = null
     private var alert: AlertDialogo? = null
@@ -102,6 +100,8 @@ class Producto_agregar : AppCompatActivity() {
 
     var contexto = this
 
+    private var funciones = Funciones()
+
     override fun onCreate(savedInstanceState: Bundle?) {
 
         super.onCreate(savedInstanceState)
@@ -127,9 +127,6 @@ class Producto_agregar : AppCompatActivity() {
         getSucursalPosition = intent.getIntExtra("sucursalPosition", 0)
        // println("posicion enviada desde detalle: $getSucursalPosition")
 
-
-
-        funciones = Funciones()
         db = Database(this)
         alert = AlertDialogo(this)
         txtcodigo = findViewById(R.id.txtcodigo)
@@ -452,7 +449,7 @@ class Producto_agregar : AppCompatActivity() {
                 provieneDetallePedido(idpedido, idcliente, nombrecliente, idvisita, codigo, "visita", idapi, getSucursalPosition)
 
             }catch (e: Exception){
-                mostrarAlerta("ERROR AL ELIMINAR EL PRODUCTO")
+                funciones.mostrarAlerta("ERROR AL ELIMINAR EL PRODUCTO", this@Producto_agregar, lienzo!!)
             }
         }//boton eliminar
 
@@ -1532,12 +1529,12 @@ class Producto_agregar : AppCompatActivity() {
                 }
             } catch (e: Exception) {
                 runOnUiThread {
-                    mostrarAlerta("ERROR: ${e.message}")
+                    funciones.mostrarAlerta("ERROR: ${e.message}", this@Producto_agregar, lienzo!!)
                 }
             }
         } else {
             runOnUiThread {
-                mostrarAlerta("PRECIO O CANTIDAD SON VALORES INCORRECTOS")
+                funciones.mostrarAlerta("PRECIO O CANTIDAD SON VALORES INCORRECTOS", this@Producto_agregar, lienzo!!)
             }
         }
     }
@@ -1563,13 +1560,6 @@ class Producto_agregar : AppCompatActivity() {
             println("ERROR: AL SELECCIONAR LA ESCALA -> " + e.message)
         }
         return cantidadEscala
-    }
-
-    //FUNCION PARA MOSTRAR MENSAJE DE ERROR
-    private fun mostrarAlerta(mensaje: String){
-        val alert: Snackbar = Snackbar.make(lienzo!!, mensaje, Snackbar.LENGTH_LONG)
-        alert.view.setBackgroundColor(ContextCompat.getColor(this@Producto_agregar, R.color.moderado))
-        alert.show()
     }
 
     //FUNCION PARA REGRESAR AL DETALLE DEL PEDIDO

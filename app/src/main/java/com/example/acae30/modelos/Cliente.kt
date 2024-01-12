@@ -26,6 +26,7 @@ data class Cliente (
     var Vendedor:String?,
     var Status:String?,
     var Ultima_venta:String?,
-    var Aporte_mensual:Float?
+    var Aporte_mensual:Float?,
+    var Firmar_pagare_app:Int?
 
 )

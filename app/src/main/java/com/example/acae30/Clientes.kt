@@ -1,21 +1,28 @@
 package com.example.acae30
 
+import android.app.Dialog
 import android.content.Context
 import android.content.Intent
 import android.content.SharedPreferences
 import android.os.Bundle
 import android.view.View
 import android.widget.SearchView
+import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.example.acae30.controllers.ClientesControllers
 import com.example.acae30.database.Database
 import com.example.acae30.listas.ClienteAdapter
 import com.example.acae30.modelos.Cliente
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import java.util.*
+import kotlin.collections.ArrayList
 
 class Clientes : AppCompatActivity() {
 
@@ -25,14 +32,21 @@ class Clientes : AppCompatActivity() {
     private var alert: AlertDialogo? = null
     private var busqueda: SearchView? = null
     private var busquedaPedido: Boolean = false
-    private var cuentas = false
     private var visita = false
+    private var cuentas = false
+
+    private lateinit var tvUpdate : TextView
+    private lateinit var tvCancel : TextView
+    private lateinit var tvMsj : TextView
+    private lateinit var tvTitulo : TextView
 
     private var preferences: SharedPreferences? = null
     private val instancia = "CONFIG_SERVIDOR"
     private var dSearch : String? = null
 
     private var clienteHistorio : Boolean = false
+
+    private var clienteController = ClientesControllers()
 
     override fun onCreate(savedInstanceState: Bundle?) {
 
@@ -57,7 +71,6 @@ class Clientes : AppCompatActivity() {
 
     override fun onStart() {
         super.onStart()
-
         //SETEA LA BUSQUEDA DEL SEARCHVIEW
         //SI HAY DATO ALMACENADO EN ESTE
 
@@ -66,21 +79,16 @@ class Clientes : AppCompatActivity() {
             busqueda!!.setQuery("$dSearch", true)
         }
 
-        MostrarClientes()
+        mostrarClientes()
         Busqueda()
     }
 
-    private fun MostrarClientes() {
-        //alert!!.Cargando()
-        //GlobalScope.launch(Dispatchers.IO) {
-        this@Clientes.lifecycleScope.launch {
-            try {
-                val list: ArrayList<Cliente> = getClient()
-                MostrarLista(list)
-            } catch (e: Exception) {
-                //alert!!.dismisss()
-                Toast.makeText(this@Clientes, e.message, Toast.LENGTH_LONG).show()
-            }
+    private fun mostrarClientes() {
+        try {
+            val list: ArrayList<Cliente> = clienteController.obtenerListaClientes(this@Clientes, dSearch!!)
+            MostrarLista(list)
+        }catch (e: Exception){
+            Toast.makeText(this@Clientes, e.message, Toast.LENGTH_LONG).show()
         }
     }
 
@@ -117,74 +125,6 @@ class Clientes : AppCompatActivity() {
         }
     }
 
-    //DEVUELVE LOS DATOS DE LA TABLA VIRTUAL
-    private fun getClient(): ArrayList<Cliente> {
-        val base = db!!.readableDatabase
-        val lista = ArrayList<Cliente>()
-        if(dSearch != ""){
-
-            val query = searchClient(dSearch.toString())
-            this@Clientes.MostrarLista(query)
-
-        }else{
-
-            try {
-                val consulta = base.rawQuery("SELECT * FROM Clientes LIMIT 50", null)
-
-                if (consulta.count > 0) {
-                    consulta.moveToFirst()
-                    do {
-                        val listado = Cliente(
-                            consulta.getInt(0),
-                            consulta.getString(1),
-                            consulta.getString(2),
-                            consulta.getString(3),
-                            consulta.getString(4),
-                            consulta.getString(5),
-                            consulta.getString(6),
-                            consulta.getString(7),
-                            consulta.getString(8),
-                            consulta.getInt(9),
-                            consulta.getFloat(10),
-                            consulta.getFloat(11),
-                            consulta.getString(12),
-                            consulta.getString(13),
-                            consulta.getString(14),
-                            consulta.getString(15),
-                            consulta.getString(16),
-                            consulta.getString(17),
-                            consulta.getString(18),
-                            consulta.getString(19),
-                            consulta.getInt(20),
-                            consulta.getInt(21),
-                            consulta.getString(22),
-                            consulta.getString(23),
-                            consulta.getString(24),
-                            consulta.getFloat(25)
-                        )
-                        lista.add(listado)
-
-                    } while (consulta.moveToNext())
-                    consulta.close()
-                }
-            } catch (e: Exception) {
-                throw Exception(e.message)
-            } finally {
-                db!!.close()
-            }
-        }
-        return lista
-    }
-
-
-    /*private fun messageAsync(mensaje: String) {
-        if (alert != null) {
-            runOnUiThread {
-                alert!!.changeText(mensaje)
-            }
-        }
-    } //obtiene el listado de clientes*/
-
     private fun Busqueda() {
         busqueda!!.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
             override fun onQueryTextSubmit(p0: String?): Boolean {
@@ -196,72 +136,15 @@ class Clientes : AppCompatActivity() {
             //22-08-2022
 
             override fun onQueryTextChange(texto: String): Boolean {
-                val dSearch = searchClient(texto.uppercase())
+                val dSearch = clienteController.obtenerListaClientes(this@Clientes ,texto.uppercase())
                 this@Clientes.MostrarLista(dSearch)
                 return false
             }
 
         })
     }
-
-    private fun searchClient(dato: String): ArrayList<Cliente> {
-        val base = db!!.readableDatabase
-        val lista = ArrayList<Cliente>()
-        try {
-
-            //val consulta = base.rawQuery("SELECT * FROM Clientes WHERE Id IN (SELECT docid FROM virtualcliente WHERE virtualcliente MATCH '$dato') LIMIT 50", null)
-
-            //CAMBIO DE CONSULTA 07-10-2023
-            val consulta = base.rawQuery("SELECT * FROM Clientes WHERE Cliente LIKE '%$dato%'", null)
-
-            var i = 0
-            if (consulta.count > 0) {
-                consulta.moveToFirst()
-                do {
-                    val listado = Cliente(
-                        consulta.getInt(0),
-                        consulta.getString(1),
-                        consulta.getString(2),
-                        consulta.getString(3),
-                        consulta.getString(4),
-                        consulta.getString(5),
-                        consulta.getString(6),
-                        consulta.getString(7),
-                        consulta.getString(8),
-                        consulta.getInt(9),
-                        consulta.getFloat(10),
-                        consulta.getFloat(11),
-                        consulta.getString(12),
-                        consulta.getString(13),
-                        consulta.getString(14),
-                        consulta.getString(15),
-                        consulta.getString(16),
-                        consulta.getString(17),
-                        consulta.getString(18),
-                        consulta.getString(19),
-                        consulta.getInt(20),
-                        consulta.getInt(21),
-                        consulta.getString(22),
-                        consulta.getString(23),
-                        consulta.getString(24),
-                        consulta.getFloat(25)
-                    )
-                    lista.add(listado)
-
-                } while (consulta.moveToNext())
-                consulta.close()
-            }
-        } catch (e: Exception) {
-            throw Exception(e.message)
-        } finally {
-            db!!.close()
-        }
-        return lista
-    } //obtiene los resultados de la busqueda en la bd
-
     private fun MostrarLista(list: ArrayList<Cliente>?) {
         try {
-
             if (list!!.size > 0) {
                 val mLayoutManager =
                     LinearLayoutManager(this@Clientes, LinearLayoutManager.VERTICAL, false)
@@ -269,18 +152,29 @@ class Clientes : AppCompatActivity() {
                 val adapter = ClienteAdapter(list, this@Clientes, this@Clientes, 0) { position ->
                     val cliente = list.get(position)
                     if (busquedaPedido) {
-                        if (visita) {
-                            val datos_visitas = funciones!!.GetVisita(cliente.Id!!, db!!)
-                            if (datos_visitas != null) {
-                                if (datos_visitas.Abierta) {
-                                    val intento = Intent(this@Clientes, Visita::class.java)
-                                    intento.putExtra("idcliente", cliente.Id!!)
-                                    intento.putExtra("nombrecliente", cliente.Cliente)
-                                    intento.putExtra("codigo", cliente.Codigo)
-                                    intento.putExtra("visitaid", datos_visitas.Id)
-                                    intento.putExtra("idapi", datos_visitas.Idvisita)
-                                    startActivity(intento)
-                                    finish()
+                        if(clienteController.obtenerInformacionCliente(this@Clientes, cliente.Id!!)?.Firmar_pagare_app!!.toInt() == 1){
+                            if (visita) {
+                                val datos_visitas = funciones!!.GetVisita(cliente.Id!!, db!!)
+                                if (datos_visitas != null) {
+                                    if (datos_visitas.Abierta) {
+                                        val intento = Intent(this@Clientes, Visita::class.java)
+                                        intento.putExtra("idcliente", cliente.Id!!)
+                                        intento.putExtra("nombrecliente", cliente.Cliente)
+                                        intento.putExtra("codigo", cliente.Codigo)
+                                        intento.putExtra("visitaid", datos_visitas.Id)
+                                        intento.putExtra("idapi", datos_visitas.Idvisita)
+                                        startActivity(intento)
+                                        finish()
+                                    } else {
+                                        val intento = Intent(this@Clientes, Visita::class.java)
+                                        intento.putExtra("idcliente", cliente.Id!!)
+                                        intento.putExtra("nombrecliente", cliente.Cliente)
+                                        intento.putExtra("codigo", cliente.Codigo)
+                                        startActivity(intento)
+                                        finish()
+
+                                    } //valida si la visita esta abierta
+
                                 } else {
                                     val intento = Intent(this@Clientes, Visita::class.java)
                                     intento.putExtra("idcliente", cliente.Id!!)
@@ -288,24 +182,17 @@ class Clientes : AppCompatActivity() {
                                     intento.putExtra("codigo", cliente.Codigo)
                                     startActivity(intento)
                                     finish()
-
-                                } //valida si la visita esta abierta
+                                } //valida si existe visita
 
                             } else {
-                                val intento = Intent(this@Clientes, Visita::class.java)
-                                intento.putExtra("idcliente", cliente.Id!!)
+                                val intento = Intent(this@Clientes, Detallepedido::class.java)
+                                intento.putExtra("id", cliente.Id)
                                 intento.putExtra("nombrecliente", cliente.Cliente)
-                                intento.putExtra("codigo", cliente.Codigo)
                                 startActivity(intento)
                                 finish()
-                            } //valida si existe visita
-
-                        } else {
-                            val intento = Intent(this@Clientes, Detallepedido::class.java)
-                            intento.putExtra("id", cliente.Id)
-                            intento.putExtra("nombrecliente", cliente.Cliente)
-                            startActivity(intento)
-                            finish()
+                            }
+                        }else{
+                            mensajeDialogo(cliente.Id!!)
                         }
 
                     } else {
@@ -356,6 +243,41 @@ class Clientes : AppCompatActivity() {
         //super.onBackPressed();
 
     }//anula el boton atras
+
+    private fun mensajeDialogo(idCliente: Int){
+
+        val msjDialog = Dialog(this, R.style.Theme_Dialog)
+        msjDialog.setCancelable(false)
+
+        msjDialog.setContentView(R.layout.dialog_cancelar)
+        tvUpdate = msjDialog.findViewById(R.id.tvUpdate)
+        tvCancel = msjDialog.findViewById(R.id.tvCancel)
+        tvMsj = msjDialog.findViewById(R.id.tvMensaje)
+        tvTitulo = msjDialog.findViewById(R.id.tvTitulo)
+
+        tvMsj.text = getString(R.string.desea_firmar_el_pagar)
+        tvTitulo.text = getString(R.string.firmar_pagar)
+        tvUpdate.text = getString(R.string.aceptar)
+        tvCancel.text = getString(R.string.cancelar)
+
+        tvUpdate.setOnClickListener {
+            val intento = Intent(this@Clientes, ClientesDetalle::class.java)
+            intento.putExtra("idcliente", idCliente)
+            intento.putExtra("busqueda", true)
+            intento.putExtra("visita", true)
+            startActivity(intento)
+            finish()
+
+            msjDialog.dismiss()
+        }
+
+        tvCancel.setOnClickListener {
+            msjDialog.dismiss()
+        }
+
+        msjDialog.show()
+
+    }
 
 
 }

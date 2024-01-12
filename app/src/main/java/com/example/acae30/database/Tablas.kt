@@ -30,7 +30,8 @@ class Tablas {
                 "Status VARCHAR(50)  NULL," +
                 "Ultima_venta DATE  NULL," +
                 "Aporte_mensual NUMERIC(20,2)  NULL," +
-                "Fecha_inventario TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL" +
+                "Fecha_inventario TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL," +
+                "Firmar_pagare_app INTEGER NOT NULL DEFAULT 0" +
                 ");"
         return cliente
     } //tabla cliente

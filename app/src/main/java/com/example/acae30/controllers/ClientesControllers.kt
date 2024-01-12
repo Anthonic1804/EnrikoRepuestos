@@ -1,0 +1,125 @@
+package com.example.acae30.controllers
+
+import android.content.Context
+import com.example.acae30.Funciones
+import com.example.acae30.modelos.Cliente
+
+class ClientesControllers {
+
+    private var funciones = Funciones()
+
+    //FUNCION PARA VERIFICAR EL ESTADO DEL PAGARE DEL CLIENTE
+    fun obtenerInformacionCliente(context: Context, idCliente: Int): Cliente?{
+
+        val base = funciones.getDataBase(context).readableDatabase
+        var datosCliente: Cliente? = null
+
+        try {
+            val cursor = base.rawQuery("SELECT * FROM clientes " +
+                    "WHERE id=$idCliente", null)
+
+            if (cursor.count > 0) {
+                cursor.moveToFirst()
+                datosCliente = Cliente(
+                    cursor.getInt(0),
+                    cursor.getString(1),
+                    cursor.getString(2),
+                    cursor.getString(3),
+                    cursor.getString(4),
+                    cursor.getString(5),
+                    cursor.getString(6),
+                    cursor.getString(7),
+                    cursor.getString(8),
+                    cursor.getInt(9),
+                    cursor.getFloat(10),
+                    cursor.getFloat(11),
+                    cursor.getString(12),
+                    cursor.getString(13),
+                    cursor.getString(14),
+                    cursor.getString(15),
+                    cursor.getString(16),
+                    cursor.getString(17),
+                    cursor.getString(18),
+                    cursor.getString(19),
+                    cursor.getInt(20),
+                    cursor.getInt(21),
+                    cursor.getString(22),
+                    cursor.getString(23),
+                    cursor.getString(24),
+                    cursor.getFloat(25),
+                    cursor.getInt(27)
+                )
+                cursor.close()
+            }
+            cursor.close()
+        }catch (e: Exception){
+            println("ERROR: NO SE ENCONTRO EL CLIENTE -> ${e.message}")
+        }finally {
+            base.close()
+        }
+
+        return datosCliente
+    }
+
+    //FUNCION PARA OBTENER TODOS LOS CLIENTES
+    fun obtenerListaClientes(context: Context, busqueda: String): ArrayList<Cliente>{
+        val base = funciones.getDataBase(context).readableDatabase
+        val listaClientes = ArrayList<Cliente>()
+        var consutaSql: String = ""
+
+        consutaSql = if (busqueda != "") {
+            "SELECT * FROM Clientes WHERE Cliente LIKE '%$busqueda%'"
+        } else {
+            "SELECT * FROM Clientes LIMIT 50"
+        }
+
+        try {
+            val consulta = base.rawQuery(consutaSql, null)
+
+            if (consulta.count > 0) {
+                consulta.moveToFirst()
+                do {
+                    val listado = Cliente(
+                        consulta.getInt(0),
+                        consulta.getString(1),
+                        consulta.getString(2),
+                        consulta.getString(3),
+                        consulta.getString(4),
+                        consulta.getString(5),
+                        consulta.getString(6),
+                        consulta.getString(7),
+                        consulta.getString(8),
+                        consulta.getInt(9),
+                        consulta.getFloat(10),
+                        consulta.getFloat(11),
+                        consulta.getString(12),
+                        consulta.getString(13),
+                        consulta.getString(14),
+                        consulta.getString(15),
+                        consulta.getString(16),
+                        consulta.getString(17),
+                        consulta.getString(18),
+                        consulta.getString(19),
+                        consulta.getInt(20),
+                        consulta.getInt(21),
+                        consulta.getString(22),
+                        consulta.getString(23),
+                        consulta.getString(24),
+                        consulta.getFloat(25),
+                        consulta.getInt(27)
+                    )
+                    listaClientes.add(listado)
+
+                } while (consulta.moveToNext())
+                consulta.close()
+            }
+        } catch (e: Exception) {
+            throw Exception(e.message)
+        } finally {
+            base.close()
+        }
+
+        return listaClientes
+    }
+
+}

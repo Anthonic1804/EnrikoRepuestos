@@ -28,6 +28,9 @@ class verPagare : AppCompatActivity() {
     private var porcentaje : Float = 0f
     private var plazo : Long = 0
 
+    private var busquedaPedido: Boolean = false
+    private var visita = false
+
 
     @RequiresApi(Build.VERSION_CODES.O)
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -40,6 +43,9 @@ class verPagare : AppCompatActivity() {
         duiCliente = intent.getStringExtra("duiCliente").toString()
         limiteCredito = intent.getFloatExtra("limiteCredito", 0f)
         plazo = intent.getLongExtra("plazoCredito", 0)
+
+        busquedaPedido = intent.getBooleanExtra("busqueda", false)
+        visita = intent.getBooleanExtra("visita", false)
 
         textPagare = findViewById(R.id.textoPagare)
         tvFecha = findViewById(R.id.tvFecha)
@@ -100,10 +106,19 @@ class verPagare : AppCompatActivity() {
     }
 
     fun atras(){
-        val intent = Intent(this, ClientesDetalle::class.java)
-        intent.putExtra("idcliente", idcliente)
-        startActivity(intent)
-        finish()
+        if(visita){
+            val intent = Intent(this, ClientesDetalle::class.java)
+            intent.putExtra("idcliente", idcliente)
+            intent.putExtra("busqueda", true)
+            intent.putExtra("visita", true)
+            startActivity(intent)
+            finish()
+        }else{
+            val intent = Intent(this, ClientesDetalle::class.java)
+            intent.putExtra("idcliente", idcliente)
+            startActivity(intent)
+            finish()
+        }
     }
 
     fun firmarPagareVista(){
@@ -114,6 +129,10 @@ class verPagare : AppCompatActivity() {
         intent.putExtra("duiCliente", duiCliente)
         intent.putExtra("limiteCredito", limiteCredito)
         intent.putExtra("plazoCredito", plazo)
+
+        intent.putExtra("busqueda", true)
+        intent.putExtra("visita", true)
+
         startActivity(intent)
         finish()
     }

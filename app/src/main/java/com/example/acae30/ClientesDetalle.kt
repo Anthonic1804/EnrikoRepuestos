@@ -4,13 +4,16 @@ import android.content.Intent
 import android.os.Bundle
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import com.example.acae30.controllers.ClientesControllers
 import com.example.acae30.database.Database
 import com.example.acae30.databinding.ActivityClientesDetalleBinding
 import com.example.acae30.modelos.Cliente
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 class ClientesDetalle : AppCompatActivity() {
 
@@ -25,6 +28,11 @@ class ClientesDetalle : AppCompatActivity() {
     private var plazo : Long = 0
     private var idcliente = 0
 
+    private var clienteController = ClientesControllers()
+
+    private var busquedaPedido: Boolean = false
+    private var visita = false
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityClientesDetalleBinding.inflate(layoutInflater)
@@ -32,6 +40,9 @@ class ClientesDetalle : AppCompatActivity() {
 
         bd = Database(this)
         idcliente = intent.getIntExtra("idcliente", 0)
+        busquedaPedido = intent.getBooleanExtra("busqueda", false)
+        visita = intent.getBooleanExtra("visita", false)
+
         funciones = Funciones()
 
     }
@@ -39,10 +50,24 @@ class ClientesDetalle : AppCompatActivity() {
     @OptIn(DelicateCoroutinesApi::class)
     override fun onStart() {
         super.onStart()
-        GlobalScope.launch(Dispatchers.IO) {
+
+        obtenerDatosCliente()
+
+        binding.imgatras.setOnClickListener {
+            Regresar()
+        }
+
+        binding.btnPagare.setOnClickListener {
+            pagare()
+        }
+    }
+
+    //FUNCION PARA OBTENER LOS DATOS DEL CLIENTE
+    private fun obtenerDatosCliente(){
+        CoroutineScope(Dispatchers.IO).launch {
             try {
                 if (idcliente > 0) {
-                    val data = getClient(idcliente)
+                    val data = clienteController.obtenerInformacionCliente(this@ClientesDetalle ,idcliente)
                     if (data != null) {
                         with(binding){
                             txtcodigo.text = data.Codigo
@@ -70,63 +95,10 @@ class ClientesDetalle : AppCompatActivity() {
                 }
 
             } catch (e: Exception) {
-               runOnUiThread{
-                   Toast.makeText(this@ClientesDetalle, "ERROR AL CARGAR LOS DATOS DEL CLIENTE", Toast.LENGTH_LONG).show()
-               }
+                withContext(Dispatchers.Main){
+                    Toast.makeText(this@ClientesDetalle, "ERROR AL CARGAR LOS DATOS DEL CLIENTE", Toast.LENGTH_LONG).show()
+                }
             }
-        }
-
-        binding.imgatras.setOnClickListener {
-            Regresar()
-        }
-
-        binding.btnPagare.setOnClickListener {
-            pagare()
-        }
-    }
-
-    fun getClient(id: Int): Cliente? {
-        val base = bd!!.readableDatabase
-        try {
-            val consulta = base!!.rawQuery("SELECT * FROM clientes where Id=$id", null)
-            var cliente: Cliente? = null
-            if (consulta.count > 0) {
-                consulta.moveToFirst()
-                cliente = Cliente(
-                    consulta.getInt(0),
-                    consulta.getString(1),
-                    consulta.getString(2),
-                    consulta.getString(3),
-                    consulta.getString(4),
-                    consulta.getString(5),
-                    consulta.getString(6),
-                    consulta.getString(7),
-                    consulta.getString(8),
-                    consulta.getInt(9),
-                    consulta.getFloat(10),
-                    consulta.getFloat(11),
-                    consulta.getString(12),
-                    consulta.getString(13),
-                    consulta.getString(14),
-                    consulta.getString(15),
-                    consulta.getString(16),
-                    consulta.getString(17),
-                    consulta.getString(18),
-                    consulta.getString(19),
-                    consulta.getInt(20),
-                    consulta.getInt(21),
-                    consulta.getString(22),
-                    consulta.getString(23),
-                    consulta.getString(24),
-                    consulta.getFloat(25)
-                )
-                consulta.close()
-            }
-            return cliente
-        } catch (e: Exception) {
-            throw Exception(e.message)
-        } finally {
-            base.close()
         }
     }
 
@@ -144,13 +116,26 @@ class ClientesDetalle : AppCompatActivity() {
         intent.putExtra("duiCliente", duiCliente)
         intent.putExtra("limiteCredito", limiteCredito)
         intent.putExtra("plazoCredito", plazo)
+
+        intent.putExtra("busqueda", true)
+        intent.putExtra("visita", true)
+
         startActivity(intent)
         finish()
     }
     private fun Regresar() {
-        val intento = Intent(this, Clientes::class.java)
-        startActivity(intento)
-        finish()
+        if(visita){
+            val intento = Intent(this, Clientes::class.java)
+            intento.putExtra("busqueda", true)
+            intento.putExtra("visita", true)
+            startActivity(intento)
+            finish()
+        }else{
+            val intento = Intent(this, Clientes::class.java)
+            startActivity(intento)
+            finish()
+        }
+
     }
 
 }

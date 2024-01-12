@@ -10,8 +10,10 @@ import android.view.ViewAnimationUtils
 import android.view.animation.AlphaAnimation
 import android.view.animation.Animation
 import android.widget.TextView
+import androidx.core.content.ContextCompat
 import com.example.acae30.database.Database
 import com.example.acae30.modelos.Visitas
+import com.google.android.material.snackbar.Snackbar
 import org.json.JSONObject
 import java.text.SimpleDateFormat
 import java.util.Date
@@ -59,38 +61,18 @@ class Funciones {
     } //valida campos vacios o nulos dela api
 
     fun validate(parametro: Int?): Int {
-        if (parametro != null) {
-            return parametro
-        } else {
-            return 0
-        }
+        return parametro ?: 0
     }//devuelve un int correcto
 
     fun validate(parametro: Float?): Float {
-        if (parametro != null) {
-            return parametro
-        } else {
-            return 0.00.toFloat()
-        }
+        return parametro ?: 0.00.toFloat()
     }//devuelve un float
 
-    fun validate(parametro: Char?): Char {
-        if (parametro != null) {
-            return parametro
-        } else {
-            return "".single()
-        }
-    }//devuelve un char
-
-    fun validate(parametro: Boolean?): Boolean {
-        try {
-            if (parametro != null) {
-                return parametro
-            } else {
-                return false
-            }
+    fun validateBoolean(parametro: Boolean?): Boolean {
+        return try {
+            parametro ?: false
         } catch (e: Exception) {
-            return false
+            false
         }
     }
 
@@ -131,42 +113,6 @@ class Funciones {
         view.visibility = View.VISIBLE
         animacion!!.start()
 
-    }
-
-
-    fun setUpFadeAnimation(textView: TextView) {
-        // Start from 0.1f if you desire 90% fade animation
-        val fadeIn = AlphaAnimation(0.0f, 1.0f)
-        fadeIn.duration = 1000
-        fadeIn.startOffset = 1000
-        // End to 0.1f if you desire 90% fade animation
-        val fadeOut = AlphaAnimation(1.0f, 0.0f)
-        fadeOut.duration = 1000
-        fadeOut.startOffset = 1000
-
-        fadeIn.setAnimationListener(object : Animation.AnimationListener {
-            override fun onAnimationEnd(arg0: Animation) {
-                // start fadeOut when fadeIn ends (continue)
-                textView.startAnimation(fadeOut)
-            }
-
-            override fun onAnimationRepeat(arg0: Animation) {}
-
-            override fun onAnimationStart(arg0: Animation) {}
-        })
-
-        fadeOut.setAnimationListener(object : Animation.AnimationListener {
-            override fun onAnimationEnd(arg0: Animation) {
-                // start fadeIn when fadeOut ends (repeat)
-                textView.startAnimation(fadeIn)
-            }
-
-            override fun onAnimationRepeat(arg0: Animation) {}
-
-            override fun onAnimationStart(arg0: Animation) {}
-        })
-
-        textView.startAnimation(fadeOut)
     }
 
     fun VendedorVerific(context: Context) {
@@ -216,5 +162,19 @@ class Funciones {
             base!!.close()
         }
     }
+
+    //FUNCION PARA OBTENER LA INSTANCIA DE LA BASE DE DATOS
+    fun getDataBase(context: Context): Database {
+        return Database(context)
+    }
+
+    //FUNCION DE MENSAJE DE ERROR
+    fun mostrarAlerta(mensaje: String, context: Context, view: View){
+        val alert: Snackbar = Snackbar.make(view, mensaje, Snackbar.LENGTH_LONG)
+        alert.view.setBackgroundColor(ContextCompat.getColor(context, R.color.moderado))
+        alert.show()
+    }
+
+
 
 }

@@ -136,7 +136,8 @@ class Cuentas_list : AppCompatActivity() {
                             consulta.getString(22),
                             consulta.getString(23),
                             consulta.getString(24),
-                            consulta.getFloat(25)
+                            consulta.getFloat(25),
+                            consulta.getInt(26)
                         )
                         lista.add(listado)
 
@@ -210,7 +211,8 @@ class Cuentas_list : AppCompatActivity() {
                         consulta.getString(22),
                         consulta.getString(23),
                         consulta.getString(24),
-                        consulta.getFloat(25)
+                        consulta.getFloat(25),
+                        consulta.getInt(27)
                     )
                     lista.add(listado)
 
