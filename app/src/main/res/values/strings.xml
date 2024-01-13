@@ -95,4 +95,7 @@
     <string name="firmar_pagar">CLIENTE SIN PAGARÉ FIRMADO</string>
     <string name="aceptar">ACEPTAR</string>
     <string name="cancelar">CANCELAR</string>
+    <string name="listado_de_clientes_nuevo_pedido">LISTADO DE CLIENTES (NUEVO PEDIDO)</string>
+    <string name="listado_de_clientes">LISTADO DE CLIENTES</string>
+    <string name="listado_de_clientes_cxc">LISTADO DE CLIENTES (CxC)</string>
 </resources>

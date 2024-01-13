@@ -10,6 +10,7 @@ import android.widget.SearchView
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -17,6 +18,7 @@ import com.example.acae30.controllers.ClientesControllers
 import com.example.acae30.database.Database
 import com.example.acae30.listas.ClienteAdapter
 import com.example.acae30.modelos.Cliente
+import kotlinx.android.synthetic.main.activity_login.lienzo
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -28,10 +30,10 @@ class Clientes : AppCompatActivity() {
 
     private var db: Database? = null
     private var recicle: RecyclerView? = null
-    private var funciones: Funciones? = null
     private var alert: AlertDialogo? = null
     private var busqueda: SearchView? = null
     private var busquedaPedido: Boolean = false
+    private var lienzo: ConstraintLayout? = null
     private var visita = false
     private var cuentas = false
 
@@ -40,6 +42,8 @@ class Clientes : AppCompatActivity() {
     private lateinit var tvMsj : TextView
     private lateinit var tvTitulo : TextView
 
+    private lateinit var tvListadoClientes: TextView
+
     private var preferences: SharedPreferences? = null
     private val instancia = "CONFIG_SERVIDOR"
     private var dSearch : String? = null
@@ -47,6 +51,7 @@ class Clientes : AppCompatActivity() {
     private var clienteHistorio : Boolean = false
 
     private var clienteController = ClientesControllers()
+    private var funciones = Funciones()
 
     override fun onCreate(savedInstanceState: Bundle?) {
 
@@ -62,10 +67,11 @@ class Clientes : AppCompatActivity() {
 
         db = Database(this)
         alert = AlertDialogo(this)
-        funciones = Funciones()
         busqueda = findViewById(R.id.busquedainv)
 
         recicle = findViewById(R.id.lista)
+        lienzo = findViewById(R.id.lienzo)
+        tvListadoClientes = findViewById(R.id.tvListadoClientes)
 
     }
 
@@ -79,17 +85,36 @@ class Clientes : AppCompatActivity() {
             busqueda!!.setQuery("$dSearch", true)
         }
 
+        when(visita){
+            true -> tvListadoClientes.text = getString(R.string.listado_de_clientes_nuevo_pedido)
+            else -> tvListadoClientes.text = getString(R.string.listado_de_clientes)
+        }
+
+        when(cuentas){
+            true -> tvListadoClientes.text = getString(R.string.listado_de_clientes_cxc)
+            else -> tvListadoClientes.text = getString(R.string.listado_de_clientes)
+        }
+
         mostrarClientes()
         Busqueda()
     }
 
     private fun mostrarClientes() {
-        try {
-            val list: ArrayList<Cliente> = clienteController.obtenerListaClientes(this@Clientes, dSearch!!)
-            MostrarLista(list)
-        }catch (e: Exception){
-            Toast.makeText(this@Clientes, e.message, Toast.LENGTH_LONG).show()
+        CoroutineScope(Dispatchers.IO).launch {
+            try {
+                val list: ArrayList<Cliente> = clienteController.obtenerListaClientes(this@Clientes, dSearch!!)
+                if(list.size > 0){
+                    runOnUiThread {
+                        MostrarLista(list)
+                    }
+                }
+            }catch (e: Exception){
+                runOnUiThread {
+                    funciones.mostrarAlerta("ERROR: NO SE LOGRO CARGAR EL LISTADO DE CLIENTES", this@Clientes, lienzo!!)
+                }
+            }
         }
+
     }
 
     fun Atras(view: View) {
