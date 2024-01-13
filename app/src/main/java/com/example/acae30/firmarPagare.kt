@@ -2,7 +2,9 @@ package com.example.acae30
 
 import android.Manifest.permission.WRITE_EXTERNAL_STORAGE
 import android.app.Dialog
+import android.content.Context
 import android.content.Intent
+import android.content.SharedPreferences
 import android.content.pm.PackageManager
 import android.graphics.Bitmap
 import android.os.Bundle
@@ -50,7 +52,8 @@ class firmarPagare : AppCompatActivity() {
     private lateinit var imageFinal : ByteArray
     private var imageFirmada : Boolean = false
 
-    private var busquedaPedido: Boolean = false
+    private lateinit var preferencias: SharedPreferences
+    private var instancia = "CONFIG_SERVIDOR"
     private var visita = false
 
 
@@ -83,8 +86,11 @@ class firmarPagare : AppCompatActivity() {
         limiteCredito = intent.getFloatExtra("limiteCredito", 0f)
         plazo = intent.getLongExtra("plazoCredito", 0)
 
-        busquedaPedido = intent.getBooleanExtra("busqueda", false)
-        visita = intent.getBooleanExtra("visita", false)
+        //busquedaPedido = intent.getBooleanExtra("busqueda", false)
+        //visita = intent.getBooleanExtra("visita", false)
+
+        preferencias = getSharedPreferences(instancia, Context.MODE_PRIVATE)
+        visita = preferencias.getBoolean("visita", false)
 
         btnCancelar.setOnClickListener {
             mensaje("Cancelar")
@@ -250,25 +256,14 @@ class firmarPagare : AppCompatActivity() {
     }
 
     fun atras(){
-        if(visita){
-            val intent = Intent(this, ClientesDetalle::class.java)
-            intent.putExtra("idcliente", idcliente)
-            intent.putExtra("busqueda", true)
-            intent.putExtra("visita", true)
-            startActivity(intent)
-            finish()
-        }else{
-            val intent = Intent(this, ClientesDetalle::class.java)
-            intent.putExtra("idcliente", idcliente)
-            startActivity(intent)
-            finish()
-        }
+        val intent = Intent(this, ClientesDetalle::class.java)
+        intent.putExtra("idcliente", idcliente)
+        startActivity(intent)
+        finish()
     }
     fun pagareYaFirmado(){
         if(visita){
             val intent = Intent(this, Clientes::class.java)
-            intent.putExtra("busqueda", true)
-            intent.putExtra("visita", true)
             startActivity(intent)
             finish()
         }else{

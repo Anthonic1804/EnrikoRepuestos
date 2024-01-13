@@ -58,12 +58,13 @@ class Clientes : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_clientes)
         supportActionBar?.hide()
-        busquedaPedido = intent.getBooleanExtra("busqueda", false)
-        cuentas = intent.getBooleanExtra("cuentas", false)
-        visita = intent.getBooleanExtra("visita", false)
+
         clienteHistorio = intent.getBooleanExtra("Historico", false)
+        cuentas = intent.getBooleanExtra("cuentas", false)
 
         preferences = getSharedPreferences(instancia, Context.MODE_PRIVATE)
+        busquedaPedido = preferences!!.getBoolean("busqueda", false)
+        visita = preferences!!.getBoolean("visita", false)
 
         db = Database(this)
         alert = AlertDialogo(this)
@@ -117,11 +118,21 @@ class Clientes : AppCompatActivity() {
 
     }
 
+    //FUNCION PARA ELIMINAR LAS SHARED PREFERENCES CREADAS
+    //13/01/2024
+    private fun updateSharedPreferencesFinalizarVisita(){
+        val editor = preferences!!.edit()
+        editor.remove("visita")
+        editor.remove("busqueda")
+        editor.apply()
+    }
+
     fun Atras(view: View) {
         if (busquedaPedido) {
             if (visita) {
 
                 eliminarBusqueda()
+                updateSharedPreferencesFinalizarVisita()
 
                 val intento = Intent(this, Pedido::class.java)
                 startActivity(intento)
@@ -288,8 +299,8 @@ class Clientes : AppCompatActivity() {
         tvUpdate.setOnClickListener {
             val intento = Intent(this@Clientes, ClientesDetalle::class.java)
             intento.putExtra("idcliente", idCliente)
-            intento.putExtra("busqueda", true)
-            intento.putExtra("visita", true)
+            //intento.putExtra("busqueda", true)
+            //intento.putExtra("visita", true)
             startActivity(intento)
             finish()
 

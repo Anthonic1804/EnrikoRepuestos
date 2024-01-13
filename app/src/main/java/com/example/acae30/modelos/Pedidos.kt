@@ -13,6 +13,7 @@ data class Pedidos(
     var Gps: String?,
     var Cerrado: Int?,
     var Idvisita: Int?,
-    var Fecha_creado: String?
+    var Fecha_creado: String?,
+    var Terminos: String?
 
 )

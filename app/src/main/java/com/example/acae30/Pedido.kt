@@ -133,9 +133,14 @@ class Pedido : AppCompatActivity() {
 
         lienzo = findViewById(R.id.lienzo)
         findViewById<FloatingActionButton>(R.id.fab).setOnClickListener { view ->
+            val editor = preferencias.edit()
+            editor.putBoolean("busqueda", true)
+            editor.putBoolean("visita", true)
+            editor.apply()
+
             val intento = Intent(this, Clientes::class.java)
-            intento.putExtra("busqueda", true)
-            intento.putExtra("visita", true)
+            //intento.putExtra("busqueda", true)
+            //intento.putExtra("visita", true)
             startActivity(intento)
             finish()
         }
@@ -358,7 +363,8 @@ class Pedido : AppCompatActivity() {
                                 pedidos.getString(8),
                                 pedidos.getInt(9),
                                 pedidos.getInt(10),
-                                pedidos.getString(11)
+                                pedidos.getString(11),
+                                pedidos.getString(17)
                             )
 
                             listPedidos.add(datos)
@@ -582,7 +588,8 @@ class Pedido : AppCompatActivity() {
                         cursor.getString(8),
                         cursor.getInt(9),
                         cursor.getInt(10),
-                        cursor.getString(11)
+                        cursor.getString(11),
+                        cursor.getString(17)
                     )
                     lista.add(pedido)
 
@@ -722,6 +729,7 @@ class Pedido : AppCompatActivity() {
                     0,
                     "",
                     pedido.getString(11),
+                    pedido.getString(17),
                     null
 
                 )

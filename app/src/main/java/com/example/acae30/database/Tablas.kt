@@ -214,7 +214,8 @@ class Tablas {
                 "codigo_sucursal VARCHAR(25) NOT NULL DEFAULT ''," +
                 "nombre_sucursal VARCHAR(45) NOT NULL DEFAULT ''," +
                 "tipo_documento VARCHAR(2) NOT NULL DEFAULT 'FC'," +
-                "tipo_envio INTEGER NOT NULL DEFAULT 0);" //AGREGAR CAMPO A LA BD SQL
+                "tipo_envio INTEGER NOT NULL DEFAULT 0," +
+                "Terminos VARCHAR(25) NOT NULL);" //AGREGAR CAMPO A LA BD SQL
         return pedido
     } //tabla pedidos
 

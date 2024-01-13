@@ -20,6 +20,7 @@ data class CabezeraPedidoSend (
     var Idvendedor:Int?,
     var Vendedor:String?,
     var fechaCreado: String?, /*AGREGADO PARA ENVIAR LA FECHA Y HORA DE CREACION DEL PEDIDO*/
+    var Terminos: String?, //AGREGANDO LOS TERMINOS DEL PEDIDO
     var detalle:ArrayList<DetallePedido>?
 
 )

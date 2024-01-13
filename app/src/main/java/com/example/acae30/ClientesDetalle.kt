@@ -1,6 +1,8 @@
 package com.example.acae30
 
+import android.content.Context
 import android.content.Intent
+import android.content.SharedPreferences
 import android.os.Bundle
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
@@ -29,20 +31,25 @@ class ClientesDetalle : AppCompatActivity() {
     private var idcliente = 0
 
     private var clienteController = ClientesControllers()
-
+/*
+    private var preferencias: SharedPreferences? = null
+    private val instancia = "CONFIG_SERVIDOR"
     private var busquedaPedido: Boolean = false
-    private var visita = false
+    private var visita = false*/
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityClientesDetalleBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
+
         bd = Database(this)
         idcliente = intent.getIntExtra("idcliente", 0)
-        busquedaPedido = intent.getBooleanExtra("busqueda", false)
-        visita = intent.getBooleanExtra("visita", false)
-
+/*
+        preferencias = getSharedPreferences(instancia, Context.MODE_PRIVATE)
+        busquedaPedido = preferencias!!.getBoolean("busqueda", false)
+        visita = preferencias!!.getBoolean("visita", false)
+*/
         funciones = Funciones()
 
     }
@@ -116,25 +123,13 @@ class ClientesDetalle : AppCompatActivity() {
         intent.putExtra("duiCliente", duiCliente)
         intent.putExtra("limiteCredito", limiteCredito)
         intent.putExtra("plazoCredito", plazo)
-
-        intent.putExtra("busqueda", true)
-        intent.putExtra("visita", true)
-
         startActivity(intent)
         finish()
     }
     private fun Regresar() {
-        if(visita){
-            val intento = Intent(this, Clientes::class.java)
-            intento.putExtra("busqueda", true)
-            intento.putExtra("visita", true)
-            startActivity(intento)
-            finish()
-        }else{
-            val intento = Intent(this, Clientes::class.java)
-            startActivity(intento)
-            finish()
-        }
+        val intento = Intent(this, Clientes::class.java)
+        startActivity(intento)
+        finish()
 
     }
 

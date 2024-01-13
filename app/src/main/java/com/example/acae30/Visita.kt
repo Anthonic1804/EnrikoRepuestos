@@ -8,7 +8,6 @@ import android.content.SharedPreferences
 import android.content.pm.PackageManager
 import android.location.Location
 import android.net.ConnectivityManager
-import android.os.Build
 import android.os.Bundle
 import android.os.StrictMode
 import android.view.View
@@ -20,6 +19,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.app.ActivityCompat
 import androidx.lifecycle.lifecycleScope
+import com.example.acae30.controllers.ClientesControllers
 import com.example.acae30.database.Database
 import com.example.acae30.modelos.Visitas
 import com.google.android.gms.location.FusedLocationProviderClient
@@ -37,7 +37,8 @@ import java.net.HttpURLConnection
 import java.net.URL
 import java.nio.charset.StandardCharsets
 import java.text.SimpleDateFormat
-import java.util.*
+import java.util.Date
+import java.util.Locale
 
 
 class Visita : AppCompatActivity() {
@@ -72,6 +73,8 @@ class Visita : AppCompatActivity() {
     private lateinit var fusedLocationProviderClient: FusedLocationProviderClient
 
     private lateinit var locationCallback: LocationCallback
+
+    private var clientesController = ClientesControllers()
 
     override fun onCreate(savedInstanceState: Bundle?) {
 
@@ -139,6 +142,7 @@ class Visita : AppCompatActivity() {
         //configuracion general del gps
         btnfinvisita!!.setOnClickListener {
             getGps(false)
+            updateSharedPreferencesFinalizarVisita()
         }
 
         RevisarVisita()
@@ -160,8 +164,6 @@ class Visita : AppCompatActivity() {
         btnatras!!.setOnClickListener {
             if (idvisitaGLOBAL!! < 1) {
                 val intento = Intent(this, Clientes::class.java)
-                intento.putExtra("busqueda", true)
-                intento.putExtra("visita", true)
                 startActivity(intento)
             }
         }
@@ -188,6 +190,15 @@ class Visita : AppCompatActivity() {
         alerta!!.Cargando()
         alerta!!.changeText("Buscando tu ubicación")
         updateGPS()
+    }
+
+    //FUNCION PARA ELIMINAR LAS SHARED PREFERENCES CREADAS
+    //13/01/2024
+    private fun updateSharedPreferencesFinalizarVisita(){
+        val editor = preferencias.edit()
+        editor.remove("visita")
+        editor.remove("busqueda")
+        editor.apply()
     }
 
     private fun startLocationUpdates() {
@@ -796,6 +807,7 @@ class Visita : AppCompatActivity() {
     private fun CreatePedido() {
         val base = bd!!.writableDatabase
         val fechanow = getDateTime()
+        val terminos = clientesController.obtenerInformacionCliente(this@Visita, idcliente)
         try {
             base.beginTransaction()
             val contenido = ContentValues()
@@ -806,6 +818,7 @@ class Visita : AppCompatActivity() {
             contenido.put("Enviado", false)
             contenido.put("Idvisita", idvisitaGLOBAL)
             contenido.put("Fecha_creado", fechanow)
+            contenido.put("Terminos", terminos!!.Terminos_cliente)
             val id = base.insert("pedidos", null, contenido)
             //inserta el encabezado del pedido
             idpedido = id.toInt()

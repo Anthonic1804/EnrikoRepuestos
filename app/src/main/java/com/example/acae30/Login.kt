@@ -53,7 +53,6 @@ class Login : AppCompatActivity() {
     private lateinit var tvTitulo : TextView
     private lateinit var tvMensaje : TextView
 
-    @RequiresApi(Build.VERSION_CODES.O)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_login)

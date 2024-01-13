@@ -711,7 +711,8 @@ class Detallepedido : AppCompatActivity() {
                     pedido.getString(8),
                     pedido.getInt(9),
                     pedido.getInt(10),
-                    pedido.getString(11)
+                    pedido.getString(11),
+                    pedido.getString(17)
                 )
                 pedido.close()
             }
@@ -884,6 +885,7 @@ class Detallepedido : AppCompatActivity() {
                     0,
                     "",
                     pedido.getString(11),
+                    pedido.getString(17),
                     null
 
                 )
@@ -1105,6 +1107,7 @@ class Detallepedido : AppCompatActivity() {
         json.addProperty("Tipo_documento_app", pedido.TipoDocumento)
         json.addProperty("Idvendedor", pedido.Idvendedor)
         json.addProperty("Vendedor", pedido.Vendedor)
+        json.addProperty("Terminos", pedido.Terminos)
         json.addProperty("fechaCreado", pedido.fechaCreado) /*ENVIANDO LA FECHA DESDE EL DISPOSITIVO MOVIL*/
         json.addProperty("HoraProceso", horaProceso)/*ENVIANDO EL TIMESTAMP DE CREACION DEL PEDIDO*/
         json.addProperty("Idapp", idvisita_v)
