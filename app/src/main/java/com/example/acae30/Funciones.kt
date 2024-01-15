@@ -168,6 +168,11 @@ class Funciones {
         return Database(context)
     }
 
+    //FUNCION PARA OBTENER EL SERVIDOR
+    fun getServidor(ip: String?, puerto: String?): String {
+        return "http://${ip}:${puerto}/"
+    }
+
     //FUNCION DE MENSAJE DE ERROR
     fun mostrarAlerta(mensaje: String, context: Context, view: View){
         val alert: Snackbar = Snackbar.make(view, mensaje, Snackbar.LENGTH_LONG)

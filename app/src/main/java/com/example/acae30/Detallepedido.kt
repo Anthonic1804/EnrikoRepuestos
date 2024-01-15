@@ -711,8 +711,7 @@ class Detallepedido : AppCompatActivity() {
                     pedido.getString(8),
                     pedido.getInt(9),
                     pedido.getInt(10),
-                    pedido.getString(11),
-                    pedido.getString(17)
+                    pedido.getString(11)
                 )
                 pedido.close()
             }

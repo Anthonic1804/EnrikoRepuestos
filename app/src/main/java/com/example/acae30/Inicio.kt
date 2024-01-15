@@ -76,6 +76,9 @@ class Inicio : AppCompatActivity(), NavigationView.OnNavigationItemSelectedListe
         funciones!!.VendedorVerific(this) //valida que haya sesion y que haya configuracion
         database = Database(this)
 
+        val pagare = preferencias!!.getBoolean("PagareObligatorio", false)
+        println("EL PAGARE SERA OBLIGATORIO: -> $pagare")
+
         ip = preferencias!!.getString("ip", "").toString()
         puerto = preferencias!!.getInt("puerto", 0)
         generaToken = preferencias!!.getInt("generaToken", 0)

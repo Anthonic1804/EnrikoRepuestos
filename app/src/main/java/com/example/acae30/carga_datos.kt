@@ -12,6 +12,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.cardview.widget.CardView
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.content.ContextCompat
+import com.example.acae30.controllers.ConfigController
 import com.example.acae30.database.Database
 import com.google.android.material.snackbar.Snackbar
 import kotlinx.android.synthetic.main.activity_carga_datos.*
@@ -37,6 +38,8 @@ class carga_datos : AppCompatActivity() {
     private var vista: ConstraintLayout? = null
     private var funciones: Funciones? = null
     private var database: Database? = null
+
+    private var configController = ConfigController()
 
     override fun onCreate(savedInstanceState: Bundle?) {
 
@@ -250,6 +253,11 @@ class carga_datos : AppCompatActivity() {
         } catch (e: Exception) {
             alert!!.dismisss()
             ShowAlert(e.message.toString())
+        }
+        finally {
+            CoroutineScope(Dispatchers.IO).launch {
+                configController.obtenerConfigPagareObligatorio(this@carga_datos)
+            }
         }
     } //obtiene los clientes del servidor
 

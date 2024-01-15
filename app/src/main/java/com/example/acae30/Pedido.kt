@@ -363,8 +363,7 @@ class Pedido : AppCompatActivity() {
                                 pedidos.getString(8),
                                 pedidos.getInt(9),
                                 pedidos.getInt(10),
-                                pedidos.getString(11),
-                                pedidos.getString(17)
+                                pedidos.getString(11)
                             )
 
                             listPedidos.add(datos)
@@ -588,8 +587,7 @@ class Pedido : AppCompatActivity() {
                         cursor.getString(8),
                         cursor.getInt(9),
                         cursor.getInt(10),
-                        cursor.getString(11),
-                        cursor.getString(17)
+                        cursor.getString(11)
                     )
                     lista.add(pedido)
 
