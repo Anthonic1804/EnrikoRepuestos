@@ -1,12 +1,29 @@
 package com.example.acae30.controllers
 
+import android.content.ContentValues
 import android.content.Context
+import android.content.SharedPreferences
+import android.view.View
+import android.widget.Toast
 import com.example.acae30.Funciones
 import com.example.acae30.modelos.Cliente
+import com.example.acae30.modelos.JSONmodels.ActualizarPagareFirmadoCliente
+import com.example.acae30.modelos.JSONmodels.TokenDataClassJSON
+import com.google.gson.Gson
+import org.json.JSONObject
+import java.io.BufferedReader
+import java.io.InputStreamReader
+import java.io.OutputStreamWriter
+import java.io.Reader
+import java.net.HttpURLConnection
+import java.net.URL
+import java.nio.charset.StandardCharsets
 
 class ClientesControllers {
 
     private var funciones = Funciones()
+    private lateinit var preferences: SharedPreferences
+    private var instancia = "CONFIG_SERVIDOR"
 
     //FUNCION PARA VERIFICAR EL ESTADO DEL PAGARE DEL CLIENTE
     fun obtenerInformacionCliente(context: Context, idCliente: Int): Cliente?{
@@ -120,6 +137,91 @@ class ClientesControllers {
         }
 
         return listaClientes
+    }
+
+    //FUNCION PARA ACTUALIZAR EL PAGARE EN SERVIDOR SQL SERVER
+    fun actualizarPagareFirmadoSqlServer(context: Context, idCliente: Int, vista: View){
+
+        preferences = context.getSharedPreferences(instancia, Context.MODE_PRIVATE)
+        val url = funciones.getServidor(preferences.getString("ip", ""), preferences.getInt("puerto", 0).toString())
+
+        try {
+            val datos = ActualizarPagareFirmadoCliente(
+                idCliente
+            )
+            val objecto =
+                Gson().toJson(datos)
+            val ruta: String = url + "actualizarPagare"
+            val url2 = URL(ruta)
+            with(url2.openConnection() as HttpURLConnection) {
+                try {
+                    connectTimeout = 20000
+                    setRequestProperty(
+                        "Content-Type",
+                        "application/json;charset=utf-8"
+                    )
+                    requestMethod = "POST"
+                    val or = OutputStreamWriter(outputStream, StandardCharsets.UTF_8)
+                    or.write(objecto) //escribo el json
+                    or.flush() //se envia el json
+                    println("CODIGO DE RESPUEST: $responseCode")
+                    if (responseCode == 201) {
+                        BufferedReader(InputStreamReader(inputStream) as Reader?).use {
+                            try {
+                                val respuesta = StringBuffer()
+                                var inpuline = it.readLine()
+                                while (inpuline != null) {
+                                    respuesta.append(inpuline)
+                                    inpuline = it.readLine()
+                                }
+                                it.close()
+                                val res: JSONObject =
+                                    JSONObject(respuesta.toString())
+                                if (res.length() > 0) {
+                                    if (res.getInt("id_token") > 0 && !res.isNull("response")) {
+                                        println("RESPUSTA DEL SERVER: ${res.getString("response")}")
+                                        when (res.getString("response")) {
+                                            "UPDATE_PAGARE_OK" -> {
+                                                actualizarPagareFirmadoSqLite(context, idCliente)
+                                            }
+                                            "UPDATE_PAGARE_ERROR" -> {
+                                                funciones.mostrarAlerta("ERROR AL ACTUALIZAR LA TABLA CLIENTES", context, vista)
+                                            }
+                                        }
+                                    }
+                                } else {
+                                    println("Error al procesar la solicitud")
+                                }
+                            } catch (e: Exception) {
+                                println("ERROR: ${e.message}")
+                            }
+                        }
+                    }else {
+                        println("Error de comunicacion con el servidor")
+                    }
+
+                } catch (e: Exception) {
+                    println("ERROR: ${e.message}")
+                }
+            }
+        } catch (e: Exception) {
+            println("ERROR: ${e.message}")
+        }
+    }
+
+    //FUNCION PARA ACTUALIZAR EL PAGARE DE FORMA LOCAL
+    private fun actualizarPagareFirmadoSqLite(context: Context, idCliente: Int){
+        val base = funciones.getDataBase(context).writableDatabase
+        base.beginTransaction()
+
+        val data = ContentValues()
+        data.put("Firmar_pagare_app", 1)
+
+        base.update("clientes", data, "Id=${idCliente}", null)
+
+        base.setTransactionSuccessful()
+        base.endTransaction()
+        base.close()
     }
 
 }

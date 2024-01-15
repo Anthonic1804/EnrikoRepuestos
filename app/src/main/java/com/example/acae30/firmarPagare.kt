@@ -11,12 +11,14 @@ import android.os.Bundle
 import android.os.Environment
 import android.view.View
 import android.widget.Button
+import android.widget.LinearLayout
 import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
+import com.example.acae30.controllers.ClientesControllers
 import com.google.android.material.snackbar.Snackbar
 import com.itextpdf.text.*
 import com.itextpdf.text.pdf.PdfWriter
@@ -38,6 +40,7 @@ class firmarPagare : AppCompatActivity() {
     private lateinit var btnCancelar : Button
     private lateinit var btnLimpiar : Button
     private lateinit var btnFirmar : Button
+    private lateinit var vista: LinearLayout
 
     private var idcliente : Int = 0
     private var nombreCliente : String = ""
@@ -55,6 +58,8 @@ class firmarPagare : AppCompatActivity() {
     private lateinit var preferencias: SharedPreferences
     private var instancia = "CONFIG_SERVIDOR"
     private var visita = false
+
+    private var clienteController = ClientesControllers()
 
 
     private val requestPermissionLauncher = registerForActivityResult(
@@ -85,6 +90,8 @@ class firmarPagare : AppCompatActivity() {
         duiCliente = intent.getStringExtra("duiCliente").toString()
         limiteCredito = intent.getFloatExtra("limiteCredito", 0f)
         plazo = intent.getLongExtra("plazoCredito", 0)
+
+        vista = findViewById(R.id.vista)
 
         //busquedaPedido = intent.getBooleanExtra("busqueda", false)
         //visita = intent.getBooleanExtra("visita", false)
@@ -316,6 +323,7 @@ class firmarPagare : AppCompatActivity() {
                 mensajeBotonAceptar = "ACEPTAR"
 
                 tvUpdate.setOnClickListener {
+                    clienteController.actualizarPagareFirmadoSqlServer(this@firmarPagare, idcliente, vista)
                     pagareYaFirmado()
                     updateDialog.dismiss()
                 }
