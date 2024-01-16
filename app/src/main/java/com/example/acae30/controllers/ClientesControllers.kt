@@ -151,7 +151,7 @@ class ClientesControllers {
             )
             val objecto =
                 Gson().toJson(datos)
-            val ruta: String = url + "actualizarPagare"
+            val ruta: String = url + "clientes/actualizarPagare"
             val url2 = URL(ruta)
             with(url2.openConnection() as HttpURLConnection) {
                 try {
@@ -164,8 +164,7 @@ class ClientesControllers {
                     val or = OutputStreamWriter(outputStream, StandardCharsets.UTF_8)
                     or.write(objecto) //escribo el json
                     or.flush() //se envia el json
-                    println("CODIGO DE RESPUEST: $responseCode")
-                    if (responseCode == 201) {
+                    if (responseCode == 200) {
                         BufferedReader(InputStreamReader(inputStream) as Reader?).use {
                             try {
                                 val respuesta = StringBuffer()
@@ -174,38 +173,30 @@ class ClientesControllers {
                                     respuesta.append(inpuline)
                                     inpuline = it.readLine()
                                 }
-                                it.close()
-                                val res: JSONObject =
-                                    JSONObject(respuesta.toString())
-                                if (res.length() > 0) {
-                                    if (res.getInt("id_token") > 0 && !res.isNull("response")) {
-                                        println("RESPUSTA DEL SERVER: ${res.getString("response")}")
-                                        when (res.getString("response")) {
-                                            "UPDATE_PAGARE_OK" -> {
-                                                actualizarPagareFirmadoSqLite(context, idCliente)
-                                            }
-                                            "UPDATE_PAGARE_ERROR" -> {
-                                                funciones.mostrarAlerta("ERROR AL ACTUALIZAR LA TABLA CLIENTES", context, vista)
-                                            }
-                                        }
+
+                                when (respuesta.toString()) {
+                                    "CLIENTE_ACTUALIZADO" -> {
+                                        actualizarPagareFirmadoSqLite(context, idCliente)
                                     }
-                                } else {
-                                    println("Error al procesar la solicitud")
+                                    "ERROR_CLIENTE_NO_ENCONTRADO" -> {
+                                        funciones.mostrarAlerta("ERROR AL ACTUALIZAR LA TABLA CLIENTES", context, vista)
+                                    }
                                 }
+
                             } catch (e: Exception) {
-                                println("ERROR: ${e.message}")
+                                println("ERROR 1: ${e.message}")
                             }
                         }
                     }else {
-                        println("Error de comunicacion con el servidor")
+                        println("ERROR AL ACTUALIZAR LA TABLA CLIENTES")
                     }
 
                 } catch (e: Exception) {
-                    println("ERROR: ${e.message}")
+                    println("ERROR 2: ${e.message}")
                 }
             }
         } catch (e: Exception) {
-            println("ERROR: ${e.message}")
+            println("ERROR 3: ${e.message}")
         }
     }
 
@@ -213,7 +204,6 @@ class ClientesControllers {
     private fun actualizarPagareFirmadoSqLite(context: Context, idCliente: Int){
         val base = funciones.getDataBase(context).writableDatabase
         base.beginTransaction()
-
         val data = ContentValues()
         data.put("Firmar_pagare_app", 1)
 

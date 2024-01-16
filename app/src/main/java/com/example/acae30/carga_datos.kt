@@ -13,6 +13,7 @@ import androidx.cardview.widget.CardView
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.content.ContextCompat
 import com.example.acae30.controllers.ConfigController
+import com.example.acae30.controllers.InventarioController
 import com.example.acae30.database.Database
 import com.google.android.material.snackbar.Snackbar
 import kotlinx.android.synthetic.main.activity_carga_datos.*
@@ -40,6 +41,7 @@ class carga_datos : AppCompatActivity() {
     private var database: Database? = null
 
     private var configController = ConfigController()
+    private var inventarioController = InventarioController()
 
     override fun onCreate(savedInstanceState: Bundle?) {
 
@@ -556,6 +558,8 @@ class carga_datos : AppCompatActivity() {
             messageAsync("Inventario Almacenado Exitosamente")
             delay(1500)
             alert!!.dismisss()
+        }finally {
+            inventarioController.obtenerFechaInventario(this@carga_datos)
         }
     }
 

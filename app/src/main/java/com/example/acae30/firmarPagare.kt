@@ -171,8 +171,13 @@ class firmarPagare : AppCompatActivity() {
                 WRITE_EXTERNAL_STORAGE
             ) == PackageManager.PERMISSION_GRANTED -> {
 
-                //Toast.makeText(this, "PERMISOS CONCEDIDOS", Toast.LENGTH_LONG).show()
+                /*
+                * ACTUALIZANDO EL PAGARE FIRMADO DEL CLIENTE
+                * SQLITE Y SQLSERVER*/
+                clienteController.actualizarPagareFirmadoSqlServer(this@firmarPagare, idcliente, vista)
 
+                /*
+                * GENERANDO EL ARCHIVO PDF DEL PAGARE*/
                 generarPDF(nombreCliente, direccionCliente, duiCliente)
             }
 
@@ -323,7 +328,6 @@ class firmarPagare : AppCompatActivity() {
                 mensajeBotonAceptar = "ACEPTAR"
 
                 tvUpdate.setOnClickListener {
-                    clienteController.actualizarPagareFirmadoSqlServer(this@firmarPagare, idcliente, vista)
                     pagareYaFirmado()
                     updateDialog.dismiss()
                 }
