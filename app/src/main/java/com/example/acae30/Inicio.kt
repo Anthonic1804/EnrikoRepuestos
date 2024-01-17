@@ -76,15 +76,15 @@ class Inicio : AppCompatActivity(), NavigationView.OnNavigationItemSelectedListe
         funciones!!.VendedorVerific(this) //valida que haya sesion y que haya configuracion
         database = Database(this)
 
-        val pagare = preferencias!!.getBoolean("PagareObligatorio", false)
-        println("EL PAGARE SERA OBLIGATORIO: -> $pagare")
-
         ip = preferencias!!.getString("ip", "").toString()
         puerto = preferencias!!.getInt("puerto", 0)
         generaToken = preferencias!!.getInt("generaToken", 0)
 
+        val fechaInventario: String? = preferencias!!.getString("fechaInventario", "NULL")
+        binding.includeBar.lblupdate.text = fechaInventario
+
         val nombre_vendedor =  preferencias!!.getString("Vendedor", "")
-        binding.includeBar.txtvendedor.text = "BIENVENIDO " + nombre_vendedor?.trim()
+        binding.includeBar.txtvendedor.text = "BIENVENIDO ${nombre_vendedor?.trim()}"
 
         //IMPLEMENTANDO MENU SLIDE
         val toolbar: androidx.appcompat.widget.Toolbar = findViewById(R.id.toolbar_main)
@@ -135,84 +135,6 @@ class Inicio : AppCompatActivity(), NavigationView.OnNavigationItemSelectedListe
         super.onResume()
         menu() //llama los botones de menu
         funciones!!.VendedorVerific(this) //valida que haya sesion
-        mostrarFecha() //MOSTRANDOLA FECHA DEL INVENTARIO
-        //PRUEBA DESDE GIT DE OFICINA
-    }
-
-    //FUNCION PARA OBTENER LA FECHA DE INVENTARIO
-    private fun getFechaInventario(): ArrayList<com.example.acae30.modelos.Inventario> {
-        val lista = ArrayList<com.example.acae30.modelos.Inventario>()
-        val base = database!!.readableDatabase
-
-        try {
-            val cursor = base.rawQuery("SELECT * FROM inventario LIMIT 1", null)
-
-            if (cursor.count > 0) {
-                cursor.moveToFirst()
-                do {
-                    val arreglo = com.example.acae30.modelos.Inventario(
-                        cursor.getInt(0),
-                        cursor.getString(1),
-                        cursor.getString(2),
-                        cursor.getInt(3),
-                        cursor.getString(4),
-                        cursor.getString(5),
-                        cursor.getString(6),
-                        cursor.getFloat(7),
-                        cursor.getString(8),
-                        cursor.getInt(9),
-                        cursor.getFloat(10),
-                        cursor.getFloat(11),
-                        cursor.getFloat(12),
-                        cursor.getFloat(13),
-                        cursor.getFloat(14),
-                        cursor.getFloat(15),
-                        cursor.getFloat(16),
-                        cursor.getString(17),
-                        cursor.getString(18),
-                        cursor.getInt(19),
-                        cursor.getString(20),
-                        cursor.getInt(21),
-                        cursor.getString(22),
-                        cursor.getString(23),
-                        cursor.getString(24),
-                        cursor.getString(25),
-                        cursor.getString(26),
-                        cursor.getString(27),
-                        cursor.getInt(28),
-                        cursor.getString(29),
-                        cursor.getFloat(30),
-                        cursor.getDouble(31),
-                        cursor.getInt(32),
-                        cursor.getFloat(33)
-                    )
-                    lista.add(arreglo)
-                } while (cursor.moveToNext())
-                cursor.close()
-            }
-        } catch (e: Exception) {
-            println("ERROR EN FUNCION DE SELECCIONAR FECHA DE INVENTARIO")
-        } finally {
-            base!!.close()
-        }
-        return lista
-    }
-
-    private fun mostrarFecha(){
-        try {
-            val list: ArrayList<com.example.acae30.modelos.Inventario> = getFechaInventario()
-            if(list.isNotEmpty()){
-                var fecha = ""
-                for(data in list){
-                    fecha = data.Fecha_inventario.toString()
-                }
-                binding.includeBar.lblupdate.text = fecha
-            }else{
-                binding.includeBar.lblupdate.visibility = View.GONE
-            }
-        } catch (e: Exception) {
-            println("ERROR AL MOSTRAR FECHA DE INVENTARIO")
-        }
     }
 
     private fun menu() {

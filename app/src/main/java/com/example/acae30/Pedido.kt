@@ -124,12 +124,6 @@ class Pedido : AppCompatActivity() {
         bd = Database(this)
         reciclado = findViewById(R.id.recicler)
 
-        //ELIMINADO POR SOBRECARGA
-        //CARGANDO EL CONTENIDO DEL PEDIDO EN UN SEGUNDO HILO
-        /*val listPedidos = ArrayList<Pedidos>()
-        this@Pedido.lifecycleScope.launch {
-            ShowList(listPedidos)
-        }*/
 
         lienzo = findViewById(R.id.lienzo)
         findViewById<FloatingActionButton>(R.id.fab).setOnClickListener { view ->
@@ -139,8 +133,6 @@ class Pedido : AppCompatActivity() {
             editor.apply()
 
             val intento = Intent(this, Clientes::class.java)
-            //intento.putExtra("busqueda", true)
-            //intento.putExtra("visita", true)
             startActivity(intento)
             finish()
         }

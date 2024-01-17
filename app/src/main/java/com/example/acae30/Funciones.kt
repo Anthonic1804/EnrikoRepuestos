@@ -130,8 +130,9 @@ class Funciones {
         }
     } //revisa si la app ya tiene la configuracion de conexion y si hay sesion iniciada
 
-    fun GetVisita(idcliente: Int, bd: Database): Visitas? {
-        val base = bd.writableDatabase
+    fun GetVisita(idcliente: Int, context: Context): Visitas? {
+        val bd = getDataBase(context)
+        val base = bd.readableDatabase
         try {
             var visita: Visitas? = null
             val cursor = base.rawQuery("SELECT * FROM visitas where Id_cliente=$idcliente", null)

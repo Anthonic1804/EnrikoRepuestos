@@ -747,7 +747,7 @@ class Visita : AppCompatActivity() {
      * */
     private fun getDateTime(): String? {
         val dateFormat = SimpleDateFormat(
-            "yyyy-MM-dd", Locale.getDefault()
+            "yyyy-MM-dd HH:mm:ss", Locale.getDefault()
         /*TIMESTAMP -> yyyy-MM-dd HH:mm:ss*/
         )
         val date = Date()

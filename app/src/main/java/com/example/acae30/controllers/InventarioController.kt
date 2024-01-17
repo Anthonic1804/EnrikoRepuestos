@@ -10,18 +10,15 @@ class InventarioController {
     private lateinit var preferences: SharedPreferences
     private var instancia = "CONFIG_SERVIDOR"
 
-
-
-
-
-
     //FUNCION PARA OBTENER LA FECHA DEL INVENTARIO
     fun obtenerFechaInventario(context: Context){
+        preferences = context.getSharedPreferences(instancia, Context.MODE_PRIVATE)
         var fechaInventario: String = ""
+
         val base = funciones.getDataBase(context).readableDatabase
 
         try {
-            val consulta = base.rawQuery("SELECT TOP(1) Fecha_inventario FROM inventario", null)
+            val consulta = base.rawQuery("SELECT Fecha_inventario FROM inventario LIMIT 1", null)
 
             fechaInventario = if(consulta.count > 0){
                 consulta.moveToFirst()
@@ -29,6 +26,10 @@ class InventarioController {
             }else ({
                 fechaInventario = ""
             }).toString()
+
+            val editor = preferences.edit()
+            editor.putString("fechaInventario", fechaInventario)
+            editor.apply()
 
             consulta.close()
         }catch (e:Exception){

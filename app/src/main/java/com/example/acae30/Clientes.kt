@@ -49,6 +49,7 @@ class Clientes : AppCompatActivity() {
     private var dSearch : String? = null
 
     private var clienteHistorio : Boolean = false
+    private var pagare: Boolean = false
 
     private var clienteController = ClientesControllers()
     private var funciones = Funciones()
@@ -65,6 +66,7 @@ class Clientes : AppCompatActivity() {
         preferences = getSharedPreferences(instancia, Context.MODE_PRIVATE)
         busquedaPedido = preferences!!.getBoolean("busqueda", false)
         visita = preferences!!.getBoolean("visita", false)
+        pagare = preferences!!.getBoolean("PagareObligatorio", false)
 
         db = Database(this)
         alert = AlertDialogo(this)
@@ -86,14 +88,10 @@ class Clientes : AppCompatActivity() {
             busqueda!!.setQuery("$dSearch", true)
         }
 
-        when(visita){
-            true -> tvListadoClientes.text = getString(R.string.listado_de_clientes_nuevo_pedido)
-            else -> tvListadoClientes.text = getString(R.string.listado_de_clientes)
-        }
-
-        when(cuentas){
-            true -> tvListadoClientes.text = getString(R.string.listado_de_clientes_cxc)
-            else -> tvListadoClientes.text = getString(R.string.listado_de_clientes)
+        if(visita){
+            tvListadoClientes.text = getString(R.string.listado_de_clientes_nuevo_pedido)
+        }else{
+            tvListadoClientes.text = getString(R.string.listado_de_clientes)
         }
 
         mostrarClientes()
@@ -120,7 +118,7 @@ class Clientes : AppCompatActivity() {
 
     //FUNCION PARA ELIMINAR LAS SHARED PREFERENCES CREADAS
     //13/01/2024
-    private fun updateSharedPreferencesFinalizarVisita(){
+    private fun sharedPreferencesFinalizarVisita(){
         val editor = preferences!!.edit()
         editor.remove("visita")
         editor.remove("busqueda")
@@ -132,7 +130,7 @@ class Clientes : AppCompatActivity() {
             if (visita) {
 
                 eliminarBusqueda()
-                updateSharedPreferencesFinalizarVisita()
+                sharedPreferencesFinalizarVisita()
 
                 val intento = Intent(this, Pedido::class.java)
                 startActivity(intento)
@@ -188,50 +186,23 @@ class Clientes : AppCompatActivity() {
                 val adapter = ClienteAdapter(list, this@Clientes, this@Clientes, 0) { position ->
                     val cliente = list.get(position)
                     if (busquedaPedido) {
-                        if(clienteController.obtenerInformacionCliente(this@Clientes, cliente.Id!!)?.Firmar_pagare_app!!.toInt() == 1){
-                            if (visita) {
-                                val datos_visitas = funciones!!.GetVisita(cliente.Id!!, db!!)
-                                if (datos_visitas != null) {
-                                    if (datos_visitas.Abierta) {
-                                        val intento = Intent(this@Clientes, Visita::class.java)
-                                        intento.putExtra("idcliente", cliente.Id!!)
-                                        intento.putExtra("nombrecliente", cliente.Cliente)
-                                        intento.putExtra("codigo", cliente.Codigo)
-                                        intento.putExtra("visitaid", datos_visitas.Id)
-                                        intento.putExtra("idapi", datos_visitas.Idvisita)
-                                        startActivity(intento)
-                                        finish()
-                                    } else {
-                                        val intento = Intent(this@Clientes, Visita::class.java)
-                                        intento.putExtra("idcliente", cliente.Id!!)
-                                        intento.putExtra("nombrecliente", cliente.Cliente)
-                                        intento.putExtra("codigo", cliente.Codigo)
-                                        startActivity(intento)
-                                        finish()
 
-                                    } //valida si la visita esta abierta
+                        val pagareFirmado = clienteController.obtenerInformacionCliente(this@Clientes, cliente.Id!!)?.Firmar_pagare_app!!.toInt()
+                        val terminosCliente = clienteController.obtenerInformacionCliente(this@Clientes, cliente.Id!!)?.Terminos_cliente.toString()
+                        val idCiente = cliente.Id!!
+                        val nomCliente = cliente.Cliente
+                        val codCliente = cliente.Codigo
 
-                                } else {
-                                    val intento = Intent(this@Clientes, Visita::class.java)
-                                    intento.putExtra("idcliente", cliente.Id!!)
-                                    intento.putExtra("nombrecliente", cliente.Cliente)
-                                    intento.putExtra("codigo", cliente.Codigo)
-                                    startActivity(intento)
-                                    finish()
-                                } //valida si existe visita
-
-                            } else {
-                                val intento = Intent(this@Clientes, Detallepedido::class.java)
-                                intento.putExtra("id", cliente.Id)
-                                intento.putExtra("nombrecliente", cliente.Cliente)
-                                startActivity(intento)
-                                finish()
+                        if(pagare){
+                            if((pagareFirmado == 1 && terminosCliente == "Credito") || (terminosCliente == "Contado")){
+                                clienteController.verificarPagareObligatorio(this@Clientes, idCiente, nomCliente!!, codCliente!!,visita)
+                            }else{
+                                mensajeDialogo(cliente.Id!!)
                             }
                         }else{
-                            mensajeDialogo(cliente.Id!!)
+                            clienteController.verificarPagareObligatorio(this@Clientes, idCiente, nomCliente!!, codCliente!!,visita)
                         }
-
-                    } else {
+                    }else {
                         if(clienteHistorio){
                             val intento = Intent(this@Clientes, HistoricoPedidos::class.java)
                             intento.putExtra("idCliente", cliente.Id!!)
@@ -299,8 +270,6 @@ class Clientes : AppCompatActivity() {
         tvUpdate.setOnClickListener {
             val intento = Intent(this@Clientes, ClientesDetalle::class.java)
             intento.putExtra("idcliente", idCliente)
-            //intento.putExtra("busqueda", true)
-            //intento.putExtra("visita", true)
             startActivity(intento)
             finish()
 

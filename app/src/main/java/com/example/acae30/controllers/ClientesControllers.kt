@@ -2,10 +2,13 @@ package com.example.acae30.controllers
 
 import android.content.ContentValues
 import android.content.Context
+import android.content.Intent
 import android.content.SharedPreferences
 import android.view.View
 import android.widget.Toast
+import com.example.acae30.Detallepedido
 import com.example.acae30.Funciones
+import com.example.acae30.Visita
 import com.example.acae30.modelos.Cliente
 import com.example.acae30.modelos.JSONmodels.ActualizarPagareFirmadoCliente
 import com.example.acae30.modelos.JSONmodels.TokenDataClassJSON
@@ -25,7 +28,7 @@ class ClientesControllers {
     private lateinit var preferences: SharedPreferences
     private var instancia = "CONFIG_SERVIDOR"
 
-    //FUNCION PARA VERIFICAR EL ESTADO DEL PAGARE DEL CLIENTE
+    //FUNCION PARA OBTENER LOS DATOS DEL CLIENTE POR ID
     fun obtenerInformacionCliente(context: Context, idCliente: Int): Cliente?{
 
         val base = funciones.getDataBase(context).readableDatabase
@@ -212,6 +215,44 @@ class ClientesControllers {
         base.setTransactionSuccessful()
         base.endTransaction()
         base.close()
+    }
+
+    //FUNCION DE REDIRECCION CUDNO SE VERIFICAR SI EL PAGARE ES OBLIGATORIO O NO
+    fun verificarPagareObligatorio(context: Context, idCliente: Int, nomCliente:String, codCliente:String, visita:Boolean){
+        if (visita) {
+            val datos_visitas = funciones.GetVisita(idCliente, context)
+            if (datos_visitas != null) {
+                if (datos_visitas.Abierta) {
+                    val intento = Intent(context, Visita::class.java)
+                    intento.putExtra("idcliente", idCliente)
+                    intento.putExtra("nombrecliente", nomCliente)
+                    intento.putExtra("codigo", codCliente)
+                    intento.putExtra("visitaid", datos_visitas.Id)
+                    intento.putExtra("idapi", datos_visitas.Idvisita)
+                    context.startActivity(intento)
+                } else {
+                    val intento = Intent(context, Visita::class.java)
+                    intento.putExtra("idcliente", idCliente)
+                    intento.putExtra("nombrecliente", nomCliente)
+                    intento.putExtra("codigo", codCliente)
+                    context.startActivity(intento)
+
+                } //valida si la visita esta abierta
+
+            } else {
+                val intento = Intent(context, Visita::class.java)
+                intento.putExtra("idcliente", idCliente)
+                intento.putExtra("nombrecliente", nomCliente)
+                intento.putExtra("codigo", codCliente)
+                context.startActivity(intento)
+            } //valida si existe visita
+
+        } else {
+            val intento = Intent(context, Detallepedido::class.java)
+            intento.putExtra("id", idCliente)
+            intento.putExtra("nombrecliente", nomCliente)
+            context.startActivity(intento)
+        }
     }
 
 }

@@ -4,8 +4,10 @@ import android.content.Context
 import android.content.Intent
 import android.content.SharedPreferences
 import android.os.Bundle
+import android.view.View
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.view.isVisible
 import com.example.acae30.controllers.ClientesControllers
 import com.example.acae30.database.Database
 import com.example.acae30.databinding.ActivityClientesDetalleBinding
@@ -16,6 +18,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import kotlin.properties.Delegates
 
 class ClientesDetalle : AppCompatActivity() {
 
@@ -30,35 +33,31 @@ class ClientesDetalle : AppCompatActivity() {
     private var plazo : Long = 0
     private var idcliente = 0
 
+    private lateinit var preferences: SharedPreferences
+    private var instancia = "CONFIG_SERVIDOR"
+    private var pagareFirmado : Boolean = false
+
     private var clienteController = ClientesControllers()
-/*
-    private var preferencias: SharedPreferences? = null
-    private val instancia = "CONFIG_SERVIDOR"
-    private var busquedaPedido: Boolean = false
-    private var visita = false*/
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityClientesDetalleBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-
         bd = Database(this)
         idcliente = intent.getIntExtra("idcliente", 0)
-/*
-        preferencias = getSharedPreferences(instancia, Context.MODE_PRIVATE)
-        busquedaPedido = preferencias!!.getBoolean("busqueda", false)
-        visita = preferencias!!.getBoolean("visita", false)
-*/
+
+        preferences = getSharedPreferences(instancia, Context.MODE_PRIVATE)
+        pagareFirmado = preferences.getBoolean("PagareObligatorio", false)
+
         funciones = Funciones()
+
+        obtenerDatosCliente()
 
     }
 
-    @OptIn(DelicateCoroutinesApi::class)
     override fun onStart() {
         super.onStart()
-
-        obtenerDatosCliente()
 
         binding.imgatras.setOnClickListener {
             Regresar()
@@ -98,6 +97,14 @@ class ClientesDetalle : AppCompatActivity() {
                         limiteCredito = data.Limite_credito!!
                         plazo = data.Plazo_credito!!.toLong()
 
+                        //DETERINANDO EN MOSTRAR U OCULTAR EL BOTON PARA FIRMAR EL PAGARE
+                        if(pagareFirmado){
+                            if(data.Terminos_cliente.toString() == "Contado"){
+                                binding.btnPagare.visibility = View.GONE
+                            }
+                        }else{
+                            binding.btnPagare.visibility = View.GONE
+                        }//FIN
                     }
                 }
 
