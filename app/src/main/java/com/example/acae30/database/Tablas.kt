@@ -31,7 +31,8 @@ class Tablas {
                 "Ultima_venta DATE  NULL," +
                 "Aporte_mensual NUMERIC(20,2)  NULL," +
                 "Fecha_inventario TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL," +
-                "Firmar_pagare_app INTEGER NOT NULL DEFAULT 0" +
+                "Firmar_pagare_app INTEGER NOT NULL DEFAULT 0," +
+                "Persona_juridica VARCHAR(10) NOT NULL DEFAULT 'N'" +
                 ");"
         return cliente
     } //tabla cliente

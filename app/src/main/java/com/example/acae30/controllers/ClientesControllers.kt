@@ -67,7 +67,8 @@ class ClientesControllers {
                     cursor.getString(23),
                     cursor.getString(24),
                     cursor.getFloat(25),
-                    cursor.getInt(27)
+                    cursor.getInt(27),
+                    cursor.getString(28)
                 )
                 cursor.close()
             }
@@ -126,7 +127,8 @@ class ClientesControllers {
                         consulta.getString(23),
                         consulta.getString(24),
                         consulta.getFloat(25),
-                        consulta.getInt(27)
+                        consulta.getInt(27),
+                        consulta.getString(28)
                     )
                     listaClientes.add(listado)
 
@@ -254,5 +256,6 @@ class ClientesControllers {
             context.startActivity(intento)
         }
     }
+
 
 }

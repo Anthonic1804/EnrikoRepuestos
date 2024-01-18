@@ -682,8 +682,11 @@ class carga_datos : AppCompatActivity() {
                 )
 
                 //AGREGADO EL CAMPO PARA VERIFICACION DEL PAGARE
-                val pagareFirmado = if(!funciones!!.validateBoolean(dato.getBoolean("pagare_Firmado_app"))) 0 else 1
+                val pagareFirmado = if(dato.getBoolean("pagare_Firmado_app")) 1 else 0
                 data.put("Firmar_pagare_app", pagareFirmado)
+
+                //AGREGANDO EL CAMPO PARA VERIFICACION DE PERSONA JURIDICA
+                data.put("Persona_juridica", funciones!!.validate(dato.getString("persona_juridica")))
 
                 bd.insert("clientes", null, data)
                 contador += talla

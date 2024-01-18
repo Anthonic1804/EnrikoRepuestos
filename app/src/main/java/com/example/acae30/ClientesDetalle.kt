@@ -29,6 +29,8 @@ class ClientesDetalle : AppCompatActivity() {
     private var nombreCliente : String = ""
     private var direccionCliente : String = ""
     private var duiCliente : String = ""
+    private var nitCliente : String = ""
+    private var personaJuridica : String = ""
     private var limiteCredito : Float = 0f
     private var plazo : Long = 0
     private var idcliente = 0
@@ -64,7 +66,19 @@ class ClientesDetalle : AppCompatActivity() {
         }
 
         binding.btnPagare.setOnClickListener {
-            pagare()
+            if (personaJuridica != "S"){
+                if(duiCliente != "" && direccionCliente != ""){
+                    pagare()
+                }else{
+                    funciones!!.mostrarAlerta("ERROR: DATOS INCOMPLETOS DEL CLIENTE", this@ClientesDetalle, binding.vista)
+                }
+            }else{
+                if(nitCliente != "" && direccionCliente != ""){
+                    pagare()
+                }else{
+                    funciones!!.mostrarAlerta("ERROR: DATOS INCOMPLETOS DEL CLIENTE", this@ClientesDetalle, binding.vista)
+                }
+            }
         }
     }
 
@@ -96,6 +110,8 @@ class ClientesDetalle : AppCompatActivity() {
                         duiCliente = data.Dui.toString()
                         limiteCredito = data.Limite_credito!!
                         plazo = data.Plazo_credito!!.toLong()
+                        nitCliente = data.Nit.toString()
+                        personaJuridica = data.Persona_juridica.toString()
 
                         //DETERINANDO EN MOSTRAR U OCULTAR EL BOTON PARA FIRMAR EL PAGARE
                         if(pagareFirmado){
@@ -107,7 +123,6 @@ class ClientesDetalle : AppCompatActivity() {
                         }//FIN
                     }
                 }
-
             } catch (e: Exception) {
                 withContext(Dispatchers.Main){
                     Toast.makeText(this@ClientesDetalle, "ERROR AL CARGAR LOS DATOS DEL CLIENTE", Toast.LENGTH_LONG).show()

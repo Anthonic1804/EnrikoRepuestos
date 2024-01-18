@@ -46,9 +46,11 @@ class firmarPagare : AppCompatActivity() {
     private var nombreCliente : String = ""
     private var direccionCliente : String = ""
     private var duiCliente : String = ""
+    private var nitCliente : String = ""
     private var limiteCredito : Float = 0f
     private var porcentaje : Float = 0f
     private var plazo : Long = 0
+    private var personaJuridica : String = ""
     private var textoPagare : String = ""
 
     private lateinit var imagenBitmap: Bitmap
@@ -85,11 +87,23 @@ class firmarPagare : AppCompatActivity() {
         btnLimpiar = findViewById(R.id.clear)
         btnFirmar = findViewById(R.id.save)
         idcliente = intent.getIntExtra("idcliente", 0)
+
+        val datosCliente = clienteController.obtenerInformacionCliente(this@firmarPagare, idcliente)
+        /*
         nombreCliente = intent.getStringExtra("nombreCliente").toString()
         direccionCliente = intent.getStringExtra("direccionCliente").toString()
         duiCliente = intent.getStringExtra("duiCliente").toString()
         limiteCredito = intent.getFloatExtra("limiteCredito", 0f)
         plazo = intent.getLongExtra("plazoCredito", 0)
+         */
+
+        nombreCliente = datosCliente!!.Cliente.toString()
+        direccionCliente = datosCliente.Direccion.toString()
+        duiCliente = datosCliente.Dui.toString()
+        nitCliente = datosCliente.Nit.toString()
+        limiteCredito = (datosCliente.Limite_credito ?: 0) as Float
+        plazo = datosCliente.Plazo_credito?.toLong() ?: 0
+        personaJuridica = datosCliente.Persona_juridica.toString()
 
         vista = findViewById(R.id.vista)
 
@@ -241,14 +255,25 @@ class firmarPagare : AppCompatActivity() {
             documento.add(descripcion)
 
             //AGREGANDO EL PIE AL PAGARE + LA FIRMA DEL CLIENTE
-            val pieDocumento = Paragraph(
-                "\n\n\n" +
-                        "NOMBRE: $nombreCliente\n" +
-                        "D.U.I: $duiCliente\n" +
-                        "DIRECCION: $direccionCliente\n\n" +
-                        "FIRMA: ",
-                FontFactory.getFont("arial", 12f, Font.NORMAL, BaseColor.BLACK)
-            )
+            val pieDocumento = if(personaJuridica != "S"){
+                Paragraph(
+                    "\n\n\n" +
+                            "NOMBRE: $nombreCliente\n" +
+                            "D.U.I: $duiCliente\n" +
+                            "DIRECCION: $direccionCliente\n\n" +
+                            "FIRMA: ",
+                    FontFactory.getFont("arial", 12f, Font.NORMAL, BaseColor.BLACK)
+                )
+            }else{
+                Paragraph(
+                    "\n\n\n" +
+                            "NOMBRE: $nombreCliente\n" +
+                            "N.I.T: $nitCliente\n" +
+                            "DIRECCION: $direccionCliente\n\n" +
+                            "FIRMA: ",
+                    FontFactory.getFont("arial", 12f, Font.NORMAL, BaseColor.BLACK)
+                )
+            }
             documento.add(pieDocumento)
 
             //CARGANDO LA FIRMA REALIZADA EN EL PDF
