@@ -66,18 +66,10 @@ class ClientesDetalle : AppCompatActivity() {
         }
 
         binding.btnPagare.setOnClickListener {
-            if (personaJuridica != "S"){
-                if(duiCliente != "" && direccionCliente != ""){
-                    pagare()
-                }else{
-                    funciones!!.mostrarAlerta("ERROR: DATOS INCOMPLETOS DEL CLIENTE", this@ClientesDetalle, binding.vista)
-                }
+            if(funciones!!.isNetworkConneted(this@ClientesDetalle)){
+                pagare()
             }else{
-                if(nitCliente != "" && direccionCliente != ""){
-                    pagare()
-                }else{
-                    funciones!!.mostrarAlerta("ERROR: DATOS INCOMPLETOS DEL CLIENTE", this@ClientesDetalle, binding.vista)
-                }
+                funciones!!.mostrarAlerta("ERROR: NO TIENES CONEXION A INTERNET", this@ClientesDetalle, binding.vista)
             }
         }
     }
@@ -144,6 +136,23 @@ class ClientesDetalle : AppCompatActivity() {
     }
 
     private fun pagare(){
+        if (personaJuridica != "S"){
+            if(duiCliente != "" && direccionCliente != ""){
+                redireccionPagare()
+            }else{
+                funciones!!.mostrarAlerta("ERROR: DATOS INCOMPLETOS DEL CLIENTE", this@ClientesDetalle, binding.vista)
+            }
+        }else{
+            if(nitCliente != "" && direccionCliente != ""){
+                redireccionPagare()
+            }else{
+                funciones!!.mostrarAlerta("ERROR: DATOS INCOMPLETOS DEL CLIENTE", this@ClientesDetalle, binding.vista)
+            }
+        }
+    }
+
+    //FUNCION PARA REDIRECCIONAR AL PAGARE
+    private fun redireccionPagare(){
         val intent = Intent(this, verPagare::class.java)
         intent.putExtra("idcliente", idcliente)
         intent.putExtra("nombreCliente", nombreCliente)

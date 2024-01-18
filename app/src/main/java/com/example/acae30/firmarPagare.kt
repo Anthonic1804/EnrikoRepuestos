@@ -62,7 +62,7 @@ class firmarPagare : AppCompatActivity() {
     private var visita = false
 
     private var clienteController = ClientesControllers()
-
+    private var funciones = Funciones()
 
     private val requestPermissionLauncher = registerForActivityResult(
         ActivityResultContracts.RequestPermission()
@@ -161,12 +161,16 @@ class firmarPagare : AppCompatActivity() {
         btnFirmar.setOnClickListener {
             fechaDoc = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy_MM_dd_HH_mm_ss"))
             imageFirmada = signatureView.isBitmapEmpty
-            if(imageFirmada){
-                Toast.makeText(this, "POR FAVOR INGRESE SU FIRMA", Toast.LENGTH_LONG).show()
+            if(funciones.isNetworkConneted(this@firmarPagare)){
+                if(imageFirmada){
+                    Toast.makeText(this, "POR FAVOR INGRESE SU FIRMA", Toast.LENGTH_LONG).show()
+                }else{
+                    imagenBitmap = signatureView.signatureBitmap
+                    imageFinal = bitmapToByteArray(imagenBitmap)
+                    verificarPermisos(it)
+                }
             }else{
-                imagenBitmap = signatureView.signatureBitmap
-                imageFinal = bitmapToByteArray(imagenBitmap)
-                verificarPermisos(it)
+                funciones.mostrarAlerta("ERROR: NO TIENE CONEXION A INTERNET", this@firmarPagare, vista)
             }
         }
 
