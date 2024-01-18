@@ -121,6 +121,12 @@ class ClientesDetalle : AppCompatActivity() {
                         }else{
                             binding.btnPagare.visibility = View.GONE
                         }//FIN
+
+                        if (personaJuridica != "S"){
+                            binding.personaJuridica.text = "PERSONA NATURAL"
+                        }else{
+                            binding.personaJuridica.text = "PERSONA JURIDICA"
+                        }
                     }
                 }
             } catch (e: Exception) {
