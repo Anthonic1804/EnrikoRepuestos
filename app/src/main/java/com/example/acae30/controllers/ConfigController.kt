@@ -21,6 +21,8 @@ class ConfigController {
         preferences = context.getSharedPreferences(instancia, Context.MODE_PRIVATE)
         val url = funciones.getServidor(preferences.getString("ip", ""), preferences.getInt("puerto", 0).toString())
         var confirmar: Boolean
+        var modificarPrecio: Boolean
+        var sinExistencias: String = ""
         try {
             val direccion = url + "config"
             val url2 = URL(direccion)
@@ -45,8 +47,10 @@ class ConfigController {
                                 for (i in 0 until respuesta.length()){
                                     val dato = respuesta.getJSONObject(i)
                                     confirmar = dato.getBoolean("pagare_obligatorio_app")
+                                    modificarPrecio = dato.getBoolean("modificar_precio_app")
+                                    sinExistencias = dato.getString("pedidos_sin_existencia")
 
-                                    confirmarPagareObligatorio(confirmar, context)
+                                    confirmarPagareObligatorio(confirmar, modificarPrecio, sinExistencias, context)
                                 }
                             } else {
                                 println("ERROR AL LEER EL JSON CONFIG")
@@ -65,11 +69,15 @@ class ConfigController {
     }
 
     //FUNCION PARA SETEAR LA FORMA DEL PAGARE EN SHAREDPREFERENCES
-    private fun confirmarPagareObligatorio(confirmar: Boolean, context: Context){
+    private fun confirmarPagareObligatorio(confirmar: Boolean, modificar:Boolean, sinExistencia:String, context: Context){
         preferences = context.getSharedPreferences(instancia, Context.MODE_PRIVATE)
         val editor = preferences.edit()
         editor.remove("PagareObligatorio")
         editor.putBoolean("PagareObligatorio", confirmar)
+        editor.putBoolean("modificar_precio_app", modificar)
+        editor.putString("pedidos_sin_existencia", sinExistencia)
+        editor.putInt("vistaInventario", 2)
+        editor.putFloat("versionActualApp", 1.0f)
         editor.apply()
     }
 }

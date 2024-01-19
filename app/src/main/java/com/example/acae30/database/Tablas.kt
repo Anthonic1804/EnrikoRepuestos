@@ -54,32 +54,6 @@ class Tablas {
 
         return clienteSucursal
     }
-    //CREANDO LA TABLA CONFIG DE LA APP
-    fun configApp(): String{
-        val configApp = "CREATE TABLE config(" +
-                "vistaInventario INTEGER NOT NULL," +
-                "sinExistencias INTEGER NOT NULL," +
-                "versionApp VARCHAR(25) NOT NULL)"
-        return  configApp
-    }
-    //INSERTANDO LA VISTA POR DEFECTO DEL INVENTARIO
-    fun insertConfig():String{
-        val insertConfig = "INSERT INTO config values(" +
-                "2," + //INSERTAMOS 2 COMO SELECCION POR DEFECTO VISTA LISTA
-                "0," +//INSERTAMOS 1 COMO SELECCION POR DEFECTO AGREGAR PRODUCTOS SIN EXISTENCIAS
-                "'1.0')" //VERSION DE LA APP
-        return insertConfig
-    }
-
-    //CREANDO TABLA VIRTUAL CLIENTES
-    /*fun virtualCliente(): String{
-        val virtualCliente = "CREATE VIRTUAL TABLE virtualcliente USING FTS4 (" +
-                "CONTENT='clientes'," +
-                "Cliente" +
-        ") ";
-
-        return virtualCliente
-    }*/
 
     fun Inventario(): String {
         val inventario = "CREATE TABLE inventario (" +
@@ -349,16 +323,6 @@ class Tablas {
                 "INNER JOIN inventario  on inventario.Id=detalle_pedidos.Id_producto;"
         return vista
     }
-
-    //TRIGGER PARA LA INSERCION DE DATOS EN TABLA FTS4 VIRTUAL CLIENTE
-   /* fun triggerClienteVirtual(): String{
-
-        val triggerCliente = "CREATE TRIGGER triggerClienteVirtual AFTER INSERT ON clientes BEGIN" +
-                "  INSERT INTO virtualcliente(virtualcliente) VALUES ('rebuild');" +
-                "END;";
-
-        return triggerCliente
-    }*/
 
     //TRIGGER PARA LA INSERCION DE DATOS EN TABLA FTS4 VIRTUAL INVENTARIO
     fun triggerInventarioVirtual(): String{

@@ -21,6 +21,7 @@ import android.widget.Spinner
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.constraintlayout.widget.ConstraintLayout
+import com.example.acae30.controllers.InventarioController
 import com.example.acae30.database.Database
 import com.example.acae30.modelos.DetallePedido
 import com.example.acae30.modelos.InventarioPrecios
@@ -74,7 +75,7 @@ class Producto_agregar : AppCompatActivity() {
     private var total_param: Float? = null
     private var precioEditado: Float = 0.toFloat()
     private var txttituloproducto: TextView? = null
-    private var sinExistencias: Int? = null  // 1 -> Si    0 -> no
+    private var sinExistencias: Int = 0  // 1 -> Si    0 -> no
     private var existenciaProducto: Float = 0f
     private var getSucursalPosition: Int? = null
 
@@ -101,6 +102,8 @@ class Producto_agregar : AppCompatActivity() {
     var contexto = this
 
     private var funciones = Funciones()
+    private var inventarioController = InventarioController()
+    private var modificarPrecio : Boolean = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
 
@@ -122,6 +125,10 @@ class Producto_agregar : AppCompatActivity() {
         preferencias = getSharedPreferences(instancia, Context.MODE_PRIVATE)
         codEmpleado = preferencias!!.getInt("Idvendedor", 0)
 
+        sinExistencias = if(preferencias!!.getString("pedidos_sin_existencia", "") == "S") 1 else 0
+        modificarPrecio = preferencias!!.getBoolean("modificar_precio_app", false)
+
+        println("MODIFICAR PREDIO -> $modificarPrecio")
 
         //CAPTURANDO SUCURSAL
         getSucursalPosition = intent.getIntExtra("sucursalPosition", 0)
@@ -141,17 +148,13 @@ class Producto_agregar : AppCompatActivity() {
         txtcantidad = findViewById(R.id.txtcantidad)
         spprecio = findViewById(R.id.spprecio)
         unidadActual = "UNIDAD"
-        datosProducto = GetProducto(idproducto!!)
+        datosProducto = inventarioController.obtenerInformacionProductoPorId(this@Producto_agregar, idproducto!!)
         btneditarprecio = findViewById(R.id.btneditarprecio)
 
         proviene = intent.getStringExtra("proviene")
         total_param = intent.getFloatExtra("total_param", 0.toFloat())
 
         txttituloproducto = findViewById(R.id.txttituloproducto)
-
-
-        //OPTENIENDO LA CONFIGURACION DE LAS CONFIGURACIONES
-        sinExistencias = getConfig()
 
         //OPTENIENDO LA IP DEL SERVIDOR
         getApiUrl()
@@ -301,11 +304,14 @@ class Producto_agregar : AppCompatActivity() {
         }
 
         btneditarprecio!!.setOnClickListener {
-
+            if(modificarPrecio){
+                AlertaPrecio(this@Producto_agregar)
+            }else{
                 verificarPrecioAutorizado(codEmpleado, codigoProducto)
+            }
         }//cuando se carga los inventarios
 
-        listPrecios = GetInvPreciosProducto(idproducto!!)
+        listPrecios = inventarioController.obtenerEscalaPrecios(this@Producto_agregar, idproducto!!)
 
 
         // ACTUALIZAR EL CAMPO TOTAL AL MODIFICAR LA CANTIDAD
@@ -326,7 +332,13 @@ class Producto_agregar : AppCompatActivity() {
                     if (nuevaCantidad != "") {
                         if(isInteger(nuevaCantidad)){
                             cantidad = nuevaCantidad.toFloat()
-                            Totalizar(cantidad)
+                            if(cantidad < cantidadEscala!!){ //VALIDADO EL PRECIO SELECCIONADO EN LAS ESCALAS.
+                                txtcantidad!!.error = "La cantidad no es válida para el precio seleccionado"
+                                btnagregar!!.setBackgroundResource(R.drawable.border_btndisable)
+                            }else{
+                                Totalizar(cantidad)
+                                btnagregar!!.setBackgroundResource(R.drawable.border_btnenviar)
+                            }
                         }else{
                             txtcantidad!!.error = "Este campo solo permite datos enteros";
                         }
@@ -345,7 +357,7 @@ class Producto_agregar : AppCompatActivity() {
                                 txtcantidad!!.error = "No puede Agregar una cantidad mayor a las existencias actuales";
                                 btnagregar!!.setBackgroundResource(R.drawable.border_btndisable)
                             }else if(cantidad < cantidadEscala!!){ //VALIDADO EL PRECIO SELECCIONADO EN LAS ESCALAS.
-                                txtcantidad!!.error = "La cantidad no es válida para el precio seleccionada"
+                                txtcantidad!!.error = "La cantidad no es válida para el precio seleccionado"
                                 btnagregar!!.setBackgroundResource(R.drawable.border_btndisable)
                             }else{
                                 Totalizar(cantidad)
@@ -364,29 +376,6 @@ class Producto_agregar : AppCompatActivity() {
         })
 
     } //inicializa todas las variables y los objetos del xml
-
-    //FUNCION PARA EXTRAER LOS CAMPOS DE LA TABLA CONFIG
-    private fun getConfig(): Int{
-        val dataBase = db!!.readableDatabase
-        var sExistencia : Int = 0
-        try {
-            val getConf = dataBase.rawQuery("SELECT sinExistencias FROM config", null)
-
-            sExistencia = if(getConf.count > 0){
-                getConf.moveToFirst()
-                getConf.getInt(0)
-            }else{
-                0
-            }
-
-            getConf.close()
-        }catch (e: Exception) {
-            println("ERROR: NO SE EXTRAJO LA INFORMACION DE CONFIG -> ${e.message}")
-        } finally {
-            dataBase!!.close()
-        }
-        return sExistencia
-    }
 
     //YA NO REGRESA HASTA EL DETALLE DEL PEDIDO, REGRESA A LA BUSQUEDA DE PRODUCTOS
     //BTNATRAS Y TEXTO CANTIDAD SETEADO SIN DECIMALES
@@ -427,10 +416,10 @@ class Producto_agregar : AppCompatActivity() {
         } // boton que lleva atras en el activity
 
         btnagregar!!.setOnClickListener {
-            if(modificado == 1){
-                confirmarToken(codEmpleado, codigoProducto)
-            }else{
+            if(modificarPrecio){
                 agregarProducto()
+            }else{
+                confirmarToken(codEmpleado, codigoProducto)
             }
         }//AGREGANDO EL PRODUCTO AL PEDIDO
 
@@ -623,107 +612,6 @@ class Producto_agregar : AppCompatActivity() {
         var total = precio * cantidad
         txttotal!!.text = "${String.format("%.4f", total)}"
     }
-
-    private fun GetProducto(id: Int): com.example.acae30.modelos.Inventario? {
-        val base = db!!.readableDatabase
-        var dato: com.example.acae30.modelos.Inventario? = null
-        try {
-            val cursor = base.rawQuery("SELECT * FROM inventario WHERE Id=$id", null)
-            if (cursor.count > 0) {
-                cursor.moveToFirst()
-                do {
-                    dato = com.example.acae30.modelos.Inventario(
-                        cursor.getInt(0),
-                        cursor.getString(1),
-                        cursor.getString(2),
-                        cursor.getInt(3),
-                        cursor.getString(4),
-                        cursor.getString(5),
-                        cursor.getString(6),
-                        cursor.getFloat(7),
-                        cursor.getString(8),
-                        cursor.getInt(9),
-                        cursor.getFloat(10),
-                        cursor.getFloat(11),
-                        cursor.getFloat(12),
-                        cursor.getFloat(13),
-                        cursor.getFloat(14),
-                        cursor.getFloat(15),
-                        cursor.getFloat(16),
-                        cursor.getString(17),
-                        cursor.getString(18),
-                        cursor.getInt(19),
-                        cursor.getString(20),
-                        cursor.getInt(21),
-                        cursor.getString(22),
-                        cursor.getString(23),
-                        cursor.getString(24),
-                        cursor.getString(25),
-                        cursor.getString(26),
-                        cursor.getString(27),
-                        cursor.getInt(28),
-                        cursor.getString(29),
-                        cursor.getFloat(30),
-                        cursor.getDouble(31),
-                        cursor.getInt(32),
-                        cursor.getFloat(33)
-                    )
-
-                } while (cursor.moveToNext())
-                cursor.close()
-            }
-            return dato
-        } catch (e: Exception) {
-            throw Exception(e.message)
-        } finally {
-            base.close()
-        }
-    } //obtiene los datos del producto
-
-    private fun GetInvPreciosProducto(id_inventario: Int): ArrayList<InventarioPrecios>? {
-        val base = db!!.readableDatabase
-        var datos = ArrayList<InventarioPrecios>()
-        try {
-            val cursor = base.rawQuery(
-                "SELECT * FROM Inventario_precios WHERE id_inventario = '$id_inventario'",
-                null
-            )
-            var i = 0
-            if (cursor.count > 0) {
-                cursor.moveToFirst()
-                do {
-                    var inv_precio = InventarioPrecios(
-                        cursor.getInt(0),
-                        cursor.getInt(1),
-                        cursor.getString(2),
-                        cursor.getString(3),
-                        cursor.getString(4),
-                        cursor.getFloat(5),
-                        cursor.getString(6),
-                        cursor.getFloat(7),
-                        cursor.getFloat(8),
-                        cursor.getFloat(9),
-                        cursor.getFloat(10),
-                        cursor.getInt(11)
-                    )
-
-//                    print("Valor: "+inv_precio!!.Codigo_producto)
-
-//                    if (inv_precio != null) {
-                    datos.add(inv_precio)
-//                    }
-
-                } while (cursor.moveToNext())
-                cursor.close()
-            }
-        } catch (e: Exception) {
-            throw Exception(e.message)
-        } finally {
-            base.close()
-        }
-        return datos
-    } // obtiene los precios de la tabla Inventario precio
-
 
     private fun AddDetallePedido(esPrecioEditado: Boolean): Int {
         val base = db!!.writableDatabase
@@ -1013,7 +901,7 @@ class Producto_agregar : AppCompatActivity() {
         val dialogo = Dialog(this)
         dialogo.setContentView(R.layout.alerta_precio)
         var nuevoprecio = dialogo.findViewById<EditText>(R.id.nuevoprecio)
-        nuevoprecio.isEnabled = false
+        nuevoprecio.isEnabled = true
 
         var cadena_precio = spprecio!!.selectedItem.toString()
 
@@ -1027,7 +915,10 @@ class Producto_agregar : AppCompatActivity() {
             nuevo_precio = precioFromList(cadena_precio)
         }
 
-        nuevoprecio!!.setText("${String.format("%.4f", precioAutorizado)}")
+        if(!modificarPrecio){
+            nuevoprecio.isEnabled = false
+            nuevoprecio!!.setText("${String.format("%.4f", precioAutorizado)}")
+        }
 
         // Actualizar el total cuando cambie la cantidad
         nuevoprecio.addTextChangedListener(object : TextWatcher {

@@ -18,7 +18,7 @@ class InventarioDetalleAdapter(private var list: ArrayList<InventarioPrecios>, p
     }
 
     override fun onBindViewHolder(vista: InventarioDetalleAdapter.MyViewHolder, position: Int) {
-        var data = list[position]
+        val data = list[position]
 
         vista.descipcionEscala.text = data.Nombre
         vista.precioEscala.text = "$ ${String.format("%.4f", data.Precio_iva)}"
