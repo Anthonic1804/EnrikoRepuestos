@@ -416,10 +416,16 @@ class Producto_agregar : AppCompatActivity() {
         } // boton que lleva atras en el activity
 
         btnagregar!!.setOnClickListener {
+            //VERIFICANDO SI MODIFICAR PRECIO ES TRUE DESDE SQLSERVER
             if(modificarPrecio){
                 agregarProducto()
             }else{
-                confirmarToken(codEmpleado, codigoProducto)
+                // VERIFICANDO SI MOD PRECIO ES FALSE Y LUEGO COMPROBAR QUE EL TOKEN HAYA SIDO UTILIZADO
+                if(modificado == 1){
+                    confirmarToken(codEmpleado, codigoProducto)
+                }else{
+                    agregarProducto()
+                }
             }
         }//AGREGANDO EL PRODUCTO AL PEDIDO
 
