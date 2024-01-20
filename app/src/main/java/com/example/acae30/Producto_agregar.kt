@@ -86,7 +86,7 @@ class Producto_agregar : AppCompatActivity() {
     private var codEmpleado: Int = 0
     private var url: String? = null
     private var codigoProducto: String = ""
-    private var modificado: Int = 0
+    private var precioAutorizadoUtilizado: Int = 0
 
     /*Variable para restriccion
     * de seleccion de escalas de precios
@@ -127,8 +127,6 @@ class Producto_agregar : AppCompatActivity() {
 
         sinExistencias = if(preferencias!!.getString("pedidos_sin_existencia", "") == "S") 1 else 0
         modificarPrecio = preferencias!!.getBoolean("modificar_precio_app", false)
-
-        println("MODIFICAR PREDIO -> $modificarPrecio")
 
         //CAPTURANDO SUCURSAL
         getSucursalPosition = intent.getIntExtra("sucursalPosition", 0)
@@ -421,7 +419,7 @@ class Producto_agregar : AppCompatActivity() {
                 agregarProducto()
             }else{
                 // VERIFICANDO SI MOD PRECIO ES FALSE Y LUEGO COMPROBAR QUE EL TOKEN HAYA SIDO UTILIZADO
-                if(modificado == 1){
+                if(precioAutorizadoUtilizado == 1){
                     confirmarToken(codEmpleado, codigoProducto)
                 }else{
                     agregarProducto()
@@ -966,7 +964,7 @@ class Producto_agregar : AppCompatActivity() {
             GlobalScope.launch(Dispatchers.Main) {
 
                 //VARIABLE PARA DETERMINAR SI EL PRECIO ES MODIFICADO O NO
-                modificado = 1
+                precioAutorizadoUtilizado = if(!modificarPrecio) 1 else 0
 
                 try {
                     val unidad = spiner!!.selectedItem.toString()
