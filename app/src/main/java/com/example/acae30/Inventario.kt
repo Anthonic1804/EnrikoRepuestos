@@ -100,9 +100,8 @@ class Inventario : AppCompatActivity() {
             integrador.initiateScan()
         }
 
-        //CAPTURANDO SUCURSAL
+        //CAPTURANDO POSICIONES DE LOS SPINNER
         getSucursalPosition = intent.getIntExtra("sucursalPosition", 0)
-       // println("posicion enviada desde detalle: $getSucursalPosition")
 
     }
 

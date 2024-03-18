@@ -106,7 +106,7 @@ class Login : AppCompatActivity() {
         var clave = txtclave!!.text.toString()
         var contexto = this
         if (usuario.length > 0 && clave.length > 0) {
-            if (funciones!!.isNetworkConneted(this)) {
+            if (funciones!!.isInternetAvailable(this)) {
                 GlobalScope.launch(Dispatchers.IO) {
                     try {
                         runOnUiThread {

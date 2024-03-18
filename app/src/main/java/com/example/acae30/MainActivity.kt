@@ -86,7 +86,7 @@ class MainActivity : AppCompatActivity() {
             GlobalScope.launch(Dispatchers.IO) {
                 val ip = ip!!.text.toString()
                 val p = puerto!!.text.toString()
-                if (funciones!!.isNetworkConneted(this@MainActivity)) {
+                if (funciones!!.isInternetAvailable(this@MainActivity)) {
                     ComproBarConexion(ip, p)
                 } else {
                     alerta!!.dismisss()

@@ -119,7 +119,7 @@ class Configuracion : AppCompatActivity() {
         btnBuscarUpdate.setOnClickListener {
             //getVersionUpdate()
             if (url != null) {
-                if (funciones!!.isNetworkConneted(this)) {
+                if (funciones!!.isInternetAvailable(this)) {
 
                     CoroutineScope(Dispatchers.IO).launch {
                         getAppVersion()
@@ -163,7 +163,7 @@ class Configuracion : AppCompatActivity() {
 
     private fun ValidateConnection(ip: String, puerto: String, context: Context) {
         if (ip.length > 0 && puerto.length > 0) {
-            if (funciones!!.isNetworkConneted(this)) {
+            if (funciones!!.isInternetAvailable(this)) {
                 try {
                     val ruta: String = "http://$ip:$puerto/conexion"
                     val url = URL(ruta)

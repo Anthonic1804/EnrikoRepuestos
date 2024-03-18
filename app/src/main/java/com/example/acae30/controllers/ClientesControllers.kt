@@ -25,6 +25,7 @@ import java.nio.charset.StandardCharsets
 class ClientesControllers {
 
     private var funciones = Funciones()
+    private var visitaController = VisitaController()
     private lateinit var preferences: SharedPreferences
     private var instancia = "CONFIG_SERVIDOR"
 
@@ -222,7 +223,7 @@ class ClientesControllers {
     //FUNCION DE REDIRECCION CUDNO SE VERIFICAR SI EL PAGARE ES OBLIGATORIO O NO
     fun verificarPagareObligatorio(context: Context, idCliente: Int, nomCliente:String, codCliente:String, visita:Boolean){
         if (visita) {
-            val datos_visitas = funciones.GetVisita(idCliente, context)
+            val datos_visitas = visitaController.obtenerVisita(idCliente, context)
             if (datos_visitas != null) {
                 if (datos_visitas.Abierta) {
                     val intento = Intent(context, Visita::class.java)

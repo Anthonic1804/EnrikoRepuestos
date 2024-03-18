@@ -5,158 +5,113 @@ import android.content.Context
 import android.content.Intent
 import android.content.SharedPreferences
 import android.os.Bundle
-import android.os.StrictMode
-import android.view.View
-import android.widget.ImageButton
 import androidx.appcompat.app.AppCompatActivity
-import androidx.cardview.widget.CardView
-import androidx.constraintlayout.widget.ConstraintLayout
-import androidx.core.content.ContextCompat
 import com.example.acae30.controllers.ConfigController
 import com.example.acae30.controllers.InventarioController
 import com.example.acae30.database.Database
-import com.google.android.material.snackbar.Snackbar
-import kotlinx.android.synthetic.main.activity_carga_datos.*
-import kotlinx.coroutines.*
+import com.example.acae30.databinding.ActivityCargaDatosBinding
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import org.json.JSONArray
 import java.net.HttpURLConnection
 import java.net.URL
-import java.text.SimpleDateFormat
-import java.util.Date
-import java.util.Locale
 
 class carga_datos : AppCompatActivity() {
 
-    private var btnatras: ImageButton? = null
-    private var url: String? = null
-    private var preferencias: SharedPreferences? = null
-    private var cvinventario: CardView? = null
-    private var cvcliente: CardView? = null
-    private var cvcuentas: CardView? = null
-    private var cvpedidos: CardView? = null
-    private val instancia = "CONFIG_SERVIDOR"
+    private lateinit var url: String
     private var alert: AlertDialogo? = null
-    private var vista: ConstraintLayout? = null
-    private var funciones: Funciones? = null
     private var database: Database? = null
 
     private var configController = ConfigController()
     private var inventarioController = InventarioController()
-
+    private var funciones = Funciones()
+    private lateinit var preferences: SharedPreferences
+    private var instancia = "CONFIG_SERVIDOR"
+    private lateinit var binding : ActivityCargaDatosBinding
     override fun onCreate(savedInstanceState: Bundle?) {
 
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_carga_datos)
-        supportActionBar?.hide()
-        preferencias = getSharedPreferences(instancia, Context.MODE_PRIVATE)
-        btnatras = findViewById(R.id.imgbtnatras)
-        cvcliente = findViewById(R.id.cvclientes)
-        cvinventario = findViewById(R.id.cvinventario)
-        cvcuentas = findViewById(R.id.cvcuentas)
-        cvpedidos = findViewById(R.id.cvpedidos)
-        alert = AlertDialogo(this)
-        vista = findViewById(R.id.vistaalerta)
-        funciones = Funciones()
-        database = Database(this)
-        getApiUrl() //obtiene la url del servidor
+        binding = ActivityCargaDatosBinding.inflate(layoutInflater)
+        setContentView(binding.root)
 
-        val policy = StrictMode.ThreadPolicy.Builder().permitAll().build()
-        StrictMode.setThreadPolicy(policy)
+        preferences = this@carga_datos.getSharedPreferences(instancia, Context.MODE_PRIVATE)
+
+        alert = AlertDialogo(this)
+        database = Database(this)
+
+        url = funciones.getServidor(preferences.getString("ip", ""), preferences.getInt("puerto", 0).toString())
 
     }
 
     override fun onStart() {
         super.onStart()
 
-        btnatras!!.setOnClickListener {
+        binding.imgbtnatras.setOnClickListener {
             val intento = Intent(this, Inicio::class.java)
             startActivity(intento)
         }//BOTON ATRAS
 
-        cvcliente!!.setOnClickListener {
-            if (url != null) {
-                if (funciones!!.isNetworkConneted(this)) {
-                    alert!!.Cargando() //muestra la alerta
+        binding.cvclientes.setOnClickListener {
+            if (funciones.isInternetAvailable(this)) {
+                alert!!.Cargando() //muestra la alerta
 
-                    CoroutineScope(Dispatchers.IO).launch {
-                        getClients()
-                    }//COURUTINA PARA OBTENER CLIENTES Y SUCURSALES
+                CoroutineScope(Dispatchers.IO).launch {
+                    getClients()
+                }//COURUTINA PARA OBTENER CLIENTES Y SUCURSALES
 
-                } else {
-                    ShowAlert("Enciende tus datos o el wifi")
-                }
             } else {
-                ShowAlert("No hay configuracion del Servidor")
+                funciones.mostrarAlerta("ENCIENDE TUS DATOS O EL WIFI", this@carga_datos, binding.vistaalerta)
             }
         }//cuando se hace click en la card de
 
-        cvinventario!!.setOnClickListener {
-            if (url != null) {
-                if (funciones!!.isNetworkConneted(this)) {
-                    alert!!.Cargando() //muestra la alerta
+        binding.cvinventario.setOnClickListener {
+            if (funciones.isInternetAvailable(this)) {
+                alert!!.Cargando() //muestra la alerta
 
-                    CoroutineScope(Dispatchers.IO).launch {
-                        getInventario()
-                    }//courrutina para obtener clientes
+                CoroutineScope(Dispatchers.IO).launch {
+                    getInventario()
+                }//courrutina para obtener clientes
 
-                } else {
-                    ShowAlert("Enciende tus datos o el wifi")
-                }
             } else {
-                ShowAlert("No hay configuracion del Servidor")
+                funciones.mostrarAlerta("ENCIENDE TUS DATOS O EL WIFI", this@carga_datos, binding.vistaalerta)
             }
         }//cuando se carga los inventarios
 
-        cvcuentas!!.setOnClickListener {
-            if (url != null) {
-                if (funciones!!.isNetworkConneted(this)) {
-                    alert!!.Cargando() //muestra la alerta
+        binding.cvcuentas.setOnClickListener {
+            if (funciones.isInternetAvailable(this)) {
+                alert!!.Cargando() //muestra la alerta
 
-                    CoroutineScope(Dispatchers.IO).launch {
-                        getCuentas()
-                    }//courrutina para obtener clientes
+                CoroutineScope(Dispatchers.IO).launch {
+                    getCuentas()
+                }//courrutina para obtener clientes
 
-                } else {
-                    ShowAlert("Enciende tus datos o el wifi")
-                }
             } else {
-                ShowAlert("No hay configuracion del Servidor")
+                funciones.mostrarAlerta("ENCIENDE TUS DATOS O EL WIFI", this@carga_datos, binding.vistaalerta)
             }
         }
 
-        cvpedidos!!.setOnClickListener {
+        binding.cvpedidos.setOnClickListener {
             try {
                 deletePedido()
-                ShowAlert("Pedidos Eliminados")
+                funciones.mostrarMensaje("PEDIDOS ELIMINADOS", this@carga_datos, binding.vistaalerta)
             } catch (e: Exception) {
-                ShowAlert(e.message.toString())
+                funciones.mostrarAlerta("ERROR AL ELIMINAR LOS PEDIDOS -> ${e.message}", this@carga_datos, binding.vistaalerta)
             }
 
         }//elimina los pedidos que no sean de la fecha en el que se presiona
     }
 
-    private fun getApiUrl() {
-        val ip = preferencias!!.getString("ip", "")
-        val puerto = preferencias!!.getInt("puerto", 0)
-        if (ip!!.length > 0 && puerto > 0) {
-            url = "http://$ip:$puerto/"
-        }
-    } //obtiene la url de la api
-
-    private fun ShowAlert(mensaje: String) {
-        val alert: Snackbar = Snackbar.make(vista!!, mensaje, Snackbar.LENGTH_LONG)
-        alert.view.setBackgroundColor(ContextCompat.getColor(this@carga_datos, R.color.moderado))
-        alert.show()
-
-    }//
 
     //OBTENIENDO SUCURSALES DESDE WEBSERVIS
     //09-03-2023
     private suspend fun getClients() {
         try {
             //val direccion = url!! + "clientes"
-            val id_vendedor = preferencias!!.getInt("Idvendedor", 0)
-            val direccion = url!! + "clientes/vendedor/"+id_vendedor
+            val id_vendedor = preferences.getInt("Idvendedor", 0)
+            val direccion = url + "clientes/vendedor/"+id_vendedor
             val url = URL(direccion)
             with(withContext(Dispatchers.IO) {
                 url.openConnection()
@@ -193,18 +148,18 @@ class carga_datos : AppCompatActivity() {
                     }
                 } catch (e: Exception) {
                     alert!!.dismisss()
-                    ShowAlert(e.message.toString())
+                    funciones.mostrarAlerta("ERROR -> ${e.message}", this@carga_datos, binding.vistaalerta)
                 }
             } //ABRIMOS LA CONEXION
         } catch (e: Exception) {
             alert!!.dismisss()
-            ShowAlert(e.message.toString())
+            funciones.mostrarAlerta("ERROR -> ${e.message}", this@carga_datos, binding.vistaalerta)
         }
 
         //IMPORTANDO DATOS DE TABLA SUCURSALES CLIENTE
 
         try {
-            val direccion = url!! + "sucursales"
+            val direccion = url + "sucursales"
             val url = URL(direccion)
             with(withContext(Dispatchers.IO) {
                 url.openConnection()
@@ -254,7 +209,7 @@ class carga_datos : AppCompatActivity() {
             }//termina de obtener los datos
         } catch (e: Exception) {
             alert!!.dismisss()
-            ShowAlert(e.message.toString())
+            funciones.mostrarAlerta("ERROR -> ${e.message}", this@carga_datos, binding.vistaalerta)
         }
         finally {
             CoroutineScope(Dispatchers.IO).launch {
@@ -282,15 +237,15 @@ class carga_datos : AppCompatActivity() {
                 val valor = ContentValues()
                 valor.put("Id", dato.getInt("id"))
                 valor.put("Id_cliente", dato.getInt("id_cliente"))
-                valor.put("codigo_sucursal", funciones!!.validateJsonIsnullString(dato, "codigo_sucursal"))
-                valor.put("nombre_sucursal", funciones!!.validateJsonIsnullString(dato, "nombre_sucursal"))
-                valor.put("direccion_sucursal", funciones!!.validateJsonIsnullString(dato, "direccion"))
-                valor.put("municipio_sucursal", funciones!!.validateJsonIsnullString(dato, "municipio"))
-                valor.put("depto_sucursal", funciones!!.validateJsonIsnullString(dato, "departamento"))
-                valor.put("telefono_1", funciones!!.validateJsonIsnullString(dato, "telefono1"))
-                valor.put("telefono_2", funciones!!.validateJsonIsnullString(dato, "telefono2"))
-                valor.put("correo_sucursal", funciones!!.validateJsonIsnullString(dato, "correo"))
-                valor.put("contacto_sucursal", funciones!!.validateJsonIsnullString(dato, "contacto"))
+                valor.put("codigo_sucursal", funciones.validateJsonIsnullString(dato, "codigo_sucursal"))
+                valor.put("nombre_sucursal", funciones.validateJsonIsnullString(dato, "nombre_sucursal"))
+                valor.put("direccion_sucursal", funciones.validateJsonIsnullString(dato, "direccion"))
+                valor.put("municipio_sucursal", funciones.validateJsonIsnullString(dato, "municipio"))
+                valor.put("depto_sucursal", funciones.validateJsonIsnullString(dato, "departamento"))
+                valor.put("telefono_1", funciones.validateJsonIsnullString(dato, "telefono1"))
+                valor.put("telefono_2", funciones.validateJsonIsnullString(dato, "telefono2"))
+                valor.put("correo_sucursal", funciones.validateJsonIsnullString(dato, "correo"))
+                valor.put("contacto_sucursal", funciones.validateJsonIsnullString(dato, "contacto"))
 
                 bd.insert("cliente_sucursal", null, valor)
                 contador += talla
@@ -310,7 +265,7 @@ class carga_datos : AppCompatActivity() {
     private suspend fun getInventario() {
         // TABLA INVENTARIO
         try {
-            val direccioncantidad = url!! + "inventario/cantidad"
+            val direccioncantidad = url + "inventario/cantidad"
             val urlcantidad = URL(direccioncantidad)
             var cantidadRegistros = 0.toInt()
             with(withContext(Dispatchers.IO) {
@@ -380,7 +335,7 @@ class carga_datos : AppCompatActivity() {
                 porcentaje += 13
 
                 val direccion =
-                    url!! + "inventario/" + inicio.toString() + "/" + longitud.toString()
+                    url + "inventario/" + inicio.toString() + "/" + longitud.toString()
                 val url = URL(direccion)
                 with(withContext(Dispatchers.IO) {
                     url.openConnection()
@@ -433,7 +388,7 @@ class carga_datos : AppCompatActivity() {
         // TABLA INVENTARIO PRECIOS
         try {
 
-            val direccionprecioscantidad = url!! + "inventario/precios/cantidad"
+            val direccionprecioscantidad = url + "inventario/precios/cantidad"
             val urlprecioscantidad = URL(direccionprecioscantidad)
             var cantidadPreciosRegistros = 0.toInt()
             with(withContext(Dispatchers.IO) {
@@ -457,7 +412,7 @@ class carga_datos : AppCompatActivity() {
                 }
             }
 
-            var BLOQUE_PRECIOS = 1000.toInt()
+            val BLOQUE_PRECIOS = 1000.toInt()
 
             //Log.d("Cantidad: ", cantidadRegistros!!.toString())
             var inicioPrecios = 0.toInt()
@@ -565,7 +520,7 @@ class carga_datos : AppCompatActivity() {
 
     private suspend fun getCuentas() {
         try {
-            val direccion = url!! + "cuentas"
+            val direccion = url + "cuentas"
             val url = URL(direccion)
             with(withContext(Dispatchers.IO) {
                 url.openConnection()
@@ -615,7 +570,7 @@ class carga_datos : AppCompatActivity() {
             }//termina de obtener los datos
         } catch (e: Exception) {
             alert!!.dismisss()
-            ShowAlert(e.message.toString())
+            funciones.mostrarAlerta("ERROR -> ${e.message}", this@carga_datos, binding.vistaalerta)
         }
     }
 
@@ -644,41 +599,41 @@ class carga_datos : AppCompatActivity() {
                 val dato = json.getJSONObject(i) //obtenemos el objecto json
                 val data = ContentValues()
                 data.put("Id", dato.getInt("id"))
-                data.put("Codigo", funciones!!.validate(dato.getString("codigo")))
-                data.put("Cliente", funciones!!.validate(dato.getString("cliente")))
-                data.put("Dui", funciones!!.validate(dato.getString("dui")))
-                data.put("Nit", funciones!!.validate(dato.getString("nit")))
-                data.put("Nrc", funciones!!.validate(dato.getString("nrc")))
-                data.put("Giro", funciones!!.validate(dato.getString("giro")))
+                data.put("Codigo", funciones.validate(dato.getString("codigo")))
+                data.put("Cliente", funciones.validate(dato.getString("cliente")))
+                data.put("Dui", funciones.validate(dato.getString("dui")))
+                data.put("Nit", funciones.validate(dato.getString("nit")))
+                data.put("Nrc", funciones.validate(dato.getString("nrc")))
+                data.put("Giro", funciones.validate(dato.getString("giro")))
                 data.put(
                     "Categoria_cliente",
-                    funciones!!.validate(dato.getString("categoria_cliente"))
+                    funciones.validate(dato.getString("categoria_cliente"))
                 )
                 data.put(
                     "Terminos_cliente",
-                    funciones!!.validate(dato.getString("terminos_cliente"))
+                    funciones.validate(dato.getString("terminos_cliente"))
                 )
-                data.put("Plazo_credito", funciones!!.validate(dato.getInt("plazo_credito")))
+                data.put("Plazo_credito", funciones.validate(dato.getInt("plazo_credito")))
                 data.put("Limite_credito",
-                    funciones!!.validate(dato.getString("limite_credito").toFloat())
+                    funciones.validate(dato.getString("limite_credito").toFloat())
                 )
-                data.put("Balance", funciones!!.validate(dato.getString("balance").toFloat()))
-                data.put("Estado_credito", funciones!!.validate(dato.getString("estado_credito")))
-                data.put("Direccion", funciones!!.validate(dato.getString("direccion")))
-                data.put("Municipio", funciones!!.validate(dato.getString("municipio")))
-                data.put("Departamento", funciones!!.validate(dato.getString("departamento")))
-                data.put("Telefono_1", funciones!!.validate(dato.getString("telefono1")))
-                data.put("Telefono_2", funciones!!.validate(dato.getString("telefono2")))
-                data.put("Correo", funciones!!.validate(dato.getString("correo")))
-                data.put("Contacto", funciones!!.validate((dato.getString("contacto"))))
-                data.put("Id_ruta", funciones!!.validateJsonIsNullInt(dato, "id_ruta"))
-                data.put("Id_vendedor", funciones!!.validateJsonIsNullInt(dato, "id_vendedor"))
-                data.put("Vendedor", funciones!!.validate(dato.getString("vendedor")))
-                data.put("Status", funciones!!.validate(dato.getString("status")))
-                data.put("Ultima_venta", funciones!!.validate(dato.getString("fecha_ult_venta")))
+                data.put("Balance", funciones.validate(dato.getString("balance").toFloat()))
+                data.put("Estado_credito", funciones.validate(dato.getString("estado_credito")))
+                data.put("Direccion", funciones.validate(dato.getString("direccion")))
+                data.put("Municipio", funciones.validate(dato.getString("municipio")))
+                data.put("Departamento", funciones.validate(dato.getString("departamento")))
+                data.put("Telefono_1", funciones.validate(dato.getString("telefono1")))
+                data.put("Telefono_2", funciones.validate(dato.getString("telefono2")))
+                data.put("Correo", funciones.validate(dato.getString("correo")))
+                data.put("Contacto", funciones.validate((dato.getString("contacto"))))
+                data.put("Id_ruta", funciones.validateJsonIsNullInt(dato, "id_ruta"))
+                data.put("Id_vendedor", funciones.validateJsonIsNullInt(dato, "id_vendedor"))
+                data.put("Vendedor", funciones.validate(dato.getString("vendedor")))
+                data.put("Status", funciones.validate(dato.getString("status")))
+                data.put("Ultima_venta", funciones.validate(dato.getString("fecha_ult_venta")))
                 data.put(
                     "Aporte_mensual",
-                    funciones!!.validate(dato.getString("aporte_mensual").toFloat())
+                    funciones.validate(dato.getString("aporte_mensual").toFloat())
                 )
 
                 //AGREGADO EL CAMPO PARA VERIFICACION DEL PAGARE
@@ -686,7 +641,7 @@ class carga_datos : AppCompatActivity() {
                 data.put("Firmar_pagare_app", pagareFirmado)
 
                 //AGREGANDO EL CAMPO PARA VERIFICACION DE PERSONA JURIDICA
-                data.put("Persona_juridica", funciones!!.validate(dato.getString("persona_juridica")))
+                data.put("Persona_juridica", funciones.validate(dato.getString("persona_juridica")))
 
                 bd.insert("clientes", null, data)
                 contador += talla
@@ -716,54 +671,54 @@ class carga_datos : AppCompatActivity() {
 
                 val data = ContentValues()
                 data.put("Id", dato.getInt("id"))
-                data.put("Codigo", funciones!!.validateJsonIsnullString(dato, "codigo"))
-                data.put("Tipo", funciones!!.validateJsonIsnullString(dato, "tipo"))
-                data.put("Id_linea", funciones!!.validateJsonIsNullInt(dato, "id_linea"))
-                data.put("Linea", funciones!!.validateJsonIsnullString(dato, "linea"))
-                data.put("Descripcion", funciones!!.validateJsonIsnullString(dato, "descripcion"))
+                data.put("Codigo", funciones.validateJsonIsnullString(dato, "codigo"))
+                data.put("Tipo", funciones.validateJsonIsnullString(dato, "tipo"))
+                data.put("Id_linea", funciones.validateJsonIsNullInt(dato, "id_linea"))
+                data.put("Linea", funciones.validateJsonIsnullString(dato, "linea"))
+                data.put("Descripcion", funciones.validateJsonIsnullString(dato, "descripcion"))
                 data.put(
                     "Unidad_medida",
-                    funciones!!.validateJsonIsnullString(dato, "unidad_medida")
+                    funciones.validateJsonIsnullString(dato, "unidad_medida")
                 )
-                data.put("Fraccion", funciones!!.validateJsonIsNullFloat(dato, "Fraccion"))
+                data.put("Fraccion", funciones.validateJsonIsNullFloat(dato, "Fraccion"))
                 data.put(
-                    "Nombre_fraccion", funciones!!.validateJsonIsnullString(
+                    "Nombre_fraccion", funciones.validateJsonIsnullString(
                         dato,
                         "nombre_fraccion"
                     )
                 )
-                data.put("Existencia", funciones!!.validateJsonIsNullFloat(dato, "existencia"))
-                data.put("Costo", funciones!!.validateJsonIsNullFloat(dato, "costo"))
-                data.put("costo_iva", funciones!!.validateJsonIsNullFloat(dato, "costo_iva"))
+                data.put("Existencia", funciones.validateJsonIsNullFloat(dato, "existencia"))
+                data.put("Costo", funciones.validateJsonIsNullFloat(dato, "costo"))
+                data.put("costo_iva", funciones.validateJsonIsNullFloat(dato, "costo_iva"))
                 data.put(
                     "Precio_oferta",
-                    funciones!!.validateJsonIsNullFloat(dato, "precio_oferta")
+                    funciones.validateJsonIsNullFloat(dato, "precio_oferta")
                 )
-                data.put("Precio_iva", funciones!!.validateJsonIsNullFloat(dato, "precio_iva"))
-                data.put("Precio_u", funciones!!.validateJsonIsNullFloat(dato, "precio_u"))
-                data.put("Precio_u_iva", funciones!!.validateJsonIsNullFloat(dato, "precio_u_iva"))
-                data.put("Precio", funciones!!.validateJsonIsNullFloat(dato, "precio"))
-                data.put("Status", funciones!!.validateJsonIsnullString(dato, "status"))
-                data.put("Id_productor", funciones!!.validateJsonIsNullInt(dato, "id_productor"))
-                data.put("Productor", funciones!!.validateJsonIsnullString(dato, "productor"))
-                data.put("Id_proveedor", funciones!!.validateJsonIsNullInt(dato, "id_proveedor"))
-                data.put("Proveedor", funciones!!.validateJsonIsnullString(dato, "proveedor"))
-                data.put("Cesc", funciones!!.validateJsonIsnullString(dato, "proveedor"))
-                data.put("Combustible", funciones!!.validateJsonIsnullString(dato, "combustible"))
+                data.put("Precio_iva", funciones.validateJsonIsNullFloat(dato, "precio_iva"))
+                data.put("Precio_u", funciones.validateJsonIsNullFloat(dato, "precio_u"))
+                data.put("Precio_u_iva", funciones.validateJsonIsNullFloat(dato, "precio_u_iva"))
+                data.put("Precio", funciones.validateJsonIsNullFloat(dato, "precio"))
+                data.put("Status", funciones.validateJsonIsnullString(dato, "status"))
+                data.put("Id_productor", funciones.validateJsonIsNullInt(dato, "id_productor"))
+                data.put("Productor", funciones.validateJsonIsnullString(dato, "productor"))
+                data.put("Id_proveedor", funciones.validateJsonIsNullInt(dato, "id_proveedor"))
+                data.put("Proveedor", funciones.validateJsonIsnullString(dato, "proveedor"))
+                data.put("Cesc", funciones.validateJsonIsnullString(dato, "proveedor"))
+                data.put("Combustible", funciones.validateJsonIsnullString(dato, "combustible"))
                 data.put("Imagen", "")
-                data.put("Rubro", funciones!!.validateJsonIsnullString(dato, "rubro"))
-                data.put("Marca", funciones!!.validateJsonIsnullString(dato, "marca"))
-                data.put("Sublinea", funciones!!.validateJsonIsnullString(dato, "sublinea"))
-                data.put("Bonificado", funciones!!.validateJsonIsNullFloat(dato, "bonificado"))
+                data.put("Rubro", funciones.validateJsonIsnullString(dato, "rubro"))
+                data.put("Marca", funciones.validateJsonIsnullString(dato, "marca"))
+                data.put("Sublinea", funciones.validateJsonIsnullString(dato, "sublinea"))
+                data.put("Bonificado", funciones.validateJsonIsNullFloat(dato, "bonificado"))
                 data.put(
-                    "Desc_automatico", funciones!!.validateJsonIsNullFloat(
+                    "Desc_automatico", funciones.validateJsonIsNullFloat(
                         dato,
                         "desc_automatico"
                     )
                 )
-                data.put("Id_sublinea", funciones!!.validateJsonIsNullInt(dato, "id_sublinea"))
-                data.put("Id_rubro", funciones!!.validateJsonIsNullInt(dato, "id_rubro"))
-                data.put("Existencia_u", funciones!!.validateJsonIsNullFloat(dato, "existencia_u"))
+                data.put("Id_sublinea", funciones.validateJsonIsNullInt(dato, "id_sublinea"))
+                data.put("Id_rubro", funciones.validateJsonIsNullInt(dato, "id_rubro"))
+                data.put("Existencia_u", funciones.validateJsonIsNullFloat(dato, "existencia_u"))
                 bd.insert("inventario", null, data)
                 //contador=contador+talla
                 //var mensaje=contador+50.toFloat()
@@ -792,24 +747,24 @@ class carga_datos : AppCompatActivity() {
                 data.put("Id", dato.getInt("id"))
                 data.put(
                     "id_inventario",
-                    funciones!!.validateJsonIsnullString(dato, "id_inventario")
+                    funciones.validateJsonIsnullString(dato, "id_inventario")
                 )
                 data.put(
                     "Codigo_producto",
-                    funciones!!.validateJsonIsnullString(dato, "codigo_producto")
+                    funciones.validateJsonIsnullString(dato, "codigo_producto")
                 )
                 data.put(
                     "Id_inventario_unidad",
-                    funciones!!.validateJsonIsNullInt(dato, "id_inventario_unidad")
+                    funciones.validateJsonIsNullInt(dato, "id_inventario_unidad")
                 )
-                data.put("Unidad", funciones!!.validateJsonIsnullString(dato, "unidad"))
-                data.put("Nombre", funciones!!.validateJsonIsnullString(dato, "nombre"))
-                data.put("Terminos", funciones!!.validateJsonIsnullString(dato, "terminos"))
-                data.put("Plazo", funciones!!.validateJsonIsNullFloat(dato, "Plazo"))
-                data.put("cantidad", funciones!!.validateJsonIsNullFloat(dato, "cantidad"))
-                data.put("porcentaje", funciones!!.validateJsonIsNullFloat(dato, "porcentaje"))
-                data.put("precio", funciones!!.validateJsonIsNullFloat(dato, "precio"))
-                data.put("precio_iva", funciones!!.validateJsonIsNullFloat(dato, "precio_iva"))
+                data.put("Unidad", funciones.validateJsonIsnullString(dato, "unidad"))
+                data.put("Nombre", funciones.validateJsonIsnullString(dato, "nombre"))
+                data.put("Terminos", funciones.validateJsonIsnullString(dato, "terminos"))
+                data.put("Plazo", funciones.validateJsonIsNullFloat(dato, "Plazo"))
+                data.put("cantidad", funciones.validateJsonIsNullFloat(dato, "cantidad"))
+                data.put("porcentaje", funciones.validateJsonIsNullFloat(dato, "porcentaje"))
+                data.put("precio", funciones.validateJsonIsNullFloat(dato, "precio"))
+                data.put("precio_iva", funciones.validateJsonIsNullFloat(dato, "precio_iva"))
 
                 bd.insert("inventario_precios", null, data)
 //                contador=contador+talla
@@ -844,35 +799,35 @@ class carga_datos : AppCompatActivity() {
                 valor.put("Id_cliente", dato.getInt("id_cliente"))
                 valor.put(
                     "Codigo_cliente",
-                    funciones!!.validateJsonIsnullString(dato, "codigo_cliente")
+                    funciones.validateJsonIsnullString(dato, "codigo_cliente")
                 )
-                valor.put("Documento", funciones!!.validateJsonIsnullString(dato, "documento"))
-                valor.put("Fecha", funciones!!.validateJsonIsnullString(dato, "fecha"))
-                valor.put("Valor", funciones!!.validateJsonIsNullFloat(dato, "valor"))
+                valor.put("Documento", funciones.validateJsonIsnullString(dato, "documento"))
+                valor.put("Fecha", funciones.validateJsonIsnullString(dato, "fecha"))
+                valor.put("Valor", funciones.validateJsonIsNullFloat(dato, "valor"))
                 valor.put(
                     "Abono_inicial",
-                    funciones!!.validateJsonIsNullFloat(dato, "abono_inicial")
+                    funciones.validateJsonIsNullFloat(dato, "abono_inicial")
                 )
                 valor.put(
                     "Saldo_inicial",
-                    funciones!!.validateJsonIsNullFloat(dato, "saldo_inicial")
+                    funciones.validateJsonIsNullFloat(dato, "saldo_inicial")
                 )
-                valor.put("Plazo", funciones!!.validateJsonIsNullFloat(dato, "plazo"))
+                valor.put("Plazo", funciones.validateJsonIsNullFloat(dato, "plazo"))
                 valor.put(
                     "Fecha_vencimiento",
-                    funciones!!.validateJsonIsnullString(dato, "fecha_vencimiento")
+                    funciones.validateJsonIsnullString(dato, "fecha_vencimiento")
                 )
-                valor.put("Saldo_actual", funciones!!.validateJsonIsNullFloat(dato, "saldo_actual"))
+                valor.put("Saldo_actual", funciones.validateJsonIsNullFloat(dato, "saldo_actual"))
                 valor.put(
                     "Fecha_ult_pago",
-                    funciones!!.validateJsonIsnullString(dato, "fecha_ult_pago")
+                    funciones.validateJsonIsnullString(dato, "fecha_ult_pago")
                 )
-                valor.put("Valor_pago", funciones!!.validateJsonIsNullFloat(dato, "valor_pago"))
-                valor.put("Relacionado", funciones!!.validateJsonIsnullString(dato, "relacionado"))
-                valor.put("Status", funciones!!.validateJsonIsnullString(dato, "status"))
+                valor.put("Valor_pago", funciones.validateJsonIsNullFloat(dato, "valor_pago"))
+                valor.put("Relacionado", funciones.validateJsonIsnullString(dato, "relacionado"))
+                valor.put("Status", funciones.validateJsonIsnullString(dato, "status"))
                 valor.put(
                     "Fecha_cancelado",
-                    funciones!!.validateJsonIsnullString(dato, "fecha_cancelado")
+                    funciones.validateJsonIsnullString(dato, "fecha_cancelado")
                 )
                 bd.insert("cuentas", null, valor)
                 contador = contador + talla
@@ -890,7 +845,7 @@ class carga_datos : AppCompatActivity() {
 
     //FUNCION PARA ELIMINAR PEDIDOS ANTIGUOS
     private fun deletePedido() {
-        val fechanow = getDateTime()
+        val fechanow = funciones.obtenerFecha()
         val bd = database!!.writableDatabase
         try {
             bd.beginTransaction()
@@ -913,15 +868,6 @@ class carga_datos : AppCompatActivity() {
             bd.close()
         }
 
-    }
-
-    //OBTENIENDO LA FECHA CON EL FORMATO CORRECTO
-    private fun getDateTime(): String? {
-        val dateFormat = SimpleDateFormat(
-            "yyyy-MM-dd", Locale.getDefault()
-        )
-        val date = Date()
-        return dateFormat.format(date)
     }
 
     @Deprecated("Deprecated in Java")

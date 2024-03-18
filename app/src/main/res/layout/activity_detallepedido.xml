@@ -31,7 +31,8 @@
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent"
-                app:srcCompat="@drawable/ic_baseline_arrow_back_24" />
+                app:srcCompat="@drawable/ic_baseline_arrow_back_24"
+                android:contentDescription="@string/imgregresar" />
 
 
             <TextView
@@ -65,7 +66,7 @@
 
         <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
+            android:layout_height="wrap_content"
             android:orientation="vertical">
 
             <androidx.constraintlayout.widget.ConstraintLayout
@@ -81,7 +82,7 @@
                     android:layout_marginStart="16dp"
                     android:layout_marginEnd="16dp"
                     style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
-                    android:hint="NOMBRE DEL CLIENTE"
+                    android:hint="@string/nombre_del_cliente"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toTopOf="parent">
@@ -104,7 +105,7 @@
                     android:layout_marginStart="16dp"
                     android:layout_marginEnd="16dp"
                     android:layout_marginTop="8dp"
-                    android:text="SUCURSAL"
+                    android:text="@string/sucursal"
                     android:textColor="@color/colordark"
                     android:textSize="18sp"
                     android:textStyle="bold"
@@ -112,134 +113,164 @@
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toBottomOf="@+id/lyCliente" />
 
-                <TextView
-                    android:id="@+id/sinSucursal"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_marginStart="16dp"
-                    android:layout_marginEnd="16dp"
-                    android:text="NO TIENE SUCURSAL REGISTRADA"
-                    android:textColor="@color/colordark"
-                    android:textSize="16sp"
-                    app:layout_constraintEnd_toEndOf="parent"
+                <androidx.constraintlayout.widget.ConstraintLayout
+                    android:id="@+id/lySucursal"
+                    android:layout_width="match_parent"
+                    android:layout_height="55dp"
+                    android:orientation="horizontal"
+                    android:gravity="center"
+                    android:background="@drawable/spinner_bg"
+                    android:layout_marginStart="@dimen/margin_default_16dp"
+                    android:layout_marginEnd="@dimen/margin_default_16dp"
+                    app:layout_constraintTop_toBottomOf="@id/tvsucursal"
                     app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toBottomOf="@+id/tvsucursal" />
+                    app:layout_constraintEnd_toEndOf="parent">
 
+                    <Spinner
+                        android:id="@+id/spSucursal"
+                        android:layout_width="match_parent"
+                        android:layout_height="55dp"
+                        android:layout_marginStart="@dimen/margin_4dp"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toTopOf="parent"
+                        app:layout_constraintBottom_toBottomOf="parent"/>
 
-                <Spinner
-                    android:id="@+id/spSucursal"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_marginStart="16dp"
-                    android:layout_marginEnd="16dp"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toBottomOf="@+id/tvsucursal"
-                    tools:layout_editor_absoluteX="41dp"
-                    tools:layout_editor_absoluteY="160dp" />
+                    <TextView
+                        android:id="@+id/sinSucursal"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="16dp"
+                        android:layout_marginEnd="16dp"
+                        android:text="@string/no_tiene_sucursal_registrada"
+                        android:textColor="@color/colordark"
+                        android:textSize="16sp"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toTopOf="parent"
+                        app:layout_constraintBottom_toBottomOf="parent"/>
+
+                </androidx.constraintlayout.widget.ConstraintLayout>
 
                 <LinearLayout
-                    android:id="@+id/lyFormatos"
-                    android:layout_width="match_parent"
+                    android:id="@+id/lySeleccionables"
+                    android:layout_width="0dp"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="30dp"
-                    android:layout_marginStart="16dp"
-                    android:layout_marginEnd="16dp"
                     android:orientation="horizontal"
-                    app:layout_constraintEnd_toEndOf="parent"
+                    android:layout_marginStart="@dimen/margin_default_16dp"
+                    android:layout_marginEnd="@dimen/margin_default_16dp"
+                    android:layout_marginTop="@dimen/margin_8dp"
+                    app:layout_constraintTop_toBottomOf="@id/lySucursal"
                     app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toBottomOf="@+id/tvsucursal">
+                    app:layout_constraintEnd_toEndOf="parent"
+                    android:baselineAligned="false">
 
                     <LinearLayout
                         android:layout_width="match_parent"
-                        android:layout_height="match_parent"
-                        android:layout_weight="1"
-                        android:orientation="vertical">
+                        android:layout_height="wrap_content"
+                        android:layout_marginEnd="@dimen/margin_4dp"
+                        android:orientation="vertical"
+                        android:layout_weight="1">
 
                         <TextView
-                            android:id="@+id/tvenvio"
+                            android:id="@+id/tvTipoEnvio"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:text="TIPO DE ENVIO"
+                            android:text="@string/tipo_envio"
                             android:textColor="@color/colordark"
                             android:textSize="18sp"
-                            android:textStyle="bold" />
+                            android:textStyle="bold"/>
 
-                        <LinearLayout
+                        <androidx.constraintlayout.widget.ConstraintLayout
+                            android:id="@+id/lyTipoEnvio"
                             android:layout_width="match_parent"
-                            android:layout_height="match_parent"
-                            android:layout_marginStart="8dp"
-                            android:layout_marginEnd="24dp"
-                            android:orientation="vertical">
+                            android:layout_height="55dp"
+                            android:orientation="horizontal"
+                            android:gravity="center"
+                            android:background="@drawable/spinner_bg">
 
-                            <Switch
-                                android:id="@+id/swruta"
+                            <Spinner
+                                android:id="@+id/spTipoEnvio"
+                                android:layout_width="match_parent"
+                                android:layout_height="55dp"
+                                android:layout_marginStart="@dimen/margin_4dp"
+                                app:layout_constraintEnd_toEndOf="parent"
+                                app:layout_constraintStart_toStartOf="parent"
+                                app:layout_constraintTop_toTopOf="parent"
+                                app:layout_constraintBottom_toBottomOf="parent"/>
+
+                            <TextView
+                                android:id="@+id/tvTipoenvio"
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
-                                android:layout_marginTop="8dp"
-                                android:text="RUTA  "
-                                android:textStyle="bold"
-                                android:thumb="@drawable/thumb"
-                                android:track="@drawable/track" />
+                                android:layout_marginStart="16dp"
+                                android:layout_marginEnd="16dp"
+                                tools:text="FACTURA"
+                                android:textColor="@color/colordark"
+                                android:textSize="16sp"
+                                app:layout_constraintEnd_toEndOf="parent"
+                                app:layout_constraintStart_toStartOf="parent"
+                                app:layout_constraintTop_toTopOf="parent"
+                                app:layout_constraintBottom_toBottomOf="parent"/>
 
-                            <Switch
-                                android:id="@+id/swcaes"
-                                android:layout_width="match_parent"
-                                android:layout_height="wrap_content"
-                                android:layout_marginTop="8dp"
-                                android:text="ENCOMIENDA  "
-                                android:textStyle="bold"
-                                android:thumb="@drawable/thumb"
-                                android:track="@drawable/track" />
-                        </LinearLayout>
+                        </androidx.constraintlayout.widget.ConstraintLayout>
 
                     </LinearLayout>
 
                     <LinearLayout
                         android:layout_width="match_parent"
-                        android:layout_height="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="@dimen/margin_4dp"
                         android:layout_weight="1"
                         android:orientation="vertical">
 
                         <TextView
+                            android:id="@+id/tvDocumento"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:text="DOCUMENTO"
+                            android:text="@string/documento"
                             android:textColor="@color/colordark"
                             android:textSize="18sp"
-                            android:textStyle="bold" />
+                            android:textStyle="bold"/>
 
-                        <LinearLayout
+                        <androidx.constraintlayout.widget.ConstraintLayout
+                            android:id="@+id/lyDocumento"
                             android:layout_width="match_parent"
-                            android:layout_height="match_parent"
-                            android:layout_marginStart="8dp"
-                            android:layout_marginEnd="24dp"
-                            android:orientation="vertical">
+                            android:layout_height="55dp"
+                            android:orientation="horizontal"
+                            android:gravity="center"
+                            android:background="@drawable/spinner_bg">
 
-                            <Switch
-                                android:id="@+id/swFactura"
+                            <Spinner
+                                android:id="@+id/spDocumento"
+                                android:layout_width="match_parent"
+                                android:layout_height="55dp"
+                                android:layout_marginStart="@dimen/margin_4dp"
+                                app:layout_constraintEnd_toEndOf="parent"
+                                app:layout_constraintStart_toStartOf="parent"
+                                app:layout_constraintTop_toTopOf="parent"
+                                app:layout_constraintBottom_toBottomOf="parent"/>
+
+                            <TextView
+                                android:id="@+id/tvDocumentoSeleccionado"
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
-                                android:layout_marginTop="8dp"
-                                android:text="FACTURA  "
-                                android:textStyle="bold"
-                                android:thumb="@drawable/thumb"
-                                android:track="@drawable/track" />
+                                android:layout_marginStart="16dp"
+                                android:layout_marginEnd="16dp"
+                                tools:text="FACTURA"
+                                android:textColor="@color/colordark"
+                                android:textSize="16sp"
+                                app:layout_constraintEnd_toEndOf="parent"
+                                app:layout_constraintStart_toStartOf="parent"
+                                app:layout_constraintTop_toTopOf="parent"
+                                app:layout_constraintBottom_toBottomOf="parent"/>
 
-                            <Switch
-                                android:id="@+id/swCredito"
-                                android:layout_width="match_parent"
-                                android:layout_height="wrap_content"
-                                android:layout_marginTop="8dp"
-                                android:text="CREDITO FISCAL  "
-                                android:textStyle="bold"
-                                android:thumb="@drawable/thumb"
-                                android:track="@drawable/track" />
-                        </LinearLayout>
+                        </androidx.constraintlayout.widget.ConstraintLayout>
 
                     </LinearLayout>
 
                 </LinearLayout>
+
 
                 <TextView
                     android:id="@+id/textView18"
@@ -253,7 +284,7 @@
                     android:textSize="18sp"
                     android:textStyle="bold"
                     app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toBottomOf="@+id/lyFormatos" />
+                    app:layout_constraintTop_toBottomOf="@+id/lySeleccionables" />
 
                 <TextView
                     android:id="@+id/fecha_creacion"

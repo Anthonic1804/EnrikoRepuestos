@@ -190,7 +190,7 @@ class Tokens : AppCompatActivity() {
     //VALIDANDO LA CARGA DE LOS EMPLEADOS
     private fun cargarEmpleados(){
         if (url != null) {
-            if (funciones!!.isNetworkConneted(this)) {
+            if (funciones!!.isInternetAvailable(this)) {
                 alert!!.Cargando() //muestra la alerta
 
                 CoroutineScope(Dispatchers.IO).launch {

@@ -161,7 +161,7 @@ class firmarPagare : AppCompatActivity() {
         btnFirmar.setOnClickListener {
             fechaDoc = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy_MM_dd_HH_mm_ss"))
             imageFirmada = signatureView.isBitmapEmpty
-            if(funciones.isNetworkConneted(this@firmarPagare)){
+            if(funciones.isInternetAvailable(this@firmarPagare)){
                 if(imageFirmada){
                     Toast.makeText(this, "POR FAVOR INGRESE SU FIRMA", Toast.LENGTH_LONG).show()
                 }else{

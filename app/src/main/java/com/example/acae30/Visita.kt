@@ -1,30 +1,27 @@
 package com.example.acae30
 
 import android.Manifest
+import android.annotation.SuppressLint
 import android.content.ContentValues
 import android.content.Context
 import android.content.Intent
 import android.content.SharedPreferences
 import android.content.pm.PackageManager
 import android.location.Location
-import android.net.ConnectivityManager
 import android.os.Bundle
 import android.os.StrictMode
 import android.view.View
-import android.widget.Button
-import android.widget.ImageButton
-import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
-import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.app.ActivityCompat
+import androidx.core.content.ContextCompat
 import androidx.lifecycle.lifecycleScope
 import com.example.acae30.controllers.ClientesControllers
+import com.example.acae30.controllers.VisitaController
 import com.example.acae30.database.Database
+import com.example.acae30.databinding.ActivityVisitaBinding
 import com.example.acae30.modelos.Visitas
 import com.google.android.gms.location.FusedLocationProviderClient
-import com.google.android.gms.location.LocationCallback
-import com.google.android.gms.location.LocationRequest
 import com.google.android.gms.location.LocationServices
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
@@ -36,65 +33,56 @@ import java.io.Reader
 import java.net.HttpURLConnection
 import java.net.URL
 import java.nio.charset.StandardCharsets
-import java.text.SimpleDateFormat
-import java.util.Date
-import java.util.Locale
 
 
 class Visita : AppCompatActivity() {
     private var idcliente = 0
     private var nombre = ""
     private var codigo = ""
-
-    private var txtcodigo: TextView? = null
-    private var txtnombre: TextView? = null
-
-    private var bd: Database? = null
-    private var funciones: Funciones? = null
-    private var btnvisita: Button? = null
-    private var btnfinvisita: Button? = null
-    private var btnpedido: Button? = null
-    lateinit var preferencias: SharedPreferences
-    private val instancia = "CONFIG_SERVIDOR"
-    private var btnatras: ImageButton? = null
-    private var lienzo: ConstraintLayout? = null
     private var latitud = "0"
     private var longitud = "0"
-    private var gpspermiso = false
     private var idpedido = 0
     private var alerta: AlertDialogo? = null
     private var idvisitaGLOBAL: Int? = 0
     private var idvisitaApi = 0 //id de la base de datos de la tabla app_visitas
 
-    // Location request is a config file for all settings related to FusedLocationProviderClient
-    private lateinit var locationRequest: LocationRequest
-
-    // Google's API for location service
-    private lateinit var fusedLocationProviderClient: FusedLocationProviderClient
-
-    private lateinit var locationCallback: LocationCallback
-
+    private var funciones = Funciones()
     private var clientesController = ClientesControllers()
+    private var visitaController = VisitaController()
+    lateinit var preferencias: SharedPreferences
+    private val instancia = "CONFIG_SERVIDOR"
+    private var bd: Database? = null
+    private lateinit var binding: ActivityVisitaBinding
+
+    private lateinit var fusedLocationClient: FusedLocationProviderClient
+    private val LOCATION_PERMISSION_REQUEST_CODE = 1001
+
+
+    private val Id_app_visita: Int = 0
+    private var Fecha_hora_checkin: String = ""
+    private var Latitud_checkin: String = ""
+    private var Longitud_checkin: String = ""
+    private var Id_cliente: Int = 0
+    private var Cliente: String = ""
+    private var Id_vendedor: Int = 0
+    private var Fecha_hora_checkout: String = ""
+    private var Latitud_checkout: String = ""
+    private var Longitud_checkout: String = ""
+    private val Comentarios: String = ""
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
 
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_visita)
-        supportActionBar?.title = "VISITA"
-        supportActionBar?.hide()
+        binding = ActivityVisitaBinding.inflate(layoutInflater)
+        setContentView(binding.root)
+
         idcliente = intent.getIntExtra("idcliente", 0)
         nombre = intent.getStringExtra("nombrecliente").toString()
         codigo = intent.getStringExtra("codigo").toString()
         idpedido = intent.getIntExtra("idpedido", 0)
         idvisitaApi = intent.getIntExtra("idapi", 0)
         idvisitaGLOBAL = intent.getIntExtra("visitaid", 0)
-        funciones = Funciones()
-        btnfinvisita = findViewById(R.id.btnfinvisita)
-        btnpedido = findViewById(R.id.btnpedido)
-        txtcodigo = findViewById(R.id.txtcodigo)
-        txtnombre = findViewById(R.id.txtnombre)
-        lienzo = findViewById(R.id.lienzo)
-        btnatras = findViewById(R.id.imbtnatras)
 
         alerta = AlertDialogo(this)
         bd = Database(this)
@@ -103,10 +91,8 @@ class Visita : AppCompatActivity() {
         val policy = StrictMode.ThreadPolicy.Builder().permitAll().build()
         StrictMode.setThreadPolicy(policy)
 
-        btnvisita = findViewById(R.id.btnvisita)
-
         if (idvisitaGLOBAL!! > 0) {
-            val base = bd!!.writableDatabase
+            val base = bd!!.readableDatabase
             try {
                 val cursor = base!!.rawQuery(
                     "select c.codigo as codigo, v.Id as idvisita, c.id as idcliente, c.cliente as nombre from visitas v inner join clientes c on v.id_cliente = c.Id where v.id = ${idvisitaGLOBAL}",
@@ -119,7 +105,7 @@ class Visita : AppCompatActivity() {
                     idcliente = cursor.getInt(2)
                     nombre = cursor.getString(3)
 
-                    txtcodigo!!.text = codigo
+                    binding.txtcodigo.text = codigo
                     cursor.close()
                 } else {
                     throw Exception("Error al obtener código de cliente")
@@ -130,24 +116,24 @@ class Visita : AppCompatActivity() {
                 base.close()
             }
         } else {
-            txtcodigo!!.text = codigo
+            binding.txtcodigo.text = codigo
         }
 
-        txtnombre!!.text = nombre
+        binding.txtnombre.text = nombre
 
-        btnvisita!!.setOnClickListener {
+        binding.btnvisita.setOnClickListener {
             getGps(true)
 
         } //obtiene las coordenadas del gps
         //configuracion general del gps
-        btnfinvisita!!.setOnClickListener {
+        binding.btnfinvisita.setOnClickListener {
             getGps(false)
             updateSharedPreferencesFinalizarVisita()
         }
 
         RevisarVisita()
 
-        btnpedido!!.setOnClickListener {
+        binding.btnpedido.setOnClickListener {
             CreatePedido()
             val intento = Intent(this, Detallepedido::class.java)
             intento.putExtra("idcliente", idcliente)
@@ -161,7 +147,7 @@ class Visita : AppCompatActivity() {
             finish()
         }
 
-        btnatras!!.setOnClickListener {
+        binding.imbtnatras.setOnClickListener {
             if (idvisitaGLOBAL!! < 1) {
                 val intento = Intent(this, Clientes::class.java)
                 startActivity(intento)
@@ -169,27 +155,41 @@ class Visita : AppCompatActivity() {
         }
 
         // GET UBICACIÓN
+        fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
 
-        fusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(this)
-        // set all properties of LocationRequest
-        locationRequest = LocationRequest()
-        locationRequest.interval = 1000 * 30
-        locationRequest.fastestInterval = 1000 * 5
-        locationRequest.priority = LocationRequest.PRIORITY_HIGH_ACCURACY
-
-        // event that is triggered whenver the update interval is met
-        locationCallback = object : LocationCallback() {
-
+        // Verificar permisos de ubicación
+        if (ContextCompat.checkSelfPermission(
+                this,
+                Manifest.permission.ACCESS_FINE_LOCATION
+            ) != PackageManager.PERMISSION_GRANTED
+        ) {
+            // Si no hay permiso, solicitarlo
+            ActivityCompat.requestPermissions(
+                this,
+                arrayOf(Manifest.permission.ACCESS_FINE_LOCATION),
+                LOCATION_PERMISSION_REQUEST_CODE
+            )
+        } else {
+            // Si ya hay permiso, obtener la ubicación
+            alerta!!.Cargando()
+            alerta!!.changeText("Buscando tu ubicación")
+            updateGPS()
         }
-        solicitarPermisos()
-        //Thread.sleep(1000 * 5)
 
-        //updateGPS()
-        startLocationUpdates()
+    }
 
-        alerta!!.Cargando()
-        alerta!!.changeText("Buscando tu ubicación")
-        updateGPS()
+    // Manejar el resultado de la solicitud de permisos
+    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+        if (requestCode == LOCATION_PERMISSION_REQUEST_CODE) {
+            if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                // Permiso concedido, obtener la ubicación
+                updateGPS()
+            } else {
+                // Permiso denegado, mostrar un mensaje o realizar otra acción
+                Toast.makeText(this, "Permiso de ubicación denegado", Toast.LENGTH_SHORT).show()
+            }
+        }
     }
 
     //FUNCION PARA ELIMINAR LAS SHARED PREFERENCES CREADAS
@@ -201,64 +201,36 @@ class Visita : AppCompatActivity() {
         editor.apply()
     }
 
-    private fun startLocationUpdates() {
-        if (ActivityCompat.checkSelfPermission(
-                this,
-                Manifest.permission.ACCESS_FINE_LOCATION
-            ) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(
-                this,
-                Manifest.permission.ACCESS_COARSE_LOCATION
-            ) != PackageManager.PERMISSION_GRANTED
-        ) {
-            return
-        }
-
-        fusedLocationProviderClient.requestLocationUpdates(locationRequest, locationCallback, null)
-    }
-
     private fun RevisarVisita() {
         if (idvisitaGLOBAL!! > 0) {
-            btnvisita!!.visibility = View.GONE
-            btnfinvisita!!.visibility = View.VISIBLE
-            btnatras!!.visibility = View.GONE
+            binding.btnvisita.visibility = View.GONE
+            binding.btnfinvisita.visibility = View.VISIBLE
+            binding.imbtnatras.visibility = View.GONE
 
 
             if (idpedido > 0) {
-                btnpedido!!.text = "NUEVO PEDIDO"
+                binding.btnpedido.text = getString(R.string.nuevo_pedido)
             } else {
-                btnpedido!!.text = "PEDIDO"
+                binding.btnpedido.text = getString(R.string.pedido)
             }
 
-            btnpedido!!.visibility = View.VISIBLE
+            binding.btnpedido.visibility = View.VISIBLE
 
         } else {
-            btnfinvisita!!.visibility = View.GONE
-            btnpedido!!.visibility = View.GONE
-            btnatras!!.visibility = View.VISIBLE
+            binding.btnfinvisita.visibility = View.GONE
+            binding.btnpedido.visibility = View.GONE
+            binding.imbtnatras.visibility = View.VISIBLE
         }
-    }
-
-    // CONOCER SI SE TIENE ACCESO A INTERNET
-    private fun isConnected(): Boolean {
-        val connectivityManager = getSystemService(CONNECTIVITY_SERVICE) as ConnectivityManager
-        val networkInfo = connectivityManager.activeNetworkInfo
-
-        var isConnected = true
-
-        isConnected = (networkInfo != null) && networkInfo.isConnected
-        return isConnected
     }
 
     // REGISTRA LA ENTRADA Y SALIDA DE LA VISITA DE MANERA LOCAL Y EN EL SERVIDOR EXTERNO
     private fun getGps(inicio: Boolean) {
-        startLocationUpdates()
 
         this@Visita.lifecycleScope.launch {
             try {
                 // GUARDA LA VISITA EN LA BD LOCAL
                 updateGPS()
 
-                var inicioVisita = JSONObject()
                 var finVisita = JSONObject()
                 var datos_enviar = JSONObject()
                 var datosEnviados: Boolean = false
@@ -277,12 +249,10 @@ class Visita : AppCompatActivity() {
 
                     idvisitaGLOBAL = datos.Id
 
-                    inicioVisita.put("Id_app_visita", 0)
-                    inicioVisita.put("Fecha_hora_checkin", datos.Fecha_inicial)
-                    inicioVisita.put("Id_cliente", datos.Id_cliente)
-                    inicioVisita.put("Cliente", datos.Nombre_cliente)
-                    inicioVisita.put("Fecha_hora_checkout", datos.Fecha_inicial)
-                    inicioVisita.put("comentarios", "")
+                    Fecha_hora_checkin = datos.Fecha_inicial
+                    Id_cliente = datos.Id_cliente
+                    Cliente = datos.Nombre_cliente
+                    Fecha_hora_checkout = datos.Fecha_inicial
 
                 } else {
                     val datos = checkOut(idvisitaGLOBAL!!, "0,0")
@@ -312,24 +282,39 @@ class Visita : AppCompatActivity() {
                 }
 
                 // EN CASO DE TENER INTERNET ENVIA LOS DATOS AL SERVIDOR EXTERNO
-                if (isConnected()) {
+                if (funciones.isInternetAvailable(this@Visita)) {
 
                     try {
                         val id_vendedor = preferencias.getInt("Idvendedor", 0)
-                        var latitud_p = latitud
-                        var longitud_p = longitud
-                        var ubicacion = "${latitud_p},${longitud_p}"
+                        val latitud_p = latitud
+                        val longitud_p = longitud
+                        val ubicacion = "${latitud_p},${longitud_p}"
 
                         updateGpsVisita(idvisitaGLOBAL!!, ubicacion, inicio)
 
                         if (inicio) {
-                            inicioVisita.put("Latitud_checkin", latitud_p)
-                            inicioVisita.put("Longitud_checkin", longitud_p)
-                            inicioVisita.put("Latitud_checkout", latitud_p)
-                            inicioVisita.put("Longitud_checkout", longitud_p)
-                            inicioVisita.put("Id_vendedor", id_vendedor)
 
-                            SendInicio(inicioVisita, idvisitaGLOBAL!!)
+                            Latitud_checkin = latitud_p
+                            Longitud_checkin = longitud_p
+                            Latitud_checkout = latitud_p
+                            Longitud_checkout = longitud_p
+                            Id_vendedor = id_vendedor
+
+                            idvisitaApi = visitaController.registrarVisita(
+                                Id_app_visita,
+                                Fecha_hora_checkin,
+                                Latitud_checkin,
+                                Longitud_checkin,
+                                Id_cliente,
+                                Cliente,
+                                Id_vendedor,
+                                Fecha_hora_checkout,
+                                Latitud_checkout,
+                                Longitud_checkout,
+                                Comentarios,
+                                idvisitaGLOBAL!!,
+                                this@Visita
+                            )
                         } else {
 
                             if (datosEnviados) {
@@ -373,10 +358,10 @@ class Visita : AppCompatActivity() {
             runOnUiThread {
                 var mensaje = "Visita Iniciada"
                 if (inicio) {
-                    btnfinvisita!!.visibility = View.VISIBLE
-                    btnpedido!!.visibility = View.VISIBLE
-                    btnvisita!!.visibility = View.GONE
-                    btnatras!!.visibility = View.GONE
+                    binding.btnfinvisita.visibility = View.VISIBLE
+                    binding.btnpedido.visibility = View.VISIBLE
+                    binding.btnvisita.visibility = View.GONE
+                    binding.imbtnatras.visibility = View.GONE
                 } else {
                     mensaje = "Visita Finalizada"
                     val intento = Intent(this@Visita, Pedido::class.java)
@@ -393,26 +378,29 @@ class Visita : AppCompatActivity() {
 
     override fun onStop() {
         val preferencias = getSharedPreferences(instancia, Context.MODE_PRIVATE)
-        var editor = preferencias.edit()
+
+        val editor = preferencias.edit()
         editor.putString("nombrecliente", nombre)
         editor.putString("codigo", codigo)
         editor.putInt("idcliente", idcliente)
-        editor.commit()
+        editor.apply()
         super.onStop()
     }
 
     override fun onRestart() {
         val preferencias = getSharedPreferences(instancia, Context.MODE_PRIVATE)
+
         nombre = preferencias.getString("nombrecliente", "").toString()
         codigo = preferencias.getString("codigo", "").toString()
         idcliente = preferencias.getInt("idcliente", 0)
-        var editor = preferencias.edit()
+
+        val editor = preferencias.edit()
         editor.remove("nombrecliente")
         editor.remove("codigo")
         editor.remove("idcliente")
-        editor.commit()
-        txtcodigo!!.text = codigo
-        txtnombre!!.text = nombre
+        editor.apply()
+        binding.txtcodigo.text = codigo
+        binding.txtnombre.text = nombre
         super.onRestart()
     }
 
@@ -427,36 +415,11 @@ class Visita : AppCompatActivity() {
 //        }
     }
 
-    override fun onRequestPermissionsResult(
-        requestCode: Int,
-        permissions: Array<out String>,
-        grantResults: IntArray
-    ) {
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
-        when (requestCode) {
-            1 -> {
-                if (grantResults.size > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                    gpspermiso = true
-                } else {
-                    ActivityCompat.requestPermissions(
-                        this,
-                        arrayOf(
-                            Manifest.permission.ACCESS_FINE_LOCATION,
-                            Manifest.permission.ACCESS_COARSE_LOCATION
-                        ),  /* Este codigo es para identificar tu request */
-                        1
-                    )
-                }
-            }
-        }
-    } //CONCEDE PERMISOS PARA usar el gps
-
     private fun CheckIn(ubicacion: String): Visitas {
         val base = bd!!.writableDatabase
         try {
             var visita = ContentValues()
-            val fechanow = getDateTime()
+            val fechanow = funciones.getFechaHoraProceso()
             visita.put("Id_cliente", idcliente)
             visita.put("Nombre_cliente", nombre)
             //visita.put("Gps_in", "$latitud,$longitud")
@@ -592,58 +555,6 @@ class Visita : AppCompatActivity() {
         }
     } //envia la data al servidor
 
-    private fun SendInicio(data: JSONObject, idvisita: Int) {
-        try {
-            val strinjson = data.toString()
-            val ip = preferencias.getString("ip", "")
-            val puerto = preferencias.getInt("puerto", 0)
-            val direccion = "http://$ip:$puerto/visitas/iniciar_visita"
-            val url = URL(direccion)
-            with(url.openConnection() as HttpURLConnection) {
-                connectTimeout = 5000
-                requestMethod = "POST"
-                setRequestProperty("Content-Type", "application/json;charset=utf-8")
-                val or = OutputStreamWriter(outputStream, StandardCharsets.UTF_8)
-                or.write(strinjson) //escribimos el json
-                or.flush() //se envia el json
-                val codigoRespuesta = responseCode
-                when (codigoRespuesta) {
-                    201 -> {
-                        BufferedReader(InputStreamReader(inputStream) as Reader?).use {
-                            val respuesta = StringBuffer()
-                            var inpuline = it.readLine()
-                            while (inpuline != null) {
-                                respuesta.append(inpuline)
-                                inpuline = it.readLine()
-                            } //obtenemos la respuesta completa
-                            it.close()
-                            var data: String? = respuesta.toString()
-                            if (data != null) {
-                                val res = JSONObject(data)
-                                if (!res.isNull("error") && !res.isNull("response")) {
-                                    val idser = res.getInt("error")
-                                    idvisitaApi = idser
-                                    updateCheckIn(idser, idvisita)
-
-                                } else {
-                                    throw Exception("Error en la respuesta del servidor")
-                                }
-                            } else {
-                                throw Exception("Error al recibir respuesta del servidor")
-                            }
-                        }
-                    } //termina response 201
-
-                    else -> {
-                        throw Exception("Error al recibir respuesta del servidor")
-                    }
-                }
-            }
-        } catch (e: Exception) {
-            throw Exception(e.message)
-        }
-    } //envia la data al servidor
-
     private fun updateCheckIn(idvisitaServer: Int, idvisita: Int) {
         val base = bd!!.writableDatabase
         try {
@@ -696,7 +607,7 @@ class Visita : AppCompatActivity() {
         try {
             val data = ContentValues()
             data.put("Gps_out", coordenadas)
-            data.put("Fecha_final", getDateTime())
+            data.put("Fecha_final", funciones.getFechaHoraProceso())
             data.put("Abierta", false)
             base.update("visitas", data, "Id=?", arrayOf(idvisita.toString()))
 
@@ -739,19 +650,6 @@ class Visita : AppCompatActivity() {
     override fun onDestroy() {
         super.onDestroy()
         lifecycleScope.cancel()
-    }
-
-    /*
-     * CAMBIANDO EL TIPO DE TIMESTAMP PARA LA CREACION DEL PEDIDO
-     * MODIFICACION 20/11/2023
-     * */
-    private fun getDateTime(): String? {
-        val dateFormat = SimpleDateFormat(
-            "yyyy-MM-dd HH:mm:ss", Locale.getDefault()
-        /*TIMESTAMP -> yyyy-MM-dd HH:mm:ss*/
-        )
-        val date = Date()
-        return dateFormat.format(date)
     }
 
     private fun Sendfinal(data: JSONObject) {
@@ -806,7 +704,7 @@ class Visita : AppCompatActivity() {
 
     private fun CreatePedido() {
         val base = bd!!.writableDatabase
-        val fechanow = getDateTime()
+        val fechanow = funciones.getFechaHoraProceso()
         val terminos = clientesController.obtenerInformacionCliente(this@Visita, idcliente)
         try {
             base.beginTransaction()
@@ -836,45 +734,38 @@ class Visita : AppCompatActivity() {
     } //crea el pedido en caso de que no exista
 
     // HACER PETICIÓN DE POSICIÓN ACTUAL DEL GPS
+    @SuppressLint("MissingPermission")
     private fun updateGPS() {
-        // get permissions from the user to track GPS
-        // get the current location from the fused client
-        // update the UI - i.e. set all properties in their associated text view items.
 
-        fusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(this@Visita)
+        fusedLocationClient.lastLocation
+            .addOnSuccessListener { location: Location? ->
+                // OBTENIENDO LA UBICACION ACTUAL
+                location?.let {
 
-        if (ActivityCompat.checkSelfPermission(
-                this,
-                Manifest.permission.ACCESS_FINE_LOCATION
-            ) == PackageManager.PERMISSION_GRANTED
-        ) {
-            // user provided the permission
-            fusedLocationProviderClient.lastLocation
-                .addOnSuccessListener { location: Location? ->
-                    // we got permissions. put the values of location. XXX into the UI Components.
-                    if (location != null) {
-                        latitud = location.latitude.toString()
-                        longitud = location.longitude.toString()
-                    }
+                    latitud = location.latitude.toString()
+                    longitud = location.longitude.toString()
+
+                   /* Toast.makeText(
+                        this,
+                        "Latitud: $latitud, Longitud: $longitud",
+                        Toast.LENGTH_SHORT
+                    ).show()*/
+
+                    alerta!!.dismisss()
+
+                } ?: run {
+                    // ERROR AL NO OBTENER LA UBICACION
+                    Toast.makeText(this, "No se pudo obtener la ubicación", Toast.LENGTH_SHORT)
+                        .show()
+
                     alerta!!.dismisss()
                 }
-        } else {
-            // permissions not granted yet.
-            solicitarPermisos()
-            alerta!!.dismisss()
-        }
-    }
+            }
+            .addOnFailureListener { e ->
+                // ERROR AL NO OBTENER LA UBICACION
+                Toast.makeText(this, "Error al obtener la ubicación: ${e.message}", Toast.LENGTH_SHORT).show()
 
-    // PERMISOS PARA ACCESO AL GPS
-    private fun solicitarPermisos() {
-        // SOLICITAR
-        ActivityCompat.requestPermissions(
-            this,
-            arrayOf(
-                Manifest.permission.ACCESS_FINE_LOCATION,
-                Manifest.permission.ACCESS_COARSE_LOCATION
-            ),  /* Este codigo es para identificar tu request */
-            1
-        )
+                alerta!!.dismisss()
+            }
     }
 }

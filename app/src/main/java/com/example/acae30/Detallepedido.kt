@@ -7,46 +7,65 @@ import android.content.Context
 import android.content.Intent
 import android.content.SharedPreferences
 import android.content.pm.PackageManager
-import android.os.Build
 import android.os.Bundle
 import android.os.Environment
-import android.os.Handler
 import android.view.View
-import android.widget.*
+import android.widget.AdapterView
 import android.widget.AdapterView.OnItemSelectedListener
+import android.widget.ArrayAdapter
+import android.widget.Button
+import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
-import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
-import androidx.core.view.isVisible
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.RecyclerView
+import com.example.acae30.R
+import com.example.acae30.controllers.PedidosController
 import com.example.acae30.database.Database
+import com.example.acae30.databinding.ActivityDetallepedidoBinding
 import com.example.acae30.listas.PedidoDetalleAdapter
-import com.example.acae30.modelos.*
+import com.example.acae30.modelos.DetallePedido
 import com.example.acae30.modelos.JSONmodels.CabezeraPedidoSend
+import com.example.acae30.modelos.Pedidos
+import com.example.acae30.modelos.Sucursales
+import com.example.acae30.modelos.dataPedidos
 import com.google.android.material.snackbar.Snackbar
 import com.google.gson.JsonArray
 import com.google.gson.JsonObject
-import com.itextpdf.text.*
+import com.itextpdf.text.BaseColor
+import com.itextpdf.text.Document
+import com.itextpdf.text.DocumentException
+import com.itextpdf.text.Element
+import com.itextpdf.text.Font
+import com.itextpdf.text.FontFactory
+import com.itextpdf.text.PageSize
+import com.itextpdf.text.Paragraph
 import com.itextpdf.text.pdf.PdfPCell
 import com.itextpdf.text.pdf.PdfPTable
 import com.itextpdf.text.pdf.PdfWriter
-import kotlinx.android.synthetic.main.activity_inicio.*
-import kotlinx.coroutines.*
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.DelicateCoroutinesApi
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import org.json.JSONObject
-import java.io.*
+import java.io.BufferedReader
+import java.io.File
+import java.io.FileNotFoundException
+import java.io.FileOutputStream
+import java.io.InputStreamReader
+import java.io.OutputStreamWriter
+import java.io.Reader
 import java.net.HttpURLConnection
 import java.net.URL
 import java.nio.charset.StandardCharsets
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
-import java.util.*
-import kotlin.collections.ArrayList
+import java.util.Timer
 import kotlin.concurrent.schedule
 import com.example.acae30.R as R1
 
@@ -54,43 +73,22 @@ import com.example.acae30.R as R1
 class Detallepedido : AppCompatActivity() {
 
     //AGREGANDO EL SPINNER DE SUCURSALES
-    private var spSucursal: Spinner? = null
-    private var sinSucursal: TextView? = null
     private var idSucursal: Int? = null
     private var codigoSucursal: String? = null
-    private var sucursalName: String = ""
     private var nombreSucursalPedido: String? = ""
     private var pedidoEnviado: Boolean = false
     private var getSucursalPosition: Int? = null
-    private lateinit var exportar : Button
-    private lateinit var swcaes: Switch
-    private lateinit var swruta: Switch
     private var tipoEnvio: Int? = null
-    private lateinit var swFactura: Switch
-    private lateinit var  swCredito: Switch
-    private var tipoDocumento: String = "FC"
 
+    private var tipoDocumento: String = ""
 
-    private var btbuscarProducto: ImageButton? = null
     private var idcliente: Int = 0
     private var nombre: String? = ""
-    private var txtcliente: TextView? = null
-    private var lienzo: ConstraintLayout? = null
     private var idpedido = 0
     private var visita_enviada: Boolean? = null
     private var from: String? = ""
     private var db: Database? = null
-    private var funciones: Funciones? = null
-    private var recicler: RecyclerView? = null
-    private var txtfecha_creacion: TextView? = null
-    private var txttotal: TextView? = null
-    private var btnatras: ImageButton? = null
-    private var btneliminar: Button? = null
     private var cabezera: Pedidos? = null
-    private var btnenviar: Button? = null
-    private var btnguardar: Button? = null
-    private var preferencias: SharedPreferences? = null
-    private val instancia = "CONFIG_SERVIDOR"
     private var idvendedor = 0
     private var idvisita = 0
     private var vendedor = ""
@@ -99,6 +97,15 @@ class Detallepedido : AppCompatActivity() {
     private var alerta: AlertDialogo? = null
     private var codigo = ""
     private var idapi = 0
+
+    private var envioSelec : String = ""
+    private var documentoSelec : String = ""
+    private var sucursalName: String = ""
+
+    private var funciones = Funciones()
+    private var pedidosController = PedidosController()
+    private lateinit var preferencias: SharedPreferences
+    private val instancia = "CONFIG_SERVIDOR"
 
 
     private val requestPermissionLauncher = registerForActivityResult(
@@ -118,13 +125,15 @@ class Detallepedido : AppCompatActivity() {
     var fechaDoc = ""
     private val tituloText = "DETALLE DEL PEDIDO"
 
+    private lateinit var binding: ActivityDetallepedidoBinding
+
     @SuppressLint("MissingInflatedId")
     override fun onCreate(savedInstanceState: Bundle?) {
 
         super.onCreate(savedInstanceState)
-        setContentView(R1.layout.activity_detallepedido)
-        supportActionBar?.hide()
-        btnatras = findViewById(R1.id.imbtnatras)
+        binding = ActivityDetallepedidoBinding.inflate(layoutInflater)
+        setContentView(binding.root)
+        
         val intento = intent
         alerta = AlertDialogo(this)
         idcliente = intento.getIntExtra("idcliente", 0)
@@ -134,102 +143,75 @@ class Detallepedido : AppCompatActivity() {
         codigo = intento.getStringExtra("codigo").toString()
         idapi = intento.getIntExtra("idapi", 0)
         from = intento.getStringExtra("from").toString()
-        txtfecha_creacion = findViewById(R1.id.fecha_creacion)
-        txtcliente = findViewById(R1.id.txtCliente)
-        btbuscarProducto = findViewById(R1.id.imgbtnadd)
-        lienzo = findViewById(R1.id.lienzo)
-        funciones = Funciones()
+
         db = Database(this)
-        txttotal = findViewById(R1.id.txttotal)
-        btneliminar = findViewById(R1.id.btncancelar)
-        btnenviar = findViewById(R1.id.btnenviar)
-        btnguardar = findViewById(R1.id.btnguardar)
+
         preferencias = getSharedPreferences(instancia, Context.MODE_PRIVATE)
-        idvendedor = preferencias!!.getInt("Idvendedor", 0)
-        vendedor = preferencias!!.getString("Vendedor", "").toString()
-        ip = preferencias!!.getString("ip", "").toString()
-        puerto = preferencias!!.getInt("puerto", 0)
+        idvendedor = preferencias.getInt("Idvendedor", 0)
+        vendedor = preferencias.getString("Vendedor", "").toString()
+        ip = preferencias.getString("ip", "").toString()
+        puerto = preferencias.getInt("puerto", 0)
         visita_enviada = false
 
-        exportar = findViewById(R1.id.btnexportar)
+        //DESHABILITAMOS LOS TEXTVIEWS DE INFORMACION ENVIADA
+        binding.tvDocumentoSeleccionado.visibility = View.GONE
+        binding.tvTipoenvio.visibility = View.GONE
+        binding.sinSucursal.visibility = View.GONE
 
         //FUNCION PARA OBTENER LA INFORMACION DEL PEDIDO
         getTipoEnvio(idpedido)
 
-        //FUNCIONES AGRAGADAS PARA LOS CONTROLES DE ENVIO Y DOCUMENTOS
-        swcaes = findViewById(R1.id.swcaes)
-        swruta = findViewById(R1.id.swruta)
-        swFactura = findViewById(R1.id.swFactura)
-        swCredito = findViewById(R1.id.swCredito)
-
-        //ACTIVADO EL TIPO DE ENVIO CORRESPONDIENTE
-        if(tipoEnvio==0){
-            swruta.isChecked = true
-        }else{
-            swcaes.isChecked = true
-        }
-
-        //ACTIVANDO EL TIPO DE DOCUMENTO
-        if(tipoDocumento == "CF"){
-            swCredito.isChecked = true
-        } else {
-            swFactura.isChecked = true
-        }
-
-        //LOGICA DE TIPO DE ENVIO
-        swcaes.setOnCheckedChangeListener { _, isChecked ->
-            if (isChecked) {
-                swruta.isChecked = false
-                updateTipoPedido(1, idpedido)
-            } else {
-                swruta.isChecked = true
-            }
-        }
-
-        swruta.setOnCheckedChangeListener { _, isChecked ->
-            if (isChecked) {
-                swcaes.isChecked = false
-                updateTipoPedido(0, idpedido)
-            } else {
-                swcaes.isChecked = true
-            }
-        }
-
-        //LOGICA DE TIPO DE DOCUMENTO
-        swFactura.setOnCheckedChangeListener { _, isChecked ->
-            if(isChecked){
-                swCredito.isChecked = false
-                updateTipoDocumento("FC", idpedido)
-            }else{
-                swCredito.isChecked = true
-            }
-        }
-
-        swCredito.setOnCheckedChangeListener { _, isChecked ->
-            if(isChecked){
-                swFactura.isChecked = false
-                updateTipoDocumento("CF", idpedido)
-            }else{
-                swFactura.isChecked = true
-            }
-        }
-
-        recicler = findViewById(R1.id.reciclerdetalle)
-        sinSucursal = findViewById(R1.id.sinSucursal) //TEXTVIEW PARA LOS CLIENTES SIN SUCURSALES
-        sinSucursal!!.visibility = View.GONE //DESHABILITAMOS LA VISIBILIDAD DEL TEXVIEW
-
         //FUNCION PARA CARGAR LAS SUCURSALES AL SPINNER
         cargarSucursales()
+
+        //FUNCION PARA DESHABILITAR FUNCIONES SEGUN PROCESO
+        validarProcesoPedidos()
+
+        //COMPLETANDO SPINNER TIPO ENVIO
+        val listaTipoAdaptador = ArrayAdapter<String>(this@Detallepedido, android.R.layout.simple_spinner_dropdown_item)
+        listaTipoAdaptador.addAll(listOf("RUTA", "ENCOMIENDA"))
+        binding.spTipoEnvio.adapter = listaTipoAdaptador
+
+        //COMPLETANDO TVTIPOENVIO
+        when(tipoEnvio){
+            0 -> {
+                binding.tvTipoenvio.text = getString(R.string.ruta)
+                binding.spTipoEnvio.setSelection(0, true)
+            }
+            1 -> {
+                binding.tvTipoenvio.text = getString(R.string.encomienda)
+                binding.spTipoEnvio.setSelection(1, true)
+            }
+        }
+
+        //COMPLETANDO SPINNER DOCUMENTO
+        val tipoDocumentoAdaptador = ArrayAdapter<String>(this@Detallepedido, android.R.layout.simple_spinner_dropdown_item)
+        tipoDocumentoAdaptador.addAll(listOf("FACTURA", "CREDITO FISCAL", "FACTURA EXPORTACION"))
+        binding.spDocumento.adapter = tipoDocumentoAdaptador
+
+        //COMPLETANDO TVTIPODOCUMENTO
+        when(tipoDocumento){
+            "FC" -> {
+                binding.tvDocumentoSeleccionado.text = getString(R.string.factura)
+                binding.spDocumento.setSelection(0, true)
+            }
+            "CF" -> {
+                binding.tvDocumentoSeleccionado.text = getString(R.string.credito_fiscal)
+                binding.spDocumento.setSelection(1, true)
+            }
+            "FE" -> {
+                binding.tvDocumentoSeleccionado.text = getString(R.string.factura_exportacion)
+                binding.spDocumento.setSelection(2, true)
+            }
+        }
 
 
         //CARTURANDO LA SUCURSAL SELECCIONADA
          getSucursalPosition = intento.getIntExtra("sucursalPosition", 0)
         //println("Sucursal desde Agregar Producto: $nombreSucursalPedido")
         if(getSucursalPosition != 0){
-            spSucursal!!.setSelection(getSucursalPosition!!, true)
+            binding.spSucursal.setSelection(getSucursalPosition!!, true)
         }
-
-
 
         // Consultar datos de visita
         if (idpedido > 0) {
@@ -246,7 +228,7 @@ class Detallepedido : AppCompatActivity() {
                     idcliente = cursor.getInt(2)
                     idvisita = cursor.getInt(3)
                     visita_enviada = cursor.getInt(4) == 1
-                    txtfecha_creacion!!.text = cursor.getString(5)
+                    binding.fechaCreacion.text = cursor.getString(5)
                     cursor.close()
                 } else {
                     throw Exception("Error al obtener código de cliente")
@@ -258,31 +240,25 @@ class Detallepedido : AppCompatActivity() {
             }
         }
 
-        // Si no hay visita, que no se pueda enviar pedido
-        /*if (!visita_enviada!!) {
-            btnenviar!!.isEnabled = false
-            btnenviar!!.setBackgroundResource(R1.drawable.border_btndisable)
-        }*/
-
         //MODIFICACION 04/12/2023
         // VERIFICAMOS SI TENEMOS CONEXION A INTERNET PARA PODER ENVIAR EL PEDIDO O ALMACENARLO
-        if(!funciones!!.isNetworkConneted(this@Detallepedido)){
-            btnenviar!!.isEnabled = false
-            btnenviar!!.setBackgroundResource(R1.drawable.border_btndisable)
+        if(!funciones.isInternetAvailable(this@Detallepedido)){
+            binding.btnenviar.isEnabled = false
+            binding.btnenviar.setBackgroundResource(R1.drawable.border_btndisable)
         }
 
-        btnatras!!.setOnClickListener {
+        binding.imbtnatras.setOnClickListener {
             val intento = Intent(this, Pedido::class.java)
             startActivity(intento)
             finish()
 
         } //regresa al menu principal
 
-        btbuscarProducto!!.setOnClickListener {
+        binding.imgbtnadd.setOnClickListener {
             if (idcliente >= 0) {
                 val intento = Intent(this, Inventario::class.java)
                 intento.putExtra("idcliente", idcliente)
-                intento.putExtra("nombrecliente", txtcliente!!.text.toString())
+                intento.putExtra("nombrecliente", binding.txtCliente.text.toString())
                 intento.putExtra("busqueda", true)
                 intento.putExtra("idpedido", idpedido)
                 intento.putExtra("visitaid", idvisita)
@@ -293,15 +269,13 @@ class Detallepedido : AppCompatActivity() {
             }
         }
         //muestra el listado de los productos
-        btneliminar!!.setOnClickListener {
+        binding.btncancelar.setOnClickListener {
             AlertaEliminar()
         }
 
-            validarDatos()
-
         //EVENTRO CLIC DEL BOTON ENVIAR
-        btnenviar!!.setOnClickListener {
-            if(funciones!!.isNetworkConneted(this)){
+        binding.btnenviar.setOnClickListener {
+            if(funciones.isInternetAvailable(this)){
                 if(ConfirmarDetallePedido() > 0){
                     alerta!!.pedidoEnviado()
 
@@ -310,18 +284,18 @@ class Detallepedido : AppCompatActivity() {
                     }
 
                 }else{
-                    mostrarAlerta("ERROR: NO HAY PRODUCTOS AGREGADOS AL PEDIDO")
+                    funciones.mostrarAlerta("ERROR: NO HAY PRODUCTOS AGREGADOS AL PEDIDO", this@Detallepedido, binding.lienzo)
                 }
             }else{
-                mostrarAlerta("ERROR: NO TIENES CONEXION A INTERNET")
+                funciones.mostrarAlerta("ERROR: NO TIENES CONEXION A INTERNET", this@Detallepedido, binding.lienzo)
             }
         }
 
         //EVENTO CLIC DEL BOTON GUARDAR.
-        btnguardar!!.setOnClickListener {
+        binding.btnguardar.setOnClickListener {
             if (ConfirmarDetallePedido() > 0) {
                 try {
-                    actualizarEstadoAlGuardar() //FUNCION PARA ACTUALIZAR EL ESTADO
+                    pedidosController.actualizarEstadoAlGuardar(idpedido, this@Detallepedido, binding.lienzo) //FUNCION PARA ACTUALIZAR EL ESTADO
                     alerta!!.pedidoGuardado()
                     alerta!!.changeText("Guardando Pedido")
 
@@ -349,22 +323,21 @@ class Detallepedido : AppCompatActivity() {
                     }
                 } catch (e: Exception) {
                     alerta!!.dismisss()
-
-                    mostrarAlerta(e.message.toString())
+                    funciones.mostrarAlerta("ERROR: ${e.message}", this@Detallepedido, binding.lienzo)
                 }
             } else {
-                mostrarAlerta("ERROR: NO HAY PRODUCTOS AGREGADOS AL PEDIDO")
+                funciones.mostrarAlerta("ERROR: NO HAY PRODUCTOS AGREGADOS AL PEDIDO", this@Detallepedido, binding.lienzo)
             }
         }
 
         //BOTON DE EXPORTAR A PDF EL PEDIDO
-        exportar.setOnClickListener {
+        binding.btnexportar.setOnClickListener {
             fechaDoc = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy_MM_dd_HH_mm_ss"))
             verificarPermisos(it)
         }
 
         //IMPLEMENTANDO LOGICA DE SUCURSAL SELECCIONADA EN SPINNER
-        spSucursal!!.onItemSelectedListener = object : OnItemSelectedListener{
+        binding.spSucursal.onItemSelectedListener = object : OnItemSelectedListener{
             override fun onItemSelected(
                 parent: AdapterView<*>?,
                 view: View?,
@@ -373,40 +346,75 @@ class Detallepedido : AppCompatActivity() {
             ) {
                 sucursalName = parent?.getItemAtPosition(position).toString()
 
-                if (sucursalName == "-- SELECCIONE UNA SUCURSAL --") {
-                    btnguardar!!.isEnabled = false
-                    btnenviar!!.isEnabled = false
-                    btnenviar!!.setBackgroundResource(R1.drawable.border_btndisable)
-                    btnguardar!!.setBackgroundResource(R1.drawable.border_btndisable)
-                }else{
-                    btnguardar!!.isEnabled = true
-                    btnenviar!!.isEnabled = true
-                    btnenviar!!.setBackgroundResource(R1.drawable.border_btnactualizar)
-                    btnguardar!!.setBackgroundResource(R1.drawable.border_btnenviar)
+                validarSelecciones(sucursalName)
 
-                    getSucursalPosition = spSucursal!!.selectedItemPosition
-                    //println("Sucursal Seleccioada: $getSucursalPosition")
-
+                if (sucursalName != "-- SELECCIONE UNA SUCURSAL --") {
+                    getSucursalPosition = binding.spSucursal.selectedItemPosition
                     updatePedidoSucursal(idcliente, sucursalName, idpedido)
                 }
             }
 
-            override fun onNothingSelected(parent: AdapterView<*>?) {
-                //NADA IMPLEMENTADO
-            }
+            override fun onNothingSelected(parent: AdapterView<*>?) {}
+        }
 
+        //IMPLEMENTANDO LOGICA DE TIPO ENVIO SELECCIONADA EN SPINNER
+        binding.spTipoEnvio.onItemSelectedListener = object : OnItemSelectedListener{
+            override fun onItemSelected(parent: AdapterView<*>?,
+                                        view: View?,
+                                        position: Int,
+                                        id: Long) {
+
+                envioSelec = parent?.getItemAtPosition(position).toString()
+
+                when(envioSelec){
+                    "ENCOMIENDA" -> {
+                       pedidosController.updateTipoPedido(1, idpedido, this@Detallepedido)
+                    }
+                    "RUTA" -> {
+                        pedidosController.updateTipoPedido(0, idpedido, this@Detallepedido)
+                    }
+                }
+            }
+            override fun onNothingSelected(p0: AdapterView<*>?) {}
+        }
+
+        //IMPLEMENTANDO LOGICA DE TIPO DOCUMENTO SELECCIONADA EN SPINNER
+        binding.spDocumento.onItemSelectedListener = object : OnItemSelectedListener{
+            override fun onItemSelected(parent: AdapterView<*>?,
+                                        view: View?,
+                                        position: Int,
+                                        id: Long) {
+
+                documentoSelec = parent?.getItemAtPosition(position).toString()
+
+                when(documentoSelec){
+                    "FACTURA" -> {
+                        pedidosController.updateTipoDocumento("FC", idpedido, this@Detallepedido)
+                    }
+                    "CREDITO FISCAL" -> {
+                        pedidosController.updateTipoDocumento("CF", idpedido, this@Detallepedido)
+                    }
+                    "FACTURA EXPORTACION" -> {
+                        pedidosController.updateTipoDocumento("FE", idpedido, this@Detallepedido)
+                    }
+                }
+            }
+            override fun onNothingSelected(p0: AdapterView<*>?) {}
         }
     }
 
-    //FUNCION PARA ACTUALIZAR EL ESTADO DEL PEDIDO AL GUARDARLO
-    private fun actualizarEstadoAlGuardar(){
-        val bd = db!!.writableDatabase
-        try {
-            bd!!.execSQL("UPDATE pedidos set Cerrado=1 WHERE Id=$idpedido")
-        } catch (e: Exception) {
-            mostrarAlerta("ERROR: NO SE ACTUALIZO EL ESTADO DEL PEDIDO AL GUARDARLO")
-        } finally {
-            bd!!.close()
+    //FUNCION PARA VALIDAR OPCIONES SELECCIONADAS
+    private fun validarSelecciones(sucursalSelec:String){
+        if(sucursalSelec != "-- SELECCIONE UNA SUCURSAL --"){
+            binding.btnguardar.isEnabled = true
+            binding.btnenviar.isEnabled = true
+            binding.btnenviar.setBackgroundResource(R1.drawable.border_btnactualizar)
+            binding.btnguardar.setBackgroundResource(R1.drawable.border_btnenviar)
+        }else{
+            binding.btnguardar.isEnabled = false
+            binding.btnenviar.isEnabled = false
+            binding.btnenviar.setBackgroundResource(R1.drawable.border_btndisable)
+            binding.btnguardar.setBackgroundResource(R1.drawable.border_btndisable)
         }
     }
 
@@ -446,15 +454,9 @@ class Detallepedido : AppCompatActivity() {
             withContext(Dispatchers.Main){
                 alerta!!.dismisss()
 
-                mostrarAlerta("ERROR AL ENVIAR EL PEDIDO")
+                funciones.mostrarAlerta("ERRORAL ENVIAR EL PEDIDO", this@Detallepedido, binding.lienzo)
             }
         }
-    }
-    //FUNCION DE MENSAJE DE ALERTA
-    private fun mostrarAlerta(mensaje: String){
-        val alert: Snackbar = Snackbar.make(lienzo!!, mensaje, Snackbar.LENGTH_LONG)
-        alert.view.setBackgroundColor(ContextCompat.getColor(this@Detallepedido, R1.color.moderado))
-        alert.show()
     }
 
     //OPTENIENDO INFORMACION DEL PEDIDO
@@ -543,12 +545,11 @@ class Detallepedido : AppCompatActivity() {
 
     //FUNCION PARA CARGAR LAS SUCURSALES AL SPINNER
     private fun cargarSucursales() {
-        spSucursal = findViewById(R1.id.spSucursal)
         val listSucursal = nombreSucursal().toMutableList()
 
         val adaptador = ArrayAdapter(this@Detallepedido, android.R.layout.simple_spinner_item, listSucursal)
         adaptador.setDropDownViewResource(R1.layout.support_simple_spinner_dropdown_item)
-        spSucursal!!.adapter = adaptador
+        binding.spSucursal.adapter = adaptador
     }
 
     //FUNCION PARA OBTENER LAS SUCURSALES POR CLIENTE.
@@ -570,8 +571,8 @@ class Detallepedido : AppCompatActivity() {
                     listaSucursales.add(data)
                 }while (dataSucursal.moveToNext())
             }else{
-                spSucursal!!.visibility = View.GONE
-                sinSucursal!!.visibility = View.VISIBLE
+                binding.spSucursal.visibility = View.GONE
+                binding.sinSucursal.visibility = View.VISIBLE
             }
             dataSucursal.close()
         }catch (e: Exception) {
@@ -582,187 +583,66 @@ class Detallepedido : AppCompatActivity() {
         return listaSucursales
     }
 
-
-    //SE MODIFICO PARA AGREGAR FUNCIONABILIDAD DE LAS SUCURSALES
-    //Y DE LOS TIPOS DE ENVIO
-    @OptIn(DelicateCoroutinesApi::class)
-    fun validarDatos() {
-        if (idpedido > 0) {
-           // btbuscar!!.visibility = View.GONE
-            txtcliente!!.isEnabled = false
-            txtcliente!!.text = nombre
-            GlobalScope.launch(Dispatchers.IO) {
-                this@Detallepedido.lifecycleScope.launch {
-                    try {
-                        val lista = getPedido(idpedido)
-                        if (lista != null && lista.size > 0) {
-                            if (cabezera != null) {
-                                if (cabezera!!.Cerrado == 1) {
-
-                                    sinSucursal!!.visibility = View.VISIBLE
-
-                                    txtcliente!!.isEnabled = false
-                                    btbuscarProducto!!.visibility = View.GONE
-                                    btnenviar!!.visibility = View.GONE
-
-                                    exportar.visibility =
-                                        View.GONE //DESHABILITANDO EL BOTON EXPORTAR - FERRETERIA EL REY
-
-                                    val visitaAbierta = getEstadoVisita()
-
-                                    if (visitaAbierta == 0 && !cabezera!!.Enviado) {
-                                        //RUTINA PARA SOLO ENVIAR EL PEDIDO
-                                        btnenviar!!.visibility = View.VISIBLE
-                                        exportar.visibility = View.GONE
-                                    }
-
-                                    btnguardar!!.visibility = View.GONE
-                                    btneliminar!!.visibility = View.GONE
-
-                                    //MOSTRANDO EL NOMBRE DE LA SUCURSAL
-                                    if (nombreSucursalPedido != "") {
-                                        sinSucursal!!.text = nombreSucursalPedido
-                                    } else {
-                                        sinSucursal!!.text = "NO TIENE SUCURSAL REGISTRADA"
-                                    }
-                                    //DESHABILITANDO EL SPINNER DE SUCURSALES
-                                    spSucursal!!.visibility = View.GONE
-
-                                    //DESHABILITANDO LOS TIPOS DE ENVIO
-                                    if (pedidoEnviado == true) {
-                                        swcaes.isEnabled = false
-                                        swruta.isEnabled = false
-                                        swFactura.isEnabled = false
-                                        swCredito.isEnabled = false
-                                    } else {
-                                        swcaes.isEnabled = true
-                                        swruta.isEnabled = true
-                                    }
-
-                                } else {
-
-                                    //  btbuscar!!.visibility = View.VISIBLE
-
-                                    // btbuscar!!.visibility = View.GONE
-                                    //  btbuscar!!.visibility = View.GONE
-                                    txtcliente!!.isEnabled = false
-                                    btbuscarProducto!!.visibility = View.VISIBLE
-                                    btnenviar!!.visibility = View.VISIBLE
-                                    btnguardar!!.visibility = View.VISIBLE
-                                    btneliminar!!.visibility = View.VISIBLE
-                                    exportar.visibility = View.GONE
-                                }
-                            }
-                            ArmarLista(lista)
-                        } else if (from == "visita") {
-
-                            //RUTINA PARA AGREGAR NUEVO PEDIDO
-
-                            //  btbuscar!!.visibility = View.VISIBLE
-
-                            //  btbuscar!!.visibility = View.GONE
-                            //  btbuscar!!.visibility = View.GONE
-                            txtcliente!!.isEnabled = false
-                            btbuscarProducto!!.visibility = View.VISIBLE
-                            btnenviar!!.visibility = View.VISIBLE
-                            btnguardar!!.visibility = View.VISIBLE
-                            btneliminar!!.visibility = View.VISIBLE
-                            exportar.visibility = View.GONE
-                        } else {
-                            throw Exception("Error al encontrar el pedido")
-                        }
-
-                        if (cabezera!!.Cerrado == 1) {
-                            btnatras!!.visibility = View.VISIBLE
-                        } else {
-                            btnatras!!.visibility = View.GONE
-                        }
-                    } catch (e: Exception) {
-                        mostrarAlerta("ERROR: ${e.message}")
-                    }
+    //FUNCION PARA DESHABILITAR OPCIONES SEGUN VISTA EN PEDIDOS
+    private fun validarProcesoPedidos(){
+        binding.txtCliente.setText(nombre)
+        val pedido = pedidosController.obtenerInformacionPedido(idpedido, this@Detallepedido)
+        this@Detallepedido.lifecycleScope.launch {
+            try {
+                val lista = pedidosController.obtenerDetallePedido(idpedido, this@Detallepedido)
+                if(lista.size > 0){
+                    ArmarLista(lista)
                 }
-            }
-
-        } else {
-            if (idcliente > 0) {
-                txtcliente!!.text = nombre
-              //  btbuscar!!.visibility = View.GONE
-            } else {
-              //  btbuscar!!.visibility = View.VISIBLE
+            }catch (e: Exception){
+                funciones.mostrarAlerta("NO SE PUEDO CARGAR EL DETALLE DEL PEDIDO", this@Detallepedido, binding.lienzo)
             }
         }
-    } //VALIA QUE YA EXISTA EL CLIENTE DATOS
+        when(from){
+            "ver" -> {
+                //MOSTRANDO EL NOMBRE DE LA SUCURSAL
+                if (nombreSucursalPedido != "") {
+                    binding.sinSucursal.text = nombreSucursalPedido
+                } else {
+                    binding.sinSucursal.text = getString(R.string.no_tiene_sucursal_registrada_)
+                }
 
-    private fun getPedido(id: Int): ArrayList<DetallePedido> {
-        val base = db!!.writableDatabase
-        try {
-            val pedido = base.rawQuery("SELECT * FROM pedidos where Id=$id", null)
-            if (pedido.count > 0) {
-                pedido.moveToFirst()
-                cabezera = Pedidos(
-                    pedido.getInt(0),
-                    pedido.getInt(1),
-                    pedido.getString(2),
-                    pedido.getFloat(3),
-                    pedido.getFloat(4),
-                    pedido.getInt(5) == 1,
-                    pedido.getString(6),
-                    pedido.getInt(7),
-                    pedido.getString(8),
-                    pedido.getInt(9),
-                    pedido.getInt(10),
-                    pedido.getString(11)
-                )
-                pedido.close()
-            }
+                if(pedido!!.Enviado){
+                    binding.txtCliente.isEnabled = false
+                    binding.imgbtnadd.visibility = View.GONE
+                    binding.btnenviar.visibility = View.GONE
+                    binding.btnguardar.visibility = View.GONE
+                    binding.imbtnatras.visibility = View.VISIBLE
+                    binding.btncancelar.visibility = View.GONE
+                    binding.btnexportar.visibility = View.GONE
+                    binding.spDocumento.visibility = View.GONE
+                    binding.spTipoEnvio.visibility = View.GONE
+                    binding.tvDocumentoSeleccionado.visibility = View.VISIBLE
+                    binding.tvTipoenvio.visibility = View.VISIBLE
 
-            val cursor = base.rawQuery("SELECT *  FROM detalle_producto where Id_pedido=$id", null)
-            val lista = ArrayList<DetallePedido>()
-            if (cursor.count > 0) {
-                cursor.moveToFirst()
-                do {
-                    val detalle = DetallePedido(
-                        cursor.getInt(0),
-                        cursor.getInt(1),
-                        cursor.getInt(2),
-                        cursor.getString(3),
-                        cursor.getString(4),
-                        cursor.getFloat(5),
-                        cursor.getFloat(6),
-                        cursor.getFloat(7),
-                        cursor.getFloat(8),
-                        cursor.getFloat(9),
-                        cursor.getFloat(10),
-                        cursor.getFloat(11),
-                        cursor.getFloat(12),
-                        cursor.getFloat(13),
-                        cursor.getFloat(14),
-                        cursor.getString(15),
-                        cursor.getString(16),
-                        cursor.getString(17),
-                        cursor.getString(18),
-                        cursor.getString(19),
-                        cursor.getFloat(20),
-                        cursor.getInt(21),
-                        cursor.getFloat(22),
-                        cursor.getString(23),
-                        cursor.getInt(24),
-                        cursor.getInt(25)
-                    )
-                    lista.add(detalle)
-                } while (cursor.moveToNext())
-                cursor.close()
+                }else if(!pedido.Enviado && pedido.Cerrado == 1){
+                    binding.txtCliente.isEnabled = false
+                    binding.imgbtnadd.visibility = View.GONE
+                    binding.btnenviar.visibility = View.VISIBLE
+                    binding.btnguardar.visibility = View.GONE
+                    binding.imbtnatras.visibility = View.VISIBLE
+                    binding.btncancelar.visibility = View.VISIBLE
+                    binding.btnexportar.visibility = View.GONE
+                }
+
             }
-            return lista
-        } catch (e: Exception) {
-            throw Exception(e.message)
-        } finally {
-            base!!.close()
+            "visita" -> {
+                //RUTINA PARA AGREGAR NUEVO PEDIDO
+
+                binding.txtCliente.isEnabled = false
+                binding.imgbtnadd.visibility = View.VISIBLE
+                binding.btnenviar.visibility = View.VISIBLE
+                binding.imbtnatras.visibility = View.VISIBLE
+                binding.btncancelar.visibility = View.VISIBLE
+                binding.btnexportar.visibility = View.GONE
+
+            }
         }
-
-    } //obtiene el detalle del pedido
-
-
+    }
     //MODIFICACION PARA AUMENTAR EL NUMERO DE DECIMALES A 4
     //MODIFICACION PARA LA PAPELERIA DM
     //23-08-2022
@@ -773,7 +653,7 @@ class Detallepedido : AppCompatActivity() {
             LinearLayoutManager.VERTICAL,
             false
         )
-        recicler!!.layoutManager = mLayoutManager
+        binding.reciclerdetalle.layoutManager = mLayoutManager
         val adapter = PedidoDetalleAdapter(lista, this@Detallepedido) { i ->
             if (cabezera != null) {
                 if (!cabezera!!.Enviado) {
@@ -796,8 +676,8 @@ class Detallepedido : AppCompatActivity() {
         for (i in lista) {
             total = total + i.Subtotal!!
         }
-        txttotal!!.text = "$" + "${String.format("%.4f", total)}"
-        recicler!!.adapter = adapter
+        binding.txttotal.text = "$" + "${String.format("%.4f", total)}"
+        binding.reciclerdetalle.adapter = adapter
 
     } //muestra el detalle del pedido
 
@@ -827,7 +707,7 @@ class Detallepedido : AppCompatActivity() {
                 } catch (e: Exception) {
                     dialogo.dismiss()
                     val alert: Snackbar = Snackbar.make(
-                        lienzo!!,
+                        binding.lienzo,
                         e.message.toString(),
                         Snackbar.LENGTH_LONG
                     )
@@ -977,33 +857,33 @@ class Detallepedido : AppCompatActivity() {
                                             if (idpedidoS > 0) {
                                                 ConfirmarPedido(idpedido, idpedidoS)
                                             } else {
-                                                mostrarAlerta("ERROR: AL ENVIAR EL PEDIDO")
+                                                funciones.mostrarAlerta("ERROR: AL ENVIAR EL PEDIDO", this@Detallepedido, binding.lienzo)
                                             }
                                         }
                                         400 -> {
-                                            mostrarAlerta("ERROR: RESPUESTA NO ENCONTRADA")
+                                            funciones.mostrarAlerta("ERROR: RESPUESTA NO ENCONTRADA", this@Detallepedido, binding.lienzo)
                                         }
                                         500 -> {
-                                            mostrarAlerta("ERROR INTERNO DEL SERVIDOR")
+                                            funciones.mostrarAlerta("ERROR INTERNO DEL SERVIDOR", this@Detallepedido, binding.lienzo)
                                         }
                                     }
                                 } else {
-                                    mostrarAlerta("ERROR: NO HEY RESPUESTA DEL SERVIDOR 1")
+                                    funciones.mostrarAlerta("ERROR: NO HEY RESPUESTA DEL SERVIDOR 1", this@Detallepedido, binding.lienzo)
                                 }
                             } else {
-                                mostrarAlerta("ERROR: NO HAY RESPUESTA DEL SERVIDOR 2")
+                                funciones.mostrarAlerta("ERROR: NO HAY RESPUESTA DEL SERVIDOR 2", this@Detallepedido, binding.lienzo)
                             }
                         } catch (e: Exception) {
-                            mostrarAlerta("ERROR: AL LEER LA RESPUESTA DEL SERVER")
+                            funciones.mostrarAlerta("ERROR: AL LEER LA RESPUESTA DEL SERVER", this@Detallepedido, binding.lienzo)
                         }
                     } //se obtiene la respuesta del servidor
                 } catch (e: Exception) {
-                    mostrarAlerta("ERROR: AL ENVIAR EL JSON DEL PEDIDO")
+                    funciones.mostrarAlerta("ERROR: AL ENVIAR EL JSON DEL PEDIDO", this@Detallepedido, binding.lienzo)
                 }
 
             }
         } catch (e: Exception) {
-            mostrarAlerta("ERROR: ENVIO DE PARAMETRO EQUIVOCADOS")
+            funciones.mostrarAlerta("ERROR: ENVIO DE PARAMETRO EQUIVOCADOS", this@Detallepedido, binding.lienzo)
         }
     } //funcion que envia el pedido a la bd
 
@@ -1018,30 +898,6 @@ class Detallepedido : AppCompatActivity() {
             bd!!.close()
         }
     } //actualiza el pedido y confirma que se envio
-
-    //FUNCION PARA ACTUALIZAR EL TIPO DE ENVIO SELECCIONADO
-    private fun updateTipoPedido(tipoPedido:Int, idpedido:Int){
-        val data = db!!.writableDatabase
-        try {
-            data!!.execSQL("UPDATE pedidos set tipo_envio=$tipoPedido WHERE id=$idpedido")
-        }catch (e: Exception) {
-            throw Exception(e.message)
-        } finally {
-            data.close()
-        }
-    }
-
-    //FUNCION PARA ACTUALIZAR EL TIPO DE DOCUMENTO SELECCIONADO
-    private fun updateTipoDocumento(tipoDocumento:String, idpedido: Int){
-        val data = db!!.writableDatabase
-        try {
-            data.execSQL("UPDATE pedidos SET tipo_documento='$tipoDocumento' WHERE id=$idpedido")
-        }catch (e: Exception){
-            throw Exception(e.message)
-        }finally {
-            data.close()
-        }
-    }
 
     private fun ConfirmarDetallePedido(): Int {
         val bd = db!!.writableDatabase
@@ -1286,7 +1142,7 @@ class Detallepedido : AppCompatActivity() {
             tablaPedido.addCell(cellTotal)
 
             //AGREGANDO EL CONTENIDO DEL PEDIDO
-            val lista = getPedido(idpedido)
+            val lista = pedidosController.obtenerDetallePedido(idpedido, this@Detallepedido)
             var total = 0f
 
             for(data in lista){
@@ -1354,9 +1210,7 @@ class Detallepedido : AppCompatActivity() {
 
             documento.close()
 
-            val alert: Snackbar = Snackbar.make(lienzo!!, "PEDIDO EXPORTADO CORRECTAMENTE", Snackbar.LENGTH_LONG)
-            alert.view.setBackgroundColor(ContextCompat.getColor(this@Detallepedido, R1.color.btnVerdeActivo))
-            alert.show()
+            funciones.mostrarMensaje("PEDIDO EXPORTADO CORRECTAMENTE", this@Detallepedido, binding.lienzo)
 
         }catch (e: FileNotFoundException){
             e.printStackTrace()

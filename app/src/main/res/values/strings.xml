@@ -98,4 +98,18 @@
     <string name="listado_de_clientes_nuevo_pedido">LISTADO DE CLIENTES (NUEVO PEDIDO)</string>
     <string name="listado_de_clientes">LISTADO DE CLIENTES</string>
     <string name="listado_de_clientes_cxc">LISTADO DE CLIENTES (CxC)</string>
+    <string name="imgregresar">imgRegresar</string>
+    <string name="nuevo_pedido">NUEVO PEDIDO</string>
+    <string name="pedido">PEDIDO</string>
+    <string name="tipo_envio">TIPO ENVIO</string>
+    <string name="documento">DOCUMENTO</string>
+    <string name="no_tiene_sucursal_registrada">NO TIENE SUCURSAL REGISTRADA</string>
+    <string name="sucursal">SUCURSAL</string>
+    <string name="nombre_del_cliente">NOMBRE DEL CLIENTE</string>
+    <string name="ruta">RUTA</string>
+    <string name="encomienda">ENCOMIENDA</string>
+    <string name="factura">FACTURA</string>
+    <string name="credito_fiscal">CREDITO FISCAL</string>
+    <string name="factura_exportacion">FACTURA EXPORTACION</string>
+    <string name="no_tiene_sucursal_registrada_">NO TIENE SUCURSAL REGISTRADA</string>
 </resources>

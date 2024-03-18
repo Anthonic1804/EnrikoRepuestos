@@ -66,7 +66,7 @@ class ClientesDetalle : AppCompatActivity() {
         }
 
         binding.btnPagare.setOnClickListener {
-            if(funciones!!.isNetworkConneted(this@ClientesDetalle)){
+            if(funciones!!.isInternetAvailable(this@ClientesDetalle)){
                 pagare()
             }else{
                 funciones!!.mostrarAlerta("ERROR: NO TIENES CONEXION A INTERNET", this@ClientesDetalle, binding.vista)

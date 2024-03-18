@@ -211,7 +211,7 @@ class HistoricoPedidos : AppCompatActivity() {
     @OptIn(DelicateCoroutinesApi::class)
     private fun generarBusqueda(){
         if (url != null) {
-            if (funciones!!.isNetworkConneted(this)) {
+            if (funciones!!.isInternetAvailable(this)) {
                 alert!!.Cargando() //MUESTRA EL MENSAJE DE CARGA
                 GlobalScope.launch(Dispatchers.IO) {
                     obtenerPedidos(
