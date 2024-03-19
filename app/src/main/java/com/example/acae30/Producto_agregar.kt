@@ -105,6 +105,8 @@ class Producto_agregar : AppCompatActivity() {
     private var inventarioController = InventarioController()
     private var modificarPrecio : Boolean = false
 
+    private lateinit var precioPersonalizado : TextView
+
     override fun onCreate(savedInstanceState: Bundle?) {
 
         super.onCreate(savedInstanceState)
@@ -153,6 +155,10 @@ class Producto_agregar : AppCompatActivity() {
         total_param = intent.getFloatExtra("total_param", 0.toFloat())
 
         txttituloproducto = findViewById(R.id.txttituloproducto)
+
+        //DESHABILITANDO EL PRECIO PERSONALIZADO
+        precioPersonalizado = findViewById(R.id.tvPrecioPersonalizado)
+        precioPersonalizado.visibility = View.GONE
 
         //OPTENIENDO LA IP DEL SERVIDOR
         getApiUrl()

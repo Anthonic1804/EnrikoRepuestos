@@ -625,7 +625,7 @@ class Detallepedido : AppCompatActivity() {
                     binding.btnenviar.visibility = View.VISIBLE
                     binding.btnguardar.visibility = View.GONE
                     binding.imbtnatras.visibility = View.VISIBLE
-                    binding.btncancelar.visibility = View.VISIBLE
+                    binding.btncancelar.visibility = View.GONE
                     binding.btnexportar.visibility = View.GONE
                 }
 
@@ -648,6 +648,7 @@ class Detallepedido : AppCompatActivity() {
     //23-08-2022
     private fun ArmarLista(lista: ArrayList<DetallePedido>) {
         var total = 0.toFloat()
+        val pedido = pedidosController.obtenerInformacionPedido(idpedido, this@Detallepedido)
         val mLayoutManager = LinearLayoutManager(
             this@Detallepedido,
             LinearLayoutManager.VERTICAL,
@@ -655,22 +656,20 @@ class Detallepedido : AppCompatActivity() {
         )
         binding.reciclerdetalle.layoutManager = mLayoutManager
         val adapter = PedidoDetalleAdapter(lista, this@Detallepedido) { i ->
-            if (cabezera != null) {
-                if (!cabezera!!.Enviado) {
-                    val data = lista.get(i)
-                    val intento = Intent(this@Detallepedido, Producto_agregar::class.java)
+            if(!pedido!!.Enviado && from == "visita"){
+                val data = lista[i]
+                val intento = Intent(this@Detallepedido, Producto_agregar::class.java)
 
-                    intento.putExtra("idpedidodetalle", data.Id)
-                    intento.putExtra("idpedido", data.Id_pedido)
-                    intento.putExtra("idcliente", idcliente)
-                    intento.putExtra("nombrecliente", nombre)
-                    intento.putExtra("idproducto", data.Id_producto)
-                    intento.putExtra("proviene", "editar")
-                    intento.putExtra("total_param", data.Subtotal)
-                    intento.putExtra("sucursalPosition", getSucursalPosition)
-                    startActivity(intento)
-                    finish()
-                }
+                intento.putExtra("idpedidodetalle", data.Id)
+                intento.putExtra("idpedido", data.Id_pedido)
+                intento.putExtra("idcliente", idcliente)
+                intento.putExtra("nombrecliente", nombre)
+                intento.putExtra("idproducto", data.Id_producto)
+                intento.putExtra("proviene", "editar")
+                intento.putExtra("total_param", data.Subtotal)
+                intento.putExtra("sucursalPosition", getSucursalPosition)
+                startActivity(intento)
+                finish()
             }
         }
         for (i in lista) {
