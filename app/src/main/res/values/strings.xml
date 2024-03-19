@@ -112,4 +112,15 @@
     <string name="credito_fiscal">CREDITO FISCAL</string>
     <string name="factura_exportacion">FACTURA EXPORTACION</string>
     <string name="no_tiene_sucursal_registrada_">NO TIENE SUCURSAL REGISTRADA</string>
+    <string name="agregar_producto">AGREGAR PRODUCTO</string>
+    <string name="codigo_">CODIGO:</string>
+    <string name="descripcion_">DESCRIPCION:</string>
+    <string name="unidad_">UNIDAD</string>
+    <string name="precio_">PRECIO</string>
+    <string name="existencias_">EXISTENCIAS</string>
+    <string name="total_">TOTAL</string>
+    <string name="agregar_a_pedido">AGREGAR A PEDIDO</string>
+    <string name="eliminar_producto">ELIMINAR PRODUCTO</string>
+    <string name="_1_00">1</string>
+    <string name="cantidad">CANTIDAD</string>
 </resources>

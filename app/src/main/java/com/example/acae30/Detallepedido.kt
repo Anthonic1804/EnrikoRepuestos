@@ -639,7 +639,7 @@ class Detallepedido : AppCompatActivity() {
                 binding.imbtnatras.visibility = View.VISIBLE
                 binding.btncancelar.visibility = View.VISIBLE
                 binding.btnexportar.visibility = View.GONE
-
+                binding.imbtnatras.visibility = View.GONE
             }
         }
     }
