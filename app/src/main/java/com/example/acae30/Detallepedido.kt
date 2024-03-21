@@ -9,6 +9,9 @@ import android.content.SharedPreferences
 import android.content.pm.PackageManager
 import android.os.Bundle
 import android.os.Environment
+import android.print.PrintAttributes
+import android.print.PrintManager
+import android.util.Log
 import android.view.View
 import android.widget.AdapterView
 import android.widget.AdapterView.OnItemSelectedListener
@@ -21,6 +24,7 @@ import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.example.acae30.Library.PdfDocumentAdapter
 import com.example.acae30.R
 import com.example.acae30.controllers.PedidosController
 import com.example.acae30.database.Database
@@ -613,7 +617,7 @@ class Detallepedido : AppCompatActivity() {
                     binding.btnguardar.visibility = View.GONE
                     binding.imbtnatras.visibility = View.VISIBLE
                     binding.btncancelar.visibility = View.GONE
-                    binding.btnexportar.visibility = View.GONE
+                    binding.btnexportar.visibility = View.VISIBLE
                     binding.spDocumento.visibility = View.GONE
                     binding.spTipoEnvio.visibility = View.GONE
                     binding.tvDocumentoSeleccionado.visibility = View.VISIBLE
@@ -626,7 +630,7 @@ class Detallepedido : AppCompatActivity() {
                     binding.btnguardar.visibility = View.GONE
                     binding.imbtnatras.visibility = View.VISIBLE
                     binding.btncancelar.visibility = View.GONE
-                    binding.btnexportar.visibility = View.GONE
+                    binding.btnexportar.visibility = View.VISIBLE
                 }
 
             }
@@ -1209,6 +1213,8 @@ class Detallepedido : AppCompatActivity() {
 
             documento.close()
 
+            printPDF(nombreCliente, fechaDoc)
+
             funciones.mostrarMensaje("PEDIDO EXPORTADO CORRECTAMENTE", this@Detallepedido, binding.lienzo)
 
         }catch (e: FileNotFoundException){
@@ -1217,5 +1223,20 @@ class Detallepedido : AppCompatActivity() {
             e.printStackTrace()
         }
     }
+
+
+
+
+    //FUNCION PARA IMPRIMIR EL PDF CON VISUALIZACION PREVIA
+    private fun printPDF(nombreCliente: String, fechaDoc: String){
+        val printManager = getSystemService(Context.PRINT_SERVICE) as PrintManager
+        try {
+            val printAdapter = PdfDocumentAdapter(this@Detallepedido, Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS).absolutePath + "/pedidospdf/" + nombreCliente + "_$fechaDoc.pdf")
+            printManager.print("DOCUMENTO", printAdapter, PrintAttributes.Builder().build())
+        }catch (e: Exception){
+            e.message?.let { Log.e("MENSAJE ERROR", it) }
+        }
+    }
+
 
 }
