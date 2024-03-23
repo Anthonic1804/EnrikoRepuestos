@@ -23,6 +23,8 @@ import java.util.Locale
 
 class Funciones {
 
+    private var alert: AlertDialogo? = null
+
     //FUNCION PARA OBTENER UN TIMESTAMP
     fun getFechaHoraProceso(): String?{
         val dateFormat = SimpleDateFormat(
@@ -101,6 +103,12 @@ class Funciones {
         alert.show()
     }
 
+    //MENSANJE ASINCRONO
+    fun messageAsync(mensaje: String) {
+        if (alert != null) {
+                alert!!.changeText(mensaje)
+        }
+    }
 
 
 

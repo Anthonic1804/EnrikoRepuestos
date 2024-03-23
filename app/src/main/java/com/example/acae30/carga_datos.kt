@@ -6,6 +6,7 @@ import android.content.Intent
 import android.content.SharedPreferences
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
+import com.example.acae30.controllers.ClientesControllers
 import com.example.acae30.controllers.ConfigController
 import com.example.acae30.controllers.InventarioController
 import com.example.acae30.database.Database
@@ -27,6 +28,7 @@ class carga_datos : AppCompatActivity() {
 
     private var configController = ConfigController()
     private var inventarioController = InventarioController()
+    private var clietnesController = ClientesControllers()
     private var funciones = Funciones()
     private lateinit var preferences: SharedPreferences
     private var instancia = "CONFIG_SERVIDOR"
@@ -212,9 +214,22 @@ class carga_datos : AppCompatActivity() {
             funciones.mostrarAlerta("ERROR -> ${e.message}", this@carga_datos, binding.vistaalerta)
         }
         finally {
-            CoroutineScope(Dispatchers.IO).launch {
-                configController.obtenerConfigPagareObligatorio(this@carga_datos)
+            try {
+                CoroutineScope(Dispatchers.IO).launch {
+                    configController.obtenerConfigPagareObligatorio(this@carga_datos)
+                }
+            }catch (e:Exception){
+                funciones.mostrarAlerta("ERROR AL CARGAR LA CONFIG -> ${e.message}", this@carga_datos, binding.vistaalerta)
+            }finally {
+                try {
+                    CoroutineScope(Dispatchers.IO).launch {
+                        clietnesController.obtenerPreciosPersonalizados(this@carga_datos)
+                    }
+                }catch (e:Exception){
+                    funciones.mostrarAlerta("ERROR AL CARGAR LOS PRECIOS PERSONALIZADOS -> ${e.message}", this@carga_datos, binding.vistaalerta)
+                }
             }
+
         }
     } //obtiene los clientes del servidor
 
@@ -574,7 +589,7 @@ class carga_datos : AppCompatActivity() {
         }
     }
 
-    private fun messageAsync(mensaje: String) {
+    fun messageAsync(mensaje: String) {
         if (alert != null) {
             runOnUiThread {
                 alert!!.changeText(mensaje)
