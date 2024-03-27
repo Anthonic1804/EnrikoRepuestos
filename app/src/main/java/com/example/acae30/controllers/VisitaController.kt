@@ -64,7 +64,7 @@ class VisitaController {
 
             with(url.openConnection() as HttpURLConnection){
                 try {
-                    connectTimeout = 20000
+                    connectTimeout = 2000
                     setRequestProperty(
                         "Content-Type",
                         "application/json;charset=utf-8"
@@ -95,29 +95,34 @@ class VisitaController {
                                         idvisitaApi = idser
                                         updateCheckIn(idser, idVisitaGloval, context)
                                     } else {
-                                        throw Exception("Error en la respuesta del servidor")
+                                        //throw Exception("Error en la respuesta del servidor")
+                                        println("ERROR NO HAY RESPUESTA DEL SERVIDOR 1")
                                     }
                                 } else {
-                                    throw Exception("Error al recibir respuesta del servidor")
+                                    //throw Exception("Error al recibir respuesta del servidor")
+                                    println("ERROR NO HAY RESPUESTA DEL SERVIDOR 2")
                                 }
 
                             }catch (e:Exception){
-                                throw Exception("ERROR DE RESPUESTA -> " + e.message)
+                                //throw Exception("ERROR DE RESPUESTA -> " + e.message)
+                                println("ERROR DE RESPUESTA -> ${e.message}")
                             }
                         }
 
                     }else {
-                        throw Exception("ERROR $responseCode : -> PARAMETROS INCORRECTOS")
+                        //throw Exception("ERROR $responseCode : -> PARAMETROS INCORRECTOS")
+                        println("ERROR $responseCode : -> PARAMETROS INCORRECTOS")
                     }
 
-
                 }catch (e:Exception){
-                    throw Exception("ERROR DE COMUNICACION CON EL SERVER -> " + e.message)
+                    //throw Exception("ERROR DE COMUNICACION CON EL SERVER -> " + e.message)
+                    println("ERROR DE COMUNICACION CON EL SERVER -> " + e.message)
                 }
             }
 
         }catch (e:Exception){
-            throw Exception("ERROR AL REGISTRAR LA VISITA -> " + e.message)
+            //throw Exception("ERROR AL REGISTRAR LA VISITA -> " + e.message)
+            println("ERROR AL REGISTRAR LA VISITA -> " + e.message)
         }
 
         return idvisitaApi

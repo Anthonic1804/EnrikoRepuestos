@@ -433,27 +433,32 @@ class Detallepedido : AppCompatActivity() {
 
                 pedido.Vendedor = vendedor//agregamos los datos del vendedor
 
-                SendPedido(pedido, idpedido)//envia el pedido y actualiza el estado del pedido en el cel
+                val enviado = SendPedido(pedido, idpedido)//envia el pedido y actualiza el estado del pedido en el cel
                 alerta!!.dismisss()
 
-                val visitaAbierta = getEstadoVisita()
+                if(enviado){
+                    val visitaAbierta = getEstadoVisita()
 
-                if (visitaAbierta == 1) {
-                    val intento = Intent(this@Detallepedido, Visita::class.java)
-                    intento.putExtra("id", idcliente)
-                    intento.putExtra("nombrecliente", nombre)
-                    intento.putExtra("idpedido", idpedido)
-                    intento.putExtra("visitaid", idvisita)
-                    intento.putExtra("codigo", codigo)
-                    intento.putExtra("idapi", idapi)
-                    startActivity(intento)
-                    finish()
-                } else {
-                    val intento = Intent(this@Detallepedido, Pedido::class.java)
-                    startActivity(intento)
-                    finish()
+                    if (visitaAbierta == 1) {
+                        val intento = Intent(this@Detallepedido, Visita::class.java)
+                        intento.putExtra("id", idcliente)
+                        intento.putExtra("nombrecliente", nombre)
+                        intento.putExtra("idpedido", idpedido)
+                        intento.putExtra("visitaid", idvisita)
+                        intento.putExtra("codigo", codigo)
+                        intento.putExtra("idapi", idapi)
+                        startActivity(intento)
+                        finish()
+                    } else {
+                        val intento = Intent(this@Detallepedido, Pedido::class.java)
+                        startActivity(intento)
+                        finish()
+                    }
+                }else{
+                    runOnUiThread {
+                        Toast.makeText(this@Detallepedido,"DESEA ALMACENAR EL PEDIDO PARA LUEGO ENVIARLO", Toast.LENGTH_SHORT).show()
+                    }
                 }
-
             }
         }catch (e: Exception){
             withContext(Dispatchers.Main){
@@ -822,7 +827,8 @@ class Detallepedido : AppCompatActivity() {
     }//obtiene el pedido
     //obtiene el pedido de la base de datos
 
-    private fun SendPedido(pedido: CabezeraPedidoSend, idpedido: Int)  {
+    private fun SendPedido(pedido: CabezeraPedidoSend, idpedido: Int) : Boolean  {
+        var enviado = false
         try {
             val objecto = convertToJson(pedido, idpedido) //convertimos a json el objecto pedido
             val ruta: String = "http://$ip:$puerto/pedido" //ruta para enviar el pedido
@@ -836,7 +842,7 @@ class Detallepedido : AppCompatActivity() {
                         "Content-Type",
                         "application/json;charset=utf-8"
                     ) //definimos la cabezera
-                    connectTimeout = 10000
+                    connectTimeout = 2000
                     requestMethod = "POST"
                     val or = OutputStreamWriter(outputStream, StandardCharsets.UTF_8)
                     or.write(objecto.toString()) //escribo el json
@@ -859,36 +865,47 @@ class Detallepedido : AppCompatActivity() {
                                         201 -> {
                                             val idpedidoS = datosservidor.getString("error").toInt()
                                             if (idpedidoS > 0) {
+                                                enviado = true
                                                 ConfirmarPedido(idpedido, idpedidoS)
                                             } else {
+                                                enviado = false
                                                 funciones.mostrarAlerta("ERROR: AL ENVIAR EL PEDIDO", this@Detallepedido, binding.lienzo)
                                             }
                                         }
                                         400 -> {
+                                            enviado = false
                                             funciones.mostrarAlerta("ERROR: RESPUESTA NO ENCONTRADA", this@Detallepedido, binding.lienzo)
                                         }
                                         500 -> {
+                                            enviado = false
                                             funciones.mostrarAlerta("ERROR INTERNO DEL SERVIDOR", this@Detallepedido, binding.lienzo)
                                         }
                                     }
                                 } else {
+                                    enviado = false
                                     funciones.mostrarAlerta("ERROR: NO HEY RESPUESTA DEL SERVIDOR 1", this@Detallepedido, binding.lienzo)
                                 }
                             } else {
+                                enviado = false
                                 funciones.mostrarAlerta("ERROR: NO HAY RESPUESTA DEL SERVIDOR 2", this@Detallepedido, binding.lienzo)
                             }
                         } catch (e: Exception) {
+                            enviado = false
                             funciones.mostrarAlerta("ERROR: AL LEER LA RESPUESTA DEL SERVER", this@Detallepedido, binding.lienzo)
                         }
                     } //se obtiene la respuesta del servidor
                 } catch (e: Exception) {
-                    funciones.mostrarAlerta("ERROR: AL ENVIAR EL JSON DEL PEDIDO", this@Detallepedido, binding.lienzo)
+                    enviado = false
+                    //funciones.mostrarAlerta("ERROR: AL ENVIAR EL JSON DEL PEDIDO", this@Detallepedido, binding.lienzo)
+                    println("ERROR AL ENVIAR EL PEDIDO -> ${e.message}")
                 }
 
             }
         } catch (e: Exception) {
+            enviado = false
             funciones.mostrarAlerta("ERROR: ENVIO DE PARAMETRO EQUIVOCADOS", this@Detallepedido, binding.lienzo)
         }
+        return enviado
     } //funcion que envia el pedido a la bd
 
     private fun ConfirmarPedido(idpedido: Int, idservidor: Int) {

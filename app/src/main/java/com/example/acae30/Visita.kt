@@ -23,6 +23,8 @@ import com.example.acae30.databinding.ActivityVisitaBinding
 import com.example.acae30.modelos.Visitas
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
 import org.json.JSONObject
@@ -122,13 +124,17 @@ class Visita : AppCompatActivity() {
         binding.txtnombre.text = nombre
 
         binding.btnvisita.setOnClickListener {
-            getGps(true)
+            CoroutineScope(Dispatchers.IO).launch {
+                getGps(true)
+            }
 
         } //obtiene las coordenadas del gps
         //configuracion general del gps
         binding.btnfinvisita.setOnClickListener {
-            getGps(false)
-            updateSharedPreferencesFinalizarVisita()
+            CoroutineScope(Dispatchers.IO).launch {
+                getGps(false)
+                updateSharedPreferencesFinalizarVisita()
+            }
         }
 
         RevisarVisita()
@@ -228,9 +234,6 @@ class Visita : AppCompatActivity() {
 
         this@Visita.lifecycleScope.launch {
             try {
-                // GUARDA LA VISITA EN LA BD LOCAL
-                updateGPS()
-
                 var finVisita = JSONObject()
                 var datos_enviar = JSONObject()
                 var datosEnviados: Boolean = false
@@ -294,27 +297,35 @@ class Visita : AppCompatActivity() {
 
                         if (inicio) {
 
-                            Latitud_checkin = latitud_p
-                            Longitud_checkin = longitud_p
-                            Latitud_checkout = latitud_p
-                            Longitud_checkout = longitud_p
-                            Id_vendedor = id_vendedor
+                            try {
+                                Latitud_checkin = latitud_p
+                                Longitud_checkin = longitud_p
+                                Latitud_checkout = latitud_p
+                                Longitud_checkout = longitud_p
+                                Id_vendedor = id_vendedor
 
-                            idvisitaApi = visitaController.registrarVisita(
-                                Id_app_visita,
-                                Fecha_hora_checkin,
-                                Latitud_checkin,
-                                Longitud_checkin,
-                                Id_cliente,
-                                Cliente,
-                                Id_vendedor,
-                                Fecha_hora_checkout,
-                                Latitud_checkout,
-                                Longitud_checkout,
-                                Comentarios,
-                                idvisitaGLOBAL!!,
-                                this@Visita
-                            )
+                                CoroutineScope(Dispatchers.IO).launch {
+                                    idvisitaApi = visitaController.registrarVisita(
+                                        Id_app_visita,
+                                        Fecha_hora_checkin,
+                                        Latitud_checkin,
+                                        Longitud_checkin,
+                                        Id_cliente,
+                                        Cliente,
+                                        Id_vendedor,
+                                        Fecha_hora_checkout,
+                                        Latitud_checkout,
+                                        Longitud_checkout,
+                                        Comentarios,
+                                        idvisitaGLOBAL!!,
+                                        this@Visita
+                                    )
+                                }
+                            }catch (e:Exception){
+                                println("NO SE PUEDE CONECTAR CON EL SERVER -> ${e.message}")
+                            }
+
+
                         } else {
 
                             if (datosEnviados) {
@@ -322,7 +333,9 @@ class Visita : AppCompatActivity() {
                                 finVisita.put("latitud", latitud_p)
                                 finVisita.put("longitud", longitud_p)
                                 finVisita.put("Id_vendedor", id_vendedor)
-                                Sendfinal(finVisita)
+                                CoroutineScope(Dispatchers.IO).launch {
+                                    Sendfinal(finVisita)
+                                }
 
                             } else {
 
@@ -336,7 +349,7 @@ class Visita : AppCompatActivity() {
                             }
                         }
                     } catch (e: Exception) {
-                        println("Error33: " + e.message.toString())
+                        println("ERROR DE CONEXION CON EL SERVIDOR: " + e.message.toString())
                     }
                 }
             } catch (e: Exception) {
@@ -684,21 +697,25 @@ class Visita : AppCompatActivity() {
                                     //respuesta correcta
                                     updateCheckOut(idvisitaGLOBAL!!)
                                 } else {
-                                    throw Exception("Error en la respuesta del servidor")
+                                    //throw Exception("Error en la respuesta del servidor")
+                                    println("ERROR DE RESPUESTA DEL SERVIDOR")
                                 }
                             } else {
-                                throw Exception("Error al recibir respuesta del servidor")
+                                //throw Exception("Error al recibir respuesta del servidor")
+                                println("ERROR AL RECIBIR RESPUESTA DEL SERVIDOR")
                             }
                         }
                     } //termina response 201
 
                     else -> {
-                        throw Exception("Error al recibir respuesta del servidor")
+                        //throw Exception("Error al recibir respuesta del servidor")
+                        println("PARRAMETROS ERRONEOS")
                     }
                 }
             }
         } catch (e: Exception) {
-            throw Exception(e.message)
+            //throw Exception(e.message)
+            println("ERROR DE CONEXION CON EL SERVIDOR -> ${e.message}")
         }
     }//finaliza el checkout
 
@@ -736,7 +753,6 @@ class Visita : AppCompatActivity() {
     // HACER PETICIÓN DE POSICIÓN ACTUAL DEL GPS
     @SuppressLint("MissingPermission")
     private fun updateGPS() {
-
         fusedLocationClient.lastLocation
             .addOnSuccessListener { location: Location? ->
                 // OBTENIENDO LA UBICACION ACTUAL
@@ -745,18 +761,21 @@ class Visita : AppCompatActivity() {
                     latitud = location.latitude.toString()
                     longitud = location.longitude.toString()
 
-                   /* Toast.makeText(
-                        this,
-                        "Latitud: $latitud, Longitud: $longitud",
-                        Toast.LENGTH_SHORT
-                    ).show()*/
+                    /* Toast.makeText(
+                         this,
+                         "Latitud: $latitud, Longitud: $longitud",
+                         Toast.LENGTH_SHORT
+                     ).show()*/
 
                     alerta!!.dismisss()
 
                 } ?: run {
                     // ERROR AL NO OBTENER LA UBICACION
-                    Toast.makeText(this, "No se pudo obtener la ubicación", Toast.LENGTH_SHORT)
-                        .show()
+                    /*Toast.makeText(this, "No se pudo obtener la ubicación", Toast.LENGTH_SHORT)
+                        .show()*/
+
+                    latitud = 0.toString()
+                    longitud = 0.toString()
 
                     alerta!!.dismisss()
                 }
