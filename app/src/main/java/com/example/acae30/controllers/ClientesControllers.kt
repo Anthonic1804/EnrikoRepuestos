@@ -5,18 +5,15 @@ import android.content.Context
 import android.content.Intent
 import android.content.SharedPreferences
 import android.view.View
-import android.widget.Toast
 import com.example.acae30.Detallepedido
 import com.example.acae30.Funciones
 import com.example.acae30.Visita
 import com.example.acae30.modelos.Cliente
 import com.example.acae30.modelos.JSONmodels.ActualizarPagareFirmadoCliente
-import com.example.acae30.modelos.JSONmodels.TokenDataClassJSON
 import com.google.gson.Gson
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import org.json.JSONArray
-import org.json.JSONObject
 import java.io.BufferedReader
 import java.io.InputStreamReader
 import java.io.OutputStreamWriter
@@ -31,6 +28,162 @@ class ClientesControllers {
     private var visitaController = VisitaController()
     private lateinit var preferences: SharedPreferences
     private var instancia = "CONFIG_SERVIDOR"
+
+    /*
+    * FUNCIONES PARA OBTENER LA INFORMACION DEL CLIENTE
+    * DESDE EL SERVIDOR SQL
+    * */
+
+    //FUNCION PARA OBTENER LA INFORMACION DE LOS CLIENTES
+    suspend fun obtenerClientesServidor(context: Context){
+        preferences = context.getSharedPreferences(instancia, Context.MODE_PRIVATE)
+        val url = funciones.getServidor(preferences.getString("ip", ""), preferences.getInt("puerto", 0).toString())
+
+
+    }
+
+    //FUNCION PARA OBTENER LOS PRECIOS PERSONALIZADOS
+    suspend fun obtenerPreciosPersonalizados(context: Context){
+        preferences = context.getSharedPreferences(instancia, Context.MODE_PRIVATE)
+        val url = funciones.getServidor(preferences.getString("ip", ""), preferences.getInt("puerto",0).toString())
+
+        /*PRIMER TRY PARA OBTENER LA CANTIDAD DE REGISTROS
+        * Y LUEGO CARGARLOS POR BLOQUES
+        */
+        try {
+            val urlCantidadRegistros = url + "clientes/precios/cantidad"
+            val urlCantidad = URL(urlCantidadRegistros)
+            var cantRegistros = 0
+
+            with(withContext(Dispatchers.IO) {
+                urlCantidad.openConnection()
+            } as HttpURLConnection) {
+                try {
+                    connectTimeout = 30000
+                    requestMethod = "GET"
+                    if (responseCode == 200) {
+                        inputStream.bufferedReader().use { data ->
+                            val readline = data.readLine()
+
+                            cantRegistros = readline.toInt()
+                        }
+
+                    } else {
+                        throw Exception("Error de Comunicacion con el servidor:$responseCode")
+                    }
+                } catch (e: Exception) {
+                    throw Exception("Error #1 Linea 207:$responseCode")
+                }
+            }
+
+            //CALCULANDO BLOQUE DE REGISTROS
+            val bloque = 500
+            var inicio = 0
+            var longitud: Int
+            var registrosCargados: Int
+
+            if(cantRegistros < bloque){
+                longitud = cantRegistros
+                registrosCargados = cantRegistros
+            }else{
+                longitud = bloque
+                registrosCargados = bloque
+            }
+
+
+            var porcentaje = 2
+            do{
+
+                if (porcentaje <= 99) {
+                    funciones.messageAsync("Cargando $porcentaje%")
+                }else{
+                    funciones.messageAsync("Cargando 100%")
+                }
+
+                porcentaje += 13
+
+                val urlPreciosPersonalizados = url + "clientes/precios/" + inicio.toString() + "/" + longitud.toString()
+                val urlPrecios = URL(urlPreciosPersonalizados)
+
+                with(withContext(Dispatchers.IO) {
+                    urlPrecios.openConnection()
+                } as HttpURLConnection) {
+                    try {
+                        connectTimeout = 30000
+                        requestMethod = "GET"
+                        if (responseCode == 200) {
+
+                            inputStream.bufferedReader().use { data ->
+                                val response = StringBuffer()
+                                var inputLine = data.readLine()
+                                while (inputLine != null) {
+                                    response.append(inputLine)
+                                    inputLine = data.readLine()
+                                }
+                                data.close()
+                                val respuesta = JSONArray(response.toString())
+                                if (respuesta.length() > 0) {
+                                    almacenarPrecioPersonalizados(respuesta, context)
+                                    println("PRECIOS PERSONALIZADOS ALMACENADOS CORRECTAMEMENTE")
+                                } else {
+                                    throw Exception("EL SERVIDOR NO DEVOLVIO DATOS")
+                                }
+                            }
+                        } else {
+                            throw Exception("ERROR DE COMUNICACIOIN CON EL SERVIDOR:$responseCode")
+                        }
+                    } catch (e: Exception) {
+                        throw Exception("ERROR DE CONEXION: $responseCode")
+                    }
+                }
+
+                inicio += bloque
+                registrosCargados += longitud
+
+                if (cantRegistros in (inicio + 1) until registrosCargados) {
+                    longitud = cantRegistros
+                }
+
+            }while(inicio < cantRegistros)
+
+
+        }catch (e:Exception){
+            println("ERROR AL OBTENER LOS PRECIOS PERSONALIZADOS -> ${e.message}")
+        }
+    }
+
+    //FUNCION PARA LAMACENAR LOS PRECIOS PERSONALIZADOS EN SQLITE
+    private fun almacenarPrecioPersonalizados(json: JSONArray, context: Context){
+        val base = funciones.getDataBase(context).writableDatabase
+        try {
+            base.beginTransaction()
+            base.execSQL("DELETE FROM cliente_precios")
+
+            for (i in 0 until json.length()){
+                val datos = json.getJSONObject(i)
+                val valor = ContentValues()
+
+                valor.put("id_cliente", datos.getInt("id_cliente"))
+                valor.put("id_inventario", datos.getInt("id_inventario"))
+                valor.put("precio_p", funciones.validateJsonIsNullFloat(datos, "precio_p"))
+                valor.put("precio_p_iva", funciones.validateJsonIsNullFloat(datos, "precio_p_iva"))
+
+                base.insert("cliente_precios", null, valor)
+            }
+            base.setTransactionSuccessful()
+        }catch (e:Exception){
+            println("ERROR AL INSERTAR LOS PRECIOS PERSONALIZADOS -> ${e.message}")
+        }finally {
+            base.endTransaction()
+            base.close()
+        }
+    }
+
+    /*
+    * FIN DE LAS FUNCIONES DE OBTENER INFORMACION DESDE
+    * EL SERVIDOR
+    * */
+
 
     //FUNCION PARA OBTENER LOS DATOS DEL CLIENTE POR ID
     fun obtenerInformacionCliente(context: Context, idCliente: Int): Cliente?{
@@ -261,116 +414,25 @@ class ClientesControllers {
         }
     }
 
-    //FUNCION PARA OBTENER LOS PRECIOS PERSONALIZADOS
-    suspend fun obtenerPreciosPersonalizados(context: Context){
+    //FUNCION PARA OBTENER EL PRECIO PERSONALIZADO POR ID CLIENTE E ID PRODUCTO
+    fun obtenerPrecioPersoCliente(idCliente: Int, idProducto: Int, context: Context) : Float{
         preferences = context.getSharedPreferences(instancia, Context.MODE_PRIVATE)
-        val url = funciones.getServidor(preferences.getString("ip", ""), preferences.getInt("puerto",0).toString())
-
-        /*PRIMER TRY PARA OBTENER LA CANTIDAD DE REGISTROS
-        * Y LUEGO CARGARLOS POR BLOQUES
-        */
+        val base = funciones.getDataBase(context).readableDatabase
+        var precioIva = 0f
         try {
-            val urlCantidadRegistros = url + "clientes/precios/cantidad"
-            val urlCantidad = URL(urlCantidadRegistros)
-            var cantRegistros = 0
-
-            with(withContext(Dispatchers.IO) {
-                urlCantidad.openConnection()
-            } as HttpURLConnection) {
-                try {
-                    connectTimeout = 30000
-                    requestMethod = "GET"
-                    if (responseCode == 200) {
-                        inputStream.bufferedReader().use { data ->
-                            val readline = data.readLine()
-
-                            cantRegistros = readline.toInt()
-                        }
-
-                    } else {
-                        throw Exception("Error de Comunicacion con el servidor:$responseCode")
-                    }
-                } catch (e: Exception) {
-                    throw Exception("Error #1 Linea 207:$responseCode")
-                }
+            val cursor = base.rawQuery("SELECT precio_p_iva from cliente_precios " +
+                    "WHERE id_cliente=$idCliente AND id_inventario=$idProducto", null)
+            if(cursor.count > 0){
+                cursor.moveToFirst()
+                precioIva = cursor.getFloat(0)
             }
-
-            //CALCULANDO BLOQUE DE REGISTROS
-            val bloque = 500
-            var inicio = 0
-            var longitud: Int
-            var registrosCargados: Int
-
-            if(cantRegistros < bloque){
-                longitud = cantRegistros
-                registrosCargados = cantRegistros
-            }else{
-                longitud = bloque
-                registrosCargados = bloque
-            }
-
-
-            var porcentaje = 2
-            do{
-
-                if (porcentaje <= 99) {
-                    funciones.messageAsync("Cargando $porcentaje%")
-                }else{
-                    funciones.messageAsync("Cargando 100%")
-                }
-
-                porcentaje += 13
-
-                val urlPreciosPersonalizados = url + "clientes/precios/" + inicio.toString() + "/" + longitud.toString()
-                val urlPrecios = URL(urlPreciosPersonalizados)
-
-                with(withContext(Dispatchers.IO) {
-                    urlPrecios.openConnection()
-                } as HttpURLConnection) {
-                    try {
-                        connectTimeout = 30000
-                        requestMethod = "GET"
-                        if (responseCode == 200) {
-
-                            inputStream.bufferedReader().use { data ->
-                                val response = StringBuffer()
-                                var inputLine = data.readLine()
-                                while (inputLine != null) {
-                                    response.append(inputLine)
-                                    inputLine = data.readLine()
-                                }
-                                //messageAsync("Cargando 45%")
-                                data.close()
-//                                messageAsync("Cargando 50%")
-                                val respuesta = JSONArray(response.toString())
-                                if (respuesta.length() > 0) {
-                                    println("PRECIOS PERSONALIZADOS ALMACENADOS CORRECTAMEMENTE")
-                                } else {
-                                    throw Exception("EL SERVIDOR NO DEVOLVIO DATOS")
-                                } //caso que la respuesta venga vacia
-                            }
-                        } else {
-                            throw Exception("ERROR DE COMUNICACIOIN CON EL SERVIDOR:$responseCode")
-                        }
-                    } catch (e: Exception) {
-                        throw Exception("ERROR DE CONEXION: $responseCode")
-                    }
-                }
-
-                inicio += bloque
-                registrosCargados += longitud
-
-                if (cantRegistros in (inicio + 1) until registrosCargados) {
-                    longitud = cantRegistros
-                }
-
-            }while(inicio < cantRegistros)
-
-
+            cursor.close()
         }catch (e:Exception){
-            println("ERROR AL OBTENER LOS PRECIOS PERSONALIZADOS -> ${e.message}")
+            println("ERROR AL BUSCAR EL PRECIO PERSONALIZADO -> ${e.message}")
+        }finally {
+            base.close()
         }
+        return precioIva
     }
-
 
 }

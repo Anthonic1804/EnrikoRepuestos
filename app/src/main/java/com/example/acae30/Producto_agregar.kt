@@ -21,6 +21,7 @@ import android.widget.Spinner
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.constraintlayout.widget.ConstraintLayout
+import com.example.acae30.controllers.ClientesControllers
 import com.example.acae30.controllers.InventarioController
 import com.example.acae30.database.Database
 import com.example.acae30.modelos.DetallePedido
@@ -103,6 +104,7 @@ class Producto_agregar : AppCompatActivity() {
 
     private var funciones = Funciones()
     private var inventarioController = InventarioController()
+    private var clientesController = ClientesControllers()
     private var modificarPrecio : Boolean = false
 
     private lateinit var precioPersonalizado : TextView
@@ -162,6 +164,22 @@ class Producto_agregar : AppCompatActivity() {
 
         //OPTENIENDO LA IP DEL SERVIDOR
         getApiUrl()
+
+        //OBTENIENDO EL PRECIO PERSONALIZADO POR CLIENTE
+        val precioIvaPersonalizado = clientesController.obtenerPrecioPersoCliente(idcliente!!,
+            idproducto!!, this@Producto_agregar)
+        if(precioIvaPersonalizado > 0){
+            precioPersonalizado.visibility = View.VISIBLE
+            spprecio?.visibility = View.GONE
+            btneditarprecio?.visibility = View.GONE
+
+            precioPersonalizado.setText("${
+                String.format(
+                    "%.4f",
+                    precioIvaPersonalizado
+                )
+            }")
+        }
 
         //TOMANDO LA CANTIDAD DE LAS ESCALA SELECCIONADA.
         //09/01/2024
