@@ -285,7 +285,7 @@ class Detallepedido : AppCompatActivity() {
                     alerta!!.pedidoEnviado()
 
                     CoroutineScope(Dispatchers.IO).launch {
-                        enviarPedidoaServidor()
+                        enviarPedidoaServidor(it)
                     }
 
                 }else{
@@ -329,6 +329,8 @@ class Detallepedido : AppCompatActivity() {
                 } catch (e: Exception) {
                     alerta!!.dismisss()
                     funciones.mostrarAlerta("ERROR: ${e.message}", this@Detallepedido, binding.lienzo)
+                }finally {
+                    imprimirRecibo(it)
                 }
             } else {
                 funciones.mostrarAlerta("ERROR: NO HAY PRODUCTOS AGREGADOS AL PEDIDO", this@Detallepedido, binding.lienzo)
@@ -408,6 +410,11 @@ class Detallepedido : AppCompatActivity() {
         }
     }
 
+    private fun imprimirRecibo(view: View){
+        fechaDoc = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy_MM_dd_HH_mm_ss"))
+        verificarPermisos(view)
+    }
+
     //FUNCION PARA VALIDAR OPCIONES SELECCIONADAS
     private fun validarSelecciones(sucursalSelec:String){
         if(sucursalSelec != "-- SELECCIONE UNA SUCURSAL --"){
@@ -424,8 +431,16 @@ class Detallepedido : AppCompatActivity() {
     }
 
     //FUNCION PARA ENVIAR EL PEDIDO AL SERVIDOR
-    private suspend fun enviarPedidoaServidor(){
+    private suspend fun enviarPedidoaServidor(view: View){
         try {
+            imprimirRecibo(view)
+        }catch (e: Exception){
+            withContext(Dispatchers.Main){
+                alerta!!.dismisss()
+
+                funciones.mostrarAlerta("ERRORAL ENVIAR EL PEDIDO", this@Detallepedido, binding.lienzo)
+            }
+        }finally {
             Timer().schedule(2300){
                 val pedido = getPedidoSend(idpedido) //retorna el pedido
 
@@ -459,12 +474,6 @@ class Detallepedido : AppCompatActivity() {
                         Toast.makeText(this@Detallepedido,"DESEA ALMACENAR EL PEDIDO PARA LUEGO ENVIARLO", Toast.LENGTH_SHORT).show()
                     }
                 }
-            }
-        }catch (e: Exception){
-            withContext(Dispatchers.Main){
-                alerta!!.dismisss()
-
-                funciones.mostrarAlerta("ERRORAL ENVIAR EL PEDIDO", this@Detallepedido, binding.lienzo)
             }
         }
     }
@@ -623,7 +632,7 @@ class Detallepedido : AppCompatActivity() {
                     binding.btnguardar.visibility = View.GONE
                     binding.imbtnatras.visibility = View.VISIBLE
                     binding.btncancelar.visibility = View.GONE
-                    binding.btnexportar.visibility = View.VISIBLE
+                    binding.btnexportar.visibility = View.GONE
                     binding.spDocumento.visibility = View.GONE
                     binding.spTipoEnvio.visibility = View.GONE
                     binding.tvDocumentoSeleccionado.visibility = View.VISIBLE
@@ -636,7 +645,7 @@ class Detallepedido : AppCompatActivity() {
                     binding.btnguardar.visibility = View.GONE
                     binding.imbtnatras.visibility = View.VISIBLE
                     binding.btncancelar.visibility = View.GONE
-                    binding.btnexportar.visibility = View.VISIBLE
+                    binding.btnexportar.visibility = View.GONE
                 }
 
             }

@@ -1,10 +1,13 @@
 package com.example.acae30
 
+import android.app.Dialog
 import android.content.ContentValues
 import android.content.Context
 import android.content.Intent
 import android.content.SharedPreferences
 import android.os.Bundle
+import android.widget.TextView
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.example.acae30.controllers.ClientesControllers
 import com.example.acae30.controllers.ConfigController
@@ -70,12 +73,17 @@ class carga_datos : AppCompatActivity() {
         }//cuando se hace click en la card de
 
         binding.cvinventario.setOnClickListener {
+            val hojaCarga = preferences.getBoolean("Hoja_carga_inventario_app", false)
             if (funciones.isInternetAvailable(this)) {
                 alert!!.Cargando() //muestra la alerta
-
-                CoroutineScope(Dispatchers.IO).launch {
-                    getInventario()
-                }//courrutina para obtener clientes
+                if(!hojaCarga){
+                    CoroutineScope(Dispatchers.IO).launch {
+                        getInventario()
+                    }
+                }else{
+                    ingresarHojaCarga()
+                    alert!!.dismisss()
+                }
 
             } else {
                 funciones.mostrarAlerta("ENCIENDE TUS DATOS O EL WIFI", this@carga_datos, binding.vistaalerta)
@@ -104,6 +112,29 @@ class carga_datos : AppCompatActivity() {
             }
 
         }//elimina los pedidos que no sean de la fecha en el que se presiona
+    }
+
+    private fun ingresarHojaCarga() {
+        val hojaCargaDialog = Dialog(this, R.style.Theme_Dialog)
+        hojaCargaDialog.setCancelable(false)
+
+        hojaCargaDialog.setContentView(R.layout.hoja_carga)
+
+        val btnAceptar = hojaCargaDialog.findViewById<TextView>(R.id.tvCargar)
+        val btnCancelar = hojaCargaDialog.findViewById<TextView>(R.id.tvCancelar)
+
+        btnAceptar.setOnClickListener {
+            Toast.makeText(this@carga_datos, "PRUEBA DE CARGA DATOS",  Toast.LENGTH_LONG).show()
+            hojaCargaDialog.dismiss()
+        }
+
+        btnCancelar.setOnClickListener {
+            hojaCargaDialog.dismiss()
+        }
+
+
+        hojaCargaDialog.show()
+
     }
 
 

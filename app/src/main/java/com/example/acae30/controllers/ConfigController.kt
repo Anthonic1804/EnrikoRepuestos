@@ -23,6 +23,8 @@ class ConfigController {
         var confirmar: Boolean
         var modificarPrecio: Boolean
         var sinExistencias: String = ""
+        var network: Boolean
+        var hojaCarga: Boolean
         try {
             val direccion = url + "config"
             val url2 = URL(direccion)
@@ -49,8 +51,10 @@ class ConfigController {
                                     confirmar = dato.getBoolean("pagare_obligatorio_app")
                                     modificarPrecio = dato.getBoolean("modificar_precio_app")
                                     sinExistencias = dato.getString("pedidos_sin_existencia")
+                                    network = dato.getBoolean("networkProvider_app")
+                                    hojaCarga = dato.getBoolean("hoja_carga_inventario_app")
 
-                                    confirmarPagareObligatorio(confirmar, modificarPrecio, sinExistencias, context)
+                                    confirmarPagareObligatorio(confirmar, modificarPrecio, sinExistencias, network, hojaCarga, context)
                                 }
                             } else {
                                 println("ERROR AL LEER EL JSON CONFIG")
@@ -69,13 +73,15 @@ class ConfigController {
     }
 
     //FUNCION PARA SETEAR LA FORMA DEL PAGARE EN SHAREDPREFERENCES
-    private fun confirmarPagareObligatorio(confirmar: Boolean, modificar:Boolean, sinExistencia:String, context: Context){
+    private fun confirmarPagareObligatorio(confirmar: Boolean, modificar:Boolean, sinExistencia:String, network:Boolean, hojaCarga:Boolean, context: Context){
         preferences = context.getSharedPreferences(instancia, Context.MODE_PRIVATE)
         val editor = preferences.edit()
         editor.remove("PagareObligatorio")
         editor.putBoolean("PagareObligatorio", confirmar)
         editor.putBoolean("modificar_precio_app", modificar)
         editor.putString("pedidos_sin_existencia", sinExistencia)
+        editor.putBoolean("NetworkProvider_app", network)
+        editor.putBoolean("Hoja_carga_inventario_app", hojaCarga)
         editor.putInt("vistaInventario", 2)
         editor.putFloat("versionActualApp", 1.0f)
         editor.apply()
