@@ -14,6 +14,7 @@ import com.example.acae30.controllers.ConfigController
 import com.example.acae30.controllers.InventarioController
 import com.example.acae30.database.Database
 import com.example.acae30.databinding.ActivityCargaDatosBinding
+import com.google.android.material.textfield.TextInputEditText
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
@@ -22,10 +23,12 @@ import kotlinx.coroutines.withContext
 import org.json.JSONArray
 import java.net.HttpURLConnection
 import java.net.URL
+import kotlin.properties.Delegates
 
 class carga_datos : AppCompatActivity() {
 
     private lateinit var url: String
+    private var idVendedor = 0
     private var alert: AlertDialogo? = null
     private var database: Database? = null
 
@@ -48,6 +51,8 @@ class carga_datos : AppCompatActivity() {
         database = Database(this)
 
         url = funciones.getServidor(preferences.getString("ip", ""), preferences.getInt("puerto", 0).toString())
+
+        idVendedor = preferences.getInt("Idvendedor", 0)
 
     }
 
@@ -124,8 +129,14 @@ class carga_datos : AppCompatActivity() {
         val btnCancelar = hojaCargaDialog.findViewById<TextView>(R.id.tvCancelar)
 
         btnAceptar.setOnClickListener {
-            Toast.makeText(this@carga_datos, "PRUEBA DE CARGA DATOS",  Toast.LENGTH_LONG).show()
-            hojaCargaDialog.dismiss()
+            val numero = hojaCargaDialog.findViewById<TextInputEditText>(R.id.tietNumeroCarga).text.toString()
+            if (numero.isEmpty() || numero.toInt() == 0) {
+                println("VALOR DE LA HOJA DE CARGA: $numero")
+                funciones.mostrarAlerta("ERROR EN LA HOJA DE CARGA", this@carga_datos, binding.vistaalerta)
+            } else {
+                inventarioController.obtenerInventarioHojaCarga(0, numero.toInt(), idVendedor, this@carga_datos)
+                hojaCargaDialog.dismiss()
+            }
         }
 
         btnCancelar.setOnClickListener {
@@ -403,7 +414,7 @@ class carga_datos : AppCompatActivity() {
 //                                messageAsync("Cargando 50%")
                                 val respuesta = JSONArray(response.toString())
                                 if (respuesta.length() > 0) {
-                                    saveInventarioDatabase(respuesta) //guarda los datos en la bd
+                                    inventarioController.saveInventarioDatabase(respuesta, this@carga_datos)
                                     //println("DATOS ALMACENADOS CORRECTAMEMENTE")
                                 } else {
                                     throw Exception("Servidor no Devolvio datos")
@@ -523,8 +534,7 @@ class carga_datos : AppCompatActivity() {
 //                                messageAsync("Cargando 50%")
                                 val respuesta = JSONArray(response.toString())
                                 if (respuesta.length() > 0) {
-                                    saveInventarioPreciosDatabase(respuesta) //guarda los datos en la bd
-                                    //println("PRECIOS ALMACENADOS CORRECTAMENTE")
+                                    inventarioController.saveInventarioPreciosDatabase(respuesta, this@carga_datos)
                                 } else {
                                     throw Exception("Servidor no Devolvio datos")
                                 } //caso que la respuesta venga vacia
@@ -703,128 +713,6 @@ class carga_datos : AppCompatActivity() {
             bd.close()
         }
     }//guarda los datos en la bd
-
-    private fun saveInventarioDatabase(json: JSONArray) {
-        //var total=json.length()
-        //var talla=(50.toFloat()/total.toFloat()).toFloat()
-        //var contador:Float=0.toFloat()
-        val bd = database!!.writableDatabase
-        try {
-            bd!!.beginTransaction() //inicio la transaccion
-//            bd!!.execSQL("DELETE FROM inventario") //limpiamos los registros viejos par obtener los nuevos
-            for (i in 0 until json.length()) {
-                val dato = json.getJSONObject(i) //obtenemos el objecto json
-
-                val data = ContentValues()
-                data.put("Id", dato.getInt("id"))
-                data.put("Codigo", funciones.validateJsonIsnullString(dato, "codigo"))
-                data.put("Tipo", funciones.validateJsonIsnullString(dato, "tipo"))
-                data.put("Id_linea", funciones.validateJsonIsNullInt(dato, "id_linea"))
-                data.put("Linea", funciones.validateJsonIsnullString(dato, "linea"))
-                data.put("Descripcion", funciones.validateJsonIsnullString(dato, "descripcion"))
-                data.put(
-                    "Unidad_medida",
-                    funciones.validateJsonIsnullString(dato, "unidad_medida")
-                )
-                data.put("Fraccion", funciones.validateJsonIsNullFloat(dato, "Fraccion"))
-                data.put(
-                    "Nombre_fraccion", funciones.validateJsonIsnullString(
-                        dato,
-                        "nombre_fraccion"
-                    )
-                )
-                data.put("Existencia", funciones.validateJsonIsNullFloat(dato, "existencia"))
-                data.put("Costo", funciones.validateJsonIsNullFloat(dato, "costo"))
-                data.put("costo_iva", funciones.validateJsonIsNullFloat(dato, "costo_iva"))
-                data.put(
-                    "Precio_oferta",
-                    funciones.validateJsonIsNullFloat(dato, "precio_oferta")
-                )
-                data.put("Precio_iva", funciones.validateJsonIsNullFloat(dato, "precio_iva"))
-                data.put("Precio_u", funciones.validateJsonIsNullFloat(dato, "precio_u"))
-                data.put("Precio_u_iva", funciones.validateJsonIsNullFloat(dato, "precio_u_iva"))
-                data.put("Precio", funciones.validateJsonIsNullFloat(dato, "precio"))
-                data.put("Status", funciones.validateJsonIsnullString(dato, "status"))
-                data.put("Id_productor", funciones.validateJsonIsNullInt(dato, "id_productor"))
-                data.put("Productor", funciones.validateJsonIsnullString(dato, "productor"))
-                data.put("Id_proveedor", funciones.validateJsonIsNullInt(dato, "id_proveedor"))
-                data.put("Proveedor", funciones.validateJsonIsnullString(dato, "proveedor"))
-                data.put("Cesc", funciones.validateJsonIsnullString(dato, "proveedor"))
-                data.put("Combustible", funciones.validateJsonIsnullString(dato, "combustible"))
-                data.put("Imagen", "")
-                data.put("Rubro", funciones.validateJsonIsnullString(dato, "rubro"))
-                data.put("Marca", funciones.validateJsonIsnullString(dato, "marca"))
-                data.put("Sublinea", funciones.validateJsonIsnullString(dato, "sublinea"))
-                data.put("Bonificado", funciones.validateJsonIsNullFloat(dato, "bonificado"))
-                data.put(
-                    "Desc_automatico", funciones.validateJsonIsNullFloat(
-                        dato,
-                        "desc_automatico"
-                    )
-                )
-                data.put("Id_sublinea", funciones.validateJsonIsNullInt(dato, "id_sublinea"))
-                data.put("Id_rubro", funciones.validateJsonIsNullInt(dato, "id_rubro"))
-                data.put("Existencia_u", funciones.validateJsonIsNullFloat(dato, "existencia_u"))
-                bd.insert("inventario", null, data)
-                //contador=contador+talla
-                //var mensaje=contador+50.toFloat()
-                //messageAsync("Cargando ${mensaje.toInt()}%")
-            }
-            bd.setTransactionSuccessful()
-        } catch (e: Exception) {
-            throw Exception(e.message)
-        } finally {
-            bd!!.endTransaction()
-            bd.close()
-        }
-    } //guarda los datos de inventario
-
-    private fun saveInventarioPreciosDatabase(json: JSONArray) {
-//        var total=json.length()
-//        var talla=(30.toFloat()/total.toFloat()).toFloat()
-//        var contador:Float=0.toFloat()
-        val bd = database!!.writableDatabase
-        try {
-            bd!!.beginTransaction() //inicio la transaccion
-//            bd!!.execSQL("DELETE FROM inventario_precios") //limpiamos los registros viejos par obtener los nuevos
-            for (i in 0 until json.length()) {
-                val dato = json.getJSONObject(i) //obtenemos el objecto json
-                val data = ContentValues()
-                data.put("Id", dato.getInt("id"))
-                data.put(
-                    "id_inventario",
-                    funciones.validateJsonIsnullString(dato, "id_inventario")
-                )
-                data.put(
-                    "Codigo_producto",
-                    funciones.validateJsonIsnullString(dato, "codigo_producto")
-                )
-                data.put(
-                    "Id_inventario_unidad",
-                    funciones.validateJsonIsNullInt(dato, "id_inventario_unidad")
-                )
-                data.put("Unidad", funciones.validateJsonIsnullString(dato, "unidad"))
-                data.put("Nombre", funciones.validateJsonIsnullString(dato, "nombre"))
-                data.put("Terminos", funciones.validateJsonIsnullString(dato, "terminos"))
-                data.put("Plazo", funciones.validateJsonIsNullFloat(dato, "Plazo"))
-                data.put("cantidad", funciones.validateJsonIsNullFloat(dato, "cantidad"))
-                data.put("porcentaje", funciones.validateJsonIsNullFloat(dato, "porcentaje"))
-                data.put("precio", funciones.validateJsonIsNullFloat(dato, "precio"))
-                data.put("precio_iva", funciones.validateJsonIsNullFloat(dato, "precio_iva"))
-
-                bd.insert("inventario_precios", null, data)
-//                contador=contador+talla
-//                var mensaje=contador+70.toFloat()
-//                messageAsync("Cargando ${mensaje.toInt()}%")
-            }
-            bd.setTransactionSuccessful()
-        } catch (e: Exception) {
-            throw Exception(e.message)
-        } finally {
-            bd!!.endTransaction()
-            bd.close()
-        }
-    } //guarda los datos de inventario precios
 
     private fun saveCuentaDatabase(json: JSONArray) {
         val bd = database!!.writableDatabase

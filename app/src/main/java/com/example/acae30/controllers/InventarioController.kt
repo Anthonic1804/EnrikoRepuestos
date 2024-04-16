@@ -1,10 +1,26 @@
 package com.example.acae30.controllers
 
+import android.content.ContentValues
 import android.content.Context
 import android.content.SharedPreferences
+import android.view.View
 import com.example.acae30.Funciones
 import com.example.acae30.modelos.Inventario
 import com.example.acae30.modelos.InventarioPrecios
+import com.example.acae30.modelos.JSONmodels.BusquedaPedidoJSON
+import com.example.acae30.modelos.JSONmodels.HojaCargaJSON
+import com.example.acae30.modelos.VentasTemp
+import com.google.gson.Gson
+import kotlinx.android.synthetic.main.activity_historico_pedidos.tvNoRegistros
+import org.json.JSONArray
+import java.io.BufferedReader
+import java.io.InputStreamReader
+import java.io.ObjectStreamException
+import java.io.OutputStreamWriter
+import java.io.Reader
+import java.net.HttpURLConnection
+import java.net.URL
+import java.nio.charset.StandardCharsets
 
 class InventarioController {
 
@@ -198,6 +214,194 @@ class InventarioController {
             base.close()
         }
     }
+
+
+    fun obtenerInventarioHojaCarga(id: Int,  numero: Int, id_vendedor: Int, context: Context) {
+        preferences = context.getSharedPreferences(instancia, Context.MODE_PRIVATE)
+        val url = funciones.getServidor(preferences.getString("ip", ""), preferences.getInt("puerto", 0).toString())
+
+        try {
+            val datos = HojaCargaJSON(
+                id,
+                numero,
+                id_vendedor
+            )
+            val objecto =
+                Gson().toJson(datos)
+            println(objecto)
+            val ruta: String = url + "inventario/hojacarga"
+            val url = URL(ruta)
+            with(url.openConnection() as HttpURLConnection) {
+                try {
+                    connectTimeout = 20000
+                    setRequestProperty(
+                        "Content-Type",
+                        "application/json;charset=utf-8"
+                    )
+                    requestMethod = "POST"
+                    val or = OutputStreamWriter(outputStream, StandardCharsets.UTF_8)
+                    or.write(objecto) //SE ESCRIBE EL OBJ JSON
+                    or.flush() //SE ENVIA EL OBJ JSON
+                    when (responseCode) {
+                        200 -> {
+                            BufferedReader(InputStreamReader(inputStream) as Reader?).use {
+                                try {
+                                    val respuesta = StringBuffer()
+                                    var inpuline = it.readLine()
+                                    while (inpuline != null) {
+                                        respuesta.append(inpuline)
+                                        inpuline = it.readLine()
+                                    }
+                                    it.close()
+                                    val res = JSONArray(respuesta.toString())
+                                    if (res.length() > 0) {
+                                        println(res)
+                                        saveInventarioDatabase(res, context)
+                                    } else {
+                                        println("ERROR: ERROR NO SE ENCONTRARON DATOS PARA ALMACENAR 222222")
+                                    }
+                                } catch (e: Exception) {
+                                    throw Exception(e.message)
+                                }
+                            }
+                        }
+                        400 -> {
+                            println("ERROR: ERROR AL CARGAR EL INVENTARIO POR HOJA DE CARGA")
+                        }
+
+                        404 -> {
+                            println("ERROR: ERROR NO SE ENCONTRARON DATOS PARA ALMACENAR")
+                        }
+
+                        else -> {
+                            println("ERROR: NO SE LOGRO CONECTAR CON EL SERVIDOR")
+                        }
+                    }
+                } catch (e: Exception) {
+                    throw Exception(e.message)
+                }
+            }
+        } catch (e: Exception) {
+            throw Exception(e.message)
+        }
+    }
+
+
+    fun saveInventarioPreciosDatabase(json: JSONArray, context: Context) {
+        val bd = funciones.getDataBase(context).writableDatabase
+        try {
+            bd!!.beginTransaction() //inicio la transaccion
+//            bd!!.execSQL("DELETE FROM inventario_precios") //limpiamos los registros viejos par obtener los nuevos
+            for (i in 0 until json.length()) {
+                val dato = json.getJSONObject(i) //obtenemos el objecto json
+                val data = ContentValues()
+                data.put("Id", dato.getInt("id"))
+                data.put(
+                    "id_inventario",
+                    funciones.validateJsonIsnullString(dato, "id_inventario")
+                )
+                data.put(
+                    "Codigo_producto",
+                    funciones.validateJsonIsnullString(dato, "codigo_producto")
+                )
+                data.put(
+                    "Id_inventario_unidad",
+                    funciones.validateJsonIsNullInt(dato, "id_inventario_unidad")
+                )
+                data.put("Unidad", funciones.validateJsonIsnullString(dato, "unidad"))
+                data.put("Nombre", funciones.validateJsonIsnullString(dato, "nombre"))
+                data.put("Terminos", funciones.validateJsonIsnullString(dato, "terminos"))
+                data.put("Plazo", funciones.validateJsonIsNullFloat(dato, "Plazo"))
+                data.put("cantidad", funciones.validateJsonIsNullFloat(dato, "cantidad"))
+                data.put("porcentaje", funciones.validateJsonIsNullFloat(dato, "porcentaje"))
+                data.put("precio", funciones.validateJsonIsNullFloat(dato, "precio"))
+                data.put("precio_iva", funciones.validateJsonIsNullFloat(dato, "precio_iva"))
+
+                bd.insert("inventario_precios", null, data)
+//                contador=contador+talla
+//                var mensaje=contador+70.toFloat()
+//                messageAsync("Cargando ${mensaje.toInt()}%")
+            }
+            bd.setTransactionSuccessful()
+        } catch (e: Exception) {
+            throw Exception(e.message)
+        } finally {
+            bd!!.endTransaction()
+            bd.close()
+        }
+    } //guarda los datos de inventario precios
+
+    fun saveInventarioDatabase(json: JSONArray, context: Context) {
+        val bd = funciones.getDataBase(context).writableDatabase
+        try {
+            bd!!.beginTransaction() //inicio la transaccion
+//            bd!!.execSQL("DELETE FROM inventario") //limpiamos los registros viejos par obtener los nuevos
+            for (i in 0 until json.length()) {
+                val dato = json.getJSONObject(i) //obtenemos el objecto json
+
+                val data = ContentValues()
+                data.put("Id", dato.getInt("id"))
+                data.put("Codigo", funciones.validateJsonIsnullString(dato, "codigo"))
+                data.put("Tipo", funciones.validateJsonIsnullString(dato, "tipo"))
+                data.put("Id_linea", funciones.validateJsonIsNullInt(dato, "id_linea"))
+                data.put("Linea", funciones.validateJsonIsnullString(dato, "linea"))
+                data.put("Descripcion", funciones.validateJsonIsnullString(dato, "descripcion"))
+                data.put(
+                    "Unidad_medida",
+                    funciones.validateJsonIsnullString(dato, "unidad_medida")
+                )
+                data.put("Fraccion", funciones.validateJsonIsNullFloat(dato, "fraccion"))
+                data.put(
+                    "Nombre_fraccion", funciones.validateJsonIsnullString(
+                        dato,
+                        "nombre_fraccion"
+                    )
+                )
+                data.put("Existencia", funciones.validateJsonIsNullFloat(dato, "existencia"))
+                data.put("Costo", funciones.validateJsonIsNullFloat(dato, "costo"))
+                data.put("costo_iva", funciones.validateJsonIsNullFloat(dato, "costo_iva"))
+                data.put(
+                    "Precio_oferta",
+                    funciones.validateJsonIsNullFloat(dato, "precio_oferta")
+                )
+                data.put("Precio_iva", funciones.validateJsonIsNullFloat(dato, "precio_iva"))
+                data.put("Precio_u", funciones.validateJsonIsNullFloat(dato, "precio_u"))
+                data.put("Precio_u_iva", funciones.validateJsonIsNullFloat(dato, "precio_u_iva"))
+                data.put("Precio", funciones.validateJsonIsNullFloat(dato, "precio"))
+                data.put("Status", funciones.validateJsonIsnullString(dato, "status"))
+                data.put("Id_productor", funciones.validateJsonIsNullInt(dato, "id_productor"))
+                data.put("Productor", funciones.validateJsonIsnullString(dato, "productor"))
+                data.put("Id_proveedor", funciones.validateJsonIsNullInt(dato, "id_proveedor"))
+                data.put("Proveedor", funciones.validateJsonIsnullString(dato, "proveedor"))
+                data.put("Cesc", funciones.validateJsonIsnullString(dato, "proveedor"))
+                data.put("Combustible", "N")
+                data.put("Imagen", "")
+                data.put("Rubro", funciones.validateJsonIsnullString(dato, "rubro"))
+                data.put("Marca", funciones.validateJsonIsnullString(dato, "marca"))
+                data.put("Sublinea", funciones.validateJsonIsnullString(dato, "sublinea"))
+                data.put("Bonificado", funciones.validateJsonIsNullFloat(dato, "bonificado"))
+                data.put(
+                    "Desc_automatico", funciones.validateJsonIsNullFloat(
+                        dato,
+                        "desc_automatico"
+                    )
+                )
+                data.put("Id_sublinea", funciones.validateJsonIsNullInt(dato, "id_sublinea"))
+                data.put("Id_rubro", funciones.validateJsonIsNullInt(dato, "id_rubro"))
+                data.put("Existencia_u", funciones.validateJsonIsNullFloat(dato, "existencia_u"))
+                bd.insert("inventario", null, data)
+                //contador=contador+talla
+                //var mensaje=contador+50.toFloat()
+                //messageAsync("Cargando ${mensaje.toInt()}%")
+            }
+            bd.setTransactionSuccessful()
+        } catch (e: Exception) {
+            throw Exception(e.message)
+        } finally {
+            bd!!.endTransaction()
+            bd.close()
+        }
+    } //guarda los datos de inventario
 
 
 }
