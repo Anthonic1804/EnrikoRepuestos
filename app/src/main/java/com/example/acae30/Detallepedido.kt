@@ -26,6 +26,7 @@ import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.acae30.Library.PdfDocumentAdapter
 import com.example.acae30.R
+import com.example.acae30.controllers.InventarioController
 import com.example.acae30.controllers.PedidosController
 import com.example.acae30.database.Database
 import com.example.acae30.databinding.ActivityDetallepedidoBinding
@@ -109,6 +110,7 @@ class Detallepedido : AppCompatActivity() {
 
     private var funciones = Funciones()
     private var pedidosController = PedidosController()
+    private var inventarioController = InventarioController()
     private lateinit var preferencias: SharedPreferences
     private val instancia = "CONFIG_SERVIDOR"
 
@@ -156,6 +158,7 @@ class Detallepedido : AppCompatActivity() {
         vendedor = preferencias.getString("Vendedor", "").toString()
         ip = preferencias.getString("ip", "").toString()
         puerto = preferencias.getInt("puerto", 0)
+
         visita_enviada = false
 
         //DESHABILITAMOS LOS TEXTVIEWS DE INFORMACION ENVIADA
@@ -300,6 +303,14 @@ class Detallepedido : AppCompatActivity() {
         binding.btnguardar.setOnClickListener {
             if (ConfirmarDetallePedido() > 0) {
                 try {
+                    imprimirRecibo(it)
+                } catch (e: Exception) {
+                    alerta!!.dismisss()
+                    funciones.mostrarAlerta("ERROR: ${e.message}", this@Detallepedido, binding.lienzo)
+                }finally {
+                    //DESCARGANDO INVENTARIO
+                    descargarInventario()
+
                     pedidosController.actualizarEstadoAlGuardar(idpedido, this@Detallepedido, binding.lienzo) //FUNCION PARA ACTUALIZAR EL ESTADO
                     alerta!!.pedidoGuardado()
                     alerta!!.changeText("Guardando Pedido")
@@ -326,11 +337,6 @@ class Detallepedido : AppCompatActivity() {
                             }
                         }
                     }
-                } catch (e: Exception) {
-                    alerta!!.dismisss()
-                    funciones.mostrarAlerta("ERROR: ${e.message}", this@Detallepedido, binding.lienzo)
-                }finally {
-                    imprimirRecibo(it)
                 }
             } else {
                 funciones.mostrarAlerta("ERROR: NO HAY PRODUCTOS AGREGADOS AL PEDIDO", this@Detallepedido, binding.lienzo)
@@ -452,6 +458,12 @@ class Detallepedido : AppCompatActivity() {
                 alerta!!.dismisss()
 
                 if(enviado){
+                    //SI EL PEDIDO YA HA FUE CERRADO NO REALIZA LA DESCARGA NUEVAMENTE
+                    if(!pedido.Cerrado!!){
+                        //DESCARGANDO INVENTARIO
+                        descargarInventario()
+                    }
+
                     val visitaAbierta = getEstadoVisita()
 
                     if (visitaAbierta == 1) {
@@ -474,6 +486,18 @@ class Detallepedido : AppCompatActivity() {
                         Toast.makeText(this@Detallepedido,"DESEA ALMACENAR EL PEDIDO PARA LUEGO ENVIARLO", Toast.LENGTH_SHORT).show()
                     }
                 }
+            }
+        }
+    }
+
+    //FUNCION PARA DESCARGAR EL PRODUCTO DE INVENTARIO APP
+    private fun descargarInventario(){
+        //REALIZANDO LA DESCAR DE INVENTARIO DE LA APP
+        //SOLO SI SE USA HOJA DE CARGA DE ESCARRSA
+        val hojaCarga = preferencias.getBoolean("Hoja_carga_inventario_app", false)
+        if(hojaCarga){
+            CoroutineScope(Dispatchers.IO).launch {
+                inventarioController.descargarProductosInventario(idpedido, this@Detallepedido)
             }
         }
     }
@@ -1286,7 +1310,12 @@ class Detallepedido : AppCompatActivity() {
         val printManager = getSystemService(Context.PRINT_SERVICE) as PrintManager
         try {
             val printAdapter = PdfDocumentAdapter(this@Detallepedido, Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS).absolutePath + "/pedidospdf/" + nombreCliente + "_$fechaDoc.pdf")
-            printManager.print("DOCUMENTO", printAdapter, PrintAttributes.Builder().build())
+            printManager.print("DOCUMENTO",
+                printAdapter,
+                PrintAttributes.Builder()
+                    .setMediaSize(PrintAttributes.MediaSize.NA_QUARTO.asLandscape())
+                    .setMinMargins(PrintAttributes.Margins.NO_MARGINS)
+                    .build())
         }catch (e: Exception){
             e.message?.let { Log.e("MENSAJE ERROR", it) }
         }

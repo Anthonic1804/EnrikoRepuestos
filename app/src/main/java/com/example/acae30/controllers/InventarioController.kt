@@ -278,6 +278,8 @@ class InventarioController {
             }
         } catch (e: Exception) {
             throw Exception(e.message)
+        }finally {
+            obtenerFechaInventario(context)
         }
     }
 
@@ -326,7 +328,8 @@ class InventarioController {
     fun saveInventarioDatabase(json: JSONArray, context: Context) {
         val bd = funciones.getDataBase(context).writableDatabase
         try {
-            bd!!.beginTransaction()
+            bd.execSQL("DELETE FROM Inventario")
+            bd.beginTransaction()
             for (i in 0 until json.length()) {
                 val dato = json.getJSONObject(i)
 
@@ -391,5 +394,26 @@ class InventarioController {
         }
     }
 
-
+    //DESCARGA DE INVENTARIO DE HOJA DE CARGA
+    fun descargarProductosInventario(idPedido: Int, context: Context){
+        val base = funciones.getDataBase(context).writableDatabase
+        try {
+            val cursor = base.rawQuery("SELECT ID_PRODUCTO, CANTIDAD FROM DETALLE_PEDIDOS WHERE ID_PEDIDO=$idPedido",null)
+            if (cursor.count > 0) {
+                cursor.moveToFirst()
+                do {
+                    try {
+                        base.execSQL("UPDATE Inventario SET Existencia = (Existencia - ${cursor.getInt(1)}) WHERE Id=${cursor.getInt(0)}")
+                    }catch (e:Exception){
+                        println("ERROR: NO SE ACTUALIZARON LAS EXITENCIAS EN INVENTARIO -> ${e.message}")
+                    }
+                } while (cursor.moveToNext())
+                cursor.close()
+            }
+        }catch (e:Exception){
+            println("ERROR: NO SE ENCONTRARON REGISTROS EN EL PEDIDO -> ${e.message}")
+        }finally {
+            base.close()
+        }
+    }
 }
