@@ -127,4 +127,31 @@ class PedidosController {
         return lista
     }
 
+    //FUNCION PARA ELIMINAR PEDIDOS ANTIGUOS
+    fun eliminarPedidosAntiguos(context: Context) {
+        val fechanow = funciones.obtenerFecha()
+        val bd = funciones.getDataBase(context).writableDatabase
+        try {
+            bd.beginTransaction()
+            val cursor = bd.rawQuery("SELECT * FROM pedidos where Enviado=1 AND Fecha_creado != '$fechanow'", null)
+            if (cursor.count > 0) {
+                cursor.moveToFirst()
+                do {
+                    val id = cursor.getInt(0)
+                    bd.delete("detalle_pedidos", "Id_pedido=?", arrayOf(id.toString()))
+                    bd.delete("pedidos", "Id=?", arrayOf(id.toString()))
+
+                } while (cursor.moveToNext())
+                cursor.close()
+                bd.setTransactionSuccessful()
+            }
+        } catch (e: Exception) {
+            throw Exception(e.message)
+        } finally {
+            bd.endTransaction()
+            bd.close()
+        }
+
+    }
+
 }

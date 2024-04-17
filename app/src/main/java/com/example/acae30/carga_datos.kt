@@ -7,11 +7,11 @@ import android.content.Intent
 import android.content.SharedPreferences
 import android.os.Bundle
 import android.widget.TextView
-import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.example.acae30.controllers.ClientesControllers
 import com.example.acae30.controllers.ConfigController
 import com.example.acae30.controllers.InventarioController
+import com.example.acae30.controllers.PedidosController
 import com.example.acae30.database.Database
 import com.example.acae30.databinding.ActivityCargaDatosBinding
 import com.google.android.material.textfield.TextInputEditText
@@ -23,7 +23,6 @@ import kotlinx.coroutines.withContext
 import org.json.JSONArray
 import java.net.HttpURLConnection
 import java.net.URL
-import kotlin.properties.Delegates
 
 class carga_datos : AppCompatActivity() {
 
@@ -35,7 +34,9 @@ class carga_datos : AppCompatActivity() {
     private var configController = ConfigController()
     private var inventarioController = InventarioController()
     private var clietnesController = ClientesControllers()
+    private var pedidosController = PedidosController()
     private var funciones = Funciones()
+
     private lateinit var preferences: SharedPreferences
     private var instancia = "CONFIG_SERVIDOR"
     private lateinit var binding : ActivityCargaDatosBinding
@@ -47,8 +48,8 @@ class carga_datos : AppCompatActivity() {
 
         preferences = this@carga_datos.getSharedPreferences(instancia, Context.MODE_PRIVATE)
 
-        alert = AlertDialogo(this)
-        database = Database(this)
+        alert = AlertDialogo(this@carga_datos)
+        database = Database(this@carga_datos)
 
         url = funciones.getServidor(preferences.getString("ip", ""), preferences.getInt("puerto", 0).toString())
 
@@ -60,32 +61,38 @@ class carga_datos : AppCompatActivity() {
         super.onStart()
 
         binding.imgbtnatras.setOnClickListener {
-            val intento = Intent(this, Inicio::class.java)
+            val intento = Intent(this@carga_datos, Inicio::class.java)
             startActivity(intento)
-        }//BOTON ATRAS
+        }
 
         binding.cvclientes.setOnClickListener {
-            if (funciones.isInternetAvailable(this)) {
-                alert!!.Cargando() //muestra la alerta
-
+            if (funciones.isInternetAvailable(this@carga_datos)) {
+                alert!!.Cargando()
                 CoroutineScope(Dispatchers.IO).launch {
                     getClients()
-                }//COURUTINA PARA OBTENER CLIENTES Y SUCURSALES
-
+                }
             } else {
                 funciones.mostrarAlerta("ENCIENDE TUS DATOS O EL WIFI", this@carga_datos, binding.vistaalerta)
             }
-        }//cuando se hace click en la card de
+        }
 
         binding.cvinventario.setOnClickListener {
             val hojaCarga = preferences.getBoolean("Hoja_carga_inventario_app", false)
-            if (funciones.isInternetAvailable(this)) {
-                alert!!.Cargando() //muestra la alerta
+            if (funciones.isInternetAvailable(this@carga_datos)) {
+                alert!!.Cargando()
+
                 if(!hojaCarga){
+                    /*
+                    * Si la Hoja de Carga está desactivada en SQL Server
+                    * Carga el inventario Completo
+                    * */
                     CoroutineScope(Dispatchers.IO).launch {
                         getInventario()
                     }
                 }else{
+                    /*
+                    * Si está Activa solamente cargar el inventario de dicha hoja
+                    * */
                     ingresarHojaCarga()
                     alert!!.dismisss()
                 }
@@ -93,16 +100,14 @@ class carga_datos : AppCompatActivity() {
             } else {
                 funciones.mostrarAlerta("ENCIENDE TUS DATOS O EL WIFI", this@carga_datos, binding.vistaalerta)
             }
-        }//cuando se carga los inventarios
+        }
 
         binding.cvcuentas.setOnClickListener {
-            if (funciones.isInternetAvailable(this)) {
-                alert!!.Cargando() //muestra la alerta
-
+            if (funciones.isInternetAvailable(this@carga_datos)) {
+                alert!!.Cargando()
                 CoroutineScope(Dispatchers.IO).launch {
                     getCuentas()
-                }//courrutina para obtener clientes
-
+                }
             } else {
                 funciones.mostrarAlerta("ENCIENDE TUS DATOS O EL WIFI", this@carga_datos, binding.vistaalerta)
             }
@@ -110,15 +115,18 @@ class carga_datos : AppCompatActivity() {
 
         binding.cvpedidos.setOnClickListener {
             try {
-                deletePedido()
+                CoroutineScope(Dispatchers.IO).launch {
+                    pedidosController.eliminarPedidosAntiguos(this@carga_datos)
+                }
                 funciones.mostrarMensaje("PEDIDOS ELIMINADOS", this@carga_datos, binding.vistaalerta)
             } catch (e: Exception) {
                 funciones.mostrarAlerta("ERROR AL ELIMINAR LOS PEDIDOS -> ${e.message}", this@carga_datos, binding.vistaalerta)
             }
 
-        }//elimina los pedidos que no sean de la fecha en el que se presiona
+        }
     }
 
+    //FUNCION PARA MOSTRAR EL DIALOG DE INGRESO DE HOJA DE CARGA
     private fun ingresarHojaCarga() {
         val hojaCargaDialog = Dialog(this, R.style.Theme_Dialog)
         hojaCargaDialog.setCancelable(false)
@@ -131,7 +139,6 @@ class carga_datos : AppCompatActivity() {
         btnAceptar.setOnClickListener {
             val numero = hojaCargaDialog.findViewById<TextInputEditText>(R.id.tietNumeroCarga).text.toString()
             if (numero.isEmpty() || numero.toInt() == 0) {
-                println("VALOR DE LA HOJA DE CARGA: $numero")
                 funciones.mostrarAlerta("ERROR EN LA HOJA DE CARGA", this@carga_datos, binding.vistaalerta)
             } else {
                 inventarioController.obtenerInventarioHojaCarga(0, numero.toInt(), idVendedor, this@carga_datos)
@@ -147,7 +154,6 @@ class carga_datos : AppCompatActivity() {
         hojaCargaDialog.show()
 
     }
-
 
     //OBTENIENDO SUCURSALES DESDE WEBSERVIS
     //09-03-2023
@@ -317,7 +323,6 @@ class carga_datos : AppCompatActivity() {
             bd.close()
         }
     } //INSERTANDO DATOS EN LA TABLA SUCURSALES EN SQLITE
-
 
     private suspend fun getInventario() {
         // TABLA INVENTARIO
@@ -777,43 +782,11 @@ class carga_datos : AppCompatActivity() {
         }
     } //inserta las cxc en la tabla
 
-    //FUNCION PARA ELIMINAR PEDIDOS ANTIGUOS
-    private fun deletePedido() {
-        val fechanow = funciones.obtenerFecha()
-        val bd = database!!.writableDatabase
-        try {
-            bd.beginTransaction()
-            val cursor = bd.rawQuery("SELECT * FROM pedidos where Enviado=1 AND Fecha_creado != '$fechanow'", null)
-            if (cursor.count > 0) {
-                cursor.moveToFirst()
-                do {
-                    val id = cursor.getInt(0)
-                    bd.delete("detalle_pedidos", "Id_pedido=?", arrayOf(id.toString()))
-                    bd.delete("pedidos", "Id=?", arrayOf(id.toString()))
-
-                } while (cursor.moveToNext())
-                cursor.close()
-                bd.setTransactionSuccessful()
-            }
-        } catch (e: Exception) {
-            throw Exception(e.message)
-        } finally {
-            bd.endTransaction()
-            bd.close()
-        }
-
-    }
-
     @Deprecated("Deprecated in Java")
     override fun onBackPressed() {
       //  super.onBackPressed()
 
     //   finish()
     }//anula el boton atras
-
-    override fun onDestroy() {
-        super.onDestroy()
-       // GlobalScope.cancel()
-    }
 
 }
