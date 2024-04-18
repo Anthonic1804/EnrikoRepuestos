@@ -1,16 +1,23 @@
 package com.example.acae30
 
-import android.Manifest
 import android.annotation.SuppressLint
 import android.app.Dialog
 import android.content.Context
 import android.content.Intent
 import android.content.SharedPreferences
-import android.content.pm.PackageManager
+import android.graphics.Canvas
+import android.graphics.pdf.PdfDocument
 import android.os.Bundle
-import android.os.Environment
+import android.os.CancellationSignal
+import android.os.ParcelFileDescriptor
+import android.print.PageRange
 import android.print.PrintAttributes
+import android.print.PrintDocumentAdapter
+import android.print.PrintDocumentInfo
 import android.print.PrintManager
+import android.text.Layout
+import android.text.StaticLayout
+import android.text.TextPaint
 import android.util.Log
 import android.view.View
 import android.widget.AdapterView
@@ -20,11 +27,8 @@ import android.widget.Button
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.app.ActivityCompat
-import androidx.core.content.ContextCompat
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
-import com.example.acae30.Library.PdfDocumentAdapter
 import com.example.acae30.R
 import com.example.acae30.controllers.InventarioController
 import com.example.acae30.controllers.PedidosController
@@ -39,28 +43,12 @@ import com.example.acae30.modelos.dataPedidos
 import com.google.android.material.snackbar.Snackbar
 import com.google.gson.JsonArray
 import com.google.gson.JsonObject
-import com.itextpdf.text.BaseColor
-import com.itextpdf.text.Document
-import com.itextpdf.text.DocumentException
-import com.itextpdf.text.Element
-import com.itextpdf.text.Font
-import com.itextpdf.text.FontFactory
-import com.itextpdf.text.PageSize
-import com.itextpdf.text.Paragraph
-import com.itextpdf.text.pdf.PdfPCell
-import com.itextpdf.text.pdf.PdfPTable
-import com.itextpdf.text.pdf.PdfWriter
-import com.itextpdf.text.pdf.draw.LineSeparator
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.json.JSONObject
 import java.io.BufferedReader
-import java.io.File
-import java.io.FileNotFoundException
 import java.io.FileOutputStream
 import java.io.InputStreamReader
 import java.io.OutputStreamWriter
@@ -69,7 +57,6 @@ import java.net.HttpURLConnection
 import java.net.URL
 import java.nio.charset.StandardCharsets
 import java.time.LocalDate
-import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 import java.util.Timer
 import kotlin.concurrent.schedule
@@ -112,6 +99,7 @@ class Detallepedido : AppCompatActivity() {
     private var pedidosController = PedidosController()
     private var inventarioController = InventarioController()
     private lateinit var preferencias: SharedPreferences
+
     private val instancia = "CONFIG_SERVIDOR"
 
 
@@ -303,7 +291,7 @@ class Detallepedido : AppCompatActivity() {
         binding.btnguardar.setOnClickListener {
             if (ConfirmarDetallePedido() > 0) {
                 try {
-                    imprimirRecibo(it)
+                    imprimirRecibo()
                 } catch (e: Exception) {
                     alerta!!.dismisss()
                     funciones.mostrarAlerta("ERROR: ${e.message}", this@Detallepedido, binding.lienzo)
@@ -345,8 +333,7 @@ class Detallepedido : AppCompatActivity() {
 
         //BOTON DE EXPORTAR A PDF EL PEDIDO
         binding.btnexportar.setOnClickListener {
-            fechaDoc = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy_MM_dd_HH_mm_ss"))
-            verificarPermisos(it)
+            imprimirRecibo()
         }
 
         //IMPLEMENTANDO LOGICA DE SUCURSAL SELECCIONADA EN SPINNER
@@ -416,11 +403,6 @@ class Detallepedido : AppCompatActivity() {
         }
     }
 
-    private fun imprimirRecibo(view: View){
-        fechaDoc = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy_MM_dd_HH_mm_ss"))
-        verificarPermisos(view)
-    }
-
     //FUNCION PARA VALIDAR OPCIONES SELECCIONADAS
     private fun validarSelecciones(sucursalSelec:String){
         if(sucursalSelec != "-- SELECCIONE UNA SUCURSAL --"){
@@ -439,7 +421,7 @@ class Detallepedido : AppCompatActivity() {
     //FUNCION PARA ENVIAR EL PEDIDO AL SERVIDOR
     private suspend fun enviarPedidoaServidor(view: View){
         try {
-            imprimirRecibo(view)
+            imprimirRecibo()
         }catch (e: Exception){
             withContext(Dispatchers.Main){
                 alerta!!.dismisss()
@@ -656,7 +638,7 @@ class Detallepedido : AppCompatActivity() {
                     binding.btnguardar.visibility = View.GONE
                     binding.imbtnatras.visibility = View.VISIBLE
                     binding.btncancelar.visibility = View.GONE
-                    binding.btnexportar.visibility = View.GONE
+                    binding.btnexportar.visibility = View.VISIBLE
                     binding.spDocumento.visibility = View.GONE
                     binding.spTipoEnvio.visibility = View.GONE
                     binding.tvDocumentoSeleccionado.visibility = View.VISIBLE
@@ -1077,248 +1059,164 @@ class Detallepedido : AppCompatActivity() {
         return visitaAbierta
     }
 
-
-    //FUNCION PARA VERIFICAR PERMISOS DE CREACION DE DIRECTORIO Y DOCUMENTOS
-    private fun verificarPermisos(view: View) {
-        when{
-            ContextCompat.checkSelfPermission(
-                this,
-                Manifest.permission.WRITE_EXTERNAL_STORAGE
-            ) == PackageManager.PERMISSION_GRANTED -> {
-                generarPDF(nombre!!, vendedor)
-            }
-
-            ActivityCompat.shouldShowRequestPermissionRationale(
-                this,
-                Manifest.permission.WRITE_EXTERNAL_STORAGE
-            ) -> {
-                Snackbar.make(view, "ESTE PERMISO ES NECESARIO PARA CREAR EL ARCHIVO", Snackbar.LENGTH_INDEFINITE).setAction("Ok"){
-                    requestPermissionLauncher.launch(Manifest.permission.WRITE_EXTERNAL_STORAGE)
-                }.show()
-            }
-
-            else -> {
-                requestPermissionLauncher.launch(Manifest.permission.WRITE_EXTERNAL_STORAGE)
-            }
-        }
-    }
-
-    //FUNCION PARA GENERAR EL REPORTE EN PDF
-    private fun generarPDF(nombreCliente : String, nombreVendedor: String) {
-        try {
-            val carpeta = "/pedidospdf"
-            val path = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS).absolutePath + carpeta
-
-            val dir = File(path)
-            if(!dir.exists()){
-                dir.mkdirs()
-                Toast.makeText(this, "CARPETA CREADA CON EXITO", Toast.LENGTH_LONG).show()
-            }
-
-            val archivo = File(dir, nombreCliente + "_$fechaDoc.pdf")
-            val fos = FileOutputStream(archivo)
-
-            //val documento = Document(PageSize.LETTER, 2.5f, 2.5f, 3.5f, 3.5f)
-            val documento = Document(PageSize.LARGE_CROWN_OCTAVO, 0f, 0f, .5f, .5f)
-            PdfWriter.getInstance(documento, fos)
-
-            documento.open()
-
-            //ESPACIOS
-            val espaciosDocumento = Paragraph(
-                "\n\n\n"
-            )
-            documento.add(espaciosDocumento)
-
-            // --------- DATOS DE LA EMPRESA
-            // LOGO
-            val tablaLogo = PdfPTable(1)
-            tablaLogo.widthPercentage = 80f
-            val logoEmpresa = PdfPCell(Paragraph("[LOGO]"))
-            logoEmpresa.horizontalAlignment = Element.ALIGN_CENTER
-            logoEmpresa.border = 0
-            tablaLogo.addCell(logoEmpresa)
-            documento.add(tablaLogo)
-
-            val tablaEncabezado = PdfPTable(1)
-            tablaEncabezado.widthPercentage = 80f
-            val cellInforEmpresa = PdfPCell(Paragraph("ESCARRSA, DE C.V\n" +
-                    "FINAL AV. PERALTA Y 38A AV. NORTE, BO. LOURDES " +
-                    "SAN SALVADOR, SAN SALVADOR\n",
-                FontFactory.getFont("arial", 12f, Font.BOLD, BaseColor.BLACK)
-            ))
-            cellInforEmpresa.horizontalAlignment = Element.ALIGN_CENTER
-            cellInforEmpresa.border = 0
-            tablaEncabezado.addCell(cellInforEmpresa)
-            documento.add(tablaEncabezado)
-
-            //DATOS CREDITICIOS
-            val tablaDatosCrediticios = PdfPTable(1)
-            tablaDatosCrediticios.widthPercentage = 80f
-
-            val cellDatosCrediticios = PdfPCell(Paragraph("N.R.C : 133843-2\n" +
-                    "N.I.T : 0614-300801-101-7 \n" +
-                    "GIRO: VENTA AL POR MAYOR DE HIELO\n\n",
-                FontFactory.getFont("arial", 12f, Font.BOLD, BaseColor.BLACK)))
-            cellDatosCrediticios.horizontalAlignment = Element.ALIGN_CENTER
-            cellDatosCrediticios.border = 0
-            tablaDatosCrediticios.addCell(cellDatosCrediticios)
-            documento.add(tablaDatosCrediticios)
-
-            //AGREGANDO TITULO PEDIDO
-            val fechaDocumento = Paragraph(
-                "$tituloText\n\n",
-                FontFactory.getFont("arial", 14f, Font.BOLD, BaseColor.BLACK)
-            )
-            fechaDocumento.alignment = Element.ALIGN_CENTER
-            documento.add(fechaDocumento)
-
-            //AGREGANDO SEPARADO
-            val lineSeparator = LineSeparator()
-            lineSeparator.percentage = 80f
-            lineSeparator.lineWidth = 1f
-            lineSeparator.alignment = Element.ALIGN_CENTER
-            documento.add(lineSeparator)
-
-            //DATOS DEL PEDIDO
-            val tablaPedido = PdfPTable(4)
-            tablaPedido.widthPercentage = 90f
-            /*
-            val cellCantidad = PdfPCell(Paragraph("CANT",
-                FontFactory.getFont("arial", 11f, Font.BOLD, BaseColor.BLACK)
-            ))
-            cellCantidad.horizontalAlignment = Element.ALIGN_CENTER
-            tablaPedido.addCell(cellCantidad)
-
-            val cellDescripcion = PdfPCell(Paragraph("PRODUCTO",
-                FontFactory.getFont("arial", 11f, Font.BOLD, BaseColor.BLACK)
-            ))
-            cellDescripcion.horizontalAlignment = Element.ALIGN_CENTER
-            tablaPedido.addCell(cellDescripcion)
-
-            val cellTotal = PdfPCell(Paragraph("TOTAL",
-                FontFactory.getFont("arial", 11f, Font.BOLD, BaseColor.BLACK)
-            ))
-            cellTotal.horizontalAlignment = Element.ALIGN_CENTER
-            tablaPedido.addCell(cellTotal)*/
-
-            //AGREGANDO EL CONTENIDO DEL PEDIDO
-            val lista = pedidosController.obtenerDetallePedido(idpedido, this@Detallepedido)
-            var total = 0f
-
-            for(data in lista){
-
-                val cellCantidadP = PdfPCell(Paragraph(""+data.Cantidad,
-                    FontFactory.getFont("arial", 10f, Font.NORMAL, BaseColor.BLACK)
-                ))
-                cellCantidadP.horizontalAlignment = Element.ALIGN_RIGHT
-                cellCantidadP.border = 0
-                tablaPedido.addCell(cellCantidadP)
-
-                val cellDescripcionP = PdfPCell(Paragraph(""+data.Descripcion,
-                    FontFactory.getFont("arial", 9f, Font.NORMAL, BaseColor.BLACK)
-                ))
-                cellDescripcionP.horizontalAlignment = Element.ALIGN_LEFT
-                cellDescripcionP.border = 0
-                tablaPedido.addCell(cellDescripcionP)
-
-                val cellPrecioU = PdfPCell(Paragraph("$ "+data.Precio_iva,
-                    FontFactory.getFont("arial", 10f, Font.NORMAL, BaseColor.BLACK)
-                ))
-                cellPrecioU.horizontalAlignment = Element.ALIGN_CENTER
-                cellPrecioU.border = 0
-                tablaPedido.addCell(cellPrecioU)
-
-                val cellTotalP = PdfPCell(Paragraph("$ "+data.Total,
-                    FontFactory.getFont("arial", 10f, Font.NORMAL, BaseColor.BLACK)
-                ))
-                cellTotalP.horizontalAlignment = Element.ALIGN_LEFT
-                cellTotalP.border = 0
-                tablaPedido.addCell(cellTotalP)
-
-                total += data.Total!!
-            }
-
-            val cellDescripcionP = PdfPCell(Paragraph(""))
-            cellDescripcionP.border = 0
-            tablaPedido.addCell(cellDescripcionP)
-
-            val cellDescripcionP2 = PdfPCell(Paragraph(""))
-            cellDescripcionP2.border = 0
-            tablaPedido.addCell(cellDescripcionP2)
-
-            val cellCantidadP = PdfPCell(Paragraph("TOTAL",
-                FontFactory.getFont("arial", 12f, Font.BOLD, BaseColor.BLACK)
-            ))
-            cellCantidadP.horizontalAlignment = Element.ALIGN_CENTER
-            cellCantidadP.border = 0
-            tablaPedido.addCell(cellCantidadP)
-
-            val cellTotalP = PdfPCell(Paragraph("$ "+ total,
-                FontFactory.getFont("arial", 12f, Font.BOLD, BaseColor.BLACK)
-            ))
-            cellTotalP.horizontalAlignment = Element.ALIGN_LEFT
-            cellTotalP.border = 0
-            tablaPedido.addCell(cellTotalP)
-            documento.add(tablaPedido)
-
-            //AGREGANDO SEPARADO
-            val lineSeparator2 = LineSeparator()
-            lineSeparator2.percentage = 80f
-            lineSeparator2.lineWidth = 1f
-            lineSeparator2.alignment = Element.ALIGN_CENTER
-            documento.add(lineSeparator2)
-
-
-            //DATOS DEL VENDEDOR
-            val tablaVendedor = PdfPTable(1)
-            tablaVendedor.widthPercentage = 80f
-            val cellInforVendedor = PdfPCell(Paragraph("\n\n\n\nVENDEDOR: $vendedor\n\n" +
-                    "FECHA: $fecha\n\n",
-                FontFactory.getFont("arial", 10f, Font.NORMAL, BaseColor.BLACK)
-            ))
-            cellInforVendedor.horizontalAlignment = Element.ALIGN_CENTER
-            cellInforVendedor.border = 0
-            tablaVendedor.addCell(cellInforVendedor)
-            documento.add(tablaVendedor)
-
-            //FINAL DOC
-            val tablaFinal = PdfPTable(1)
-            tablaFinal.widthPercentage = 80f
-            val cellFinal = PdfPCell(Paragraph("ESTE COMPROBANTE NO ES UN " +
-                    "DOCUMENTO LEGAL\n", FontFactory.getFont("arial", 12f, Font.NORMAL, BaseColor.BLACK)))
-            cellFinal.horizontalAlignment = Element.ALIGN_CENTER
-            cellFinal.border = 0
-            tablaFinal.addCell(cellFinal)
-            documento.add(tablaFinal)
-
-            documento.close()
-
-            printPDF(nombreCliente, fechaDoc)
-
-            //funciones.mostrarMensaje("PEDIDO EXPORTADO CORRECTAMENTE", this@Detallepedido, binding.lienzo)
-
-        }catch (e: FileNotFoundException){
-            e.printStackTrace()
-        }catch (e: DocumentException){
-            e.printStackTrace()
-        }
-    }
-
-    //FUNCION PARA IMPRIMIR EL PDF CON VISUALIZACION PREVIA
-    private fun printPDF(nombreCliente: String, fechaDoc: String){
+    //FUNCION PARA IMPRIMIR EL RECIBO
+    private fun imprimirRecibo(){
         val printManager = getSystemService(Context.PRINT_SERVICE) as PrintManager
-        try {
-            val printAdapter = PdfDocumentAdapter(this@Detallepedido, Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS).absolutePath + "/pedidospdf/" + nombreCliente + "_$fechaDoc.pdf")
-            printManager.print("DOCUMENTO",
-                printAdapter,
-                PrintAttributes.Builder()
-                    .setMediaSize(PrintAttributes.MediaSize.NA_QUARTO.asLandscape())
-                    .setMinMargins(PrintAttributes.Margins.NO_MARGINS)
-                    .build())
-        }catch (e: Exception){
-            e.message?.let { Log.e("MENSAJE ERROR", it) }
+        val jobName = getString(R.string.app_name) + " Document"
+
+        printManager.print(jobName, object : PrintDocumentAdapter() {
+            override fun onLayout(
+                oldAttributes: PrintAttributes?,
+                newAttributes: PrintAttributes?,
+                cancellationSignal: CancellationSignal?,
+                callback: LayoutResultCallback?,
+                extras: Bundle?
+            ) {
+                if (cancellationSignal?.isCanceled == true) {
+                    callback?.onLayoutCancelled()
+                    return
+                }
+
+                val builder = PrintDocumentInfo.Builder(jobName)
+                    .setContentType(PrintDocumentInfo.CONTENT_TYPE_DOCUMENT)
+                    .setPageCount(1)
+                    .build()
+
+                callback?.onLayoutFinished(builder, true)
+            }
+
+            override fun onWrite(
+                pages: Array<out PageRange>?,
+                destination: ParcelFileDescriptor?,
+                cancellationSignal: CancellationSignal?,
+                callback: WriteResultCallback?
+            ) {
+                try {
+                    val os = FileOutputStream(destination?.fileDescriptor)
+                    val pdfDocument = PdfDocument()
+
+                    // Create a page
+                    val pageInfo = PdfDocument.PageInfo.Builder(280, calculateTicketHeight().toInt(), 1).create()
+                    val page = pdfDocument.startPage(pageInfo)
+
+                    // Draw the ticket content on the canvas
+                    val canvas = page.canvas
+                    crearTicket(canvas)
+
+                    pdfDocument.finishPage(page)
+                    pdfDocument.writeTo(os)
+                    pdfDocument.close()
+
+                    callback?.onWriteFinished(arrayOf(PageRange.ALL_PAGES))
+                } catch (e: Exception) {
+                    Log.e("ERROR IMPRESION", "ERROR AL IMPRIMIR EL TICKET", e)
+                    callback?.onWriteFailed(e.message)
+                }
+            }
+        }, null)
+    }
+
+    //FUNCION PARA DIBUJAR EL TIKET
+    private fun crearTicket(canvas: Canvas) {
+        // Tamaños de letra específicos para cada columna
+        val textSizeCantidad = 9f
+        val textSizeCodigo = 10f
+        val textSizeTotal = 9f
+
+        // Espacio entre las columnas
+        val columnSpacing = 10f
+
+        // Paint para el texto
+        val paint = TextPaint().apply {
+            textSize = 12f // Tamaño predeterminado para el título y la división
         }
+
+        // Draw title
+        paint.isFakeBoldText = true
+        canvas.drawText("ESCARRSA, DE C.V", 50f, 50f, paint)
+        canvas.drawText("FINAL AV. PERALTA Y 38A AV. NORTE, BO. LOURDES", 50f, 70f, paint)
+        canvas.drawText("SAN SALVADOR, SAN SALVADOR", 50f, 90f, paint)
+        canvas.drawText("N.R.C : 133843-2", 50f, 110f, paint)
+        canvas.drawText("N.I.T : 0614-300801-101-7", 50f, 130f, paint)
+        canvas.drawText("GIRO: VENTA AL POR MAYOR DE HIELO", 50f, 150f, paint)
+
+        // Draw divider line
+        paint.isFakeBoldText = false
+        canvas.drawLine(50f, 160f, canvas.width - 50f, 160f, paint)
+
+        // Draw column headers
+        val columnWidths = floatArrayOf(20f, 100f, 60f) // Ancho fijo para cada columna
+        val startY = 165f
+        var y = startY
+        val columnX = floatArrayOf(
+            50f,
+            50f + columnWidths[0] + columnSpacing,
+            50f + columnWidths[0] + columnWidths[1] + columnSpacing
+        )
+
+        y += 20f
+        val lista = pedidosController.obtenerDetallePedido(idpedido, this@Detallepedido)
+        var total = 0f
+
+        for (data in lista) {
+            // Draw text in each column with specific text sizes
+            paint.textSize = textSizeCantidad
+            canvas.drawText("${data.Cantidad}", columnX[0] + 5f, y + 15f, paint)
+
+            paint.textSize = textSizeCodigo
+            val descripcionLayout = StaticLayout(
+                data.Descripcion, paint, columnWidths[1].toInt(),
+                Layout.Alignment.ALIGN_NORMAL, 1.0f, 0.0f, false
+            )
+            canvas.save()
+            canvas.translate(columnX[1] + 5f, y)
+            descripcionLayout.draw(canvas)
+            canvas.restore()
+
+            paint.textSize = textSizeTotal
+            val totalWidth = paint.measureText("$ ${data.Total}")
+            canvas.drawText("$ ${data.Total}", columnX[2] + columnWidths[2] - totalWidth, y + 15f, paint)
+
+            y += descripcionLayout.height.toFloat() + 20f
+            total += data.Total!!
+        }
+
+        // Draw total
+        y += 20f
+        paint.textSize = 12f // Restaurar el tamaño de letra predeterminado
+        canvas.drawText("Total:", 50f, y, paint)
+        val totalTextWidth = paint.measureText("$total")
+        canvas.drawText("$total", canvas.width - totalTextWidth - 50f, y, paint)
+
+        // Draw divider line after the table
+        canvas.drawLine(50f, y + 20f, canvas.width - 50f, y + 20f, paint)
+        canvas.drawText("VENDIDO POR: $vendedor", 50f, y + 40f, paint)
+        canvas.drawText("FECHA: $fecha", 50f,  y + 60f, paint)
+    }
+
+    //FUNCION PARA CALCULAR EL LARGO DEL TICKET
+    private fun calculateTicketHeight(): Float {
+
+        val paint = TextPaint().apply {
+            textSize = 12f
+        }
+
+        var ticketHeight = 160f // Altura del título y la división inicialmente
+
+        // Altura de cada fila de datos
+        val lista = pedidosController.obtenerDetallePedido(idpedido, this@Detallepedido)
+        for (data in lista) {
+            val descripcionLayout = StaticLayout(
+                data.Descripcion, paint, 100,
+                Layout.Alignment.ALIGN_NORMAL, 1.0f, 0.0f, false
+            )
+            ticketHeight += descripcionLayout.height.toFloat() + 20f
+        }
+
+        // Altura del total
+        ticketHeight += 140f
+
+        return ticketHeight
     }
 
 

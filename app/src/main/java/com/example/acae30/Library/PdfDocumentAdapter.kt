@@ -37,10 +37,9 @@ class PdfDocumentAdapter(context: Context, path:String) : PrintDocumentAdapter()
         }else{
             val builder = PrintDocumentInfo.Builder("Documento")
             builder.setContentType(PrintDocumentInfo.CONTENT_TYPE_DOCUMENT)
-                .setPageCount(PrintDocumentInfo.PAGE_COUNT_UNKNOWN)
                 .build()
 
-            layoutResultCallback!!.onLayoutFinished(builder.build(), p1 != p0)
+            layoutResultCallback!!.onLayoutFinished(builder.build(), true)
         }
     }
 

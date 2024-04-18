@@ -273,11 +273,11 @@ class InventarioController {
                         }
                     }
                 } catch (e: Exception) {
-                    throw Exception(e.message)
+                    throw Exception("ERROR: " + e.message)
                 }
             }
         } catch (e: Exception) {
-            throw Exception(e.message)
+            throw Exception("ERROR EN LA CONEXION CON EL SERVIDOR" + e.message)
         }finally {
             obtenerFechaInventario(context)
         }

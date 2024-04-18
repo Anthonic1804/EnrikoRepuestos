@@ -63,7 +63,8 @@ dependencies {
     implementation 'com.kyanogen.signatureview:signature-view:1.2'
 
     //LIBRERIA PARA EXPORTAR PDF
-    implementation 'com.itextpdf:itextpdf:5.5.13.2'
+    //implementation 'com.itextpdf:itextpdf:5.5.13.2'
+    implementation 'com.itextpdf:itextg:5.5.10'
 
     //Picasso
     implementation "com.squareup.picasso:picasso:2.71828"
