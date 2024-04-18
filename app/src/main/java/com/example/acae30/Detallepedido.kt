@@ -25,7 +25,6 @@ import android.widget.AdapterView.OnItemSelectedListener
 import android.widget.ArrayAdapter
 import android.widget.Button
 import android.widget.Toast
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -37,7 +36,6 @@ import com.example.acae30.databinding.ActivityDetallepedidoBinding
 import com.example.acae30.listas.PedidoDetalleAdapter
 import com.example.acae30.modelos.DetallePedido
 import com.example.acae30.modelos.JSONmodels.CabezeraPedidoSend
-import com.example.acae30.modelos.Pedidos
 import com.example.acae30.modelos.Sucursales
 import com.example.acae30.modelos.dataPedidos
 import com.google.android.material.snackbar.Snackbar
@@ -81,7 +79,6 @@ class Detallepedido : AppCompatActivity() {
     private var visita_enviada: Boolean? = null
     private var from: String? = ""
     private var db: Database? = null
-    private var cabezera: Pedidos? = null
     private var idvendedor = 0
     private var idvisita = 0
     private var vendedor = ""
@@ -103,22 +100,8 @@ class Detallepedido : AppCompatActivity() {
     private val instancia = "CONFIG_SERVIDOR"
 
 
-    private val requestPermissionLauncher = registerForActivityResult(
-        ActivityResultContracts.RequestPermission()
-    ){
-            isAceptado ->
-        if(isAceptado){
-            Toast.makeText(this, "PERMISOS CONCEDIDOS", Toast.LENGTH_LONG).show()
-        }else{
-            Toast.makeText(this, "PERMISOS DENEGADOS", Toast.LENGTH_LONG).show()
-        }
-    }
-
     val fecha: String = LocalDate.now()
         .format(DateTimeFormatter.ofPattern("dd MMM yyyy"))
-
-    var fechaDoc = ""
-    private val tituloText = "DETALLE FACTURADO"
 
     private lateinit var binding: ActivityDetallepedidoBinding
 
@@ -306,7 +289,7 @@ class Detallepedido : AppCompatActivity() {
                     Timer().schedule(2300){
                         runOnUiThread {
                             alerta!!.dismisss()
-                            val visitaAbierta = getEstadoVisita()
+                           /* val visitaAbierta = getEstadoVisita()
 
                             if (visitaAbierta == 1) {
                                 val intento = Intent(this@Detallepedido, Visita::class.java)
@@ -322,7 +305,7 @@ class Detallepedido : AppCompatActivity() {
                                 val intento = Intent(this@Detallepedido, Pedido::class.java)
                                 startActivity(intento)
                                 finish()
-                            }
+                            }*/
                         }
                     }
                 }
@@ -426,7 +409,7 @@ class Detallepedido : AppCompatActivity() {
             withContext(Dispatchers.Main){
                 alerta!!.dismisss()
 
-                funciones.mostrarAlerta("ERRORAL ENVIAR EL PEDIDO", this@Detallepedido, binding.lienzo)
+                funciones.mostrarAlerta("ERROR AL ENVIAR EL PEDIDO", this@Detallepedido, binding.lienzo)
             }
         }finally {
             Timer().schedule(2300){
@@ -445,24 +428,6 @@ class Detallepedido : AppCompatActivity() {
                         //DESCARGANDO INVENTARIO
                         descargarInventario()
                     }
-
-                    val visitaAbierta = getEstadoVisita()
-
-                    if (visitaAbierta == 1) {
-                        val intento = Intent(this@Detallepedido, Visita::class.java)
-                        intento.putExtra("id", idcliente)
-                        intento.putExtra("nombrecliente", nombre)
-                        intento.putExtra("idpedido", idpedido)
-                        intento.putExtra("visitaid", idvisita)
-                        intento.putExtra("codigo", codigo)
-                        intento.putExtra("idapi", idapi)
-                        startActivity(intento)
-                        finish()
-                    } else {
-                        val intento = Intent(this@Detallepedido, Pedido::class.java)
-                        startActivity(intento)
-                        finish()
-                    }
                 }else{
                     runOnUiThread {
                         Toast.makeText(this@Detallepedido,"DESEA ALMACENAR EL PEDIDO PARA LUEGO ENVIARLO", Toast.LENGTH_SHORT).show()
@@ -470,6 +435,35 @@ class Detallepedido : AppCompatActivity() {
                 }
             }
         }
+    }
+
+    //FUNCION PARA FINALIZAR EL ENVIO DEL PEDIDO
+    private fun pedidoEnviado(string: String){
+        val pedido = getPedidoSend(idpedido)
+        if(string == "visita"){
+            if (pedido!!.Cerrado!!) {
+                val intento = Intent(this@Detallepedido, Visita::class.java)
+                intento.putExtra("id", idcliente)
+                intento.putExtra("nombrecliente", nombre)
+                intento.putExtra("idpedido", idpedido)
+                intento.putExtra("visitaid", idvisita)
+                intento.putExtra("codigo", codigo)
+                intento.putExtra("idapi", idapi)
+                startActivity(intento)
+                finish()
+            }
+        }else{
+            if(pedido!!.Enviado!!){
+                binding.btnenviar.visibility = View.GONE
+            }
+        }
+    }
+
+    //METODO PARA VERIFICAR SI EL PEDIDO YA FUE CERRADO PARA PODER REDIRECCIONAR
+    //CORRECTAMENTE
+    override fun onResume() {
+        super.onResume()
+        pedidoEnviado(from!!)
     }
 
     //FUNCION PARA DESCARGAR EL PRODUCTO DE INVENTARIO APP
@@ -638,7 +632,7 @@ class Detallepedido : AppCompatActivity() {
                     binding.btnguardar.visibility = View.GONE
                     binding.imbtnatras.visibility = View.VISIBLE
                     binding.btncancelar.visibility = View.GONE
-                    binding.btnexportar.visibility = View.VISIBLE
+                    binding.btnexportar.visibility = View.GONE
                     binding.spDocumento.visibility = View.GONE
                     binding.spTipoEnvio.visibility = View.GONE
                     binding.tvDocumentoSeleccionado.visibility = View.VISIBLE
@@ -1036,28 +1030,6 @@ class Detallepedido : AppCompatActivity() {
 
     }
     //convierte el pedido a json
-
-    private fun getEstadoVisita(): Int {
-        var visitaAbierta = 1
-
-        val base = db!!.writableDatabase
-        try {
-            val cursor = base!!.rawQuery("select Abierta from visitas where id = ${idvisita}", null)
-            if (cursor.count > 0) {
-                cursor.moveToFirst()
-                visitaAbierta = cursor.getInt(0)
-                cursor.close()
-            } else {
-                //throw Exception("Error al obtener código de cliente")
-            }
-        } catch (e: Exception) {
-            throw Exception(e.message)
-        } finally {
-            base.close()
-        }
-
-        return visitaAbierta
-    }
 
     //FUNCION PARA IMPRIMIR EL RECIBO
     private fun imprimirRecibo(){
