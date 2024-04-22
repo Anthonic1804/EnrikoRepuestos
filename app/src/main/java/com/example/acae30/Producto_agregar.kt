@@ -21,12 +21,12 @@ import android.widget.Spinner
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.constraintlayout.widget.ConstraintLayout
-import com.example.acae30.controllers.ClientesControllers
+import com.example.acae30.controllers.ClientesController
 import com.example.acae30.controllers.InventarioController
 import com.example.acae30.database.Database
 import com.example.acae30.modelos.DetallePedido
 import com.example.acae30.modelos.InventarioPrecios
-import com.example.acae30.modelos.JSONmodels.UpdateTokenDataClassJSON
+import com.example.acae30.modelos.JSONmodels.ActualizarPrecioPersonalizadoJSON
 import com.google.android.material.snackbar.Snackbar
 import com.google.gson.Gson
 import kotlinx.coroutines.CoroutineScope
@@ -104,7 +104,7 @@ class Producto_agregar : AppCompatActivity() {
 
     private var funciones = Funciones()
     private var inventarioController = InventarioController()
-    private var clientesController = ClientesControllers()
+    private var clientesController = ClientesController()
     private var modificarPrecio : Boolean = false
 
     private lateinit var precioPersonalizado : TextView
@@ -1098,7 +1098,7 @@ class Producto_agregar : AppCompatActivity() {
     //FUNCION PARA OBTENER EL PRECIO AUTORIZADO
     private fun verificarPrecioAutorizado(id_empleado:Int, cod_producto:String){
         try {
-            val datos = UpdateTokenDataClassJSON(
+            val datos = ActualizarPrecioPersonalizadoJSON(
                 id_empleado,
                 cod_producto
             )
@@ -1155,7 +1155,7 @@ class Producto_agregar : AppCompatActivity() {
     //FUNCION PARA CONFIRMAR LA UTILIZACION DEL TOKEN
     private fun confirmarToken(id_empleado:Int, cod_producto:String){
         try {
-            val datos = UpdateTokenDataClassJSON(
+            val datos = ActualizarPrecioPersonalizadoJSON(
                 id_empleado,
                 cod_producto
             )

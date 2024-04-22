@@ -22,7 +22,7 @@ import java.net.HttpURLConnection
 import java.net.URL
 import java.nio.charset.StandardCharsets
 
-class ClientesControllers {
+class ClientesController {
 
     private var funciones = Funciones()
     private var visitaController = VisitaController()
@@ -35,7 +35,7 @@ class ClientesControllers {
     * */
 
     //FUNCION PARA OBTENER LA INFORMACION DE LOS CLIENTES
-    suspend fun obtenerClientesServidor(context: Context){
+    fun obtenerClientesServidor(context: Context){
         preferences = context.getSharedPreferences(instancia, Context.MODE_PRIVATE)
         val url = funciones.getServidor(preferences.getString("ip", ""), preferences.getInt("puerto", 0).toString())
 

@@ -11,7 +11,7 @@ import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
 import com.example.acae30.database.Database
 import com.example.acae30.modelos.Empleados
-import com.example.acae30.modelos.JSONmodels.TokenDataClassJSON
+import com.example.acae30.modelos.JSONmodels.PrecioPersonalizadoJSON
 import com.google.gson.Gson
 import org.json.JSONObject
 import java.io.BufferedReader
@@ -24,7 +24,7 @@ import java.nio.charset.StandardCharsets
 import java.text.SimpleDateFormat
 import java.util.*
 
-class NuevoToken : AppCompatActivity() {
+class NuevoPrecioAutorizado : AppCompatActivity() {
 
     private lateinit var btnAtras : Button
     private lateinit var btnProcesar : Button
@@ -80,7 +80,7 @@ class NuevoToken : AppCompatActivity() {
         }
 
         btnBuscarProducto.setOnClickListener {
-            val intent = Intent(this@NuevoToken, Inventario::class.java)
+            val intent = Intent(this@NuevoPrecioAutorizado, Inventario::class.java)
             intent.putExtra("tokenBusqueda", true)
             startActivity(intent)
             finish()
@@ -94,7 +94,7 @@ class NuevoToken : AppCompatActivity() {
             if(validarFormulario()){
                 val precioNuevo : Float = edtPrecio.text.toString().toFloat()
                 if(precioNuevo <= 0f){
-                    Toast.makeText(this@NuevoToken, "EL NUEVO PRECIO INGRESADO ES INCORRECTO", Toast.LENGTH_LONG).show()
+                    Toast.makeText(this@NuevoPrecioAutorizado, "EL NUEVO PRECIO INGRESADO ES INCORRECTO", Toast.LENGTH_LONG).show()
                 }else{
                     validadToken(empleadoId, adminId, codigoProducto!!, precioNuevo)
                 }
@@ -135,7 +135,7 @@ class NuevoToken : AppCompatActivity() {
         val nuevoPrecio = edtPrecio.text.toString()
 
         if(producto.isEmpty() || nuevoPrecio.isEmpty()){
-            Toast.makeText(this@NuevoToken, "LOS CAMPOS PRODUCTO Y NUEVO PRECIO SON REQUERIDOS", Toast.LENGTH_LONG).show()
+            Toast.makeText(this@NuevoPrecioAutorizado, "LOS CAMPOS PRODUCTO Y NUEVO PRECIO SON REQUERIDOS", Toast.LENGTH_LONG).show()
             return false
         }
 
@@ -170,7 +170,7 @@ class NuevoToken : AppCompatActivity() {
                     empleadoId = data.idEmpleado.toInt()
                 }
             }else{
-                Toast.makeText(this@NuevoToken, "NO SE ENCONTRARON VENDEDORES REGISTRADOS", Toast.LENGTH_LONG).show()
+                Toast.makeText(this@NuevoPrecioAutorizado, "NO SE ENCONTRARON VENDEDORES REGISTRADOS", Toast.LENGTH_LONG).show()
             }
             dataEmpleado.close()
         }catch (e: Exception) {
@@ -181,7 +181,7 @@ class NuevoToken : AppCompatActivity() {
     }
 
     private fun atras(){
-        val intent = Intent(this@NuevoToken, Tokens::class.java)
+        val intent = Intent(this@NuevoPrecioAutorizado, PreciosAutorizados::class.java)
         startActivity(intent)
         finish()
     }
@@ -232,7 +232,7 @@ class NuevoToken : AppCompatActivity() {
         spEmpleado = findViewById(R.id.spVendedor)
         val listSucursal = nombreEmpleado().toMutableList()
 
-        val adaptador = ArrayAdapter(this@NuevoToken, android.R.layout.simple_spinner_item, listSucursal)
+        val adaptador = ArrayAdapter(this@NuevoPrecioAutorizado, android.R.layout.simple_spinner_item, listSucursal)
         adaptador.setDropDownViewResource(R.layout.support_simple_spinner_dropdown_item)
         spEmpleado.adapter = adaptador
     }
@@ -254,7 +254,7 @@ class NuevoToken : AppCompatActivity() {
                     listaEmpleados.add(data)
                 }while (dataEmpleado.moveToNext())
             }else{
-                Toast.makeText(this@NuevoToken, "NO SE ENCONTRARON VENDEDORES REGISTRADOS", Toast.LENGTH_LONG).show()
+                Toast.makeText(this@NuevoPrecioAutorizado, "NO SE ENCONTRARON VENDEDORES REGISTRADOS", Toast.LENGTH_LONG).show()
             }
             dataEmpleado.close()
         }catch (e: Exception) {
@@ -267,7 +267,7 @@ class NuevoToken : AppCompatActivity() {
 
     private fun validadToken(id_empleado:Int, id_admin:Int, cod_producto:String, precio_asig:Float){
         try {
-            val datos = TokenDataClassJSON(
+            val datos = PrecioPersonalizadoJSON(
                 id_empleado,
                 id_admin,
                 cod_producto,
@@ -313,7 +313,7 @@ class NuevoToken : AppCompatActivity() {
                                                 }
                                                 "ERROR_TOKEN" -> {
                                                     runOnUiThread {
-                                                        Toast.makeText(this@NuevoToken, "ERROR AL AUTORIZAR EL TOKEN", Toast.LENGTH_SHORT).show()
+                                                        Toast.makeText(this@NuevoPrecioAutorizado, "ERROR AL AUTORIZAR EL TOKEN", Toast.LENGTH_SHORT).show()
                                                     }
                                                 }
                                             }
@@ -351,7 +351,7 @@ class NuevoToken : AppCompatActivity() {
             contenido.put("fecha_registrado", fechanow)
             contenido.put("id_server", idServer)
 
-            base.insert("token", null, contenido)
+            base.insert("preciosAutorizados", null, contenido)
             base.setTransactionSuccessful()
         } catch (e: Exception) {
             throw Exception(e.message)

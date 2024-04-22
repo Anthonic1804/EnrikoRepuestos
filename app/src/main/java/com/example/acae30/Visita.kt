@@ -16,7 +16,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.lifecycleScope
-import com.example.acae30.controllers.ClientesControllers
+import com.example.acae30.controllers.ClientesController
 import com.example.acae30.controllers.VisitaController
 import com.example.acae30.database.Database
 import com.example.acae30.databinding.ActivityVisitaBinding
@@ -49,7 +49,7 @@ class Visita : AppCompatActivity() {
     private var idvisitaApi = 0 //id de la base de datos de la tabla app_visitas
 
     private var funciones = Funciones()
-    private var clientesController = ClientesControllers()
+    private var clientesController = ClientesController()
     private var visitaController = VisitaController()
     lateinit var preferencias: SharedPreferences
     private val instancia = "CONFIG_SERVIDOR"

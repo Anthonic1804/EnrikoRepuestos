@@ -110,30 +110,23 @@ class Funciones {
         }
     }
 
-
-
+    /**
+     * FUNCIONES DE VALIDACION DE LAS RESPUESTAS DEL WEBSERVICE
+     */
     fun validate(parametro: String?): String {
         if (parametro != null && parametro.length > 0) {
             return parametro.trim()
         } else {
             return ""
         }
-    } //valida campos vacios o nulos dela api
+    }
 
     fun validate(parametro: Int?): Int {
         return parametro ?: 0
-    }//devuelve un int correcto
+    }
 
     fun validate(parametro: Float?): Float {
         return parametro ?: 0.00.toFloat()
-    }//devuelve un float
-
-    fun validateBoolean(parametro: Boolean?): Boolean {
-        return try {
-            parametro ?: false
-        } catch (e: Exception) {
-            false
-        }
     }
 
     fun validateJsonIsNullInt(json: JSONObject, campo: String): Int {
@@ -158,8 +151,15 @@ class Funciones {
         } else {
             json.getString(campo).trim()
         }
-    } //valida si un json de tipo varchar viene nulo
+    }
+    /**
+     * FIN DE FUNCIONES DE VALIDACION
+     */
 
+
+    /**
+     * FUNCION DE ANIMACION CIRCULAR PARA LOS RECYCLER VIEW
+     */
     fun AnimacionCircularReavel(view: View) {
         val centerx = 0
         val centery = 0
@@ -175,11 +175,14 @@ class Funciones {
 
     }
 
+    /**
+     * FUNCION DE VALIDACION DE CONEXION DEL VENDEDOR
+     */
     fun VendedorVerific(context: Context) {
         val instancia = "CONFIG_SERVIDOR"
         val preferencias = context.getSharedPreferences(instancia, Context.MODE_PRIVATE)
         if (!preferencias.contains("ip") || !preferencias.contains("puerto")) {
-            val editor = preferencias.edit().clear().commit() //elimina todo los datos
+            val editor = preferencias.edit().clear().commit() //elimina los datos
             val intento = Intent(context, MainActivity::class.java)
             context.startActivity(intento)
         } else if (!preferencias.contains("Idvendedor") || !preferencias.contains("Vendedor")) {
@@ -188,6 +191,6 @@ class Funciones {
         } else {
 
         }
-    } //revisa si la app ya tiene la configuracion de conexion y si hay sesion iniciada
+    }
 
 }

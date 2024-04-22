@@ -11,19 +11,15 @@ import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.constraintlayout.widget.ConstraintLayout
-import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.example.acae30.controllers.ClientesControllers
+import com.example.acae30.controllers.ClientesController
 import com.example.acae30.database.Database
 import com.example.acae30.listas.ClienteAdapter
 import com.example.acae30.modelos.Cliente
-import kotlinx.android.synthetic.main.activity_login.lienzo
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
-import java.util.*
 import kotlin.collections.ArrayList
 
 class Clientes : AppCompatActivity() {
@@ -51,7 +47,7 @@ class Clientes : AppCompatActivity() {
     private var clienteHistorio : Boolean = false
     private var pagare: Boolean = false
 
-    private var clienteController = ClientesControllers()
+    private var clienteController = ClientesController()
     private var funciones = Funciones()
 
     override fun onCreate(savedInstanceState: Bundle?) {

@@ -1,6 +1,6 @@
 package com.example.acae30.modelos
 
-data class TokenData(
+data class PrecioPersonalizado(
     val id: Int,
     val cod_producto: String,
     val descripcion: String,

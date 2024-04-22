@@ -7,18 +7,13 @@ import android.os.Bundle
 import android.view.View
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.view.isVisible
-import com.example.acae30.controllers.ClientesControllers
+import com.example.acae30.controllers.ClientesController
 import com.example.acae30.database.Database
 import com.example.acae30.databinding.ActivityClientesDetalleBinding
-import com.example.acae30.modelos.Cliente
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import kotlin.properties.Delegates
 
 class ClientesDetalle : AppCompatActivity() {
 
@@ -39,7 +34,7 @@ class ClientesDetalle : AppCompatActivity() {
     private var instancia = "CONFIG_SERVIDOR"
     private var pagareFirmado : Boolean = false
 
-    private var clienteController = ClientesControllers()
+    private var clienteController = ClientesController()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

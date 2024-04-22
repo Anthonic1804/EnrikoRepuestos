@@ -8,7 +8,7 @@ import android.content.SharedPreferences
 import android.os.Bundle
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
-import com.example.acae30.controllers.ClientesControllers
+import com.example.acae30.controllers.ClientesController
 import com.example.acae30.controllers.ConfigController
 import com.example.acae30.controllers.InventarioController
 import com.example.acae30.controllers.PedidosController
@@ -33,7 +33,7 @@ class carga_datos : AppCompatActivity() {
 
     private var configController = ConfigController()
     private var inventarioController = InventarioController()
-    private var clietnesController = ClientesControllers()
+    private var clietnesController = ClientesController()
     private var pedidosController = PedidosController()
     private var funciones = Funciones()
 

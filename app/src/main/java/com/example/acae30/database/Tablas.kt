@@ -2,8 +2,8 @@ package com.example.acae30.database
 
 class Tablas {
 
-    fun Cliente(): String {
-        val cliente = "CREATE TABLE clientes (" +
+    fun cliente(): String {
+        return "CREATE TABLE clientes (" +
                 "Id INTEGER  PRIMARY KEY NOT NULL," +
                 "Codigo VARCHAR(25)  NOT NULL," +
                 "Cliente varchar(200)  NULL," +
@@ -34,12 +34,12 @@ class Tablas {
                 "Firmar_pagare_app INTEGER NOT NULL DEFAULT 0," +
                 "Persona_juridica VARCHAR(10) NOT NULL DEFAULT 'N'" +
                 ");"
-        return cliente
     } //tabla cliente
 
     //CREANDO TABLA CLIENTES_SUCURSALES 25-01-2023
-    fun clienteSucursal(): String{
-        val clienteSucursal = "CREATE TABLE cliente_sucursal(" +
+    fun clienteSucursal(): String {
+
+        return "CREATE TABLE cliente_sucursal(" +
                 "Id INTEGER NOT NULL," +
                 "id_cliente INTEGER NOT NULL," +
                 "codigo_sucursal VARCHAR(25) NULL," +
@@ -51,23 +51,20 @@ class Tablas {
                 "telefono_2 VARCHAR(15) NULL," +
                 "correo_sucursal VARCHAR(100) NULL," +
                 "contacto_sucursal VARCHAR(50))"
-
-        return clienteSucursal
     }
 
     //CREANDO TABLA PARA PRECIO PESONALIZADOS POR CLIENTE
-    fun clientePrecios() : String{
-        val clientePrecios = "CREATE TABLE cliente_precios(" +
+    fun clientePrecios(): String {
+
+        return "CREATE TABLE cliente_precios(" +
                 "id_cliente INTEGER NOT NULL," +
                 "id_inventario INTEGER NOT NULL," +
                 "precio_p NUMERIC(18,6) NOT NULL," +
                 "precio_p_iva NUMERIC(18,6) NOT NULL)"
-
-        return clientePrecios
     }
 
-    fun Inventario(): String {
-        val inventario = "CREATE TABLE inventario (" +
+    fun inventario(): String {
+        return "CREATE TABLE inventario (" +
                 "Id INTEGER  PRIMARY KEY NOT NULL," +
                 "Codigo VARCHAR(100)  NULL," +
                 "Tipo VARCHAR(50)  NULL," +
@@ -102,11 +99,11 @@ class Tablas {
                 "Bonificado NUMERIC(20,6)," +
                 "Id_rubro INTEGER," +
                 "Existencia_u NUMERIC(20,6))"
-        return inventario
     } //tabla inventario
 
-    fun InventarioPrecios(): String {
-        val tabla = "CREATE TABLE inventario_precios(" +
+    fun inventarioPrecios(): String {
+
+        return "CREATE TABLE inventario_precios(" +
                 "Id INTEGER NOT NULL," +
                 "Id_inventario NOT NULL," +
                 "Codigo_producto VARCHAR(25)DEFAULT '' ," +
@@ -119,43 +116,37 @@ class Tablas {
                 "Precio NUMERIC(18,6) NOT NULL," +
                 "Precio_iva NUMERIC(18,6) NOT NULL," +
                 "Id_inventario_unidad INTEGER NOT NULL DEFAULT 0)"
-
-        return tabla
     } //tabla inventario precios
 
-    fun InventarioUnidades(): String {
+    fun inventarioUnidades(): String {
 
-        val tabla = "CREATE TABLE inventario_unidades(" +
+        return "CREATE TABLE inventario_unidades(" +
                 "Id INTEGER NOT NULL," +
                 "Id_inventario INTEGER NOT NULL," +
                 "Nombre_unidad VARCHAR(25) NOT NULL," +
                 "Equivale NUMERIC(18,2) NOT NULL," +
                 "Unidades VARCHAR(3) NOT NULL)"
-        return tabla
     } //tabla inventario unidades
 
     //CREANDO LA TABLA VIRTUAL INVENTARIO
-    fun virtualInventario(): String{
-        val virtualInventario = "CREATE VIRTUAL TABLE virtualinventario USING FTS4 (" +
+    fun virtualInventario(): String {
+        return "CREATE VIRTUAL TABLE virtualinventario USING FTS4 (" +
                 "CONTENT='inventario'," +
                 "Codigo," +
                 "Descripcion" +
-                ") ";
-
-        return virtualInventario
+                ") "
     }
 
     //CREANDO LA TABLA EMPLEADOS
-    fun Empleados(): String{
-        val tblEmpleados = "CREATE TABLE empleado(" +
+    fun empleados(): String {
+        return "CREATE TABLE empleado(" +
                 "id_empleado INTEGER NOT NULL," +
                 "nombre_empleado VARCHAR(50) NOT NULL);"
-        return tblEmpleados
     }
 
     //CREANDO LA TABLA TOKENAPP
-    fun Token(): String{
-        val tblToken = "CREATE TABLE token(" +
+    fun preciosAutorizados(): String {
+        return "CREATE TABLE preciosAutorizados(" +
                 "Id INTEGER  NOT NULL PRIMARY KEY AUTOINCREMENT," +
                 "Id_vendedor INTEGER NOT NULL," +
                 "Id_admin INTEGER NOT NULL," +
@@ -163,27 +154,24 @@ class Tablas {
                 "precio_asig NUMERIC(18,4) NOT NULL," +
                 "fecha_registrado TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL," +
                 "id_server INTEGER NOT NULL);"
-        return tblToken
     }
 
-    fun Lineas(): String {
-        val tabla = "CREATE TABLE lineas(" +
+    fun lineas(): String {
+        return "CREATE TABLE lineas(" +
                 "Id INTEGER NOT NULL," +
                 "Nombre VARCHAR(50)," +
                 "Mayoreo_detalle VARCHAR(1));"
-        return tabla
     } //tabla lineas
 
-    fun Rubros(): String {
-        val tabla = "CREATE TABLE rubros(" +
+    fun rubros(): String {
+        return "CREATE TABLE rubros(" +
                 "Id INTEGER NOT NULL," +
                 "Rubro VARCHAR(50)," +
                 "Tipo VARCHAR(20));"
-        return tabla
     } //tabla rubros
 
-    fun Pedidos(): String {
-        val pedido = "CREATE TABLE [pedidos] (" +
+    fun pedidos(): String {
+        return "CREATE TABLE [pedidos] (" +
                 "[Id] INTEGER  NOT NULL PRIMARY KEY AUTOINCREMENT," +
                 "[Id_cliente] INTEGER   NOT NULL DEFAULT 0," +
                 "[Nombre_cliente] VARCHAR(100) NOT NULL," +
@@ -201,22 +189,20 @@ class Tablas {
                 "nombre_sucursal VARCHAR(45) NOT NULL DEFAULT ''," +
                 "tipo_documento VARCHAR(2) NULL DEFAULT 'FC'," +
                 "tipo_envio INTEGER NOT NULL DEFAULT 0," +
-                "Terminos VARCHAR(25) NOT NULL);" //AGREGAR CAMPO A LA BD SQL
-        return pedido
+                "Terminos VARCHAR(25) NOT NULL);"
     } //tabla pedidos
 
     //TABLA REPORTE TEMP
-    fun ReporteTemp():String{
-        val reporteTemp = "CREATE TABLE reporteTemp(" +
+    fun reporteTemp(): String {
+        return "CREATE TABLE reporteTemp(" +
                 "Cliente VARCHAR(50) NOT NULL," +
                 "Sucursal VARCHAR(50) NOT NULL," +
                 "Total NUMERIC(20,6) NOT NULL)"
-        return reporteTemp
     }
 
     //TABLA VENTAS TEMP
-    fun VentasTemp():String{
-        val ventasTemp = "CREATE TABLE ventasTemp (" +
+    fun ventasTemp(): String {
+        return "CREATE TABLE ventasTemp (" +
                 "Id INTEGER NOT NULL," +
                 "Fecha TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL," +
                 "Id_cliente INTEGER NOT NULL," +
@@ -225,22 +211,20 @@ class Tablas {
                 "Vendedor VARCHAR(25) NOT NULL," +
                 "Total NUMERIC(20,6) NOT NULL," +
                 "Numero INTEGER NOT NULL);"
-        return ventasTemp
     }
 
-    fun VentasDetalleTemp(): String{
-        val ventasDetalle = "CREATE TABLE ventasDetalleTemp (" +
+    fun ventasDetalleTemp(): String {
+        return "CREATE TABLE ventasDetalleTemp (" +
                 "Id_venta INTEGER NOT NULL," +
                 "Id_producto INTEGER NOT NULL," +
                 "Producto VARCHAR(50) NOT NULL," +
                 "Precio_u_iva NUMERIC(20,6) NOT NULL," +
                 "Cantidad INTEGER NOT NULL," +
                 "Total_iva NUMERIC(20,6) NOT NULL)"
-        return ventasDetalle
     }
 
-    fun Cuentas(): String {
-        val cuenta = "CREATE TABLE cuentas(" +
+    fun cuentas(): String {
+        return "CREATE TABLE cuentas(" +
                 "Id INTEGER NOT NULL," +
                 "Id_cliente INTEGER NOT NULL," +
                 "Codigo_cliente VARCHAR(25) NULL," +
@@ -257,12 +241,11 @@ class Tablas {
                 "Relacionado VARCHAR(1)," +
                 "Status VARCHAR(10)," +
                 "Fecha_cancelado DATE)"
-        return cuenta
 
     } //tabla de cuentas
 
-    fun Visitas(): String {
-        val tbl = "CREATE TABLE visitas (" +
+    fun visitas(): String {
+        return "CREATE TABLE visitas (" +
                 "Id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT," +
                 "Id_cliente INTEGER NOT NULL DEFAULT 0," +
                 "Nombre_cliente VARCHAR(100) NOT NULL," +
@@ -278,11 +261,10 @@ class Tablas {
                 "Enviado BOOLEAN DEFAULT 'FALSE' NOT NULL," +
                 "Enviado_final BOOLEAN DEFAULT 'FALSE' NOT NULL" +
                 ");"
-        return tbl
     } //tabla de las visitas
 
-    fun Detalle_pedidos(): String {
-        val detalle = "CREATE TABLE [detalle_pedidos] (" +
+    fun detallePedidos(): String {
+        return "CREATE TABLE [detalle_pedidos] (" +
                 "[Id] INTEGER  NOT NULL PRIMARY KEY AUTOINCREMENT," +
                 "[Id_pedido] INTEGER   NOT NULL," +
                 "[Id_producto] INTEGER   NOT NULL," +
@@ -299,11 +281,10 @@ class Tablas {
                 "Id_Inventario_Precios INTEGER NOT NULL DEFAULT 0," +
                 "FOREIGN KEY(Id_pedido) REFERENCES pedidos(Id_pedido)" +
                 ")"
-        return detalle
     } //tabla detalle pedidos
 
-    fun VistaDetallePedidos(): String {
-        val vista = "CREATE VIEW detalle_producto AS " +
+    fun vistaDetallePedidos(): String {
+        return "CREATE VIEW detalle_producto AS " +
                 "SELECT  detalle_pedidos.Id, " +
                 "detalle_pedidos.Id_pedido," +
                 "detalle_pedidos.Id_producto," +
@@ -332,17 +313,13 @@ class Tablas {
                 "detalle_pedidos.Id_talla" +
                 " FROM detalle_pedidos " +
                 "INNER JOIN inventario  on inventario.Id=detalle_pedidos.Id_producto;"
-        return vista
     }
 
     //TRIGGER PARA LA INSERCION DE DATOS EN TABLA FTS4 VIRTUAL INVENTARIO
-    fun triggerInventarioVirtual(): String{
-
-        val triggerInventario = "CREATE TRIGGER triggerInventarioVirtual AFTER INSERT ON inventario BEGIN" +
+    fun triggerInventarioVirtual(): String {
+        return "CREATE TRIGGER triggerInventarioVirtual AFTER INSERT ON inventario BEGIN" +
                 " INSERT INTO virtualinventario(virtualinventario) VALUES ('rebuild');" +
-                "END;";
-
-        return triggerInventario
+                "END;"
 
     }
 

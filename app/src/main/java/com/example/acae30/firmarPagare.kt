@@ -18,7 +18,7 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
-import com.example.acae30.controllers.ClientesControllers
+import com.example.acae30.controllers.ClientesController
 import com.google.android.material.snackbar.Snackbar
 import com.itextpdf.text.*
 import com.itextpdf.text.pdf.PdfWriter
@@ -61,7 +61,7 @@ class firmarPagare : AppCompatActivity() {
     private var instancia = "CONFIG_SERVIDOR"
     private var visita = false
 
-    private var clienteController = ClientesControllers()
+    private var clienteController = ClientesController()
     private var funciones = Funciones()
 
     private val requestPermissionLauncher = registerForActivityResult(

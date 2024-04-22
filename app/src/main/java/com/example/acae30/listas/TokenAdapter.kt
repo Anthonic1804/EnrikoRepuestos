@@ -7,9 +7,9 @@ import android.view.ViewGroup
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.example.acae30.R
-import com.example.acae30.modelos.TokenData
+import com.example.acae30.modelos.PrecioPersonalizado
 
-class TokenAdapter(private var list: ArrayList<TokenData>, private val context: Context) :
+class TokenAdapter(private var list: ArrayList<PrecioPersonalizado>, private val context: Context) :
     RecyclerView.Adapter<TokenAdapter.MyViewHolder>() {
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): TokenAdapter.MyViewHolder {
         val vista = LayoutInflater.from(parent.context).inflate(

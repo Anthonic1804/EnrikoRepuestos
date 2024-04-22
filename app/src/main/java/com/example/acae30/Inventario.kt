@@ -16,9 +16,7 @@ import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.acae30.controllers.InventarioController
-import com.example.acae30.database.Database
 import com.example.acae30.listas.InventarioAdapter
-import com.example.acae30.modelos.Config
 import com.example.acae30.modelos.Inventario
 import com.google.zxing.integration.android.IntentIntegrator
 import kotlinx.coroutines.DelicateCoroutinesApi
@@ -190,7 +188,7 @@ class Inventario : AppCompatActivity() {
         } else {
 
             if(busquedaToken){
-                val intent = Intent(this@Inventario, NuevoToken::class.java)
+                val intent = Intent(this@Inventario, NuevoPrecioAutorizado::class.java)
                 startActivity(intent)
                 finish()
             }else{
@@ -238,7 +236,7 @@ class Inventario : AppCompatActivity() {
                             } else {
 
                                 if(busquedaToken){
-                                    val intent = Intent(this@Inventario, NuevoToken::class.java)
+                                    val intent = Intent(this@Inventario, NuevoPrecioAutorizado::class.java)
                                     intent.putExtra("codigo", list.get(position).Codigo.toString())
                                     intent.putExtra("producto", list.get(position).descripcion.toString())
                                     intent.putExtra("precio", list.get(position).Precio_iva)
@@ -286,7 +284,7 @@ class Inventario : AppCompatActivity() {
                             } else {
 
                                 if(busquedaToken){
-                                    val intent = Intent(this@Inventario, NuevoToken::class.java)
+                                    val intent = Intent(this@Inventario, NuevoPrecioAutorizado::class.java)
                                     intent.putExtra("codigo", list.get(position).Codigo.toString())
                                     intent.putExtra("producto", list.get(position).descripcion.toString())
                                     intent.putExtra("precio", list.get(position).Precio_iva)

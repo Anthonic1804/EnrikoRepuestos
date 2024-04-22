@@ -33,11 +33,11 @@
             android:exported="false"
             android:screenOrientation="portrait" />
         <activity
-            android:name=".Tokens"
+            android:name=".PreciosAutorizados"
             android:exported="false"
             android:screenOrientation="portrait" />
         <activity
-            android:name=".NuevoToken"
+            android:name=".NuevoPrecioAutorizado"
             android:exported="false"
             android:screenOrientation="portrait" />
         <activity

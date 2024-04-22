@@ -11,12 +11,9 @@ import android.net.ConnectivityManager
 import android.os.Bundle
 import android.os.StrictMode
 import android.view.MenuItem
-import android.view.View
 import android.widget.Button
-import android.widget.TextView
 import androidx.appcompat.app.ActionBarDrawerToggle
 import androidx.appcompat.app.AppCompatActivity
-import androidx.cardview.widget.CardView
 import androidx.core.app.ActivityCompat
 import androidx.drawerlayout.widget.DrawerLayout
 import com.example.acae30.database.Database
@@ -434,7 +431,7 @@ class Inicio : AppCompatActivity(), NavigationView.OnNavigationItemSelectedListe
         finish()
     }
     private fun crearTokens(){
-        val intent = Intent(this@Inicio, Tokens::class.java)
+        val intent = Intent(this@Inicio, PreciosAutorizados::class.java)
         startActivity(intent)
         finish()
     }
