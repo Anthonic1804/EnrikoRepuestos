@@ -11,7 +11,7 @@
         <item
             android:id="@+id/nav_token"
             android:icon="@drawable/token"
-            android:title="@string/token"
+            android:title="@string/autorizaci_n_de_precios"
             />
     </group>
     <group>

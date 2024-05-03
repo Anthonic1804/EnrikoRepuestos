@@ -131,4 +131,5 @@
     <string name="cuentas_por_cobrar">CUENTAS POR COBRAR</string>
     <string name="Inventario">INVENTARIO</string>
     <string name="borrar_pedidos_antiguos">BORRAR PEDIDOS ANTIGUOS</string>
+    <string name="autorizaci_n_de_precios">AUTORIZACIÓN DE PRECIOS</string>
 </resources>
