@@ -123,4 +123,12 @@
     <string name="eliminar_producto">ELIMINAR PRODUCTO</string>
     <string name="_1_00">1</string>
     <string name="cantidad">CANTIDAD</string>
+    <string name="btnregresar">btnRegresar</string>
+    <string name="carga_de_datos">CARGA DE DATOS</string>
+    <string name="imgcliente">imgCliente</string>
+    <string name="clientes_y_sucursales">CLIENTES Y SUCURSALES</string>
+    <string name="imgCuentas">imgCuentas</string>
+    <string name="cuentas_por_cobrar">CUENTAS POR COBRAR</string>
+    <string name="Inventario">INVENTARIO</string>
+    <string name="borrar_pedidos_antiguos">BORRAR PEDIDOS ANTIGUOS</string>
 </resources>
