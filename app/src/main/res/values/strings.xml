@@ -132,4 +132,9 @@
     <string name="Inventario">INVENTARIO</string>
     <string name="borrar_pedidos_antiguos">BORRAR PEDIDOS ANTIGUOS</string>
     <string name="autorizaci_n_de_precios">AUTORIZACIÓN DE PRECIOS</string>
+    <string name="imgpago">imgPago</string>
+    <string name="detalle_de_pago">DETALLE DE PAGO</string>
+    <string name="efectivo">EFECTIVO</string>
+    <string name="total">TOTAL</string>
+    <string name="cambio">CAMBIO</string>
 </resources>

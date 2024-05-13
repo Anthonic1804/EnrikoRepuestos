@@ -39,6 +39,7 @@ import com.example.acae30.modelos.JSONmodels.CabezeraPedidoSend
 import com.example.acae30.modelos.Sucursales
 import com.example.acae30.modelos.dataPedidos
 import com.google.android.material.snackbar.Snackbar
+import com.google.android.material.textfield.TextInputEditText
 import com.google.gson.JsonArray
 import com.google.gson.JsonObject
 import kotlinx.coroutines.CoroutineScope
@@ -87,6 +88,7 @@ class Detallepedido : AppCompatActivity() {
     private var alerta: AlertDialogo? = null
     private var codigo = ""
     private var idapi = 0
+    var total = 0f
 
     private var envioSelec : String = ""
     private var documentoSelec : String = ""
@@ -254,6 +256,10 @@ class Detallepedido : AppCompatActivity() {
 
         //EVENTRO CLIC DEL BOTON ENVIAR
         binding.btnenviar.setOnClickListener {
+
+            alertaPago(total)
+
+            /*
             if(funciones.isInternetAvailable(this)){
                 if(ConfirmarDetallePedido() > 0){
                     alerta!!.pedidoEnviado()
@@ -267,7 +273,7 @@ class Detallepedido : AppCompatActivity() {
                 }
             }else{
                 funciones.mostrarAlerta("ERROR: NO TIENES CONEXION A INTERNET", this@Detallepedido, binding.lienzo)
-            }
+            }*/
         }
 
         //EVENTO CLIC DEL BOTON GUARDAR.
@@ -666,7 +672,7 @@ class Detallepedido : AppCompatActivity() {
     //MODIFICACION PARA LA PAPELERIA DM
     //23-08-2022
     private fun ArmarLista(lista: ArrayList<DetallePedido>) {
-        var total = 0.toFloat()
+        //var total = 0.toFloat()
         val pedido = pedidosController.obtenerInformacionPedido(idpedido, this@Detallepedido)
         val mLayoutManager = LinearLayoutManager(
             this@Detallepedido,
@@ -692,7 +698,7 @@ class Detallepedido : AppCompatActivity() {
             }
         }
         for (i in lista) {
-            total = total + i.Subtotal!!
+            total += i.Subtotal!!
         }
         binding.txttotal.text = "$" + "${String.format("%.4f", total)}"
         binding.reciclerdetalle.adapter = adapter
@@ -736,9 +742,6 @@ class Detallepedido : AppCompatActivity() {
         dialogo.findViewById<Button>(R1.id.btncancelar).setOnClickListener {
             dialogo.dismiss()
         }//boton eliminar
-
-
-
     } //muestra la alerta para eliminar
 
     private fun EliminarPedido(idpedido: Int) {
@@ -1189,6 +1192,32 @@ class Detallepedido : AppCompatActivity() {
         ticketHeight += 140f
 
         return ticketHeight
+    }
+
+    //FUNCION PARA MOSTRAR VENTANA DE PAGO
+    private fun alertaPago(total: Float){
+        val dialogo = Dialog(this@Detallepedido)
+        dialogo.show()
+        dialogo.setContentView(R1.layout.vista_cobro)
+        dialogo.setCancelable(false)
+
+        val etTotal = dialogo.findViewById<TextInputEditText>(R1.id.txtTotalPago)
+        etTotal.setText("$" + "${String.format("%.4f", total)}")
+
+        //PROCESO DEL BOTON ACEPTAR
+        dialogo.findViewById<Button>(R1.id.btnaceptar).setOnClickListener {
+
+        }
+
+        //PROCESO DEL BOTON CANCELAR
+        dialogo.findViewById<Button>(R1.id.btncancelar).setOnClickListener {
+            dialogo.dismiss()
+        }
+
+    }
+
+    private fun calcularCambio(cambio: Float): Float{
+        return total - cambio
     }
 
 
