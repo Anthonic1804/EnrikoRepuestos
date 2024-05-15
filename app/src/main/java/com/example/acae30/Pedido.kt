@@ -746,17 +746,12 @@ class Pedido : AppCompatActivity() {
                             cdetalle.getFloat(12),
                             cdetalle.getFloat(13),
                             cdetalle.getFloat(14),
-                            cdetalle.getString(15),
+                            cdetalle.getFloat(15),
                             cdetalle.getString(16),
-                            cdetalle.getString(17),
-                            cdetalle.getString(18),
+                            cdetalle.getInt(17),
+                            cdetalle.getFloat(18),
                             cdetalle.getString(19),
-                            cdetalle.getFloat(20),
-                            cdetalle.getInt(21),
-                            cdetalle.getFloat(22),
-                            cdetalle.getString(23),
-                            cdetalle.getInt(24),
-                            cdetalle.getInt(25)
+                            cdetalle.getInt(20)
                         )
                         list.add(detalle)
                     } while (cdetalle.moveToNext())
@@ -909,14 +904,14 @@ class Pedido : AppCompatActivity() {
             d.addProperty("Precio_u_iva", data.Precio_u_iva)
             d.addProperty("Cantidad", data.Cantidad)
             d.addProperty("Precio_venta", data.Precio_venta)
-            d.addProperty("Unidad", data.Unidad)
-            d.addProperty("Subtotal", data.Subtotal)
             d.addProperty("Total", data.Total)
+            d.addProperty("Total_iva", data.Total_iva)
+            d.addProperty("Unidad", data.Unidad)
             d.addProperty("Bonificado", data.Bonificado)
             d.addProperty("Descuento", data.Descuento)
             d.addProperty("Precio_editado", data.Precio_editado)
             d.addProperty("Idunidad", data.Idunidad)
-            d.addProperty("Idtalla", data.Id_talla)
+            d.addProperty("FechaCreado", pedido.fechaCreado)
             detalle.add(d)
         }
         json.add("detalle", detalle)

@@ -83,41 +83,36 @@ class PedidosController {
         val base = funciones.getDataBase(context).readableDatabase
         val lista = ArrayList<DetallePedido>()
         try{
-            val cursor = base.rawQuery("SELECT *  FROM detalle_producto where Id_pedido=$idPedido", null)
-            if (cursor.count > 0) {
-                cursor.moveToFirst()
+            val cdetalle = base.rawQuery("SELECT *  FROM detalle_producto where Id_pedido=$idPedido", null)
+            if (cdetalle.count > 0) {
+                cdetalle.moveToFirst()
                 do {
                     val detalle = DetallePedido(
-                        cursor.getInt(0),
-                        cursor.getInt(1),
-                        cursor.getInt(2),
-                        cursor.getString(3),
-                        cursor.getString(4),
-                        cursor.getFloat(5),
-                        cursor.getFloat(6),
-                        cursor.getFloat(7),
-                        cursor.getFloat(8),
-                        cursor.getFloat(9),
-                        cursor.getFloat(10),
-                        cursor.getFloat(11),
-                        cursor.getFloat(12),
-                        cursor.getFloat(13),
-                        cursor.getFloat(14),
-                        cursor.getString(15),
-                        cursor.getString(16),
-                        cursor.getString(17),
-                        cursor.getString(18),
-                        cursor.getString(19),
-                        cursor.getFloat(20),
-                        cursor.getInt(21),
-                        cursor.getFloat(22),
-                        cursor.getString(23),
-                        cursor.getInt(24),
-                        cursor.getInt(25)
+                        cdetalle.getInt(0),
+                        cdetalle.getInt(1),
+                        cdetalle.getInt(2),
+                        cdetalle.getString(3),
+                        cdetalle.getString(4),
+                        cdetalle.getFloat(5),
+                        cdetalle.getFloat(6),
+                        cdetalle.getFloat(7),
+                        cdetalle.getFloat(8),
+                        cdetalle.getFloat(9),
+                        cdetalle.getFloat(10),
+                        cdetalle.getFloat(11),
+                        cdetalle.getFloat(12),
+                        cdetalle.getFloat(13),
+                        cdetalle.getFloat(14),
+                        cdetalle.getFloat(15),
+                        cdetalle.getString(16),
+                        cdetalle.getInt(17),
+                        cdetalle.getFloat(18),
+                        cdetalle.getString(19),
+                        cdetalle.getInt(20)
                     )
                     lista.add(detalle)
-                } while (cursor.moveToNext())
-                cursor.close()
+                } while (cdetalle.moveToNext())
+                cdetalle.close()
             }
         }catch (e:Exception){
             println("ERROR AL OBTENER EL DETALLE DEL PEDIDO -> ${e.message}")

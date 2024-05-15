@@ -21,6 +21,7 @@ import android.widget.Spinner
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.constraintlayout.widget.ConstraintLayout
+import androidx.lifecycle.lifecycleScope
 import com.example.acae30.controllers.ClientesController
 import com.example.acae30.controllers.InventarioController
 import com.example.acae30.database.Database
@@ -54,7 +55,8 @@ class Producto_agregar : AppCompatActivity() {
     private var txtdescripcion: TextView? = null
     private var txtexistencia: TextView? = null
     private var spiner: Spinner? = null
-    private var precio: Float = 0.toFloat()
+    private var precio_iva: Float = 0.toFloat()
+    private var precio : Float = 0f
     private var cantidad: Float = 0.toFloat()
     private var txttotal: TextView? = null
     private var idpedido: Int = 0
@@ -314,10 +316,10 @@ class Producto_agregar : AppCompatActivity() {
                 val nuevaCadena = parent!!.getItemAtPosition(position).toString()
 
                 if (nuevaCadena.last() == '*') {
-                    precio = precioEditado
+                    precio_iva = precioEditado
                 } else {
                     var nuevoValor = precioFromList(nuevaCadena)
-                    precio = nuevoValor
+                    precio_iva = nuevoValor
                 }
 
                 Totalizar(cantidad)
@@ -472,8 +474,8 @@ class Producto_agregar : AppCompatActivity() {
 
         //SE BUSCA EL DETALLE DEL PEDIDO
         if (idproducto!! > 0) {
-            var detalle = getPedidodetalle(idpedidodetalle!!)
-            GlobalScope.launch(Dispatchers.IO) {
+            val detalle = getPedidodetalle(idpedidodetalle!!)
+            this@Producto_agregar.lifecycleScope.launch {
                 try {
                     val datos = datosProducto
                     val datosInvPrecios = listPrecios!!
@@ -510,7 +512,8 @@ class Producto_agregar : AppCompatActivity() {
                         txtdescripcion!!.text = datos.descripcion
                         codigoProducto = datos.Codigo.toString()
 
-                        precio = datos.Precio_iva!!
+                        precio_iva = datos.Precio_iva!!
+                        precio = datos.Precio!!
                         Totalizar(cantidad)
                         txtexistencia!!.text = "${datos.Existencia}"
                         existenciaProducto = datos.Existencia!!.toFloat()
@@ -538,18 +541,18 @@ class Producto_agregar : AppCompatActivity() {
 
                             //var precio_provisional = total_param!! / cantidad_provisional
                             cantidad = cantidad_provisional!!
-                            precio = detalle.Precio_venta!! // EDITADO PARA QUE TOME EL VALOR SELECCIONADO PARA LA VENTA
+                            precio_iva = detalle.Precio_venta!! // EDITADO PARA QUE TOME EL VALOR SELECCIONADO PARA LA VENTA
 
                             txtcantidad!!.setText("${String.format("%.0f", cantidad)}")
 
-                            if ("${String.format("%.4f", precio_provisional)}" == "${String.format("%.4f", precio)}")
+                            if ("${String.format("%.4f", precio_provisional)}" == "${String.format("%.4f", precio_iva)}")
                             {
                                 if (detalle.Precio_editado == "*") {
                                     // precio = detalle.Precio_venta!!
-                                    precioss.add("${String.format("%.4f", precio)}" + "*")
+                                    precioss.add("${String.format("%.4f", precio_iva)}" + "*")
                                 } else {
                                     // precio = detalle.Precio_venta!!
-                                    precioss.add("${String.format("%.4f", precio)}")
+                                    precioss.add("${String.format("%.4f", precio_iva)}")
                                 }
                                 seleccionado = true
                             }
@@ -637,7 +640,7 @@ class Producto_agregar : AppCompatActivity() {
     //PAPELERIA DM
     //23-08-2022
     private fun Totalizar(cantidad: Float) {
-        var total = precio * cantidad
+        var total = precio_iva * cantidad
         txttotal!!.text = "${String.format("%.4f", total)}"
     }
 
@@ -657,9 +660,11 @@ class Producto_agregar : AppCompatActivity() {
             }
 
             detalle.put("Idunidad", 0)
-            detalle.put("Precio", precio)
+            detalle.put("precio", precio)
+            detalle.put("Precio_iva", precio_iva)
             detalle.put("Precio_oferta", 0.toFloat())
-            detalle.put("Subtotal", txttotal!!.text.toString().toFloat())
+            detalle.put("Total", (txttotal!!.text.toString().toFloat()) / 1.13)
+            detalle.put("Total_iva", txttotal!!.text.toString().toFloat())
             detalle.put("Descuento", 0.toFloat())
 
             if (esPrecioEditado) {
@@ -673,7 +678,7 @@ class Producto_agregar : AppCompatActivity() {
             val idpedidodetalle = base.insert("detalle_pedidos", null, detalle)
 
             val cursor = base.rawQuery(
-                "SELECT SUM(Subtotal) FROM detalle_pedidos where Id_pedido=$idpedido",
+                "SELECT SUM(Total_iva) FROM detalle_pedidos where Id_pedido=$idpedido",
                 null
             )
             var total = 0.toFloat()
@@ -732,17 +737,12 @@ class Producto_agregar : AppCompatActivity() {
                     cursor.getFloat(12),
                     cursor.getFloat(13),
                     cursor.getFloat(14),
-                    cursor.getString(15),
+                    cursor.getFloat(15),
                     cursor.getString(16),
-                    cursor.getString(17),
-                    cursor.getString(18),
+                    cursor.getInt(17),
+                    cursor.getFloat(18),
                     cursor.getString(19),
-                    cursor.getFloat(20),
-                    cursor.getInt(21),
-                    cursor.getFloat(22),
-                    cursor.getString(23),
-                    cursor.getInt(24),
-                    cursor.getInt(25)
+                    cursor.getInt(20)
                 )
 
                 cursor.close()
@@ -1432,7 +1432,7 @@ class Producto_agregar : AppCompatActivity() {
                             val data = getPedidodetalle(id)
                             cantidad = cantidad + data!!.Cantidad!!
                             var t =
-                                ((txttotal!!.text.toString().toFloat()) + data.Subtotal!!)
+                                ((txttotal!!.text.toString().toFloat()) + data.Total_iva!!)
                             txttotal!!.text = "${String.format("%.4f", t)}"
                             updateDetalle(id, esPrecioEditado)
                         } else {

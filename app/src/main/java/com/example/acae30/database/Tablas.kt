@@ -170,27 +170,117 @@ class Tablas {
                 "Tipo VARCHAR(20));"
     } //tabla rubros
 
+    /*ESCARRSA 15/05/2024
+    * CAMBIOS EN LA TBL PEDIDOS -> SE AGREGARON LOS SIGUIENTES CAMPOS
+    * PAGO, CAMBIO, SUMAS, IVA, SUBTOTAL, IVA_RETENIDO, IVA_PERCIBIDO
+    * */
     fun pedidos(): String {
         return "CREATE TABLE [pedidos] (" +
-                "[Id] INTEGER  NOT NULL PRIMARY KEY AUTOINCREMENT," +
-                "[Id_cliente] INTEGER   NOT NULL DEFAULT 0," +
-                "[Nombre_cliente] VARCHAR(100) NOT NULL," +
-                "[Total] NUMERIC(20,6)  NOT NULL," +
-                "Descuento NUMERIC(20,2)not null," +
-                "[Enviado] BOOLEAN DEFAULT 'FALSE' NOT NULL," +
-                "[Fecha_enviado] TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL," +
+                "Id INTEGER  NOT NULL PRIMARY KEY AUTOINCREMENT," +
+                "Id_cliente INTEGER   NOT NULL DEFAULT 0," +
+                "Nombre_cliente VARCHAR(100) NOT NULL," +
+                "Pago NUMERIC(20,6) NULL DEFAULT 0," +
+                "Cambio NUMERIC(20,6) NULL DEFAULT 0," +
+                "Descuento NUMERIC(20,6) NULL DEFAULT 0," +
+                "Sumas NUMERIC(20,6) NULL DEFAULT 0," +
+                "Iva NUMERIC(20,6) NULL DEFAULT 0," +
+                "SubTotal NUMERIC(20,6) NULL DEFAULT 0," +
+                "Iva_retenido NUMERIC(20,6) NULL DEFAULT 0," +
+                "Iva_percibido NUMERIC(20,6) NULL DEFAULT 0," +
+                "Total NUMERIC(20,6)  NOT NULL," +
+                "Enviado BOOLEAN DEFAULT 'FALSE' NOT NULL," +
+                "Fecha_enviado TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL," +
                 "Id_pedido_sistema INTEGER NOT NULL DEFAULT 0," +
-                "[Gps] TEXT  NULL," +
+                "Gps TEXT  NULL," +
                 "Cerrado INTEGER NOT NUll default 0," +
-                "[Idvisita] INTEGER NOT NULL DEFAULT 0," +
+                "Idvisita INTEGER NOT NULL DEFAULT 0," +
                 "[Fecha_creado] TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL," +
-                "id_sucursal INTEGER NOT NULL DEFAULT 0," +
-                "codigo_sucursal VARCHAR(25) NOT NULL DEFAULT ''," +
-                "nombre_sucursal VARCHAR(45) NOT NULL DEFAULT ''," +
-                "tipo_documento VARCHAR(2) NULL DEFAULT 'FC'," +
-                "tipo_envio INTEGER NOT NULL DEFAULT 0," +
+                "Id_sucursal INTEGER NOT NULL DEFAULT 0," +
+                "Codigo_sucursal VARCHAR(25) NOT NULL DEFAULT ''," +
+                "Nombre_sucursal VARCHAR(45) NOT NULL DEFAULT ''," +
+                "Tipo_documento VARCHAR(2) NULL DEFAULT 'FC'," +
+                "Tipo_envio INTEGER NOT NULL DEFAULT 0," +
                 "Terminos VARCHAR(25) NOT NULL);"
-    } //tabla pedidos
+    }
+
+    fun detallePedidos(): String {
+        return "CREATE TABLE [detalle_pedidos] (" +
+                "[Id] INTEGER  NOT NULL PRIMARY KEY AUTOINCREMENT," +
+                "[Id_pedido] INTEGER   NOT NULL," +
+                "[Id_producto] INTEGER   NOT NULL," +
+                "[Cantidad] NUMERIC(18,2) DEFAULT '0' NOT NULL," +
+                "Unidad VARCHAR(10)," +
+                "Idunidad INTEGER not null default 0," +
+                "Precio NUMERIC(18,2) NOT NULL DEFAULT 0," +
+                "Precio_iva NUMERIC(18,2)  NOT NULL DEFAULT 0," +
+                "Total NUMERIC(18,2)  NOT NULL DEFAULT 0," +
+                "Total_iva NUMERIC(18,2) NOT NULL DEFAULT 0," +
+                "[Precio_oferta] NUMERIC(18,2)  NOT NULL," +
+                "Bonificado Integer not null DEFAULT 0," +
+                "Descuento Numeric(18,2)not null default 0," +
+                "Precio_editado VARCHAR(10) DEFAULT '' NOT NULL," +
+                "Id_talla INTEGER NOT NULL DEFAULT 0," +
+                "Id_Inventario_Precios INTEGER NOT NULL DEFAULT 0," +
+                "FOREIGN KEY(Id_pedido) REFERENCES pedidos(Id_pedido)" +
+                ")"
+    } //tabla detalle pedidos
+
+    fun vistaDetallePedidos(): String {
+        return "CREATE VIEW detalle_producto AS " +
+                "SELECT detalle_pedidos.id," +
+                    "detalle_pedidos.id_pedido," +
+                    "detalle_pedidos.id_producto," +
+                    "inventario.codigo," +
+                    "inventario.descripcion," +
+                    "inventario.costo," +
+                    "inventario.costo_iva," +
+                    "inventario.precio," +
+                    "inventario.precio_iva," +
+                    "inventario.precio_u," +
+                    "inventario.precio_u_iva," +
+                    "detalle_pedidos.cantidad," +
+                    "detalle_pedidos.precio AS Precio_venta_siva," +
+                    "detalle_pedidos.precio_iva AS precio_venta," +
+                    "detalle_pedidos.total," +
+                    "detalle_pedidos.total_iva," +
+                    "detalle_pedidos.unidad," +
+                    "detalle_pedidos.bonificado," +
+                    "detalle_pedidos.descuento," +
+                    "detalle_pedidos.precio_editado," +
+                    "detalle_pedidos.idunidad " +
+                "FROM detalle_pedidos " +
+                "INNER JOIN inventario " +
+                "ON inventario.Id = detalle_pedidos.Id_producto;"
+       /* return "CREATE VIEW detalle_producto AS " +
+                "SELECT  detalle_pedidos.Id, " +
+                "detalle_pedidos.Id_pedido," +
+                "detalle_pedidos.Id_producto," +
+                "inventario.Codigo," +
+                "inventario.Descripcion," +
+                "inventario.Costo," +
+                "inventario.costo_iva," +
+                "inventario.Precio," +
+                "inventario.Precio_iva," +
+                "inventario.Precio_u," +
+                "inventario.Precio_u_iva," +
+                "detalle_pedidos.Cantidad," +
+                "detalle_pedidos.Precio as precio_venta," +
+                "detalle_pedidos.Precio_oferta," +
+                "detalle_pedidos.Subtotal," +
+                "detalle_pedidos.Unidad," +
+                "inventario.Unidad_medida," +
+                "inventario.Nombre_fraccion," +
+                "inventario.Cesc," +
+                "inventario.Combustible," +
+                "detalle_pedidos.Subtotal as Total," +
+                "detalle_pedidos.Bonificado," +
+                "detalle_pedidos.Descuento," +
+                "detalle_pedidos.Precio_editado," +
+                "detalle_pedidos.Idunidad," +
+                "detalle_pedidos.Id_talla" +
+                " FROM detalle_pedidos " +
+                "INNER JOIN inventario  on inventario.Id=detalle_pedidos.Id_producto;"*/
+    }
 
     //TABLA REPORTE TEMP
     fun reporteTemp(): String {
@@ -262,58 +352,6 @@ class Tablas {
                 "Enviado_final BOOLEAN DEFAULT 'FALSE' NOT NULL" +
                 ");"
     } //tabla de las visitas
-
-    fun detallePedidos(): String {
-        return "CREATE TABLE [detalle_pedidos] (" +
-                "[Id] INTEGER  NOT NULL PRIMARY KEY AUTOINCREMENT," +
-                "[Id_pedido] INTEGER   NOT NULL," +
-                "[Id_producto] INTEGER   NOT NULL," +
-                "[Cantidad] NUMERIC(18,2) DEFAULT '0' NOT NULL," +
-                "Unidad VARCHAR(10)," +
-                "Idunidad INTEGER not null default 0," +
-                "[Precio] NUMERIC(18,2)  NOT NULL," +
-                "[Precio_oferta] NUMERIC(18,2)  NOT NULL," +
-                "[Subtotal] NUMERIC(18,2)  NOT NULL," +
-                "Bonificado Integer not null DEFAULT 0," +
-                "Descuento Numeric(18,2)not null default 0," +
-                "Precio_editado VARCHAR(10) DEFAULT '' NOT NULL," +
-                "Id_talla INTEGER NOT NULL DEFAULT 0," +
-                "Id_Inventario_Precios INTEGER NOT NULL DEFAULT 0," +
-                "FOREIGN KEY(Id_pedido) REFERENCES pedidos(Id_pedido)" +
-                ")"
-    } //tabla detalle pedidos
-
-    fun vistaDetallePedidos(): String {
-        return "CREATE VIEW detalle_producto AS " +
-                "SELECT  detalle_pedidos.Id, " +
-                "detalle_pedidos.Id_pedido," +
-                "detalle_pedidos.Id_producto," +
-                "inventario.Codigo," +
-                "inventario.Descripcion," +
-                "inventario.Costo," +
-                "inventario.costo_iva," +
-                "inventario.Precio," +
-                "inventario.Precio_iva," +
-                "inventario.Precio_u," +
-                "inventario.Precio_u_iva," +
-                "detalle_pedidos.Cantidad," +
-                "detalle_pedidos.Precio as precio_venta," +
-                "detalle_pedidos.Precio_oferta," +
-                "detalle_pedidos.Subtotal," +
-                "detalle_pedidos.Unidad," +
-                "inventario.Unidad_medida," +
-                "inventario.Nombre_fraccion," +
-                "inventario.Cesc," +
-                "inventario.Combustible," +
-                "detalle_pedidos.Subtotal as Total," +
-                "detalle_pedidos.Bonificado," +
-                "detalle_pedidos.Descuento," +
-                "detalle_pedidos.Precio_editado," +
-                "detalle_pedidos.Idunidad," +
-                "detalle_pedidos.Id_talla" +
-                " FROM detalle_pedidos " +
-                "INNER JOIN inventario  on inventario.Id=detalle_pedidos.Id_producto;"
-    }
 
     //TRIGGER PARA LA INSERCION DE DATOS EN TABLA FTS4 VIRTUAL INVENTARIO
     fun triggerInventarioVirtual(): String {

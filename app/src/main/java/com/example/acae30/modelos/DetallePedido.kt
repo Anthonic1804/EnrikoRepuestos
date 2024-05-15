@@ -13,18 +13,13 @@ data class DetallePedido(
     var Precio_u: Float?,
     var Precio_u_iva: Float?,
     var Cantidad: Float?,
+    var Precio_venta_siva: Float?,
     var Precio_venta: Float?,
-    var Precio_oferta: Float?,
-    var Subtotal: Float?,
-    var Unidad: String?,
-    var Unidad_medida: String?,
-    var Nombre_fraccion: String?,
-    var Cesc: String?,
-    var Combustible: String?,
     var Total: Float?,
+    var Total_iva: Float?,
+    var Unidad: String?,
     var Bonificado: Int?,
     var Descuento: Float?,
     var Precio_editado: String?,
-    var Idunidad: Int?,
-    var Id_talla: Int?
+    var Idunidad: Int?
 )

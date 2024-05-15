@@ -175,14 +175,20 @@ class Detallepedido : AppCompatActivity() {
             "FC" -> {
                 binding.tvDocumentoSeleccionado.text = getString(R.string.factura)
                 binding.spDocumento.setSelection(0, true)
+
+                actualizarTotales()
             }
             "CF" -> {
                 binding.tvDocumentoSeleccionado.text = getString(R.string.credito_fiscal)
                 binding.spDocumento.setSelection(1, true)
+
+                actualizarTotales()
             }
             "FE" -> {
                 binding.tvDocumentoSeleccionado.text = getString(R.string.factura_exportacion)
                 binding.spDocumento.setSelection(2, true)
+
+                actualizarTotales()
             }
         }
 
@@ -379,17 +385,39 @@ class Detallepedido : AppCompatActivity() {
                 when(documentoSelec){
                     "FACTURA" -> {
                         pedidosController.updateTipoDocumento("FC", idpedido, this@Detallepedido)
+                        tipoDocumento = "FC"
+                        actualizarTotales()
                     }
                     "CREDITO FISCAL" -> {
                         pedidosController.updateTipoDocumento("CF", idpedido, this@Detallepedido)
+                        tipoDocumento = "CF"
+                        actualizarTotales()
                     }
                     "FACTURA EXPORTACION" -> {
                         pedidosController.updateTipoDocumento("FE", idpedido, this@Detallepedido)
+                        tipoDocumento = "FE"
+                        actualizarTotales()
                     }
                 }
             }
             override fun onNothingSelected(p0: AdapterView<*>?) {}
         }
+    }
+
+    //FUNCION PARA ACTUALIZAR TOTALES CUANDO ES CREDITO FISCAL
+    private fun actualizarTotales(){
+        when(tipoDocumento) {
+            "CF" -> {
+                binding.txtSumas.text = "$" + "${String.format("%.4f", (total/1.13))}"
+                binding.txtIva.text = "$" + "${String.format("%.4f", ((total/1.13)*0.13))}"
+            }
+
+            else -> {
+                binding.txtSumas.text = "$" + "${String.format("%.4f", total)}"
+                binding.txtIva.text = "$" + "${String.format("%.4f", 0f)}"
+            }
+        }
+
     }
 
     //FUNCION PARA VALIDAR OPCIONES SELECCIONADAS
@@ -488,16 +516,16 @@ class Detallepedido : AppCompatActivity() {
     private fun getTipoEnvio(ipPedido: Int){
         val dataBase = db!!.readableDatabase
         try {
-            val getTipo = dataBase.rawQuery("SELECT * FROM pedidos WHERE id=$ipPedido", null)
+            val getTipo = dataBase.rawQuery("SELECT Enviado, nombre_sucursal, tipo_envio, tipo_documento FROM pedidos WHERE id=$ipPedido", null)
             val getPedidoData = ArrayList<dataPedidos>()
             if(getTipo.count > 0){
                 getTipo.moveToFirst()
                 do {
                     val data = dataPedidos(
-                        getTipo.getInt(5) == 1,
-                        getTipo.getString(14),
-                        getTipo.getInt(16),
-                        getTipo.getString(15)
+                        getTipo.getInt(0) == 1,
+                        getTipo.getString(1),
+                        getTipo.getInt(2),
+                        getTipo.getString(3)
                     )
                     getPedidoData.add(data)
                 }while (getTipo.moveToNext())
@@ -691,14 +719,14 @@ class Detallepedido : AppCompatActivity() {
                 intento.putExtra("nombrecliente", nombre)
                 intento.putExtra("idproducto", data.Id_producto)
                 intento.putExtra("proviene", "editar")
-                intento.putExtra("total_param", data.Subtotal)
+                intento.putExtra("total_param", data.Total_iva)
                 intento.putExtra("sucursalPosition", getSucursalPosition)
                 startActivity(intento)
                 finish()
             }
         }
         for (i in lista) {
-            total += i.Subtotal!!
+            total += i.Total_iva!!
         }
         binding.txttotal.text = "$" + "${String.format("%.4f", total)}"
         binding.reciclerdetalle.adapter = adapter
@@ -754,6 +782,7 @@ class Detallepedido : AppCompatActivity() {
             } else {
                 bd.execSQL("DELETE FROM pedidos where Id=$idpedido")
             }
+            cursor.close()
         } catch (e: Exception) {
             throw Exception(e.message)
         } finally {
@@ -812,17 +841,12 @@ class Detallepedido : AppCompatActivity() {
                             cdetalle.getFloat(12),
                             cdetalle.getFloat(13),
                             cdetalle.getFloat(14),
-                            cdetalle.getString(15),
+                            cdetalle.getFloat(15),
                             cdetalle.getString(16),
-                            cdetalle.getString(17),
-                            cdetalle.getString(18),
+                            cdetalle.getInt(17),
+                            cdetalle.getFloat(18),
                             cdetalle.getString(19),
-                            cdetalle.getFloat(20),
-                            cdetalle.getInt(21),
-                            cdetalle.getFloat(22),
-                            cdetalle.getString(23),
-                            cdetalle.getInt(24),
-                            cdetalle.getInt(25)
+                            cdetalle.getInt(20)
                         )
                         list.add(detalle)
                     } while (cdetalle.moveToNext())
@@ -1017,14 +1041,13 @@ class Detallepedido : AppCompatActivity() {
             d.addProperty("Precio_u_iva", data.Precio_u_iva)
             d.addProperty("Cantidad", data.Cantidad)
             d.addProperty("Precio_venta", data.Precio_venta)
-            d.addProperty("Unidad", data.Unidad)
-            d.addProperty("Subtotal", data.Subtotal)
             d.addProperty("Total", data.Total)
+            d.addProperty("Total_iva", data.Total_iva)
+            d.addProperty("Unidad", data.Unidad)
             d.addProperty("Bonificado", data.Bonificado)
             d.addProperty("Descuento", data.Descuento)
             d.addProperty("Precio_editado", data.Precio_editado)
             d.addProperty("Idunidad", data.Idunidad)
-            d.addProperty("Idtalla", data.Id_talla)
             d.addProperty("FechaCreado", pedido.fechaCreado) /*ENVIANDO LA MISMA FECHA DEL PEDIDO DESDE EL CEL*/
             detalle.add(d)
         }
@@ -1033,6 +1056,8 @@ class Detallepedido : AppCompatActivity() {
 
     }
     //convierte el pedido a json
+
+
 
     //FUNCION PARA IMPRIMIR EL RECIBO
     private fun imprimirRecibo(){

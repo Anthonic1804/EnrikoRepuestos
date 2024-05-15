@@ -31,9 +31,9 @@ class PedidoDetalleAdapter(
         vista.cantidad.text = "${String.format("%.0f", data.Cantidad)}"
         vista.descripcion.text = data.Descripcion
         if (data.Precio_editado == "*") {
-            vista.total.text = "$" + "${String.format("%.4f", data.Subtotal)}" + "*"
+            vista.total.text = "$" + "${String.format("%.4f", data.Total_iva)}" + "*"
         } else {
-            vista.total.text = "$" + "${String.format("%.4f", data.Subtotal)}"
+            vista.total.text = "$" + "${String.format("%.4f", data.Total_iva)}"
         }
     }
 
