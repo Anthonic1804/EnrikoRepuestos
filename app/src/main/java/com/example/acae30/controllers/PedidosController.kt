@@ -9,6 +9,7 @@ import com.example.acae30.modelos.Pedidos
 class PedidosController {
 
     var funciones = Funciones()
+    var clienteController = ClientesController()
 
     //FUNCION PARA ACTUALIZAR EL TIPO DE ENVIO SELECCIONADO
     fun updateTipoPedido(tipoPedido:Int, idpedido:Int, context: Context){
@@ -19,6 +20,21 @@ class PedidosController {
             throw Exception(e.message)
         } finally {
             data.close()
+        }
+    }
+
+    //FUNCION PARA ACTUALIZAR LOS TOTAL SEGUN TIPO DE DOCUMENTO
+    fun actualizarTotales(context: Context, IdPedido: Int, total:Float){
+        val bd = funciones.getDataBase(context).writableDatabase
+        val sumas = total / 1.13
+        val iva = (total / 1.13) * 0.13
+        try {
+            bd.execSQL("UPDATE pedidos SET Sumas=$sumas, Iva=$iva" +
+                    " WHERE Id=$IdPedido")
+        }catch (e:Exception){
+            throw Exception(e.message)
+        }finally {
+            bd.close()
         }
     }
 
