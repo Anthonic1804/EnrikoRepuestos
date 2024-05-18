@@ -398,7 +398,7 @@ class InventarioController {
     fun descargarProductosInventario(idPedido: Int, context: Context){
         val base = funciones.getDataBase(context).writableDatabase
         try {
-            val cursor = base.rawQuery("SELECT ID_PRODUCTO, CANTIDAD FROM DETALLE_PEDIDOS WHERE ID_PEDIDO=$idPedido",null)
+            val cursor = base.rawQuery("SELECT ID_PRODUCTO, (CANTIDAD + BONIFICADO) AS CANTIDAD FROM DETALLE_PEDIDOS WHERE ID_PEDIDO=$idPedido",null)
             if (cursor.count > 0) {
                 cursor.moveToFirst()
                 do {

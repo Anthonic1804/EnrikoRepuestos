@@ -60,7 +60,8 @@ class Tablas {
                 "id_cliente INTEGER NOT NULL," +
                 "id_inventario INTEGER NOT NULL," +
                 "precio_p NUMERIC(18,6) NOT NULL," +
-                "precio_p_iva NUMERIC(18,6) NOT NULL)"
+                "precio_p_iva NUMERIC(18,6) NOT NULL," +
+                "bonificado NUMERIC(18,6) NOT NULL DEFAULT 0)"
     }
 
     fun inventario(): String {

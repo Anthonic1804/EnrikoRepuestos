@@ -321,35 +321,77 @@
                 </LinearLayout>
             </LinearLayout>
 
-            <TextView
-                android:id="@+id/tvCantidadUni"
+            <LinearLayout
+                android:id="@+id/lyCantidades"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center"
                 android:layout_marginTop="@dimen/margin_8dp"
-                android:text="@string/cantidad"
-                android:textAlignment="center"
-                android:textColor="@color/moderado"
-                android:textSize="20sp"
-                android:textStyle="bold"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintHorizontal_bias="0.0"
+                app:layout_constraintTop_toBottomOf="@id/lyPrecioExistencias"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/lyPrecioExistencias" />
+                app:layout_constraintEnd_toEndOf="parent">
 
-            <EditText
-                android:id="@+id/txtcantidad"
-                android:layout_width="0dp"
-                android:layout_height="55dp"
-                android:background="@drawable/border_textbox"
-                android:inputType="number"
-                android:hint="@string/_1_00"
-                android:textAlignment="center"
-                android:textColor="@color/colordark"
-                android:textCursorDrawable="@drawable/black_cursor"
-                android:textSize="25sp"
-                app:layout_constraintTop_toBottomOf="@id/tvCantidadUni"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintEnd_toEndOf="parent"/>
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1"
+                    android:orientation="vertical"
+                    android:layout_marginEnd="@dimen/margin_4dp">
+                    <TextView
+                        android:id="@+id/tvCantidadUni"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="@dimen/margin_8dp"
+                        android:text="@string/cantidad"
+                        android:textAlignment="center"
+                        android:textColor="@color/moderado"
+                        android:textSize="20sp"
+                        android:textStyle="bold"/>
+                    <EditText
+                        android:id="@+id/txtcantidad"
+                        android:layout_width="match_parent"
+                        android:layout_height="55dp"
+                        android:background="@drawable/border_textbox"
+                        android:inputType="number"
+                        android:hint="@string/_1_00"
+                        android:textAlignment="center"
+                        android:textColor="@color/colordark"
+                        android:textCursorDrawable="@drawable/black_cursor"
+                        android:textSize="25sp" />
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1"
+                    android:orientation="vertical"
+                    android:layout_marginStart="@dimen/margin_4dp">
+                    <TextView
+                        android:id="@+id/tvCantbonificados"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="@dimen/margin_8dp"
+                        android:text="BONIFICADOS"
+                        android:textAlignment="center"
+                        android:textColor="@color/moderado"
+                        android:textSize="20sp"
+                        android:textStyle="bold"/>
+                    <TextView
+                        android:id="@+id/txtBonificados"
+                        android:layout_width="match_parent"
+                        android:layout_height="55dp"
+                        android:background="@drawable/border_textbox"
+                        android:gravity="center_horizontal|center_vertical"
+                        android:text="0"
+                        android:textColor="@color/colordark"
+                        android:textCursorDrawable="@drawable/black_cursor"
+                        android:textSize="25sp" />
+                </LinearLayout>
+
+            </LinearLayout>
+
+
 
             <Button
                 android:id="@+id/btnagregar"
@@ -362,7 +404,7 @@
                 android:textStyle="bold"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/txtcantidad"/>
+                app:layout_constraintTop_toBottomOf="@id/lyCantidades"/>
 
             <Button
                 android:id="@+id/btneliminar"

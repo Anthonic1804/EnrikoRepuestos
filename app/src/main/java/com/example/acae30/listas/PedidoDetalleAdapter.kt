@@ -28,7 +28,7 @@ class PedidoDetalleAdapter(
     //23-08-2022
     override fun onBindViewHolder(vista: PedidoDetalleAdapter.MyViewHolder, position: Int) {
         var data = list[position]
-        vista.cantidad.text = "${String.format("%.0f", data.Cantidad)}"
+        vista.cantidad.text = "${String.format("%.0f", data.Cantidad?.plus(data.Bonificado!!) ?: data.Cantidad)}"
         vista.descripcion.text = data.Descripcion
         if (data.Precio_editado == "*") {
             vista.total.text = "$" + "${String.format("%.4f", data.Total_iva)}" + "*"

@@ -292,11 +292,6 @@ class carga_datos : AppCompatActivity() {
         var contador: Float = 0.toFloat()
         try {
             bd!!.beginTransaction() //INICIANDO TRANSACCION DE REGISTRO
-            bd.execSQL("DELETE FROM cliente_sucursal") //LIMPIANDO TABLA SUCURSALES
-
-            val sql2 = "DELETE FROM SQLITE_SEQUENCE WHERE NAME = 'cliente_sucursal'"
-            bd.execSQL(sql2)
-
             for (i in 0 until json.length()) {
                 val dato = json.getJSONObject(i)
                 val valor = ContentValues()
@@ -653,10 +648,10 @@ class carga_datos : AppCompatActivity() {
         val bd = database!!.writableDatabase
         try {
             bd!!.beginTransaction() //inicio la transaccion
-            bd.execSQL("DELETE FROM clientes") //limpiamos los registros viejos par obtener los nuevos
 
-            val sql2 = "DELETE FROM SQLITE_SEQUENCE WHERE NAME = 'clientes'"
-            bd.execSQL(sql2)
+            bd.execSQL("DELETE FROM clientes") //limpiamos los registros viejos par obtener los nuevos
+            bd.execSQL("DELETE FROM cliente_precios")
+            bd.execSQL("DELETE FROM cliente_sucursal") //LIMPIANDO TABLA SUCURSALES
 
             for (i in 0 until json.length()) {
                 val dato = json.getJSONObject(i) //obtenemos el objecto json

@@ -157,8 +157,6 @@ class ClientesController {
         val base = funciones.getDataBase(context).writableDatabase
         try {
             base.beginTransaction()
-            base.execSQL("DELETE FROM cliente_precios")
-
             for (i in 0 until json.length()){
                 val datos = json.getJSONObject(i)
                 val valor = ContentValues()
@@ -167,6 +165,7 @@ class ClientesController {
                 valor.put("id_inventario", datos.getInt("id_inventario"))
                 valor.put("precio_p", funciones.validateJsonIsNullFloat(datos, "precio_p"))
                 valor.put("precio_p_iva", funciones.validateJsonIsNullFloat(datos, "precio_p_iva"))
+                valor.put("bonificado", funciones.validateJsonIsNullFloat(datos, "bonificado"))
 
                 base.insert("cliente_precios", null, valor)
             }
@@ -433,6 +432,29 @@ class ClientesController {
             base.close()
         }
         return precioIva
+    }
+
+    //FUNCION PARA OBTENER LAS BONIFICACIONES PERSONALIDAS POR ID CLIENTE E ID PRODUCTO
+    fun obtenerBonificacionCliente(idCliente: Int, idProducto: Int, context: Context) : Float{
+        preferences = context.getSharedPreferences(instancia, Context.MODE_PRIVATE)
+        val base = funciones.getDataBase(context).readableDatabase
+        var bonificacion = 0f
+
+        try {
+            val cursor = base.rawQuery("SELECT bonificado FROM cliente_precios " +
+                    "WHERE id_cliente = $idCliente AND id_inventario = $idProducto", null)
+
+            if(cursor.count > 0){
+                cursor.moveToFirst()
+                bonificacion = cursor.getFloat(0)
+            }
+            cursor.close()
+        }catch (e:Exception){
+            println("ERROR AL BUSCAR LA BONIFICACIONI PERSONALIZADA ->  ${e.message}")
+        }finally {
+            base.close()
+        }
+        return bonificacion
     }
 
 }

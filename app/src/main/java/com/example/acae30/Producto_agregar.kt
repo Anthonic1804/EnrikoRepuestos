@@ -30,6 +30,7 @@ import com.example.acae30.modelos.InventarioPrecios
 import com.example.acae30.modelos.JSONmodels.ActualizarPrecioPersonalizadoJSON
 import com.google.android.material.snackbar.Snackbar
 import com.google.gson.Gson
+import kotlinx.android.synthetic.main.activity_producto_agregar.tvCantbonificados
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
@@ -110,6 +111,8 @@ class Producto_agregar : AppCompatActivity() {
     private var modificarPrecio : Boolean = false
 
     private lateinit var precioPersonalizado : TextView
+    private var bonificacion : Float = 0f
+    private lateinit var txtCantBonificados : TextView
 
     override fun onCreate(savedInstanceState: Bundle?) {
 
@@ -149,6 +152,8 @@ class Producto_agregar : AppCompatActivity() {
         btneliminar = findViewById(R.id.btneliminar)
         precioEditado = 0.toFloat()
 
+        txtCantBonificados = findViewById(R.id.txtBonificados)
+
         txtcantidad = findViewById(R.id.txtcantidad)
         spprecio = findViewById(R.id.spprecio)
         unidadActual = "UNIDAD"
@@ -182,6 +187,10 @@ class Producto_agregar : AppCompatActivity() {
                 )
             }")
         }
+
+        //OBTENIENDO LA BONIFICACION PERSONALIZADA POR CLIENTE
+        bonificacion = clientesController.obtenerBonificacionCliente(idcliente!!,
+            idproducto!!,this@Producto_agregar)
 
         //TOMANDO LA CANTIDAD DE LAS ESCALA SELECCIONADA.
         //09/01/2024
@@ -640,11 +649,17 @@ class Producto_agregar : AppCompatActivity() {
     //PAPELERIA DM
     //23-08-2022
     private fun Totalizar(cantidad: Float) {
-        var total = precio_iva * cantidad
+        val total = precio_iva * cantidad
         txttotal!!.text = "${String.format("%.4f", total)}"
+
+        if(bonificacion > 0){
+            val productosBonificados = cantidad / bonificacion
+            txtCantBonificados.text = productosBonificados.toInt().toString()
+        }
+
     }
 
-    private fun AddDetallePedido(esPrecioEditado: Boolean): Int {
+    private fun AddDetallePedido(esPrecioEditado: Boolean, bonificado:Int): Int {
         val base = db!!.writableDatabase
         try {
             base.beginTransaction()
@@ -666,6 +681,7 @@ class Producto_agregar : AppCompatActivity() {
             detalle.put("Total", (txttotal!!.text.toString().toFloat()) / 1.13)
             detalle.put("Total_iva", txttotal!!.text.toString().toFloat())
             detalle.put("Descuento", 0.toFloat())
+            detalle.put("Bonificado", bonificado)
 
             if (esPrecioEditado) {
                 detalle.put("Precio_editado", "*")
@@ -756,14 +772,15 @@ class Producto_agregar : AppCompatActivity() {
 
     } //obtiene el detalle del pedido
 
-    private fun updateDetalle(iddetalle: Int?, esPrecioEditado: Boolean) {
+    private fun updateDetalle(iddetalle: Int?, esPrecioEditado: Boolean, bonificado: Int) {
         val base = db!!.writableDatabase
         try {
             base.beginTransaction()
             val detalle = ContentValues()
             detalle.put("Cantidad", cantidad)
+            detalle.put("Bonificado", bonificado)
             //detalle.put("Cantidad", spiner!!.selectedItem.toString())
-            detalle.put("Subtotal", txttotal!!.text.toString().toFloat())
+            detalle.put("Total_iva", txttotal!!.text.toString().toFloat())
 
             if (esPrecioEditado) {
                 detalle.put("Precio_editado", "*")
@@ -785,7 +802,7 @@ class Producto_agregar : AppCompatActivity() {
             )
 
             val cursor = base.rawQuery(
-                "SELECT SUM(Subtotal)  FROM detalle_pedidos where Id_pedido=$idpedido",
+                "SELECT SUM(Total_iva)  FROM detalle_pedidos where Id_pedido=$idpedido",
                 null
             )
 
@@ -819,7 +836,7 @@ class Producto_agregar : AppCompatActivity() {
             base.beginTransaction()
             base.execSQL("DELETE FROM detalle_pedidos where Id=$iddetalle") //elimina
             val cursor = base.rawQuery(
-                "SELECT SUM(Subtotal)  FROM detalle_pedidos where Id_pedido=$idpedido",
+                "SELECT SUM(Total_iva)  FROM detalle_pedidos where Id_pedido=$idpedido",
                 null
             )
             var total = 0.toFloat()
@@ -1244,6 +1261,9 @@ class Producto_agregar : AppCompatActivity() {
 
     //FUNCION PARA AGREGAR EL PRODUCTO SELECCIONADO AL PEDIDO
     private fun agregarProducto(){
+
+        var bonificacion = txtCantBonificados.text.toString().toInt()
+
         // Validar si la cantidad corresponde al precio
         var esCorrecto = true
 
@@ -1425,7 +1445,7 @@ class Producto_agregar : AppCompatActivity() {
 
                 if (idpedido > 0) {
                     if (idpedidodetalle!! > 0) {
-                        updateDetalle(idpedidodetalle!!, esPrecioEditado)
+                        updateDetalle(idpedidodetalle!!, esPrecioEditado, bonificacion)
                     } else {
                         val id = validateProduct(idproducto!!)
                         if (id > 0) {
@@ -1434,9 +1454,9 @@ class Producto_agregar : AppCompatActivity() {
                             var t =
                                 ((txttotal!!.text.toString().toFloat()) + data.Total_iva!!)
                             txttotal!!.text = "${String.format("%.4f", t)}"
-                            updateDetalle(id, esPrecioEditado)
+                            updateDetalle(id, esPrecioEditado, bonificacion)
                         } else {
-                            AddDetallePedido(esPrecioEditado)
+                            AddDetallePedido(esPrecioEditado, bonificacion)
                         }
                     }
 
