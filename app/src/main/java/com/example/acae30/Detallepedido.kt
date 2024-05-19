@@ -113,6 +113,7 @@ class Detallepedido : AppCompatActivity() {
     private lateinit var tvTitulo : TextView
     private lateinit var tvMensaje : TextView
     private var enviandoPedido = false
+    private var guardandoPedido = false
 
 
     val fecha: String = LocalDate.now()
@@ -275,27 +276,17 @@ class Detallepedido : AppCompatActivity() {
 
         //EVENTRO CLIC DEL BOTON ENVIAR
         binding.btnenviar.setOnClickListener {
-            val pedidoInfo = pedidosController.obtenerInformacionPedido(idpedido, this@Detallepedido)
-            enviandoPedido = true
+            if (ConfirmarDetallePedido() > 0) {
+                val pedidoInfo = pedidosController.obtenerInformacionPedido(idpedido, this@Detallepedido)
+                enviandoPedido = true
 
-            if(pedidoInfo?.Cerrado == 0 && pedidoInfo.Enviado == 0){
-                alertaPago(total)
-            }else{
-                Toast.makeText(this, "EL PEDIDO SOLO SERA ENVIADO", Toast.LENGTH_SHORT).show()
-               /* if(funciones.isInternetAvailable(this)){
-                    if(ConfirmarDetallePedido() > 0){
-                        alerta!!.pedidoEnviado()
-
-                        CoroutineScope(Dispatchers.IO).launch {
-                            enviarPedidoaServidor(it)
-                        }
-
-                    }else{
-                        funciones.mostrarAlerta("ERROR: NO HAY PRODUCTOS AGREGADOS AL PEDIDO", this@Detallepedido, binding.lienzo)
-                    }
+                if(pedidoInfo?.Cerrado == 0 && pedidoInfo.Enviado == 0){
+                    alertaPago(total)
                 }else{
-                    funciones.mostrarAlerta("ERROR: NO TIENES CONEXION A INTERNET", this@Detallepedido, binding.lienzo)
-                }*/
+                    verificarConexionEnvio()
+                }
+            } else {
+                funciones.mostrarAlerta("ERROR: NO HAY PRODUCTOS AGREGADOS AL PEDIDO", this@Detallepedido, binding.lienzo)
             }
 
         }
@@ -303,45 +294,12 @@ class Detallepedido : AppCompatActivity() {
         //EVENTO CLIC DEL BOTON GUARDAR.
         binding.btnguardar.setOnClickListener {
             if (ConfirmarDetallePedido() > 0) {
-                try {
-                    imprimirRecibo()
-                } catch (e: Exception) {
-                    alerta!!.dismisss()
-                    funciones.mostrarAlerta("ERROR: ${e.message}", this@Detallepedido, binding.lienzo)
-                }finally {
-                    //DESCARGANDO INVENTARIO
-                    descargarInventario()
-
-                    pedidosController.actualizarEstadoAlGuardar(idpedido, this@Detallepedido, binding.lienzo) //FUNCION PARA ACTUALIZAR EL ESTADO
-                    alerta!!.pedidoGuardado()
-                    alerta!!.changeText("Guardando Pedido")
-
-                    Timer().schedule(2300){
-                        runOnUiThread {
-                            alerta!!.dismisss()
-                           /* val visitaAbierta = getEstadoVisita()
-
-                            if (visitaAbierta == 1) {
-                                val intento = Intent(this@Detallepedido, Visita::class.java)
-                                intento.putExtra("id", idcliente)
-                                intento.putExtra("nombrecliente", nombre)
-                                intento.putExtra("idpedido", idpedido)
-                                intento.putExtra("visitaid", idvisita)
-                                intento.putExtra("codigo", codigo)
-                                intento.putExtra("idapi", idapi)
-                                startActivity(intento)
-                                finish()
-                            } else {
-                                val intento = Intent(this@Detallepedido, Pedido::class.java)
-                                startActivity(intento)
-                                finish()
-                            }*/
-                        }
-                    }
-                }
+                guardandoPedido = true
+                alertaPago(total)
             } else {
                 funciones.mostrarAlerta("ERROR: NO HAY PRODUCTOS AGREGADOS AL PEDIDO", this@Detallepedido, binding.lienzo)
             }
+
         }
 
         //BOTON DE EXPORTAR A PDF EL PEDIDO
@@ -419,6 +377,29 @@ class Detallepedido : AppCompatActivity() {
                 }
             }
             override fun onNothingSelected(p0: AdapterView<*>?) {}
+        }
+    }
+
+    //FUNCION PARA GUARDAR EL PEDIDO EN EL DISPOSITIVO
+    private fun guardarPedido(){
+        try {
+            //DESCARGANDO INVENTARIO
+            descargarInventario()
+
+            pedidosController.actualizarEstadoAlGuardar(idpedido, this@Detallepedido, binding.lienzo) //FUNCION PARA ACTUALIZAR EL ESTADO
+            alerta!!.pedidoGuardado()
+            alerta!!.changeText("Guardando Pedido")
+
+            Timer().schedule(2300){
+                runOnUiThread {
+                    alerta!!.dismisss()
+                }
+
+                pedidoEnviado()
+            }
+        } catch (e: Exception) {
+            alerta!!.dismisss()
+            funciones.mostrarAlerta("ERROR: ${e.message}", this@Detallepedido, binding.lienzo)
         }
     }
 
@@ -527,6 +508,10 @@ class Detallepedido : AppCompatActivity() {
         if(enviandoPedido){
             envioAlerta()
         }
+
+        if(guardandoPedido){
+            guardarPedido()
+        }
     }
 
     private fun envioAlerta(){
@@ -558,15 +543,10 @@ class Detallepedido : AppCompatActivity() {
 
     private fun verificarConexionEnvio() {
         if(funciones.isInternetAvailable(this)){
-            if(ConfirmarDetallePedido() > 0){
-                alerta!!.pedidoEnviado()
+            alerta!!.pedidoEnviado()
 
-                CoroutineScope(Dispatchers.IO).launch {
-                    enviarPedidoaServidor()
-                }
-
-            }else{
-                funciones.mostrarAlerta("ERROR: NO HAY PRODUCTOS AGREGADOS AL PEDIDO", this@Detallepedido, binding.lienzo)
+            CoroutineScope(Dispatchers.IO).launch {
+                enviarPedidoaServidor()
             }
         }else{
             funciones.mostrarAlerta("ERROR: NO TIENES CONEXION A INTERNET", this@Detallepedido, binding.lienzo)
