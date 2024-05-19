@@ -543,7 +543,7 @@ class Pedido : AppCompatActivity() {
 
                 val intento = Intent(this@Pedido, Detallepedido::class.java)
                 intento.putExtra("nombrecliente", data.Nombre_cliente)
-                intento.putExtra("idcliene", data.Id_cliente!!)
+                intento.putExtra("idcliente", data.Id_cliente!!)
                 intent.putExtra("codigo", "")
                 intento.putExtra("idpedido", data.Id)
                 intento.putExtra("from", "ver")
