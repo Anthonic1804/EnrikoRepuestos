@@ -23,6 +23,18 @@ class PedidosController {
         }
     }
 
+    //FUNCION PARA ACTUALIZAR EL PAGO Y EL CAMBIO DEL CLIENTE
+    fun actualizarPagoCambioPedido(context: Context, idpedido: Int, pago:Float, cambio:Float){
+        val bd = funciones.getDataBase(context).writableDatabase
+        try {
+            bd.execSQL("UPDATE pedidos SET pago=$pago, cambio=$cambio WHERE id=$idpedido")
+        }catch (e:Exception){
+            throw Exception(e.message)
+        }finally {
+            bd.close()
+        }
+    }
+
     //FUNCION PARA ACTUALIZAR LOS TERMINOS DE ENVIO DEL PEDIDO
     fun actualizarTerminosEnvio(terminos:String, idpedido: Int, context: Context){
         val data = funciones.getDataBase(context).writableDatabase

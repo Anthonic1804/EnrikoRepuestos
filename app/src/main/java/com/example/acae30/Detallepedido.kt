@@ -26,6 +26,7 @@ import android.widget.AdapterView
 import android.widget.AdapterView.OnItemSelectedListener
 import android.widget.ArrayAdapter
 import android.widget.Button
+import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
@@ -106,6 +107,12 @@ class Detallepedido : AppCompatActivity() {
     private lateinit var preferencias: SharedPreferences
 
     private val instancia = "CONFIG_SERVIDOR"
+
+    private lateinit var tvUpdate : TextView
+    private lateinit var tvCancel : TextView
+    private lateinit var tvTitulo : TextView
+    private lateinit var tvMensaje : TextView
+    private var enviandoPedido = false
 
 
     val fecha: String = LocalDate.now()
@@ -268,24 +275,29 @@ class Detallepedido : AppCompatActivity() {
 
         //EVENTRO CLIC DEL BOTON ENVIAR
         binding.btnenviar.setOnClickListener {
+            val pedidoInfo = pedidosController.obtenerInformacionPedido(idpedido, this@Detallepedido)
+            enviandoPedido = true
 
-            alertaPago(total)
-
-            /*
-            if(funciones.isInternetAvailable(this)){
-                if(ConfirmarDetallePedido() > 0){
-                    alerta!!.pedidoEnviado()
-
-                    CoroutineScope(Dispatchers.IO).launch {
-                        enviarPedidoaServidor(it)
-                    }
-
-                }else{
-                    funciones.mostrarAlerta("ERROR: NO HAY PRODUCTOS AGREGADOS AL PEDIDO", this@Detallepedido, binding.lienzo)
-                }
+            if(pedidoInfo?.Cerrado == 0 && pedidoInfo.Enviado == 0){
+                alertaPago(total)
             }else{
-                funciones.mostrarAlerta("ERROR: NO TIENES CONEXION A INTERNET", this@Detallepedido, binding.lienzo)
-            }*/
+                Toast.makeText(this, "EL PEDIDO SOLO SERA ENVIADO", Toast.LENGTH_SHORT).show()
+               /* if(funciones.isInternetAvailable(this)){
+                    if(ConfirmarDetallePedido() > 0){
+                        alerta!!.pedidoEnviado()
+
+                        CoroutineScope(Dispatchers.IO).launch {
+                            enviarPedidoaServidor(it)
+                        }
+
+                    }else{
+                        funciones.mostrarAlerta("ERROR: NO HAY PRODUCTOS AGREGADOS AL PEDIDO", this@Detallepedido, binding.lienzo)
+                    }
+                }else{
+                    funciones.mostrarAlerta("ERROR: NO TIENES CONEXION A INTERNET", this@Detallepedido, binding.lienzo)
+                }*/
+            }
+
         }
 
         //EVENTO CLIC DEL BOTON GUARDAR.
@@ -459,16 +471,8 @@ class Detallepedido : AppCompatActivity() {
     }
 
     //FUNCION PARA ENVIAR EL PEDIDO AL SERVIDOR
-    private suspend fun enviarPedidoaServidor(view: View){
+    private suspend fun enviarPedidoaServidor(){
         try {
-            imprimirRecibo()
-        }catch (e: Exception){
-            withContext(Dispatchers.Main){
-                alerta!!.dismisss()
-
-                funciones.mostrarAlerta("ERROR AL ENVIAR EL PEDIDO", this@Detallepedido, binding.lienzo)
-            }
-        }finally {
             Timer().schedule(2300){
                 val pedido = getPedidoSend(idpedido) //retorna el pedido
 
@@ -481,47 +485,92 @@ class Detallepedido : AppCompatActivity() {
 
                 if(enviado){
                     //SI EL PEDIDO YA HA FUE CERRADO NO REALIZA LA DESCARGA NUEVAMENTE
-                    if(pedido.Cerrado!! == 1){
+                    if(pedido.Cerrado!! == 0){
                         //DESCARGANDO INVENTARIO
                         descargarInventario()
                     }
+
+                    pedidoEnviado()
+
                 }else{
                     runOnUiThread {
                         Toast.makeText(this@Detallepedido,"DESEA ALMACENAR EL PEDIDO PARA LUEGO ENVIARLO", Toast.LENGTH_SHORT).show()
                     }
                 }
             }
+        }catch (e: Exception){
+            withContext(Dispatchers.Main){
+                alerta!!.dismisss()
+
+                funciones.mostrarAlerta("ERROR AL ENVIAR EL PEDIDO", this@Detallepedido, binding.lienzo)
+            }
         }
     }
 
     //FUNCION PARA FINALIZAR EL ENVIO DEL PEDIDO
-    private fun pedidoEnviado(string: String){
-        val pedido = getPedidoSend(idpedido)
-        println("DATOS DEL PEDIDO ${pedido!!.Cerrado}, $string")
-        if(string == "visita"){
-            if (pedido.Cerrado!! == 1) {
-                val intento = Intent(this@Detallepedido, Visita::class.java)
-                intento.putExtra("id", idcliente)
-                intento.putExtra("nombrecliente", nombre)
-                intento.putExtra("idpedido", idpedido)
-                intento.putExtra("visitaid", idvisita)
-                intento.putExtra("codigo", codigo)
-                intento.putExtra("idapi", idapi)
-                startActivity(intento)
-                finish()
-            }
-        }else{
-            if(pedido.Enviado!! == 1){
-                binding.btnenviar.visibility = View.GONE
-            }
-        }
+    private fun pedidoEnviado(){
+        val intento = Intent(this@Detallepedido, Visita::class.java)
+        intento.putExtra("id", idcliente)
+        intento.putExtra("nombrecliente", nombre)
+        intento.putExtra("idpedido", idpedido)
+        intento.putExtra("visitaid", idvisita)
+        intento.putExtra("codigo", codigo)
+        intento.putExtra("idapi", idapi)
+        startActivity(intento)
+        finish()
     }
 
     //METODO PARA VERIFICAR SI EL PEDIDO YA FUE CERRADO PARA PODER REDIRECCIONAR
     //CORRECTAMENTE
     override fun onResume() {
         super.onResume()
-        pedidoEnviado(from!!)
+        if(enviandoPedido){
+            envioAlerta()
+        }
+    }
+
+    private fun envioAlerta(){
+        val updateDialog = Dialog(this, R.style.Theme_Dialog)
+        updateDialog.setCancelable(false)
+
+        updateDialog.setContentView(R.layout.dialog_cancelar)
+        tvUpdate = updateDialog.findViewById(R.id.tvUpdate)
+        tvCancel = updateDialog.findViewById(R.id.tvCancel)
+        tvMensaje = updateDialog.findViewById(R.id.tvMensaje)
+        tvTitulo = updateDialog.findViewById(R.id.tvTitulo)
+
+        tvTitulo.text = "INFORMACIÓN"
+        tvMensaje.text = "¿DESEA ENVIAR EL PEDIDO?"
+        tvUpdate.text = "ACEPTAR"
+
+        tvUpdate.setOnClickListener {
+            updateDialog.dismiss()
+            verificarConexionEnvio()
+        }
+
+        tvCancel.setOnClickListener {
+            enviandoPedido = false
+            updateDialog.dismiss()
+        }
+
+        updateDialog.show()
+    }
+
+    private fun verificarConexionEnvio() {
+        if(funciones.isInternetAvailable(this)){
+            if(ConfirmarDetallePedido() > 0){
+                alerta!!.pedidoEnviado()
+
+                CoroutineScope(Dispatchers.IO).launch {
+                    enviarPedidoaServidor()
+                }
+
+            }else{
+                funciones.mostrarAlerta("ERROR: NO HAY PRODUCTOS AGREGADOS AL PEDIDO", this@Detallepedido, binding.lienzo)
+            }
+        }else{
+            funciones.mostrarAlerta("ERROR: NO TIENES CONEXION A INTERNET", this@Detallepedido, binding.lienzo)
+        }
     }
 
     //FUNCION PARA DESCARGAR EL PRODUCTO DE INVENTARIO APP
@@ -1200,17 +1249,18 @@ class Detallepedido : AppCompatActivity() {
             canvas.restore()
 
             paint.textSize = textSizeTotal
-            val totalWidth = paint.measureText("$ ${data.Total}")
-            canvas.drawText("$ ${data.Total}", columnX[2] + columnWidths[2] - totalWidth, y + 15f, paint)
+            val totalWidth = paint.measureText("$ ${data.Total_iva}")
+            canvas.drawText("$ ${data.Total_iva}", columnX[2] + columnWidths[2] - totalWidth, y + 15f, paint)
 
             y += descripcionLayout.height.toFloat() + 20f
-            total += data.Total!!
+            total += data.Total_iva!!
         }
 
         // Draw total
+
         y += 20f
         paint.textSize = 12f // Restaurar el tamaño de letra predeterminado
-        canvas.drawText("Total:", 50f, y, paint)
+        canvas.drawText("TOTAL:", 50f, y, paint)
         val totalTextWidth = paint.measureText("$total")
         canvas.drawText("$total", canvas.width - totalTextWidth - 50f, y, paint)
 
@@ -1252,39 +1302,48 @@ class Detallepedido : AppCompatActivity() {
         dialogo.setContentView(R1.layout.vista_cobro)
         dialogo.setCancelable(false)
 
-        var calculo: Float
-
         val etTotal = dialogo.findViewById<TextInputEditText>(R1.id.txtTotalPago)
         etTotal.setText("$" + "${String.format("%.2f", total)}")
 
         val etCambio = dialogo.findViewById<TextInputEditText>(R1.id.txtCambioPago)
+        var cambio = 0f
 
         val etPago = dialogo.findViewById<TextInputEditText>(R1.id.txtEfectivoPago)
+        var pagoCliente = 0f
+
         etPago.addTextChangedListener(object : TextWatcher {
             override fun beforeTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {
                 //NADA QUE HACER
             }
 
-            override fun onTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {
-                var pagoCliente = etPago.text.toString()
-                if(pagoCliente == ""){
-                    pagoCliente = 0f.toString()
-                    calculo = total - pagoCliente.toFloat()
-                    etCambio.setText("$" + "${String.format("%.2f", calculo)}")
+            override fun onTextChanged(pago: CharSequence?, p1: Int, p2: Int, p3: Int) {
+                if(pago.isNullOrEmpty()){
+                    pagoCliente = 0f
+                    cambio = total - pagoCliente
+                    etCambio.setText("${String.format("%.2f", cambio)}")
                 }else{
-                    calculo = total - pagoCliente.toFloat()
-                    etCambio.setText("$" + "${String.format("%.2f", calculo)}")
+                    pagoCliente = pago.toString().toFloat()
+                    cambio = total - pagoCliente
+                    etCambio.setText("${String.format("%.2f", cambio)}")
                 }
             }
 
             override fun afterTextChanged(p0: Editable?) {
                 //NADA QUE HACER
+
             }
 
         })
 
         //PROCESO DEL BOTON ACEPTAR
         dialogo.findViewById<Button>(R1.id.btnaceptar).setOnClickListener {
+            CoroutineScope(Dispatchers.IO).launch {
+                pedidosController.actualizarPagoCambioPedido(this@Detallepedido, idpedido,
+                    pagoCliente, cambio
+                )
+            }
+            dialogo.dismiss()
+            imprimirRecibo()
 
         }
 
