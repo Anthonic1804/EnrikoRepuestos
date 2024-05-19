@@ -29,6 +29,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.acae30.R
+import com.example.acae30.controllers.ClientesController
 import com.example.acae30.controllers.InventarioController
 import com.example.acae30.controllers.PedidosController
 import com.example.acae30.database.Database
@@ -71,6 +72,7 @@ class Detallepedido : AppCompatActivity() {
     private var pedidoEnviado: Boolean = false
     private var getSucursalPosition: Int? = null
     private var tipoEnvio: Int? = null
+    private var terminosPedidos: String? = null
 
     private var tipoDocumento: String = ""
 
@@ -93,10 +95,12 @@ class Detallepedido : AppCompatActivity() {
     private var envioSelec : String = ""
     private var documentoSelec : String = ""
     private var sucursalName: String = ""
+    private var categoriaCliente: String = ""
 
     private var funciones = Funciones()
     private var pedidosController = PedidosController()
     private var inventarioController = InventarioController()
+    private var clientesController = ClientesController()
     private lateinit var preferencias: SharedPreferences
 
     private val instancia = "CONFIG_SERVIDOR"
@@ -134,6 +138,9 @@ class Detallepedido : AppCompatActivity() {
 
         visita_enviada = false
 
+        //OBTENIENDO LA CATEGORIA DEL CLIENTE
+        categoriaCliente = clientesController.obtenerInformacionCliente(this@Detallepedido, idcliente)?.Categoria_cliente.toString()
+
         //DESHABILITAMOS LOS TEXTVIEWS DE INFORMACION ENVIADA
         binding.tvDocumentoSeleccionado.visibility = View.GONE
         binding.tvTipoenvio.visibility = View.GONE
@@ -148,19 +155,16 @@ class Detallepedido : AppCompatActivity() {
         //FUNCION PARA DESHABILITAR FUNCIONES SEGUN PROCESO
         validarProcesoPedidos()
 
-        //COMPLETANDO SPINNER TIPO ENVIO
+        //COMPLETANDO SPINNER TERMINOS ENVIO
         val listaTipoAdaptador = ArrayAdapter<String>(this@Detallepedido, android.R.layout.simple_spinner_dropdown_item)
-        listaTipoAdaptador.addAll(listOf("RUTA", "ENCOMIENDA"))
-        binding.spTipoEnvio.adapter = listaTipoAdaptador
-
-        //COMPLETANDO TVTIPOENVIO
-        when(tipoEnvio){
-            0 -> {
-                binding.tvTipoenvio.text = getString(R.string.ruta)
-                binding.spTipoEnvio.setSelection(0, true)
+        when(terminosPedidos){
+            "Contado" -> {
+                listaTipoAdaptador.addAll(listOf("CONTADO"))
+                binding.spTipoEnvio.adapter = listaTipoAdaptador
             }
-            1 -> {
-                binding.tvTipoenvio.text = getString(R.string.encomienda)
+            else -> {
+                listaTipoAdaptador.addAll(listOf("CONTADO", "CREDITO"))
+                binding.spTipoEnvio.adapter = listaTipoAdaptador
                 binding.spTipoEnvio.setSelection(1, true)
             }
         }
@@ -362,11 +366,11 @@ class Detallepedido : AppCompatActivity() {
                 envioSelec = parent?.getItemAtPosition(position).toString()
 
                 when(envioSelec){
-                    "ENCOMIENDA" -> {
-                       pedidosController.updateTipoPedido(1, idpedido, this@Detallepedido)
+                    "CONTADO" -> {
+                        pedidosController.actualizarTerminosEnvio("Contado", idpedido,this@Detallepedido)
                     }
-                    "RUTA" -> {
-                        pedidosController.updateTipoPedido(0, idpedido, this@Detallepedido)
+                    "CREDITO" -> {
+                        pedidosController.actualizarTerminosEnvio("Credito", idpedido, this@Detallepedido)
                     }
                 }
             }
@@ -406,17 +410,34 @@ class Detallepedido : AppCompatActivity() {
 
     //FUNCION PARA ACTUALIZAR TOTALES CUANDO ES CREDITO FISCAL
     private fun actualizarTotales(){
-        when(tipoDocumento) {
-            "CF" -> {
-                binding.txtSumas.text = "$" + "${String.format("%.4f", (total/1.13))}"
-                binding.txtIva.text = "$" + "${String.format("%.4f", ((total/1.13)*0.13))}"
-            }
+        if(total > 0){
+            when(tipoDocumento) {
+                "CF" -> {
+                    if(categoriaCliente == "Gran contribuyente"){
+                        binding.txtSumas.text = "${String.format("%.4f", (total/1.13)/1.01)}"
+                        binding.txtIva.text = "${String.format("%.4f", ((total/1.13)*0.13))}"
+                        binding.txtIvaPerci.text = "${String.format("%.4f", ((total/1.13)*0.01))}"
+                    }else{
+                        binding.txtSumas.text = "${String.format("%.4f", (total/1.13))}"
+                        binding.txtIva.text = "${String.format("%.4f", ((total/1.13)*0.13))}"
+                        binding.txtIvaPerci.text = "${String.format("%.4f", 0f)}"
+                    }
+                }
+                else -> {
+                    binding.txtSumas.text = "${String.format("%.4f", total)}"
+                    binding.txtIva.text = "${String.format("%.4f", 0f)}"
+                    binding.txtIvaPerci.text = "${String.format("%.4f", 0f)}"
 
-            else -> {
-                binding.txtSumas.text = "$" + "${String.format("%.4f", total)}"
-                binding.txtIva.text = "$" + "${String.format("%.4f", 0f)}"
+                }
             }
         }
+
+        val sumas = binding.txtSumas.text.toString().toFloat()
+        val iva = binding.txtIva.text.toString().toFloat()
+        val ivaperci = binding.txtIvaPerci.text.toString().toFloat()
+
+        pedidosController.actualizarTotalesFiscales(this@Detallepedido, idpedido,
+            sumas, iva, ivaperci)
 
     }
 
@@ -458,7 +479,7 @@ class Detallepedido : AppCompatActivity() {
 
                 if(enviado){
                     //SI EL PEDIDO YA HA FUE CERRADO NO REALIZA LA DESCARGA NUEVAMENTE
-                    if(!pedido.Cerrado!!){
+                    if(pedido.Cerrado!! == 1){
                         //DESCARGANDO INVENTARIO
                         descargarInventario()
                     }
@@ -474,8 +495,9 @@ class Detallepedido : AppCompatActivity() {
     //FUNCION PARA FINALIZAR EL ENVIO DEL PEDIDO
     private fun pedidoEnviado(string: String){
         val pedido = getPedidoSend(idpedido)
+        println("DATOS DEL PEDIDO ${pedido!!.Cerrado}, $string")
         if(string == "visita"){
-            if (pedido!!.Cerrado!!) {
+            if (pedido.Cerrado!! == 1) {
                 val intento = Intent(this@Detallepedido, Visita::class.java)
                 intento.putExtra("id", idcliente)
                 intento.putExtra("nombrecliente", nombre)
@@ -487,7 +509,7 @@ class Detallepedido : AppCompatActivity() {
                 finish()
             }
         }else{
-            if(pedido!!.Enviado!!){
+            if(pedido.Enviado!! == 1){
                 binding.btnenviar.visibility = View.GONE
             }
         }
@@ -516,7 +538,7 @@ class Detallepedido : AppCompatActivity() {
     private fun getTipoEnvio(ipPedido: Int){
         val dataBase = db!!.readableDatabase
         try {
-            val getTipo = dataBase.rawQuery("SELECT Enviado, nombre_sucursal, tipo_envio, tipo_documento FROM pedidos WHERE id=$ipPedido", null)
+            val getTipo = dataBase.rawQuery("SELECT Enviado, nombre_sucursal, tipo_envio, tipo_documento, terminos FROM pedidos WHERE id=$ipPedido", null)
             val getPedidoData = ArrayList<dataPedidos>()
             if(getTipo.count > 0){
                 getTipo.moveToFirst()
@@ -525,7 +547,8 @@ class Detallepedido : AppCompatActivity() {
                         getTipo.getInt(0) == 1,
                         getTipo.getString(1),
                         getTipo.getInt(2),
-                        getTipo.getString(3)
+                        getTipo.getString(3),
+                        getTipo.getString(4)
                     )
                     getPedidoData.add(data)
                 }while (getTipo.moveToNext())
@@ -536,6 +559,7 @@ class Detallepedido : AppCompatActivity() {
                 nombreSucursalPedido = data.nombreSucursalPedido!!.toString()
                 tipoEnvio = data.tipoPedido!!.toInt()
                 tipoDocumento = data.tipoDocumento!!.toString()
+                terminosPedidos = data.terminosPedido!!.toString()
             }
             getTipo.close()
         }catch (e: Exception) {
@@ -659,7 +683,7 @@ class Detallepedido : AppCompatActivity() {
                     binding.sinSucursal.text = getString(R.string.no_tiene_sucursal_registrada_)
                 }
 
-                if(pedido!!.Enviado){
+                if(pedido!!.Enviado == 1){
                     binding.txtCliente.isEnabled = false
                     binding.imgbtnadd.visibility = View.GONE
                     binding.btnenviar.visibility = View.GONE
@@ -672,7 +696,7 @@ class Detallepedido : AppCompatActivity() {
                     binding.tvDocumentoSeleccionado.visibility = View.VISIBLE
                     binding.tvTipoenvio.visibility = View.VISIBLE
 
-                }else if(!pedido.Enviado && pedido.Cerrado == 1){
+                }else if(pedido.Enviado != 1 && pedido.Cerrado == 1){
                     binding.txtCliente.isEnabled = false
                     binding.imgbtnadd.visibility = View.GONE
                     binding.btnenviar.visibility = View.VISIBLE
@@ -709,7 +733,7 @@ class Detallepedido : AppCompatActivity() {
         )
         binding.reciclerdetalle.layoutManager = mLayoutManager
         val adapter = PedidoDetalleAdapter(lista, this@Detallepedido) { i ->
-            if(!pedido!!.Enviado && from == "visita"){
+            if(pedido!!.Enviado != 1 && from == "visita"){
                 val data = lista[i]
                 val intento = Intent(this@Detallepedido, Producto_agregar::class.java)
 
@@ -801,20 +825,20 @@ class Detallepedido : AppCompatActivity() {
                 envio = CabezeraPedidoSend(
                     pedido.getInt(1),//id del cliente
                     pedido.getString(2), //nombre del cliente
-                    pedido.getFloat(3),
-                    pedido.getFloat(4),
-                    pedido.getFloat(3),
-                    pedido.getInt(5) == 1,
-                    pedido.getInt(9) == 1,
+                    pedido.getFloat(11), //POR EL MOMENTO TIENE EL DATO DEL TOTAL
+                    pedido.getFloat(5),
+                    pedido.getFloat(11),
                     pedido.getInt(12),
-                    pedido.getString(13),
-                    pedido.getString(14),
                     pedido.getInt(16),
-                    pedido.getString(15),
+                    pedido.getInt(19),
+                    pedido.getString(20),
+                    pedido.getString(21),
+                    pedido.getInt(23),
+                    pedido.getString(22),
                     0,
                     "",
-                    pedido.getString(11),
-                    pedido.getString(17),
+                    pedido.getString(18),
+                    pedido.getString(24),
                     null
 
                 )

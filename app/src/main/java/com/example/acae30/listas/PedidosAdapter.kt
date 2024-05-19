@@ -37,7 +37,7 @@ class PedidosAdapter(
         holder.txtCliente.text = data.Nombre_cliente
         holder.txtTotal.text = "$" + "${String.format("%.4f", data.Total)}"
         var estado = "ENVIADO"
-        if (!data.Enviado) {
+        if (data.Enviado == 0) {
             estado = "NO ENVIADO"
             holder.txtEstado.setBackgroundResource(R.drawable.border_status_red)
         }

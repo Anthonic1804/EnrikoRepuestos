@@ -4,5 +4,6 @@ data class dataPedidos(
     var envioPedido : Boolean?,
     var nombreSucursalPedido: String?,
     var tipoPedido:Int?,
-    var tipoDocumento:String?
+    var tipoDocumento:String?,
+    var terminosPedido:String?
 )

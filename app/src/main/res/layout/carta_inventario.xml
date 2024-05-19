@@ -50,6 +50,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:text="TextView"
+                    android:layout_marginTop="@dimen/margin_8dp"
                     android:textAlignment="textStart"
                     android:textColor="@color/moderado"
                     android:textSize="12sp"
@@ -99,7 +100,8 @@
                     android:text="TextView"
                     android:textColor="@color/colorPrimaryDark"
                     android:textSize="16sp"
-                    android:textStyle="bold" />
+                    android:textStyle="bold"
+                    android:layout_marginBottom="8dp"/>
 
             </LinearLayout>
         </LinearLayout>

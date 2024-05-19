@@ -7,7 +7,7 @@ data class Pedidos(
     var Nombre_cliente: String?,
     var Total: Float?,
     var Descuento: Float?,
-    var Enviado: Boolean,
+    var Enviado: Int,
     var Fecha_enviado: String?,
     var Id_pedido_sistema: Int?,
     var Gps: String?,

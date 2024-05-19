@@ -23,13 +23,23 @@ class PedidosController {
         }
     }
 
-    //FUNCION PARA ACTUALIZAR LOS TOTAL SEGUN TIPO DE DOCUMENTO
-    fun actualizarTotales(context: Context, IdPedido: Int, total:Float){
-        val bd = funciones.getDataBase(context).writableDatabase
-        val sumas = total / 1.13
-        val iva = (total / 1.13) * 0.13
+    //FUNCION PARA ACTUALIZAR LOS TERMINOS DE ENVIO DEL PEDIDO
+    fun actualizarTerminosEnvio(terminos:String, idpedido: Int, context: Context){
+        val data = funciones.getDataBase(context).writableDatabase
         try {
-            bd.execSQL("UPDATE pedidos SET Sumas=$sumas, Iva=$iva" +
+            data.execSQL("UPDATE pedidos SET Terminos='$terminos' WHERE id=$idpedido")
+        }catch (e:Exception){
+            throw Exception(e.message)
+        }finally {
+            data.close()
+        }
+    }
+
+    //FUNCION PARA ACTUALIZAR LOS TOTAL SEGUN TIPO DE DOCUMENTO
+    fun actualizarTotalesFiscales(context: Context, IdPedido: Int, sumas:Float, iva:Float, iva_perci:Float){
+        val bd = funciones.getDataBase(context).writableDatabase
+        try {
+            bd.execSQL("UPDATE pedidos SET Sumas=$sumas, Iva=$iva, Iva_percibido=$iva_perci" +
                     " WHERE Id=$IdPedido")
         }catch (e:Exception){
             throw Exception(e.message)
@@ -74,15 +84,15 @@ class PedidosController {
                     cursor.getInt(0),
                     cursor.getInt(1),
                     cursor.getString(2),
-                    cursor.getFloat(3),
-                    cursor.getFloat(4),
-                    cursor.getInt(5) == 1,
-                    cursor.getString(6),
-                    cursor.getInt(7),
-                    cursor.getString(8),
-                    cursor.getInt(9),
-                    cursor.getInt(10),
-                    cursor.getString(11)
+                    cursor.getFloat(11),
+                    cursor.getFloat(5),
+                    cursor.getInt(12),
+                    cursor.getString(13),
+                    cursor.getInt(14),
+                    cursor.getString(15),
+                    cursor.getInt(16),
+                    cursor.getInt(17),
+                    cursor.getString(18)
                 )
                 cursor.close()
             }

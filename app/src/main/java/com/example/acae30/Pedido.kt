@@ -139,7 +139,9 @@ class Pedido : AppCompatActivity() {
 
         //sincronizar los datos que no se han enviado
         btnsincronizar!!.setOnClickListener {
-            btnsincronizar!!.isEnabled = false
+            Toast.makeText(this@Pedido, "FUNCION EN CONSTRUCCION", Toast.LENGTH_SHORT)
+                .show()
+            /*btnsincronizar!!.isEnabled = false
             if (isConnected()) {
 
                 var alert: Snackbar =
@@ -337,32 +339,32 @@ class Pedido : AppCompatActivity() {
 
                 try {
 
-                    var pedidos =
+                    var cursor =
                         base_p!!.rawQuery("SELECT * FROM pedidos WHERE enviado=0", null)
 
-                    if (pedidos.count > 0) {
-                        pedidos.moveToFirst()
+                    if (cursor.count > 0) {
+                        cursor.moveToFirst()
                         do {
                             val datos = Pedidos(
-                                pedidos.getInt(0),
-                                pedidos.getInt(1),
-                                pedidos.getString(2),
-                                pedidos.getFloat(3),
-                                pedidos.getFloat(4),
-                                pedidos.getInt(5) == 1,
-                                pedidos.getString(6),
-                                pedidos.getInt(7),
-                                pedidos.getString(8),
-                                pedidos.getInt(9),
-                                pedidos.getInt(10),
-                                pedidos.getString(11)
+                                cursor.getInt(0),
+                                cursor.getInt(1),
+                                cursor.getString(2),
+                                cursor.getFloat(11),
+                                cursor.getFloat(5),
+                                cursor.getInt(12),
+                                cursor.getString(13),
+                                cursor.getInt(14),
+                                cursor.getString(15),
+                                cursor.getInt(16),
+                                cursor.getInt(17),
+                                cursor.getString(18)
                             )
 
                             listPedidos.add(datos)
 
-                        } while (pedidos.moveToNext())
+                        } while (cursor.moveToNext())
 
-                        pedidos.close()
+                        cursor.close()
                     }
                 } catch (e: Exception) {
                     val alert: Snackbar =
@@ -475,7 +477,7 @@ class Pedido : AppCompatActivity() {
                 alert.show()
             } //valida conexion a internet
             btnsincronizar!!.isEnabled = true
-        }
+        */}
 
         btnatras!!.setOnClickListener {
             val intento = Intent(this, Inicio::class.java)
@@ -559,7 +561,21 @@ class Pedido : AppCompatActivity() {
         val base = bd!!.writableDatabase
         try {
             val cursor = base!!.rawQuery(
-                "SELECT Id, Id_cliente, Nombre_cliente, Total, Descuento, Enviado, Fecha_enviado, Id_pedido_sistema, Gps, Cerrado, Idvisita, strftime('%d/%m/%Y %H:%M', fecha_creado) as fecha_creado FROM pedidos order by id desc",
+                "SELECT Id," +
+                        " Id_cliente," +
+                        " Nombre_cliente," +
+                        " Total," +
+                        " Descuento," +
+                        " Enviado," +
+                        " Fecha_enviado," +
+                        " Id_pedido_sistema," +
+                        " Gps," +
+                        " Cerrado," +
+                        " Idvisita," +
+                        " strftime('%d/%m/%Y %H:%M'," +
+                        " fecha_creado) as fecha_creado " +
+                        "FROM pedidos " +
+                        "order by id desc",
                 null
             )
             var lista = ArrayList<Pedidos>()
@@ -573,7 +589,7 @@ class Pedido : AppCompatActivity() {
                         cursor.getString(2),
                         cursor.getFloat(3),
                         cursor.getFloat(4),
-                        cursor.getInt(5) == 1,
+                        cursor.getInt(5),
                         cursor.getString(6),
                         cursor.getInt(7),
                         cursor.getString(8),
@@ -706,20 +722,20 @@ class Pedido : AppCompatActivity() {
                 envio = CabezeraPedidoSend(
                     pedido.getInt(1),//id del cliente
                     pedido.getString(2), //nombre del cliente
-                    pedido.getFloat(3),
-                    pedido.getFloat(4),
-                    pedido.getFloat(3),
-                    pedido.getInt(5) == 1,
-                    pedido.getInt(9) == 1,
+                    pedido.getFloat(11), //POR EL MOMENTO TIENE EL DATO DEL TOTAL
+                    pedido.getFloat(5),
+                    pedido.getFloat(11),
                     pedido.getInt(12),
-                    pedido.getString(13),
-                    pedido.getString(14),
                     pedido.getInt(16),
-                    pedido.getString(15),
+                    pedido.getInt(19),
+                    pedido.getString(20),
+                    pedido.getString(21),
+                    pedido.getInt(23),
+                    pedido.getString(22),
                     0,
                     "",
-                    pedido.getString(11),
-                    pedido.getString(17),
+                    pedido.getString(18),
+                    pedido.getString(24),
                     null
 
                 )
