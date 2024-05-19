@@ -15,9 +15,11 @@ import android.print.PrintAttributes
 import android.print.PrintDocumentAdapter
 import android.print.PrintDocumentInfo
 import android.print.PrintManager
+import android.text.Editable
 import android.text.Layout
 import android.text.StaticLayout
 import android.text.TextPaint
+import android.text.TextWatcher
 import android.util.Log
 import android.view.View
 import android.widget.AdapterView
@@ -1250,8 +1252,36 @@ class Detallepedido : AppCompatActivity() {
         dialogo.setContentView(R1.layout.vista_cobro)
         dialogo.setCancelable(false)
 
+        var calculo: Float
+
         val etTotal = dialogo.findViewById<TextInputEditText>(R1.id.txtTotalPago)
-        etTotal.setText("$" + "${String.format("%.4f", total)}")
+        etTotal.setText("$" + "${String.format("%.2f", total)}")
+
+        val etCambio = dialogo.findViewById<TextInputEditText>(R1.id.txtCambioPago)
+
+        val etPago = dialogo.findViewById<TextInputEditText>(R1.id.txtEfectivoPago)
+        etPago.addTextChangedListener(object : TextWatcher {
+            override fun beforeTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {
+                //NADA QUE HACER
+            }
+
+            override fun onTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {
+                var pagoCliente = etPago.text.toString()
+                if(pagoCliente == ""){
+                    pagoCliente = 0f.toString()
+                    calculo = total - pagoCliente.toFloat()
+                    etCambio.setText("$" + "${String.format("%.2f", calculo)}")
+                }else{
+                    calculo = total - pagoCliente.toFloat()
+                    etCambio.setText("$" + "${String.format("%.2f", calculo)}")
+                }
+            }
+
+            override fun afterTextChanged(p0: Editable?) {
+                //NADA QUE HACER
+            }
+
+        })
 
         //PROCESO DEL BOTON ACEPTAR
         dialogo.findViewById<Button>(R1.id.btnaceptar).setOnClickListener {
@@ -1264,10 +1294,5 @@ class Detallepedido : AppCompatActivity() {
         }
 
     }
-
-    private fun calcularCambio(cambio: Float): Float{
-        return total - cambio
-    }
-
 
 }
