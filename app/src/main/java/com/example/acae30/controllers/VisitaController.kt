@@ -180,5 +180,40 @@ class VisitaController {
         }
     }
 
+    //OBTENER VISITAR POR ID
+    fun obtenerVisitaPorID(idVisita: Int, context: Context): Visitas? {
+        val bd = funciones.getDataBase(context)
+        val base = bd.readableDatabase
+        try {
+            var visita: Visitas? = null
+            val cursor = base.rawQuery("SELECT * FROM visitas where id=$idVisita", null)
+            if (cursor.count > 0) {
+                cursor.moveToFirst()
+                visita = Visitas(
+                    cursor.getInt(0),
+                    cursor.getInt(1),
+                    cursor.getString(2),
+                    cursor.getString(3),
+                    cursor.getString(4),
+                    cursor.getString(5),
+                    cursor.getString(6),
+                    cursor.getInt(7),
+                    cursor.getString(8),
+                    cursor.getString(9),
+                    cursor.getString(10),
+                    cursor.getInt(11) == 1,
+                    cursor.getInt(12) == 1,
+                    cursor.getInt(13) == 1
+                )
+                cursor.close()
+            }
+            return visita
+        } catch (e: Exception) {
+            throw Exception(e.message)
+        } finally {
+            base!!.close()
+        }
+    }
+
 
 }

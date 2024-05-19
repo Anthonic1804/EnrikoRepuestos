@@ -252,35 +252,7 @@ class Tablas {
                 "FROM detalle_pedidos " +
                 "INNER JOIN inventario " +
                 "ON inventario.Id = detalle_pedidos.Id_producto;"
-       /* return "CREATE VIEW detalle_producto AS " +
-                "SELECT  detalle_pedidos.Id, " +
-                "detalle_pedidos.Id_pedido," +
-                "detalle_pedidos.Id_producto," +
-                "inventario.Codigo," +
-                "inventario.Descripcion," +
-                "inventario.Costo," +
-                "inventario.costo_iva," +
-                "inventario.Precio," +
-                "inventario.Precio_iva," +
-                "inventario.Precio_u," +
-                "inventario.Precio_u_iva," +
-                "detalle_pedidos.Cantidad," +
-                "detalle_pedidos.Precio as precio_venta," +
-                "detalle_pedidos.Precio_oferta," +
-                "detalle_pedidos.Subtotal," +
-                "detalle_pedidos.Unidad," +
-                "inventario.Unidad_medida," +
-                "inventario.Nombre_fraccion," +
-                "inventario.Cesc," +
-                "inventario.Combustible," +
-                "detalle_pedidos.Subtotal as Total," +
-                "detalle_pedidos.Bonificado," +
-                "detalle_pedidos.Descuento," +
-                "detalle_pedidos.Precio_editado," +
-                "detalle_pedidos.Idunidad," +
-                "detalle_pedidos.Id_talla" +
-                " FROM detalle_pedidos " +
-                "INNER JOIN inventario  on inventario.Id=detalle_pedidos.Id_producto;"*/
+
     }
 
     //TABLA REPORTE TEMP

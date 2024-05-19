@@ -35,6 +35,7 @@ import com.example.acae30.R
 import com.example.acae30.controllers.ClientesController
 import com.example.acae30.controllers.InventarioController
 import com.example.acae30.controllers.PedidosController
+import com.example.acae30.controllers.VisitaController
 import com.example.acae30.database.Database
 import com.example.acae30.databinding.ActivityDetallepedidoBinding
 import com.example.acae30.listas.PedidoDetalleAdapter
@@ -104,6 +105,7 @@ class Detallepedido : AppCompatActivity() {
     private var pedidosController = PedidosController()
     private var inventarioController = InventarioController()
     private var clientesController = ClientesController()
+    private var visitaController = VisitaController()
     private lateinit var preferencias: SharedPreferences
 
     private val instancia = "CONFIG_SERVIDOR"
@@ -171,11 +173,15 @@ class Detallepedido : AppCompatActivity() {
             "Contado" -> {
                 listaTipoAdaptador.addAll(listOf("CONTADO"))
                 binding.spTipoEnvio.adapter = listaTipoAdaptador
+                binding.tvTipoenvio.text = "CONTADO"
             }
             else -> {
                 listaTipoAdaptador.addAll(listOf("CONTADO", "CREDITO"))
                 binding.spTipoEnvio.adapter = listaTipoAdaptador
                 binding.spTipoEnvio.setSelection(1, true)
+
+                binding.tvTipoenvio.text = "CREDITO"
+
             }
         }
 
@@ -490,15 +496,23 @@ class Detallepedido : AppCompatActivity() {
 
     //FUNCION PARA FINALIZAR EL ENVIO DEL PEDIDO
     private fun pedidoEnviado(){
-        val intento = Intent(this@Detallepedido, Visita::class.java)
-        intento.putExtra("id", idcliente)
-        intento.putExtra("nombrecliente", nombre)
-        intento.putExtra("idpedido", idpedido)
-        intento.putExtra("visitaid", idvisita)
-        intento.putExtra("codigo", codigo)
-        intento.putExtra("idapi", idapi)
-        startActivity(intento)
-        finish()
+        val visita = visitaController.obtenerVisitaPorID(idvisita, this@Detallepedido)
+        if(visita!!.Abierta){
+            val intento = Intent(this@Detallepedido, Visita::class.java)
+            intento.putExtra("id", idcliente)
+            intento.putExtra("nombrecliente", nombre)
+            intento.putExtra("idpedido", idpedido)
+            intento.putExtra("visitaid", idvisita)
+            intento.putExtra("codigo", codigo)
+            intento.putExtra("idapi", idapi)
+            startActivity(intento)
+            finish()
+        }else{
+            val intento = Intent(this@Detallepedido, Pedido::class.java)
+            startActivity(intento)
+            finish()
+        }
+
     }
 
     //METODO PARA VERIFICAR SI EL PEDIDO YA FUE CERRADO PARA PODER REDIRECCIONAR
@@ -724,10 +738,12 @@ class Detallepedido : AppCompatActivity() {
                     binding.btnexportar.visibility = View.GONE
                     binding.spDocumento.visibility = View.GONE
                     binding.spTipoEnvio.visibility = View.GONE
+                    binding.spSucursal.visibility = View.GONE
+                    binding.sinSucursal.visibility = View.VISIBLE
                     binding.tvDocumentoSeleccionado.visibility = View.VISIBLE
                     binding.tvTipoenvio.visibility = View.VISIBLE
 
-                }else if(pedido.Enviado != 1 && pedido.Cerrado == 1){
+                }else if(pedido.Enviado == 0 && pedido.Cerrado == 1){
                     binding.txtCliente.isEnabled = false
                     binding.imgbtnadd.visibility = View.GONE
                     binding.btnenviar.visibility = View.VISIBLE
@@ -735,6 +751,8 @@ class Detallepedido : AppCompatActivity() {
                     binding.imbtnatras.visibility = View.VISIBLE
                     binding.btncancelar.visibility = View.GONE
                     binding.btnexportar.visibility = View.GONE
+                    binding.spSucursal.visibility = View.GONE
+                    binding.sinSucursal.visibility = View.VISIBLE
                 }
 
             }
