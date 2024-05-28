@@ -1237,7 +1237,8 @@ class Detallepedido : AppCompatActivity() {
         for (data in lista) {
             // Draw text in each column with specific text sizes
             paint.textSize = textSizeCantidad
-            canvas.drawText("${data.Cantidad}", columnX[0] + 5f, y + 15f, paint)
+            val Cantidad = data.Cantidad?.plus(data.Bonificado!!)
+            canvas.drawText("$Cantidad", columnX[0] + 5f, y + 15f, paint)
 
             paint.textSize = textSizeCodigo
             val descripcionLayout = StaticLayout(
