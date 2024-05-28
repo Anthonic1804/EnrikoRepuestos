@@ -142,7 +142,7 @@ class carga_datos : AppCompatActivity() {
                 funciones.mostrarAlerta("ERROR EN LA HOJA DE CARGA", this@carga_datos, binding.vistaalerta)
             } else {
                 CoroutineScope(Dispatchers.IO).launch {
-                    inventarioController.obtenerInventarioHojaCarga(0, numero.toInt(), idVendedor, this@carga_datos)
+                    inventarioController.obtenerInventarioHojaCarga(0, numero.toInt(), idVendedor, this@carga_datos, binding.vistaalerta)
                 }
                 hojaCargaDialog.dismiss()
             }
@@ -151,7 +151,6 @@ class carga_datos : AppCompatActivity() {
         btnCancelar.setOnClickListener {
             hojaCargaDialog.dismiss()
         }
-
 
         hojaCargaDialog.show()
 
@@ -416,7 +415,7 @@ class carga_datos : AppCompatActivity() {
 //                                messageAsync("Cargando 50%")
                                 val respuesta = JSONArray(response.toString())
                                 if (respuesta.length() > 0) {
-                                    inventarioController.saveInventarioDatabase(respuesta, this@carga_datos)
+                                    inventarioController.saveInventarioDatabase(respuesta, this@carga_datos, binding.vistaalerta)
                                     //println("DATOS ALMACENADOS CORRECTAMEMENTE")
                                 } else {
                                     throw Exception("Servidor no Devolvio datos")

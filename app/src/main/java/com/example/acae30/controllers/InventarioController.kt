@@ -3,6 +3,7 @@ package com.example.acae30.controllers
 import android.content.ContentValues
 import android.content.Context
 import android.content.SharedPreferences
+import android.view.View
 import com.example.acae30.Funciones
 import com.example.acae30.modelos.Inventario
 import com.example.acae30.modelos.InventarioPrecios
@@ -211,7 +212,7 @@ class InventarioController {
     }
 
     //FUNCION PARA OBTENER EL INVENTARIO DESDE LA HOJA DE CARGA DE ESCARRSA
-    fun obtenerInventarioHojaCarga(id: Int,  numero: Int, id_vendedor: Int, context: Context) {
+    fun obtenerInventarioHojaCarga(id: Int,  numero: Int, id_vendedor: Int, context: Context, view:View) {
         preferences = context.getSharedPreferences(instancia, Context.MODE_PRIVATE)
         val url = funciones.getServidor(preferences.getString("ip", ""), preferences.getInt("puerto", 0).toString())
 
@@ -251,7 +252,7 @@ class InventarioController {
                                     val res = JSONArray(respuesta.toString())
                                     if (res.length() > 0) {
                                         println(res)
-                                        saveInventarioDatabase(res, context)
+                                        saveInventarioDatabase(res, context, view)
                                     } else {
                                         println("ERROR: ERROR NO SE ENCONTRARON DATOS PARA ALMACENAR 222222")
                                     }
@@ -325,7 +326,7 @@ class InventarioController {
     }
 
     //FUNCION PARA ALMACENAR EL INVENTARIO EN SQLITE
-    fun saveInventarioDatabase(json: JSONArray, context: Context) {
+    fun saveInventarioDatabase(json: JSONArray, context: Context, view:View) {
         val bd = funciones.getDataBase(context).writableDatabase
         try {
             bd.execSQL("DELETE FROM Inventario")
@@ -391,6 +392,9 @@ class InventarioController {
         } finally {
             bd!!.endTransaction()
             bd.close()
+
+            funciones.mostrarMensaje("INVENTARIO CARGADO CORRECTAMENTE", context, view)
+
         }
     }
 

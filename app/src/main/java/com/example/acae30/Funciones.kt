@@ -99,7 +99,7 @@ class Funciones {
     //FUNCION DE MENSAJE OK
     fun mostrarMensaje(mensaje: String, context: Context, view: View){
         val alert: Snackbar = Snackbar.make(view, mensaje, Snackbar.LENGTH_LONG)
-        alert.view.setBackgroundColor(ContextCompat.getColor(context, R.color.btnVerdeActivo))
+        alert.view.setBackgroundColor(ContextCompat.getColor(context, R.color.btnVerde))
         alert.show()
     }
 

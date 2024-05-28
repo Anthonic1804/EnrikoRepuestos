@@ -735,7 +735,7 @@ class Detallepedido : AppCompatActivity() {
                     binding.btnguardar.visibility = View.GONE
                     binding.imbtnatras.visibility = View.VISIBLE
                     binding.btncancelar.visibility = View.GONE
-                    binding.btnexportar.visibility = View.GONE
+                    binding.btnexportar.visibility = View.VISIBLE
                     binding.spDocumento.visibility = View.GONE
                     binding.spTipoEnvio.visibility = View.GONE
                     binding.spSucursal.visibility = View.GONE
@@ -1191,6 +1191,9 @@ class Detallepedido : AppCompatActivity() {
 
     //FUNCION PARA DIBUJAR EL TIKET
     private fun crearTicket(canvas: Canvas) {
+
+        val inforPedido = pedidosController.obtenerInformacionPedido(idpedido, this@Detallepedido)
+
         // Tamaños de letra específicos para cada columna
         val textSizeCantidad = 9f
         val textSizeCodigo = 10f
@@ -1254,7 +1257,29 @@ class Detallepedido : AppCompatActivity() {
             total += data.Total_iva!!
         }
 
+        // Draw divider line
+        y+=20
+        paint.isFakeBoldText = false
+        canvas.drawLine(50f, y, canvas.width - 50f, y, paint)
+
         // Draw total
+        y+= 20f
+        paint.textSize = 12f
+        canvas.drawText("SUBTOTAL:", 50f, y, paint)
+        val subTotalText = paint.measureText("${inforPedido!!.Suma}")
+        canvas.drawText("${inforPedido.Suma}", canvas.width - subTotalText - 50f, y, paint)
+
+        y+= 20f
+        paint.textSize = 12f
+        canvas.drawText("IVA:", 50f, y, paint)
+        val ivaText = paint.measureText("${inforPedido.Iva}")
+        canvas.drawText("${inforPedido.Iva}", canvas.width - ivaText - 50f, y, paint)
+
+        y+= 20f
+        paint.textSize = 12f
+        canvas.drawText("IVA/PER:", 50f, y, paint)
+        val perciText = paint.measureText("{${inforPedido.Iva_Percibido}}")
+        canvas.drawText("${inforPedido.Iva_Percibido}", canvas.width - perciText - 50f, y, paint)
 
         y += 20f
         paint.textSize = 12f // Restaurar el tamaño de letra predeterminado
@@ -1288,7 +1313,7 @@ class Detallepedido : AppCompatActivity() {
         }
 
         // Altura del total
-        ticketHeight += 140f
+        ticketHeight += 160f
 
         return ticketHeight
     }
@@ -1317,18 +1342,17 @@ class Detallepedido : AppCompatActivity() {
             override fun onTextChanged(pago: CharSequence?, p1: Int, p2: Int, p3: Int) {
                 if(pago.isNullOrEmpty()){
                     pagoCliente = 0f
-                    cambio = total - pagoCliente
+                    cambio = pagoCliente - total
                     etCambio.setText("${String.format("%.2f", cambio)}")
                 }else{
                     pagoCliente = pago.toString().toFloat()
-                    cambio = total - pagoCliente
+                    cambio = pagoCliente - total
                     etCambio.setText("${String.format("%.2f", cambio)}")
                 }
             }
 
             override fun afterTextChanged(p0: Editable?) {
                 //NADA QUE HACER
-
             }
 
         })

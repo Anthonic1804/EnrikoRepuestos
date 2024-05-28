@@ -573,7 +573,10 @@ class Pedido : AppCompatActivity() {
                         " Cerrado," +
                         " Idvisita," +
                         " strftime('%d/%m/%Y %H:%M'," +
-                        " fecha_creado) as fecha_creado " +
+                        " fecha_creado) as fecha_creado," +
+                        "Sumas," +
+                        "Iva," +
+                        "Iva_percibido " +
                         "FROM pedidos " +
                         "order by id desc",
                 null
@@ -595,7 +598,10 @@ class Pedido : AppCompatActivity() {
                         cursor.getString(8),
                         cursor.getInt(9),
                         cursor.getInt(10),
-                        cursor.getString(11)
+                        cursor.getString(11),
+                        cursor.getFloat(12),
+                        cursor.getFloat(13),
+                        cursor.getFloat(14)
                     )
                     lista.add(pedido)
 

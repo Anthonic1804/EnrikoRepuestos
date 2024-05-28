@@ -104,7 +104,10 @@ class PedidosController {
                     cursor.getString(15),
                     cursor.getInt(16),
                     cursor.getInt(17),
-                    cursor.getString(18)
+                    cursor.getString(18),
+                    cursor.getFloat(6),
+                    cursor.getFloat(7),
+                    cursor.getFloat(10)
                 )
                 cursor.close()
             }

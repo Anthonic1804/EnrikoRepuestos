@@ -53,7 +53,6 @@ class PedidosAdapter(
 
     inner class MyViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
 
-
         internal var txtPedido: TextView
         internal var txtCliente: TextView
         internal var txtTotal: TextView
@@ -68,10 +67,7 @@ class PedidosAdapter(
             txtTotal = itemView.findViewById(R.id.txtTotal)
             txtEstado = itemView.findViewById(R.id.txtEnviado)
             txtFecha = itemView.findViewById(R.id.txtFecha)
-
         }
-
-
     }
 
 }
