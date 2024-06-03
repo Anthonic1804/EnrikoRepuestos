@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/lienzo"
@@ -9,12 +10,11 @@
     tools:context=".CuentasDetalle">
 
     <LinearLayout
-        android:id="@+id/cardView8"
+        android:id="@+id/lyEncabezado"
         android:layout_width="0dp"
-        android:layout_height="55dp"
+        android:layout_height="wrap_content"
         android:orientation="horizontal"
         android:gravity="center"
-        android:padding="5dp"
         android:background="@color/colorPrimary"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
@@ -22,13 +22,11 @@
 
         <ImageButton
             android:id="@+id/imgatras"
-            android:layout_width="wrap_content"
-            android:layout_height="48dp"
+            android:layout_width="55dp"
+            android:layout_height="55dp"
             android:backgroundTint="@color/colorPrimary"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            app:srcCompat="@drawable/ic_baseline_arrow_back_24" />
+            app:srcCompat="@drawable/ic_baseline_arrow_back_24"
+            android:contentDescription="@string/btnregresar" />
 
         <TextView
             android:id="@+id/textView5"
@@ -38,54 +36,42 @@
             android:text="@string/detalle_de_cuentas"
             android:textAlignment="center"
             android:textColor="@color/colorAccent"
-            android:textSize="18sp"
-            android:textStyle="bold"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintHorizontal_bias="0.223"
-            app:layout_constraintStart_toEndOf="@+id/imgatras"
-            app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintVertical_bias="0.466" />
-
-
+            android:textSize="20sp"
+            android:textStyle="bold"/>
     </LinearLayout>
 
     <androidx.constraintlayout.widget.ConstraintLayout
-        android:id="@+id/LyBack"
+        android:id="@+id/lyDatosCliente"
         android:layout_width="match_parent"
-        android:layout_height="130dp"
+        android:layout_height="120dp"
         android:background="@drawable/border_description"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/cardView8">
-
+        app:layout_constraintTop_toBottomOf="@+id/lyEncabezado">
 
         <ImageView
-            android:id="@+id/imgDescripProduct"
+            android:id="@+id/imgCliente"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintHorizontal_bias="0.095"
+            app:srcCompat="@drawable/ic_person80dp"
             app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toStartOf="@id/txtcliente"
             app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintVertical_bias="0.266"
-            app:srcCompat="@drawable/ic_person80dp" />
+            app:layout_constraintBottom_toBottomOf="parent"
+            android:contentDescription="@string/imgcliente" />
 
         <TextView
             android:id="@+id/txtcliente"
             android:layout_width="240dp"
             android:layout_height="wrap_content"
-            android:layout_marginStart="5dp"
-            android:layout_marginTop="32dp"
-            android:text="NOMBRE"
+            android:hint="@string/nombre"
             android:textColor="@color/colorAccent"
             android:textSize="18sp"
             android:textStyle="bold"
+            app:layout_constraintStart_toEndOf="@id/imgCliente"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintHorizontal_bias="0.0"
-            app:layout_constraintStart_toEndOf="@+id/imgDescripProduct"
-            app:layout_constraintTop_toTopOf="parent" />
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"/>
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 
@@ -93,42 +79,46 @@
         android:id="@+id/cardPrecios"
         android:layout_width="match_parent"
         android:layout_height="125dp"
-        android:layout_marginLeft="20dp"
-        android:layout_marginTop="155dp"
-        android:layout_marginRight="20dp"
+        android:layout_marginTop="-20dp"
+        android:layout_marginStart="@dimen/margin_default_16dp"
+        android:layout_marginEnd="@dimen/margin_default_16dp"
         app:cardCornerRadius="10dp"
-        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/lyDatosCliente"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" >
+        app:layout_constraintEnd_toEndOf="parent">
 
         <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent">
 
-            <ImageView
-                android:id="@+id/imageView7"
-                android:layout_width="wrap_content"
+            <LinearLayout
+                android:id="@+id/lyTotalEncabezado"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="16dp"
+                android:gravity="center"
+                android:orientation="horizontal"
+                android:layout_margin="@dimen/margin_default_16dp"
                 app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintHorizontal_bias="0.188"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent"
-                app:srcCompat="@drawable/ic_dolar" />
+                app:layout_constraintTop_toTopOf="parent">
 
-            <TextView
-                android:id="@+id/textView21"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="20dp"
-                android:text="@string/total_de_cuentas"
-                android:textColor="@color/colordark"
-                android:textSize="20sp"
-                android:textStyle="bold"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintHorizontal_bias="0.081"
-                app:layout_constraintStart_toEndOf="@+id/imageView7"
-                app:layout_constraintTop_toTopOf="parent" />
+                <ImageView
+                    android:id="@+id/imageView7"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    app:srcCompat="@drawable/ic_dolar"
+                    android:contentDescription="@string/imgcliente" />
+
+                <TextView
+                    android:id="@+id/textView21"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/total_de_cuentas"
+                    android:textColor="@color/colordark"
+                    android:textSize="20sp"
+                    android:textStyle="bold" />
+
+            </LinearLayout>
 
             <TextView
                 android:id="@+id/txttotal"
@@ -139,12 +129,9 @@
                 android:textColor="@color/moderado"
                 android:textSize="25sp"
                 android:textStyle="bold"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintHorizontal_bias="0.498"
+                app:layout_constraintTop_toBottomOf="@+id/lyTotalEncabezado"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/textView21"
-                app:layout_constraintVertical_bias="0.0" />
+                app:layout_constraintEnd_toEndOf="parent"/>
 
         </androidx.constraintlayout.widget.ConstraintLayout>
 
@@ -154,12 +141,9 @@
         android:id="@+id/cardEscalas"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginLeft="20dp"
-        android:layout_marginTop="16dp"
-        android:layout_marginRight="20dp"
+        android:layout_margin="@dimen/margin_default_16dp"
         app:cardCornerRadius="10dp"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.4"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/cardPrecios" >
 
@@ -167,98 +151,86 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content">
 
-
             <TextView
                 android:id="@+id/textView28"
-                android:layout_width="wrap_content"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="10dp"
-                android:text="DETALLE DE CUENTAS"
+                android:layout_margin="@dimen/margin_default_16dp"
+                android:text="@string/detalle_de_cuentas"
                 android:textColor="@color/moderado"
                 android:textSize="20sp"
                 android:textStyle="bold"
+                android:textAlignment="center"
                 app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintHorizontal_bias="0.496"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent" />
 
-            <TextView
-                android:id="@+id/scaCantidad"
-                android:layout_width="wrap_content"
+            <LinearLayout
+                android:id="@+id/lyEncabezadoDetalle"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="45dp"
-                android:layout_weight="1"
-                android:text="NUM. FACTURA"
-                android:textAlignment="center"
-                android:textColor="@color/colordark"
-                android:textSize="14sp"
-                android:textStyle="bold"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintHorizontal_bias="0.552"
+                android:layout_marginStart="@dimen/margin_default_16dp"
+                android:layout_marginEnd="@dimen/margin_default_16dp"
+                app:layout_constraintTop_toBottomOf="@+id/textView28"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent" />
+                app:layout_constraintEnd_toEndOf="parent">
 
-            <TextView
-                android:id="@+id/scaPrecio"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="45dp"
-                android:layout_weight="1"
-                android:text="TOTAL"
-                android:textAlignment="center"
-                android:textColor="@color/colordark"
-                android:textSize="14sp"
-                android:textStyle="bold"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintHorizontal_bias="0.897"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent" />
+                <TextView
+                    android:id="@+id/scaDescripcion"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="@string/fecha"
+                    android:textAlignment="center"
+                    android:textColor="@color/colordark"
+                    android:textSize="14sp"
+                    android:textStyle="bold"/>
 
-            <TextView
-                android:id="@+id/scaDescripcion"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="45dp"
-                android:layout_weight="1"
-                android:text="FECHA"
-                android:textAlignment="center"
-                android:textColor="@color/colordark"
-                android:textSize="14sp"
-                android:textStyle="bold"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintHorizontal_bias="0.1"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent" />
+                <TextView
+                    android:id="@+id/scaCantidad"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="@string/num_factura"
+                    android:textAlignment="center"
+                    android:textColor="@color/colordark"
+                    android:textSize="14sp"
+                    android:textStyle="bold"/>
+
+                <TextView
+                    android:id="@+id/scaPrecio"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="@string/total"
+                    android:textAlignment="center"
+                    android:textColor="@color/colordark"
+                    android:textSize="14sp"
+                    android:textStyle="bold"/>
+
+
+            </LinearLayout>
 
             <ScrollView
                 android:layout_width="match_parent"
                 android:layout_height="210dp"
-                app:layout_constraintTop_toBottomOf="@+id/scaCantidad">
+                android:layout_margin="@dimen/margin_default_16dp"
+                app:layout_constraintTop_toBottomOf="@+id/lyEncabezadoDetalle"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintBottom_toBottomOf="parent">
 
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="180dp"
                     android:orientation="vertical" >
 
-
-                    <androidx.constraintlayout.widget.ConstraintLayout
+                    <androidx.recyclerview.widget.RecyclerView
+                        android:id="@+id/lista"
                         android:layout_width="match_parent"
-                        android:layout_height="match_parent">
+                        android:layout_height="wrap_content"
+                        tools:visibility="visible"/>
 
-                        <androidx.recyclerview.widget.RecyclerView
-                            android:id="@+id/lista"
-                            android:layout_width="0dp"
-                            android:layout_height="wrap_content"
-                            android:layout_marginStart="16dp"
-                            android:layout_marginTop="10dp"
-                            android:layout_marginEnd="16dp"
-                            app:layout_constraintEnd_toEndOf="parent"
-                            app:layout_constraintHorizontal_bias="0.0"
-                            app:layout_constraintStart_toStartOf="parent"
-                            app:layout_constraintTop_toTopOf="parent"
-                            tools:visibility="visible"/>
-
-                    </androidx.constraintlayout.widget.ConstraintLayout>
                 </LinearLayout>
             </ScrollView>
 

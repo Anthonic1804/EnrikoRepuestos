@@ -138,6 +138,25 @@ class Tablas {
                 ") "
     }
 
+    //CREANDO TABLA HOJA DE CARGA
+    fun hojaCarga():String{
+        return "CREATE TABLE hoja_carga(" +
+                "Id INTEGER PRIMARY KEY AUTOINCREMENT," +
+                "numeroHoja INTEGER NOT NULL DEFAULT O," +
+                "Fecha_registro DATE DEFAULT CURRENT_DATE)"
+    }
+
+    //CREADO TABLA HOJA DE CARGA DETALLE
+    fun hojaCargaDetalle():String{
+        return "" +
+                "CREATE TABLE hoja_carga_detalle(" +
+                "Id INTEGER PRIMARY KEY AUTOINCREMENT," +
+                "Id_hojaCarga INTEGER NOT NULL DEFAULT 0," +
+                "Id_inventario INTEGER NOT NULL DEFACULT O," +
+                "Codigo_inventario VARCHAR(25) NOT NULL," +
+                "Cantidad NUMERIC(20,6) NOT NULL DEFAULT O)"
+    }
+
     //CREANDO LA TABLA EMPLEADOS
     fun empleados(): String {
         return "CREATE TABLE empleado(" +
@@ -156,20 +175,6 @@ class Tablas {
                 "fecha_registrado TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL," +
                 "id_server INTEGER NOT NULL);"
     }
-
-    fun lineas(): String {
-        return "CREATE TABLE lineas(" +
-                "Id INTEGER NOT NULL," +
-                "Nombre VARCHAR(50)," +
-                "Mayoreo_detalle VARCHAR(1));"
-    } //tabla lineas
-
-    fun rubros(): String {
-        return "CREATE TABLE rubros(" +
-                "Id INTEGER NOT NULL," +
-                "Rubro VARCHAR(50)," +
-                "Tipo VARCHAR(20));"
-    } //tabla rubros
 
     /*ESCARRSA 15/05/2024
     * CAMBIOS EN LA TBL PEDIDOS -> SE AGREGARON LOS SIGUIENTES CAMPOS
@@ -263,7 +268,7 @@ class Tablas {
                 "Total NUMERIC(20,6) NOT NULL)"
     }
 
-    //TABLA VENTAS TEMP
+    //TABLA VENTAS PARA HISTORICO DE PEDIDOS
     fun ventasTemp(): String {
         return "CREATE TABLE ventasTemp (" +
                 "Id INTEGER NOT NULL," +
@@ -276,6 +281,7 @@ class Tablas {
                 "Numero INTEGER NOT NULL);"
     }
 
+    //DETALLE DE HISTORICO
     fun ventasDetalleTemp(): String {
         return "CREATE TABLE ventasDetalleTemp (" +
                 "Id_venta INTEGER NOT NULL," +
