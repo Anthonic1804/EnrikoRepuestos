@@ -1360,14 +1360,18 @@ class Detallepedido : AppCompatActivity() {
 
         //PROCESO DEL BOTON ACEPTAR
         dialogo.findViewById<Button>(R1.id.btnaceptar).setOnClickListener {
-            CoroutineScope(Dispatchers.IO).launch {
-                pedidosController.actualizarPagoCambioPedido(this@Detallepedido, idpedido,
-                    pagoCliente, cambio
-                )
+            if(terminosPedidos == "Contado" && etPago.text.toString().isEmpty()){
+                Toast.makeText(this@Detallepedido, "DEBE DE INGRESAR EL PAGO DEL CLIENTE", Toast.LENGTH_SHORT)
+                    .show()
+            }else{
+                CoroutineScope(Dispatchers.IO).launch {
+                    pedidosController.actualizarPagoCambioPedido(this@Detallepedido, idpedido,
+                        pagoCliente, cambio
+                    )
+                }
+                dialogo.dismiss()
+                imprimirRecibo()
             }
-            dialogo.dismiss()
-            imprimirRecibo()
-
         }
 
         //PROCESO DEL BOTON CANCELAR
