@@ -152,7 +152,7 @@ class Tablas {
                 "CREATE TABLE hoja_carga_detalle(" +
                 "Id INTEGER PRIMARY KEY AUTOINCREMENT," +
                 "Id_hojaCarga INTEGER NOT NULL DEFAULT 0," +
-                "Id_inventario INTEGER NOT NULL DEFACULT O," +
+                "Id_inventario INTEGER NOT NULL DEFAULT O," +
                 "Codigo_inventario VARCHAR(25) NOT NULL," +
                 "Cantidad NUMERIC(20,6) NOT NULL DEFAULT O)"
     }

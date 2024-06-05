@@ -3,13 +3,14 @@ package com.example.acae30.controllers
 import android.content.Context
 import com.example.acae30.Funciones
 import com.example.acae30.modelos.Cliente
+import com.example.acae30.modelos.Cuenta
 
 class CuentasController {
 
     val funciones = Funciones()
 
     //FUNCION PARA OBTENER LAS CXC POR CLIENTE
-    fun obtenerCuentasPorCliente(cliente: String, context: Context): ArrayList<Cliente> {
+    fun obtenerCuentasPorNombre(cliente: String, context: Context): ArrayList<Cliente> {
         val base = funciones.getDataBase(context).readableDatabase
         val lista = ArrayList<Cliente>()
         try {
@@ -119,6 +120,45 @@ class CuentasController {
             base.close()
         }
         return lista
+    }
+
+    //FUNCION PARA OBTENER LAS CUENTAS DEL CLIENTE POR ID
+    fun obtenerCxCporIdCliente(idcliente: Int, context: Context) : ArrayList<Cuenta>{
+        val base = funciones.getDataBase(context).readableDatabase
+        try {
+            val lista = ArrayList<Cuenta>()
+            val cursor = base!!.rawQuery("SELECT * FROM cuentas where Id_cliente=$idcliente AND status LIKE '%PENDIENTE%'", null)
+            if (cursor.count > 0) {
+                cursor.moveToFirst()
+                do {
+                    val cuenta = Cuenta(
+                        cursor.getInt(0),
+                        cursor.getInt(1),
+                        cursor.getString(2),
+                        cursor.getString(3),
+                        cursor.getString(4),
+                        cursor.getFloat(5),
+                        cursor.getFloat(6),
+                        cursor.getFloat(7),
+                        cursor.getFloat(8),
+                        cursor.getString(9),
+                        cursor.getFloat(10),
+                        cursor.getString(11),
+                        cursor.getFloat(12),
+                        cursor.getString(13),
+                        cursor.getString(14),
+                        cursor.getString(15)
+                    )
+                    lista.add(cuenta)
+                } while (cursor.moveToNext())
+                cursor.close()
+            } //evalua si hayo datos
+            return lista
+        } catch (e: Exception) {
+            throw Exception("ERROR: NO SE ENCONTRARON CXC -> " + e.message)
+        } finally {
+            base!!.close()
+        }
     }
 
 }

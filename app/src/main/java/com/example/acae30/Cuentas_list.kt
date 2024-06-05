@@ -95,7 +95,7 @@ class Cuentas_list : AppCompatActivity() {
     private fun obtenerCuentas() : ArrayList<Cliente>{
 
         val listado : ArrayList<Cliente> = if(!busquedaCliente.isNullOrEmpty()){
-            cuentasController.obtenerCuentasPorCliente(busquedaCliente.toString(), this@Cuentas_list)
+            cuentasController.obtenerCuentasPorNombre(busquedaCliente.toString(), this@Cuentas_list)
         }else{
             cuentasController.obtenerTodaslasCxC(this@Cuentas_list)
         }
@@ -130,7 +130,7 @@ class Cuentas_list : AppCompatActivity() {
             }
 
             override fun onQueryTextChange(texto: String): Boolean {
-                val dSearch = cuentasController.obtenerCuentasPorCliente(texto, this@Cuentas_list)
+                val dSearch = cuentasController.obtenerCuentasPorNombre(texto, this@Cuentas_list)
                 MostrarLista(dSearch)
                 return false
             }
@@ -166,7 +166,7 @@ class Cuentas_list : AppCompatActivity() {
                 lista!!.layoutManager = mLayoutManager
                 val adapter =
                     ClienteAdapter(list, this@Cuentas_list, this@Cuentas_list, 0) { position ->
-                        val cliente = list.get(position)
+                        val cliente = list[position]
                         runOnUiThread {
                             //GlobalScope.launch(Dispatchers.IO) {
                             this@Cuentas_list.lifecycleScope.launch {

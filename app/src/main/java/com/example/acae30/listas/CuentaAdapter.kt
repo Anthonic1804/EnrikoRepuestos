@@ -22,17 +22,17 @@ class CuentaAdapter(private var list: ArrayList<Cuenta>, private val context: Co
     }
 
     override fun onBindViewHolder(holder: CuentaAdapter.MyViewHolder, position: Int) {
-        val data = list.get(position)
+        val data = list[position]
         var f = ""
-        if (data.Fecha!!.length > 0) {
+        if (data.Fecha!!.isNotEmpty()) {
             val parser = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss")
-            val formatter = SimpleDateFormat("dd-MM-yyyy")
+            val formatter = SimpleDateFormat("dd/MM/yyyy")
             val output: String = formatter.format(parser.parse(data.Fecha))
             f = output
         }
         holder.fecha.text = f
         holder.documento.text = data.Documento!!
-        holder.total.text = "$ " + String.format("%.4f", data.Saldo_actual)
+        holder.total.text = "$ " + String.format("%.2f", data.Saldo_actual)
     }
 
     override fun getItemCount(): Int {
