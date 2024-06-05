@@ -34,6 +34,10 @@ class CuentasDetalle : AppCompatActivity() {
             Regresar()
         }
 
+        binding.btnVencidas.setOnClickListener {
+            binding.tvEncabezadoCuentas.setText(getString(R.string.detalle_de_cuentas_vencidas))
+        }
+
 
     }
 
