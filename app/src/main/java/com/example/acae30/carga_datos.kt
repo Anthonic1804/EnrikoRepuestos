@@ -764,6 +764,8 @@ class carga_datos : AppCompatActivity() {
                     "Fecha_cancelado",
                     funciones.validateJsonIsnullString(dato, "fecha_cancelado")
                 )
+                valor.put("dias_tardios", funciones.validateJsonIsNullInt(dato, "dias_tardios"))
+
                 bd.insert("cuentas", null, valor)
                 contador = contador + talla
                 val mensaje = contador + 50.toFloat()

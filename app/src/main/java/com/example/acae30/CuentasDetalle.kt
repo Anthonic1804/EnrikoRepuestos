@@ -2,6 +2,7 @@ package com.example.acae30
 
 import android.content.Intent
 import android.os.Bundle
+import android.view.View
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
@@ -10,6 +11,7 @@ import com.example.acae30.controllers.CuentasController
 import com.example.acae30.databinding.ActivityCuentasDetalleBinding
 import com.example.acae30.listas.CuentaAdapter
 import com.example.acae30.modelos.Cuenta
+import kotlinx.android.synthetic.main.activity_firmar_pagare.view.clear
 import kotlinx.coroutines.launch
 
 class CuentasDetalle : AppCompatActivity() {
@@ -35,20 +37,36 @@ class CuentasDetalle : AppCompatActivity() {
         }
 
         binding.btnVencidas.setOnClickListener {
-            binding.tvEncabezadoCuentas.setText(getString(R.string.detalle_de_cuentas_vencidas))
+            binding.tvEncabezadoCuentas.text = getString(R.string.detalle_de_cuentas_vencidas)
+            cargarLista("Vencidas")
         }
 
+        binding.btnVigentes.setOnClickListener {
+            binding.tvEncabezadoCuentas.text = getString(R.string.detalle_de_cuentas_vigentes)
+            cargarLista("Vigentes")
+        }
 
+        binding.btnTodas.setOnClickListener {
+            binding.tvEncabezadoCuentas.text = getString(R.string.detalle_de_cuentas)
+            cargarLista("Todas")
+        }
     }
 
     override fun onStart() {
         super.onStart()
-        //GlobalScope.launch(Dispatchers.IO) {
+        cargarLista("Todas")
+    }
+
+    //FUNCION PARA CARGAR LA LISTA DE CXC EN EL RECICLERVIEW
+    private fun cargarLista(filtro: String){
         this@CuentasDetalle.lifecycleScope.launch {
             try {
-                val data = cuentasController.obtenerCxCporIdCliente(idcliente, this@CuentasDetalle)
+                val data = cuentasController.obtenerCxCporIdCliente(idcliente, this@CuentasDetalle, filtro)
                 if (data.size > 0) {
+                    binding.rvlista.visibility = View.VISIBLE
                     list(data)
+                }else{
+                    binding.rvlista.visibility = View.GONE
                 }
             } catch (e: Exception) {
                 runOnUiThread {

@@ -309,7 +309,8 @@ class Tablas {
                 "Valor_pago NUMERIC(18,2)," +
                 "Relacionado VARCHAR(1)," +
                 "Status VARCHAR(10)," +
-                "Fecha_cancelado DATE)"
+                "Fecha_cancelado DATE," +
+                "dias_tardios INTEGER DEFAULT 0)"
 
     } //tabla de cuentas
 

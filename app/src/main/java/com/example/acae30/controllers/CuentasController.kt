@@ -122,12 +122,25 @@ class CuentasController {
         return lista
     }
 
-    //FUNCION PARA OBTENER LAS CUENTAS DEL CLIENTE POR ID
-    fun obtenerCxCporIdCliente(idcliente: Int, context: Context) : ArrayList<Cuenta>{
+    //FUNCION PARA OBTENER LAS CUENTAS DEL CLIENTE POR ID Y FILTRO
+    fun obtenerCxCporIdCliente(idcliente: Int, context: Context, filtro: String) : ArrayList<Cuenta>{
         val base = funciones.getDataBase(context).readableDatabase
         try {
+            var consulta : String = ""
+            when(filtro){
+                "Todas" -> {
+                    consulta = "SELECT * FROM cuentas where Id_cliente=$idcliente AND status LIKE '%PENDIENTE%'"
+                }
+                "Vencidas" -> {
+                    consulta = "SELECT * FROM cuentas where Id_cliente=$idcliente AND status LIKE '%PENDIENTE%' AND dias_tardios > 0"
+                }
+                "Vigentes" -> {
+                    consulta = "SELECT * FROM cuentas where Id_cliente=$idcliente AND status LIKE '%PENDIENTE%' AND dias_tardios = 0"
+                }
+            }
+
             val lista = ArrayList<Cuenta>()
-            val cursor = base!!.rawQuery("SELECT * FROM cuentas where Id_cliente=$idcliente AND status LIKE '%PENDIENTE%'", null)
+            val cursor = base!!.rawQuery(consulta, null)
             if (cursor.count > 0) {
                 cursor.moveToFirst()
                 do {
