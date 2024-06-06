@@ -17,6 +17,7 @@ import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.lifecycleScope
 import com.example.acae30.controllers.ClientesController
+import com.example.acae30.controllers.CuentasController
 import com.example.acae30.controllers.VisitaController
 import com.example.acae30.database.Database
 import com.example.acae30.databinding.ActivityVisitaBinding
@@ -51,6 +52,7 @@ class Visita : AppCompatActivity() {
     private var funciones = Funciones()
     private var clientesController = ClientesController()
     private var visitaController = VisitaController()
+    private var cuentasController = CuentasController()
     lateinit var preferencias: SharedPreferences
     private val instancia = "CONFIG_SERVIDOR"
     private var bd: Database? = null
@@ -72,6 +74,8 @@ class Visita : AppCompatActivity() {
     private var Longitud_checkout: String = ""
     private val Comentarios: String = ""
 
+    private var clienteMoroso = 0
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
 
@@ -92,6 +96,9 @@ class Visita : AppCompatActivity() {
 
         val policy = StrictMode.ThreadPolicy.Builder().permitAll().build()
         StrictMode.setThreadPolicy(policy)
+
+        //VALIDACION PARA CLIENTES EN MORA
+        verificarClienteMora()
 
         if (idvisitaGLOBAL!! > 0) {
             val base = bd!!.readableDatabase
@@ -141,6 +148,7 @@ class Visita : AppCompatActivity() {
 
         binding.btnpedido.setOnClickListener {
             CreatePedido()
+            clienteMoroso()
             val intento = Intent(this, Detallepedido::class.java)
             intento.putExtra("idcliente", idcliente)
             intento.putExtra("nombrecliente", nombre)
@@ -182,6 +190,23 @@ class Visita : AppCompatActivity() {
             updateGPS()
         }
 
+    }
+
+    //FUNCION PARA VERIFICAR SI UN CLIENTE ESTA EN MORA
+    private fun verificarClienteMora(){
+        val clienteMora = cuentasController.obtenerCxCporIdCliente(idcliente, this@Visita, "Vencidas")
+        if(clienteMora.size > 0){
+            binding.cvClienteMora.visibility = View.VISIBLE
+            clienteMoroso = 1
+        }else{
+            binding.cvClienteMora.visibility = View.GONE
+        }
+    }
+    //FUNCION PARA CREAR LA PROPIEDAD EN LAS SHAREDPREFERENCIAS
+    private fun clienteMoroso(){
+        val agregar = preferencias.edit()
+        agregar.putInt("clienteMoroso", clienteMoroso)
+        agregar.apply()
     }
 
     // Manejar el resultado de la solicitud de permisos

@@ -122,6 +122,7 @@ class Detallepedido : AppCompatActivity() {
         .format(DateTimeFormatter.ofPattern("dd MMM yyyy"))
 
     private lateinit var binding: ActivityDetallepedidoBinding
+    private var clienteMosoro = 0
 
     @SuppressLint("MissingInflatedId")
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -147,6 +148,8 @@ class Detallepedido : AppCompatActivity() {
         vendedor = preferencias.getString("Vendedor", "").toString()
         ip = preferencias.getString("ip", "").toString()
         puerto = preferencias.getInt("puerto", 0)
+        clienteMosoro = preferencias.getInt("clienteMoroso", 0)
+        println("DATOS DEL CLIENTE MOROS -> $clienteMosoro")
 
         visita_enviada = false
 
@@ -168,20 +171,15 @@ class Detallepedido : AppCompatActivity() {
         validarProcesoPedidos()
 
         //COMPLETANDO SPINNER TERMINOS ENVIO
-        val listaTipoAdaptador = ArrayAdapter<String>(this@Detallepedido, android.R.layout.simple_spinner_dropdown_item)
+        terminosDelCliente()
         when(terminosPedidos){
             "Contado" -> {
-                listaTipoAdaptador.addAll(listOf("CONTADO"))
-                binding.spTipoEnvio.adapter = listaTipoAdaptador
+                binding.spTipoEnvio.setSelection(0, true)
                 binding.tvTipoenvio.text = "CONTADO"
             }
             else -> {
-                listaTipoAdaptador.addAll(listOf("CONTADO", "CREDITO"))
-                binding.spTipoEnvio.adapter = listaTipoAdaptador
                 binding.spTipoEnvio.setSelection(1, true)
-
                 binding.tvTipoenvio.text = "CREDITO"
-
             }
         }
 
@@ -282,19 +280,22 @@ class Detallepedido : AppCompatActivity() {
 
         //EVENTRO CLIC DEL BOTON ENVIAR
         binding.btnenviar.setOnClickListener {
-            if (ConfirmarDetallePedido() > 0) {
-                val pedidoInfo = pedidosController.obtenerInformacionPedido(idpedido, this@Detallepedido)
-                enviandoPedido = true
+            if(clienteMosoro == 1 && terminosPedidos != "Contado"){
+                funciones.mostrarAlerta("ERROR: NO PUEDE FACTURAR AL CREDITO A CLIENTE EN MORA", this@Detallepedido, binding.lienzo)
+            }else{
+                if (ConfirmarDetallePedido() > 0) {
+                    val pedidoInfo = pedidosController.obtenerInformacionPedido(idpedido, this@Detallepedido)
+                    enviandoPedido = true
 
-                if(pedidoInfo?.Cerrado == 0 && pedidoInfo.Enviado == 0){
-                    alertaPago(total)
-                }else{
-                    verificarConexionEnvio()
+                    if(pedidoInfo?.Cerrado == 0 && pedidoInfo.Enviado == 0){
+                        alertaPago(total)
+                    }else{
+                        verificarConexionEnvio()
+                    }
+                } else {
+                    funciones.mostrarAlerta("ERROR: NO HAY PRODUCTOS AGREGADOS AL PEDIDO", this@Detallepedido, binding.lienzo)
                 }
-            } else {
-                funciones.mostrarAlerta("ERROR: NO HAY PRODUCTOS AGREGADOS AL PEDIDO", this@Detallepedido, binding.lienzo)
             }
-
         }
 
         //EVENTO CLIC DEL BOTON GUARDAR.
@@ -346,9 +347,11 @@ class Detallepedido : AppCompatActivity() {
                 when(envioSelec){
                     "CONTADO" -> {
                         pedidosController.actualizarTerminosEnvio("Contado", idpedido,this@Detallepedido)
+                        terminosPedidos = "Contado"
                     }
                     "CREDITO" -> {
                         pedidosController.actualizarTerminosEnvio("Credito", idpedido, this@Detallepedido)
+                        terminosPedidos = "Credito"
                     }
                 }
             }
@@ -384,6 +387,19 @@ class Detallepedido : AppCompatActivity() {
             }
             override fun onNothingSelected(p0: AdapterView<*>?) {}
         }
+    }
+
+    //FUNCION PARA COMPLETAR LOS TERMINOS DEL CLIENTE
+    private fun terminosDelCliente(){
+        val terminosClientes = clientesController.obtenerInformacionCliente(this@Detallepedido, idcliente)!!.Terminos_cliente
+
+        val listaTipoAdaptador = ArrayAdapter<String>(this@Detallepedido, android.R.layout.simple_spinner_dropdown_item)
+        if(terminosClientes == "Contado"){
+            listaTipoAdaptador.addAll(listOf("CONTADO"))
+        }else{
+            listaTipoAdaptador.addAll(listOf("CONTADO", "CREDITO"))
+        }
+        binding.spTipoEnvio.adapter = listaTipoAdaptador
     }
 
     //FUNCION PARA GUARDAR EL PEDIDO EN EL DISPOSITIVO
@@ -499,7 +515,7 @@ class Detallepedido : AppCompatActivity() {
         val visita = visitaController.obtenerVisitaPorID(idvisita, this@Detallepedido)
         if(visita!!.Abierta){
             val intento = Intent(this@Detallepedido, Visita::class.java)
-            intento.putExtra("id", idcliente)
+            intento.putExtra("idcliente", idcliente)
             intento.putExtra("nombrecliente", nombre)
             intento.putExtra("idpedido", idpedido)
             intento.putExtra("visitaid", idvisita)
@@ -821,7 +837,7 @@ class Detallepedido : AppCompatActivity() {
                     EliminarPedido(idpedido)
 
                     val intento = Intent(this@Detallepedido, Visita::class.java)
-                    intento.putExtra("id", idcliente)
+                    intento.putExtra("idcliente", idcliente)
                     intento.putExtra("nombrecliente", nombre)
                     intento.putExtra("visitaid", idvisita)
                     intento.putExtra("codigo", codigo)
@@ -1195,9 +1211,9 @@ class Detallepedido : AppCompatActivity() {
         val inforPedido = pedidosController.obtenerInformacionPedido(idpedido, this@Detallepedido)
 
         // Tamaños de letra específicos para cada columna
-        val textSizeCantidad = 9f
+        val textSizeCantidad = 10f
         val textSizeCodigo = 10f
-        val textSizeTotal = 9f
+        val textSizeTotal = 10f
 
         // Espacio entre las columnas
         val columnSpacing = 10f
@@ -1237,16 +1253,22 @@ class Detallepedido : AppCompatActivity() {
         for (data in lista) {
             // Draw text in each column with specific text sizes
             paint.textSize = textSizeCantidad
-            val Cantidad = data.Cantidad?.plus(data.Bonificado!!)
-            canvas.drawText("$Cantidad", columnX[0] + 5f, y + 15f, paint)
+            canvas.drawText("${data.Cantidad}", columnX[0] + 5f, y + 25f, paint)
 
             paint.textSize = textSizeCodigo
-            val descripcionLayout = StaticLayout(
-                data.Descripcion, paint, columnWidths[1].toInt(),
-                Layout.Alignment.ALIGN_NORMAL, 1.0f, 0.0f, false
-            )
+            val descripcionLayout : StaticLayout = if(data.Bonificado!! > 0){
+                StaticLayout(
+                    "${data.Descripcion} - BONIFICADOS: +${data.Bonificado}", paint, columnWidths[1].toInt(),
+                    Layout.Alignment.ALIGN_NORMAL, 1.0f, 0.0f, false
+                )
+            }else{
+                StaticLayout(
+                    data.Descripcion, paint, columnWidths[1].toInt(),
+                    Layout.Alignment.ALIGN_NORMAL, 1.0f, 0.0f, false
+                )
+            }
             canvas.save()
-            canvas.translate(columnX[1] + 5f, y)
+            canvas.translate(columnX[1] + 10f, y)
             descripcionLayout.draw(canvas)
             canvas.restore()
 
@@ -1268,25 +1290,25 @@ class Detallepedido : AppCompatActivity() {
         paint.textSize = 12f
         canvas.drawText("SUBTOTAL:", 50f, y, paint)
         val subTotalText = paint.measureText("${inforPedido!!.Suma}")
-        canvas.drawText("${inforPedido.Suma}", canvas.width - subTotalText - 50f, y, paint)
+        canvas.drawText("$ ${inforPedido.Suma}", canvas.width - subTotalText - 50f, y, paint)
 
         y+= 20f
         paint.textSize = 12f
         canvas.drawText("IVA:", 50f, y, paint)
         val ivaText = paint.measureText("${inforPedido.Iva}")
-        canvas.drawText("${inforPedido.Iva}", canvas.width - ivaText - 50f, y, paint)
+        canvas.drawText("$ ${inforPedido.Iva}", canvas.width - ivaText - 50f, y, paint)
 
         y+= 20f
         paint.textSize = 12f
         canvas.drawText("IVA/PER:", 50f, y, paint)
         val perciText = paint.measureText("{${inforPedido.Iva_Percibido}}")
-        canvas.drawText("${inforPedido.Iva_Percibido}", canvas.width - perciText - 50f, y, paint)
+        canvas.drawText("$ ${inforPedido.Iva_Percibido}", canvas.width - perciText - 50f, y, paint)
 
         y += 20f
         paint.textSize = 12f // Restaurar el tamaño de letra predeterminado
         canvas.drawText("TOTAL:", 50f, y, paint)
         val totalTextWidth = paint.measureText("$total")
-        canvas.drawText("$total", canvas.width - totalTextWidth - 50f, y, paint)
+        canvas.drawText("$ $total", canvas.width - totalTextWidth - 50f, y, paint)
 
         // Draw divider line after the table
         canvas.drawLine(50f, y + 20f, canvas.width - 50f, y + 20f, paint)
@@ -1301,7 +1323,7 @@ class Detallepedido : AppCompatActivity() {
             textSize = 12f
         }
 
-        var ticketHeight = 160f // Altura del título y la división inicialmente
+        var ticketHeight = 170f // Altura del título y la división inicialmente
 
         // Altura de cada fila de datos
         val lista = pedidosController.obtenerDetallePedido(idpedido, this@Detallepedido)
@@ -1314,7 +1336,7 @@ class Detallepedido : AppCompatActivity() {
         }
 
         // Altura del total
-        ticketHeight += 160f
+        ticketHeight += 220f
 
         return ticketHeight
     }

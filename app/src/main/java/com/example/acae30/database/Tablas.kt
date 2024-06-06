@@ -148,8 +148,7 @@ class Tablas {
 
     //CREADO TABLA HOJA DE CARGA DETALLE
     fun hojaCargaDetalle():String{
-        return "" +
-                "CREATE TABLE hoja_carga_detalle(" +
+        return "CREATE TABLE hoja_carga_detalle(" +
                 "Id INTEGER PRIMARY KEY AUTOINCREMENT," +
                 "Id_hojaCarga INTEGER NOT NULL DEFAULT 0," +
                 "Id_inventario INTEGER NOT NULL DEFAULT O," +
