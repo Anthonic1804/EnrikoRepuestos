@@ -111,6 +111,7 @@ class Producto_agregar : AppCompatActivity() {
     private var modificarPrecio : Boolean = false
 
     private lateinit var precioPersonalizado : TextView
+    private var precioIvaPersonalizado : Float = 0f
     private var bonificacion : Float = 0f
     private lateinit var txtCantBonificados : TextView
 
@@ -173,7 +174,7 @@ class Producto_agregar : AppCompatActivity() {
         getApiUrl()
 
         //OBTENIENDO EL PRECIO PERSONALIZADO POR CLIENTE
-        val precioIvaPersonalizado = clientesController.obtenerPrecioPersoCliente(idcliente!!,
+        precioIvaPersonalizado = clientesController.obtenerPrecioPersoCliente(idcliente!!,
             idproducto!!, this@Producto_agregar)
         if(precioIvaPersonalizado > 0){
             precioPersonalizado.visibility = View.VISIBLE
@@ -409,6 +410,24 @@ class Producto_agregar : AppCompatActivity() {
         })
 
     } //inicializa todas las variables y los objetos del xml
+
+    //FUNCION PARA VALIDAD CANTIDAD SEGUN PARAMETRIZACION
+    private fun validarCantidad(cantidadIngresada: String){
+        if(cantidadIngresada.isNotEmpty() && isInteger(cantidadIngresada)){
+            cantidad = cantidadIngresada.toFloat()
+            if(cantidad < cantidadEscala!!){ //VALIDADO EL PRECIO SELECCIONADO EN LAS ESCALAS.
+                txtcantidad!!.error = "La cantidad no es válida para el precio seleccionado"
+                btnagregar!!.setBackgroundResource(R.drawable.border_btndisable)
+            }else{
+                Totalizar(cantidad)
+                btnagregar!!.setBackgroundResource(R.drawable.border_btnenviar)
+            }
+        }else{
+            txtcantidad!!.error = "Campo no puede quedar vacio"
+            cantidad = 0.toFloat()
+            Totalizar(cantidad)
+        }
+    }
 
     //YA NO REGRESA HASTA EL DETALLE DEL PEDIDO, REGRESA A LA BUSQUEDA DE PRODUCTOS
     //BTNATRAS Y TEXTO CANTIDAD SETEADO SIN DECIMALES
@@ -649,7 +668,13 @@ class Producto_agregar : AppCompatActivity() {
     //PAPELERIA DM
     //23-08-2022
     private fun Totalizar(cantidad: Float) {
-        val total = precio_iva * cantidad
+        var total : Float = 0f
+        total = if(precioIvaPersonalizado > 0){
+            precioIvaPersonalizado * cantidad
+        }else{
+            precio_iva * cantidad
+        }
+
         txttotal!!.text = "${String.format("%.4f", total)}"
 
         if(bonificacion > 0){
