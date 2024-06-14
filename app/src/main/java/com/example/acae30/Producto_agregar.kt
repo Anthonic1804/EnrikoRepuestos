@@ -176,6 +176,7 @@ class Producto_agregar : AppCompatActivity() {
         //OBTENIENDO EL PRECIO PERSONALIZADO POR CLIENTE
         precioIvaPersonalizado = clientesController.obtenerPrecioPersoCliente(idcliente!!,
             idproducto!!, this@Producto_agregar)
+
         if(precioIvaPersonalizado > 0){
             precioPersonalizado.visibility = View.VISIBLE
             spprecio?.visibility = View.GONE
@@ -360,9 +361,9 @@ class Producto_agregar : AppCompatActivity() {
             override fun onTextChanged(s: CharSequence, start: Int, before: Int, count: Int) {
 
             }
-            override fun afterTextChanged(s: Editable) {
-                val nuevaCantidad = s.toString()
-                if(sinExistencias != 0){
+            override fun afterTextChanged(cantidad: Editable) {
+                //val nuevaCantidad = s.toString()
+                /*if(sinExistencias != 0){
                     if (nuevaCantidad != "") {
                         if(isInteger(nuevaCantidad)){
                             cantidad = nuevaCantidad.toFloat()
@@ -405,25 +406,38 @@ class Producto_agregar : AppCompatActivity() {
                         cantidad = 0.toFloat()
                         Totalizar(cantidad)
                     }
-                }
+                }*/
+
+                //PARA ESCARRSA SE ANULARA LA VALIDACION SIN EXISTENCIAS, YA QUE CON ELLOS
+                //SOLO SE PODRA VENDER LO QUE ANDAN EN EL CAMION
+                validarCantidad(cantidad.toString())
             }
         })
 
     } //inicializa todas las variables y los objetos del xml
 
-    //FUNCION PARA VALIDAD CANTIDAD SEGUN PARAMETRIZACION
+    //FUNCION PARA VALIDAD CANTIDAD PARA ESCARRSA
     private fun validarCantidad(cantidadIngresada: String){
         if(cantidadIngresada.isNotEmpty() && isInteger(cantidadIngresada)){
             cantidad = cantidadIngresada.toFloat()
-            if(cantidad < cantidadEscala!!){ //VALIDADO EL PRECIO SELECCIONADO EN LAS ESCALAS.
+
+            if(cantidad > existenciaProducto || cantidad == 0f){
+                txtcantidad!!.error = "No puede Agregar una cantidad mayor a las existencias actuales";
+                btnagregar!!.setBackgroundResource(R.drawable.border_btndisable)
+                btnagregar!!.isEnabled = false
+            }else if(cantidad < cantidadEscala!!){ //VALIDADO EL PRECIO SELECCIONADO EN LAS ESCALAS.
                 txtcantidad!!.error = "La cantidad no es válida para el precio seleccionado"
                 btnagregar!!.setBackgroundResource(R.drawable.border_btndisable)
+                btnagregar!!.isEnabled = false
             }else{
+                btnagregar!!.isEnabled = true
                 Totalizar(cantidad)
                 btnagregar!!.setBackgroundResource(R.drawable.border_btnenviar)
             }
+
         }else{
             txtcantidad!!.error = "Campo no puede quedar vacio"
+            btnagregar!!.isEnabled = false
             cantidad = 0.toFloat()
             Totalizar(cantidad)
         }

@@ -245,7 +245,7 @@ class ClientesController {
         var consutaSql: String = ""
 
         consutaSql = if (busqueda != "") {
-            "SELECT * FROM Clientes WHERE Cliente LIKE '%$busqueda%' OR Codigo LIKE '%$busqueda%'"
+            "SELECT * FROM Clientes WHERE Cliente LIKE '%$busqueda%' OR Codigo LIKE '%$busqueda'"
         } else {
             "SELECT * FROM Clientes LIMIT 50"
         }
