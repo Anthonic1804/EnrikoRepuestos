@@ -12,6 +12,7 @@ import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.google.android.material.snackbar.Snackbar
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
@@ -29,16 +30,24 @@ class MainActivity : AppCompatActivity() {
     private var preferencias: SharedPreferences? = null
     private var funciones: Funciones? = null
     private var reconfig = false
+
+    private lateinit var puntoVenta : TextView
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
         supportActionBar?.hide()
         funciones = Funciones()
         reconfig = intent.getBooleanExtra("reconfig", false)
+
+
         alerta = AlertDialogo(this)
         ip = findViewById(R.id.txtip)
         puerto = findViewById(R.id.txtpuerto)
         vista = findViewById(R.id.alerta)
+        puntoVenta = findViewById(R.id.tvPuntoVenta)
+
+
         //amarramos el widgets a las variables
         preferencias = getSharedPreferences(instancia, Context.MODE_PRIVATE)
         val btn: Button = findViewById(R.id.btnguardar)
@@ -80,22 +89,19 @@ class MainActivity : AppCompatActivity() {
     } //valida que ya se tenga la conexion al servidor guardada
 
     fun validar() {
-        if (ip!!.text.length > 0 && puerto!!.text.length > 0) {
+        if (ip!!.text.isNotEmpty() && puerto!!.text.isNotEmpty() && puntoVenta.text.isNotEmpty()) {
             alerta!!.Cargando()
             val v = vista
-            GlobalScope.launch(Dispatchers.IO) {
+            CoroutineScope(Dispatchers.IO).launch {
                 val ip = ip!!.text.toString()
                 val p = puerto!!.text.toString()
+                val pVenta = puntoVenta.text.toString()
                 if (funciones!!.isInternetAvailable(this@MainActivity)) {
-                    ComproBarConexion(ip, p)
+                    ComproBarConexion(ip, p, pVenta)
                 } else {
+                    funciones!!.mostrarAlerta("ENCIENDE EL WIFI PARA CONTINUAR", this@MainActivity, vista!!)
                     alerta!!.dismisss()
-                    val alerta: Snackbar =
-                        Snackbar.make(v!!, "Enciendo el WIFI para Continuar", Snackbar.LENGTH_LONG)
-                    alerta.view.setBackgroundColor(resources.getColor(R.color.moderado))
-                    alerta.show()
                 }
-
             }
 
         } else {
@@ -108,7 +114,7 @@ class MainActivity : AppCompatActivity() {
     } //funcion que valida que haya internet,revisa si se han llenado las cajas y llama la peticio
 
 
-    fun ComproBarConexion(ip: String, puerto: String) {
+    fun ComproBarConexion(ip: String, puerto: String, pVenta: String) {
         try {
             val ruta: String = "http://$ip:$puerto/conexion" //ruta de la api
             val url = URL(ruta)
@@ -135,6 +141,7 @@ class MainActivity : AppCompatActivity() {
                                     val editor = preferencias!!.edit()
                                     editor!!.putInt("puerto", puerto.toInt())
                                     editor.putString("ip", ip)
+                                    editor.putString("puntoVenta", pVenta)
                                     editor.commit()
                                     //se guarda la direccion del servidor y se envia al login
                                     alerta!!.dismisss()

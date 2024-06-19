@@ -142,7 +142,8 @@ class Tablas {
     fun hojaCarga():String{
         return "CREATE TABLE hoja_carga(" +
                 "Id INTEGER PRIMARY KEY AUTOINCREMENT," +
-                "numeroHoja INTEGER NOT NULL DEFAULT O," +
+                "idHojaCarga INTEGER NOT NULL DEFAULT 0," +
+                "numeroHoja INTEGER NOT NULL DEFAULT 0," +
                 "Fecha_registro DATE DEFAULT CURRENT_DATE)"
     }
 
@@ -340,5 +341,10 @@ class Tablas {
 
     }
 
+    fun triggerActualizarInventarioHojaCarga(): String{
+        return "CREATE TRIGGER triggerActualizarInventarioHojaCarga AFTER INSERT ON hoja_carga_detalle BEGIN" +
+                " UPDATE i SET i.existencia = (I.existencia + h.cantidad) FROM inventario i INNER JOIN hoja_carga_detalle h ON i.id = h.Id_inventario;" +
+                "END;";
+    }
 
 }

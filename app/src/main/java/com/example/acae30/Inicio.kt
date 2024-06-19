@@ -76,6 +76,8 @@ class Inicio : AppCompatActivity(), NavigationView.OnNavigationItemSelectedListe
         ip = preferencias!!.getString("ip", "").toString()
         puerto = preferencias!!.getInt("puerto", 0)
         generaToken = preferencias!!.getInt("generaToken", 0)
+        val puntoVenta = preferencias!!.getString("puntoVenta", "").toString()
+        println("PUNTO DE VENTA ASIGNADO -> $puntoVenta")
 
         val fechaInventario: String? = preferencias!!.getString("fechaInventario", "NULL")
         binding.includeBar.lblupdate.text = fechaInventario

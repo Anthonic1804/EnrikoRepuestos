@@ -432,7 +432,7 @@ class Producto_agregar : AppCompatActivity() {
             }else{
                 btnagregar!!.isEnabled = true
                 Totalizar(cantidad)
-                btnagregar!!.setBackgroundResource(R.drawable.border_btnenviar)
+                btnagregar!!.setBackgroundResource(R.drawable.border_btnenviar) 
             }
 
         }else{

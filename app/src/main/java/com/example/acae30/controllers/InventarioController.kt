@@ -328,8 +328,15 @@ class InventarioController {
     //FUNCION PARA ALMACENAR EL INVENTARIO EN SQLITE
     fun saveInventarioDatabase(json: JSONArray, context: Context, view:View) {
         val bd = funciones.getDataBase(context).writableDatabase
+
+        preferences = context.getSharedPreferences(instancia, Context.MODE_PRIVATE)
+        val hojaCarga = preferences.getBoolean("Hoja_carga_inventario_app", false)
+
         try {
-            bd.execSQL("DELETE FROM Inventario")
+            if(!hojaCarga){
+                bd.execSQL("DELETE FROM Inventario")
+            }
+
             bd.beginTransaction()
             for (i in 0 until json.length()) {
                 val dato = json.getJSONObject(i)
@@ -352,7 +359,8 @@ class InventarioController {
                         "nombre_fraccion"
                     )
                 )
-                data.put("Existencia", funciones.validateJsonIsNullFloat(dato, "existencia"))
+                //data.put("Existencia", funciones.validateJsonIsNullFloat(dato, "existencia"))
+                data.put("Existencia", 0)
                 data.put("Costo", funciones.validateJsonIsNullFloat(dato, "costo"))
                 data.put("costo_iva", funciones.validateJsonIsNullFloat(dato, "costo_iva"))
                 data.put(
@@ -393,6 +401,7 @@ class InventarioController {
             bd!!.endTransaction()
             bd.close()
 
+            //insertarHojaCarga()
             funciones.mostrarMensaje("INVENTARIO CARGADO CORRECTAMENTE", context, view)
 
         }

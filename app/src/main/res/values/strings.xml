@@ -142,4 +142,5 @@
     <string name="detalle_de_cuentas_vencidas">DETALLE CUENTAS VENCIDAS</string>
     <string name="detalle_de_cuentas_vigentes">DETALLE CUENTAS VIGENTES</string>
     <string name="cliente_en_mora">CLIENTE EN MORA</string>
+    <string name="punto_de_venta">PUNTO DE VENTA</string>
 </resources>

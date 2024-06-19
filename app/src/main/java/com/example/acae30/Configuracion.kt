@@ -51,6 +51,8 @@ class Configuracion : AppCompatActivity() {
     private var funciones: Funciones? = null
     private var alerta: AlertDialogo? = null
 
+    private lateinit var puntoVenta : TextView
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_configuracion)
@@ -64,6 +66,8 @@ class Configuracion : AppCompatActivity() {
         atras = findViewById(R.id.imgbtnatras)
         alerta = AlertDialogo(this)
         dataBase = Database(this)
+
+        puntoVenta = findViewById(R.id.tvPuntoVenta)
 
         //FUNCIONES AGRAGADAS PARA LOS CONTROLES DE VISTA DE INVENTARIO
         swlista = findViewById(R.id.swlista)
@@ -159,6 +163,7 @@ class Configuracion : AppCompatActivity() {
         val e = preferencias!!
         ip!!.text = e.getString("ip", "")
         puerto!!.text = e.getInt("puerto", 0).toString()
+        puntoVenta.text = e.getString("puntoVenta", "").toString()
     } //obtiene la ip y el puerto del servidor
 
     private fun ValidateConnection(ip: String, puerto: String, context: Context) {
