@@ -141,7 +141,15 @@ class carga_datos : AppCompatActivity() {
             if (numero.isEmpty() || numero.toInt() == 0) {
                 funciones.mostrarAlerta("ERROR EN LA HOJA DE CARGA", this@carga_datos, binding.vistaalerta)
             } else {
+
+                //REGISTRANDO HOJA DE CARGA ACTIVA
+                println("REGISTRANDO HOJA DE CARGA ACTIVA")
+                val editor = preferences.edit()
+                editor.putInt("hojaCarga", numero.toInt())
+                editor.apply()
+
                 CoroutineScope(Dispatchers.IO).launch {
+                    //OBTENIENDO INVENTARIO DESDE HOJA DE CARGA
                     inventarioController.obtenerInventarioHojaCarga(0, numero.toInt(), idVendedor, this@carga_datos, binding.vistaalerta)
                 }
                 hojaCargaDialog.dismiss()

@@ -340,11 +340,4 @@ class Tablas {
                 "END;"
 
     }
-
-    fun triggerActualizarInventarioHojaCarga(): String{
-        return "CREATE TRIGGER triggerActualizarInventarioHojaCarga AFTER INSERT ON hoja_carga_detalle BEGIN" +
-                " UPDATE i SET i.existencia = (I.existencia + h.cantidad) FROM inventario i INNER JOIN hoja_carga_detalle h ON i.id = h.Id_inventario;" +
-                "END;";
-    }
-
 }

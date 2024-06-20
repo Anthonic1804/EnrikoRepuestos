@@ -1071,8 +1071,11 @@ class Detallepedido : AppCompatActivity() {
     private fun convertToJson(pedido: CabezeraPedidoSend, idpedido_param: Int): JsonObject {
 
         var idvisita_v = 0.toInt()
+        val puntoVenta = preferencias.getString("puntoVenta", "").toString()
+        val idHojaCarga = preferencias.getInt("idHojaCarga", 0)
+        val hojaCarga = preferencias.getInt("hojaCarga", 0)
 
-        var horaProceso = funciones?.getFechaHoraProceso()
+        var horaProceso = funciones.getFechaHoraProceso()
 
         val base = db!!.writableDatabase
         try {
@@ -1112,6 +1115,10 @@ class Detallepedido : AppCompatActivity() {
         json.addProperty("fechaCreado", pedido.fechaCreado) /*ENVIANDO LA FECHA DESDE EL DISPOSITIVO MOVIL*/
         json.addProperty("HoraProceso", horaProceso)/*ENVIANDO EL TIMESTAMP DE CREACION DEL PEDIDO*/
         json.addProperty("Idapp", idvisita_v)
+        //AGREGANDO NUEVO PARAMETROS
+        json.addProperty("Id_hoja_de_carga", idHojaCarga)
+        json.addProperty("num_hoja_de_carga", hojaCarga)
+        json.addProperty("punto_venta",puntoVenta)
         //se ordena la cabezera
         val detalle = JsonArray()
         for (i in 0..(pedido.detalle!!.size - 1)) {

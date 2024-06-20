@@ -16,10 +16,12 @@ import androidx.appcompat.app.ActionBarDrawerToggle
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.drawerlayout.widget.DrawerLayout
+import com.example.acae30.controllers.InventarioController
 import com.example.acae30.database.Database
 import com.example.acae30.databinding.ActivityInicioBinding
 import com.google.android.material.navigation.NavigationView
 import com.google.gson.Gson
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
@@ -51,6 +53,8 @@ class Inicio : AppCompatActivity(), NavigationView.OnNavigationItemSelectedListe
     private var ip = ""
     private var puerto = 0
 
+    private var inventarioController = InventarioController()
+
     @Deprecated("Deprecated in Java")
     override fun onBackPressed() {
        /* if (tiempoPrimerClick + INTERVALO > System.currentTimeMillis()) {
@@ -76,10 +80,13 @@ class Inicio : AppCompatActivity(), NavigationView.OnNavigationItemSelectedListe
         ip = preferencias!!.getString("ip", "").toString()
         puerto = preferencias!!.getInt("puerto", 0)
         generaToken = preferencias!!.getInt("generaToken", 0)
-        val puntoVenta = preferencias!!.getString("puntoVenta", "").toString()
-        println("PUNTO DE VENTA ASIGNADO -> $puntoVenta")
 
-        val fechaInventario: String? = preferencias!!.getString("fechaInventario", "NULL")
+        //FUNCION PARA OBTENER LA FECHA DEL INVENTARIO
+        CoroutineScope(Dispatchers.IO).launch {
+            inventarioController.obtenerFechaInventario(this@Inicio)
+        }
+
+        val fechaInventario: String? = preferencias!!.getString("fechaInventario", null)
         binding.includeBar.lblupdate.text = fechaInventario
 
         val nombre_vendedor =  preferencias!!.getString("Vendedor", "")
