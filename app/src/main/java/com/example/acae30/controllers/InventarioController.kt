@@ -4,6 +4,7 @@ import android.content.ContentValues
 import android.content.Context
 import android.content.SharedPreferences
 import android.view.View
+import android.widget.Toast
 import com.example.acae30.Funciones
 import com.example.acae30.modelos.Inventario
 import com.example.acae30.modelos.InventarioPrecios
@@ -12,6 +13,7 @@ import com.google.gson.Gson
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import org.json.JSONArray
 import java.io.BufferedReader
 import java.io.InputStreamReader
@@ -190,7 +192,7 @@ class InventarioController {
         preferences = context.getSharedPreferences(instancia, Context.MODE_PRIVATE)
         val base = funciones.getDataBase(context).readableDatabase
         try {
-            var fechaInventario: String? = null
+            var fechaInventario: String = "NULL"
             val consulta = base.rawQuery("SELECT Fecha_inventario FROM inventario LIMIT 1", null)
 
             if(consulta.count > 0){
@@ -281,16 +283,16 @@ class InventarioController {
                         "nombre_fraccion"
                     )
                 )
-
-                /*if(hojaCarga){
+                //SI HOJA DE CARGA ESTA ACTIVA, LA EXISTENCIA ES 0 Y SE CARGARA LA CANTIDAD DE LA HOJA DE CARGA
+                if(hojaCarga){
                     data.put("Existencia", 0)
                     val editor = preferences.edit()
                     editor.putInt("idHojaCarga", funciones.validateJsonIsNullInt(dato, "idHojaCarga"))
                     editor.apply()
                 }else{
                     data.put("Existencia", funciones.validateJsonIsNullFloat(dato, "existencia"))
-                }*/
-                data.put("Existencia", 0)
+                }
+
                 data.put("Costo", funciones.validateJsonIsNullFloat(dato, "costo"))
                 data.put("costo_iva", funciones.validateJsonIsNullFloat(dato, "costo_iva"))
                 data.put(
@@ -330,13 +332,12 @@ class InventarioController {
         } finally {
             bd!!.endTransaction()
             bd.close()
-            if(!hojaCarga){
-                funciones.mostrarMensaje("INVENTARIO CARGADO CORRECTAMENTE", context, view)
-                /*CoroutineScope(Dispatchers.IO).launch {
+            if(hojaCarga){
+                CoroutineScope(Dispatchers.IO).launch {
                     insertarHojaDeCargar(json, context, view)
-                }*/
+                }
             }else{
-                //funciones.mostrarMensaje("INVENTARIO CARGADO CORRECTAMENTE", context, view)
+                funciones.mostrarMensaje("INVENTARIO CARGADO CORRECTAMENTE", context, view)
             }
         }
     }
@@ -344,7 +345,7 @@ class InventarioController {
 
     //FUNCIONES PARA HOJA DE CARGA
     //FUNCION PARA OBTENER EL INVENTARIO DESDE LA HOJA DE CARGA DE ESCARRSA
-    fun obtenerInventarioHojaCarga(id: Int,  numero: Int, id_vendedor: Int, context: Context, view:View) {
+    suspend fun obtenerInventarioHojaCarga(id: Int,  numero: Int, id_vendedor: Int, context: Context, view:View) {
         preferences = context.getSharedPreferences(instancia, Context.MODE_PRIVATE)
         val url = funciones.getServidor(preferences.getString("ip", ""), preferences.getInt("puerto", 0).toString())
 
@@ -384,29 +385,28 @@ class InventarioController {
                                     val res = JSONArray(respuesta.toString())
                                     if (res.length() > 0) {
                                         println(res)
-                                        saveInventarioDatabase(res, context, view)
+                                        //saveInventarioDatabase(res, context, view)
                                         //VERIFICANDO SI LA HOJA CORRESPONDE AL MISMO DIA
-                                        if(verificarFechaInventario(context)){
+                                        if(!verificarFechaInventario(context)){
                                             println("LIMPIANDO INVENTARIO YA QUE NO CORRESPONDE AL MISMO DIA")
-                                            CoroutineScope(Dispatchers.IO).launch {
-                                                //limpiarInventarioHojaCarga(context) //LIMPIAR LAS TABLAS DE INVENTARIO
-                                            }
+                                            limpiarInventarioHojaCarga(context) //LIMPIAR LAS TABLAS
+
                                             println("INSERTANDO INFORMACION EN TABLA DE INVENTARIO Y PRIMERA HOJA DE CARGA")
                                             //ALMACENANDO INVENTARIO NUEVO
-                                            //saveInventarioDatabase(res, context, view)
-                                            //insertarHojaDeCargar(res, context, view)
+                                            saveInventarioDatabase(res, context, view)
 
                                         }else{
                                             //AQUI SE CARGAR SOLO LAS EXISTENCIA DE ACUERDO A LA HOJA DE CARGA
                                             println("INSERTANDO INSERTANDO INFORMACION SOLO EN HOJA DE CARGA Y DETALLE")
-                                            CoroutineScope(Dispatchers.IO).launch {
-                                                //ALMACENANDO INVENTARIO NUEVO
-                                                insertarHojaDeCargar(res, context, view)
-                                            }
+                                            //ALMACENANDO INVENTARIO NUEVO
+                                            insertarHojaDeCargar(res, context, view)
                                         }
 
                                     } else {
-                                        println("ERROR: ERROR NO SE ENCONTRARON DATOS PARA ALMACENAR 222222")
+                                        //println("ERROR: ERROR NO SE ENCONTRARON DATOS PARA ALMACENAR 222222")
+                                        withContext(Dispatchers.Main){
+                                            Toast.makeText(context,"ERROR: NO SE ENCONTRO LA HOJA DE CARGA", Toast.LENGTH_SHORT).show()
+                                        }
                                     }
                                 } catch (e: Exception) {
                                     throw Exception(e.message)
@@ -418,7 +418,9 @@ class InventarioController {
                         }
 
                         404 -> {
-                            println("ERROR: ERROR NO SE ENCONTRARON DATOS PARA ALMACENAR")
+                            withContext(Dispatchers.Main){
+                                Toast.makeText(context,"ERROR: NO SE ENCONTRO LA HOJA DE CARGA", Toast.LENGTH_SHORT).show()
+                            }
                         }
 
                         else -> {
@@ -458,17 +460,17 @@ class InventarioController {
     }
 
     //FUNCION PARA VERIFICAR FECHA DE INVENTARIO CON HOJA DE CARGA
-    private fun verificarFechaInventario(context: Context) : Boolean{
+    fun verificarFechaInventario(context: Context) : Boolean{
         preferences = context.getSharedPreferences(instancia, Context.MODE_PRIVATE)
         val fechaActual = funciones.obtenerFecha()
         val fechaInventario = preferences.getString("fechaInventario", "NULL")
 
-        val respuesta : Boolean = if(fechaInventario.isNullOrEmpty()){
-            true
-        }else if(fechaActual != fechaInventario){
-            true
-        }else{
+        val respuesta : Boolean = if(fechaInventario == "NULL"){
             false
+        }else if(fechaActual != fechaInventario){
+            false
+        }else{
+            true
         }
 
         return respuesta
@@ -511,7 +513,9 @@ class InventarioController {
         }finally {
             bd.endTransaction()
             bd.close()
-            insertarDetalleHojaCarga(json, context, view)
+            CoroutineScope(Dispatchers.IO).launch {
+                insertarDetalleHojaCarga(json, context, view)
+            }
         }
     }
 
@@ -539,14 +543,15 @@ class InventarioController {
                 }
 
             }
-
             bd.setTransactionSuccessful()
         }catch (e:Exception){
             throw Exception("ERROR AL INSERTAR HOJA DE CARGA DETALLE -> " + e.message)
         }finally {
             bd.endTransaction()
             bd.close()
-            //obtenerFechaInventario(context)
+            CoroutineScope(Dispatchers.IO).launch {
+                obtenerFechaInventario(context)
+            }
             funciones.mostrarMensaje("INVENTARIO CARGADO CORRECTAMENTE", context, view)
         }
 

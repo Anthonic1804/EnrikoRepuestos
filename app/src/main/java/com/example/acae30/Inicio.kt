@@ -82,12 +82,19 @@ class Inicio : AppCompatActivity(), NavigationView.OnNavigationItemSelectedListe
         generaToken = preferencias!!.getInt("generaToken", 0)
 
         //FUNCION PARA OBTENER LA FECHA DEL INVENTARIO
-        CoroutineScope(Dispatchers.IO).launch {
+        /*CoroutineScope(Dispatchers.IO).launch {
             inventarioController.obtenerFechaInventario(this@Inicio)
-        }
+        }*/
 
-        val fechaInventario: String? = preferencias!!.getString("fechaInventario", null)
+        val fechaInventario: String? = preferencias!!.getString("fechaInventario", "NULL")
         binding.includeBar.lblupdate.text = fechaInventario
+
+        //PRUEBA DE COMPARACION DE FECHA
+        if(inventarioController.verificarFechaInventario(this@Inicio)){
+            println("LA FECHA ES IGUAL")
+        }else{
+            println("LA FECHA ES DIFERENTE")
+        }
 
         val nombre_vendedor =  preferencias!!.getString("Vendedor", "")
         binding.includeBar.txtvendedor.text = "BIENVENIDO ${nombre_vendedor?.trim()}"
@@ -185,6 +192,15 @@ class Inicio : AppCompatActivity(), NavigationView.OnNavigationItemSelectedListe
         val dialogo = Dialog(this)
         dialogo.setContentView(R.layout.alert_cerrar_sesion_usuario)
         dialogo.findViewById<Button>(R.id.btncerrar).setOnClickListener {
+            //FUNCION PARA ALIMINAR LA INFORMACION DE TABLAS MAESTRAS
+            CoroutineScope(Dispatchers.IO).launch {
+                funciones!!.eliminarInformacion(this@Inicio)
+            }
+
+            val editor = preferencias!!.edit()
+            editor.putString("fechaInventario", "NULL")
+            editor.apply()
+
             updateSesionServer()
             cerrarSesion()
             dialogo.dismiss()

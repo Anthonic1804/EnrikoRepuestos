@@ -193,4 +193,25 @@ class Funciones {
         }
     }
 
+
+    //FUNCION PARA ELIMINAR INFORMACION DE LAS TABLAS PRINCIPALES AL CERRAR SESSION
+    fun eliminarInformacion(context: Context){
+        val db = getDataBase(context).writableDatabase
+        try {
+            db.execSQL("DELETE FROM Inventario")
+            db.execSQL("DELETE FROM hoja_carga")
+            db.execSQL("DELETE FROM hoja_carga_detalle")
+            db.execSQL("DELETE FROM clientes")
+            db.execSQL("DELETE FROM cliente_sucursal")
+            db.execSQL("DELETE FROM cliente_precios")
+            db.execSQL("DELETE FROM inventario_precios")
+            //db.execSQL("DELETE FROM pedidos")
+            //db.execSQL("DELETE FROM detalle_pedidos")
+        }catch (e:Exception){
+            throw Exception("ERROR AL ELIMINAR LA INFORMACION AL CERRAR SESSION -> " + e.message)
+        }finally {
+            db.close()
+        }
+    }
+
 }
