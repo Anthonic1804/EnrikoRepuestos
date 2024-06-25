@@ -134,7 +134,7 @@
     <string name="autorizaci_n_de_precios">AUTORIZACIÓN DE PRECIOS</string>
     <string name="imgpago">imgPago</string>
     <string name="detalle_de_pago">DETALLE DE PAGO</string>
-    <string name="efectivo">EFECTIVO</string>
+    <string name="efectivo">PAGO DEL CLIENTE</string>
     <string name="total">TOTAL</string>
     <string name="cambio">CAMBIO</string>
     <string name="fecha">FECHA</string>

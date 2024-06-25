@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <array name="formaPago">
+        <item>EFECTIVO</item>
+        <item>TARJETA</item>
+        <item>CHEQUE</item>
+        <item>DEPOSITO A CUENTA</item>
+    </array>
+</resources>
