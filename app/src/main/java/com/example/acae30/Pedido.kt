@@ -743,6 +743,21 @@ class Pedido : AppCompatActivity() {
                     "",
                     pedido.getString(18),
                     pedido.getString(24),
+                    pedido.getFloat(25),
+                    pedido.getFloat(26),
+                    pedido.getFloat(27),
+                    pedido.getFloat(28),
+                    pedido.getString(39),
+                    pedido.getString(29),
+                    pedido.getString(30),
+                    pedido.getString(31),
+                    pedido.getString(32),
+                    pedido.getString(33),
+                    pedido.getString(34),
+                    pedido.getString(35),
+                    pedido.getString(36),
+                    pedido.getString(37),
+                    pedido.getString(38),
                     null
 
                 )
@@ -909,6 +924,7 @@ class Pedido : AppCompatActivity() {
         json.addProperty("Idvendedor", pedido.Idvendedor)
         json.addProperty("Vendedor", pedido.Vendedor)
         json.addProperty("Idapp", idvisita_v)
+
         //se ordena la cabezera
         var detalle = JsonArray()
         for (i in 0..(pedido.detalle!!.size - 1)) {

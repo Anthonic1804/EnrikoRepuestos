@@ -26,6 +26,8 @@ import android.widget.AdapterView
 import android.widget.AdapterView.OnItemSelectedListener
 import android.widget.ArrayAdapter
 import android.widget.Button
+import android.widget.LinearLayout
+import android.widget.Spinner
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
@@ -57,6 +59,7 @@ import java.io.FileOutputStream
 import java.io.InputStreamReader
 import java.io.OutputStreamWriter
 import java.io.Reader
+import java.math.BigDecimal
 import java.net.HttpURLConnection
 import java.net.URL
 import java.nio.charset.StandardCharsets
@@ -280,7 +283,19 @@ class Detallepedido : AppCompatActivity() {
 
         //EVENTRO CLIC DEL BOTON ENVIAR
         binding.btnenviar.setOnClickListener {
-            if(clienteMosoro == 1 && terminosPedidos != "Contado"){
+            if (ConfirmarDetallePedido() > 0) {
+                val pedidoInfo = pedidosController.obtenerInformacionPedido(idpedido, this@Detallepedido)
+                enviandoPedido = true
+
+                if(pedidoInfo?.Cerrado == 0 && pedidoInfo.Enviado == 0){
+                    alertaPago(total)
+                }else{
+                    verificarConexionEnvio()
+                }
+            } else {
+                funciones.mostrarAlerta("ERROR: NO HAY PRODUCTOS AGREGADOS AL PEDIDO", this@Detallepedido, binding.lienzo)
+            }
+            /*if(clienteMosoro == 1 && terminosPedidos != "Contado"){
                 funciones.mostrarAlerta("ERROR: NO PUEDE FACTURAR AL CREDITO A CLIENTE EN MORA", this@Detallepedido, binding.lienzo)
             }else{
                 if (ConfirmarDetallePedido() > 0) {
@@ -295,7 +310,7 @@ class Detallepedido : AppCompatActivity() {
                 } else {
                     funciones.mostrarAlerta("ERROR: NO HAY PRODUCTOS AGREGADOS AL PEDIDO", this@Detallepedido, binding.lienzo)
                 }
-            }
+            }*/
         }
 
         //EVENTO CLIC DEL BOTON GUARDAR.
@@ -904,8 +919,22 @@ class Detallepedido : AppCompatActivity() {
                     "",
                     pedido.getString(18),
                     pedido.getString(24),
+                    pedido.getFloat(25),
+                    pedido.getFloat(26),
+                    pedido.getFloat(27),
+                    pedido.getFloat(28),
+                    pedido.getString(39),
+                    pedido.getString(29),
+                    pedido.getString(30),
+                    pedido.getString(31),
+                    pedido.getString(32),
+                    pedido.getString(33),
+                    pedido.getString(34),
+                    pedido.getString(35),
+                    pedido.getString(36),
+                    pedido.getString(37),
+                    pedido.getString(38),
                     null
-
                 )
                 pedido.close()
                 val cdetalle =
@@ -1119,6 +1148,24 @@ class Detallepedido : AppCompatActivity() {
         json.addProperty("Id_hoja_de_carga", idHojaCarga)
         json.addProperty("num_hoja_de_carga", hojaCarga)
         json.addProperty("punto_venta",puntoVenta)
+
+        //ENVIANDO FORMAS DE PAGO
+        json.addProperty("Forma_pago", pedido.formaPago)
+        json.addProperty("numero_orden",pedido.numeroOrden!!.toBigDecimal())
+        json.addProperty("Efectivo_pago", pedido.pagoEfectivo)
+        json.addProperty("Tarjeta_pago", pedido.pagoTarjeta)
+        json.addProperty("Tarjeta_banco", pedido.bancoTarjeta)
+        json.addProperty("Tarjeta_nombre", pedido.nombreTarjeta)
+        json.addProperty("Tarjeta_numero", pedido.numTarjeta)
+        json.addProperty("Cheque_pago", pedido.pagoCheque)
+        json.addProperty("Cheque_banco", pedido.bancoCheque)
+        json.addProperty("Cheque_cuenta", pedido.numCuentaCheque)
+        json.addProperty("Cheque_numero", pedido.numCheque)
+        json.addProperty("Deposito_pago", pedido.pagoDeposito)
+        json.addProperty("Deposito_banco", pedido.bancoDeposito)
+        json.addProperty("Deposito_cuenta", pedido.numCuentaDeposito)
+        json.addProperty("Deposito_numero", pedido.numDeposito)
+
         //se ordena la cabezera
         val detalle = JsonArray()
         for (i in 0..(pedido.detalle!!.size - 1)) {
@@ -1355,6 +1402,9 @@ class Detallepedido : AppCompatActivity() {
         dialogo.setContentView(R1.layout.vista_cobro)
         dialogo.setCancelable(false)
 
+
+
+
         val etTotal = dialogo.findViewById<TextInputEditText>(R1.id.txtTotalPago)
         etTotal.setText("$" + "${String.format("%.2f", total)}")
 
@@ -1363,6 +1413,69 @@ class Detallepedido : AppCompatActivity() {
 
         val etPago = dialogo.findViewById<TextInputEditText>(R1.id.txtEfectivoPago)
         var pagoCliente = 0f
+
+        //VARIABLES PARA MOSTRAR Y OCULTAR LOS LAYOUTS
+        val spFormaPago = dialogo.findViewById<Spinner>(R1.id.spFormaPago)
+        val lyPagoCheque = dialogo.findViewById<LinearLayout>(R1.id.lyContenedorCheque)
+        val lyPagoTarjeta = dialogo.findViewById<LinearLayout>(R1.id.lyContenedorTarjeta)
+        val lyPagoDeposito = dialogo.findViewById<LinearLayout>(R1.id.lyContenedorDeposito)
+
+        var formaPagoSeleccionada : String = ""
+
+        //VARIABLES PARA ALMACENAR LOS VALORES
+        var pagoEfectivo : Float = 0f
+        var pagoCheque : Float = 0f
+        var pagoTarjeta : Float = 0f
+        var pagoDeposito : Float = 0f
+
+        var numeroOrden : String = ""
+
+        var bancoCheque : String = ""
+        var numCuentaCheque : String = ""
+        var numCheque : String = ""
+
+        var bancoTarjeta : String = ""
+        var nombreTarjeta: String = ""
+        var numTarjeta : String = ""
+
+        var bancoDeposito : String = ""
+        var numCuentaDeposito : String = ""
+        var numDeposito : String = ""
+
+        //IMPLEMENTANDO LOGICA DE TIPO DE PAGO SELECCIONADA EN SPINNER
+        spFormaPago.onItemSelectedListener = object : OnItemSelectedListener{
+            override fun onItemSelected(parent: AdapterView<*>?,
+                                        view: View?,
+                                        position: Int,
+                                        id: Long) {
+
+                formaPagoSeleccionada = parent?.getItemAtPosition(position).toString()
+
+                when(formaPagoSeleccionada){
+                    "TARJETA"->{
+                        lyPagoCheque.visibility = View.GONE
+                        lyPagoDeposito.visibility = View.GONE
+                        lyPagoTarjeta.visibility = View.VISIBLE
+                    }
+                    "CHEQUE" -> {
+                        lyPagoCheque.visibility = View.VISIBLE
+                        lyPagoDeposito.visibility = View.GONE
+                        lyPagoTarjeta.visibility = View.GONE
+                    }
+                    "DEPOSITO A CUENTA" -> {
+                        lyPagoCheque.visibility = View.GONE
+                        lyPagoDeposito.visibility = View.VISIBLE
+                        lyPagoTarjeta.visibility = View.GONE
+                    }
+                    else -> {
+                        lyPagoCheque.visibility = View.GONE
+                        lyPagoDeposito.visibility = View.GONE
+                        lyPagoTarjeta.visibility = View.GONE
+                    }
+                }
+            }
+            override fun onNothingSelected(p0: AdapterView<*>?) {}
+        }
 
         etPago.addTextChangedListener(object : TextWatcher {
             override fun beforeTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {
@@ -1393,11 +1506,46 @@ class Detallepedido : AppCompatActivity() {
                 Toast.makeText(this@Detallepedido, "DEBE DE INGRESAR EL PAGO DEL CLIENTE", Toast.LENGTH_SHORT)
                     .show()
             }else{
+
+                when(formaPagoSeleccionada){
+                    "TARJETA"->{
+                        pagoTarjeta = etPago.text.toString().toFloat()
+                    }
+                    "CHEQUE" -> {
+                        pagoCheque = etPago.text.toString().toFloat()
+                    }
+                    "DEPOSITO A CUENTA" -> {
+                        pagoDeposito = etPago.text.toString().toFloat()
+                    }
+                    else -> {
+                        pagoEfectivo = etPago.text.toString().toFloat()
+                    }
+                }
+
+                numeroOrden = dialogo.findViewById<TextInputEditText>(R1.id.txtNumeroOrden).text.toString()
+
+                bancoCheque = dialogo.findViewById<TextInputEditText>(R1.id.tvBanco).text.toString()
+                numCuentaCheque = dialogo.findViewById<TextInputEditText>(R1.id.tvNumCuentaCheque).text.toString()
+                numCheque = dialogo.findViewById<TextInputEditText>(R1.id.tvNumCheque).text.toString()
+
+                bancoTarjeta = dialogo.findViewById<TextInputEditText>(R1.id.tvTarjeta).text.toString()
+                nombreTarjeta = dialogo.findViewById<TextInputEditText>(R1.id.tvNombreTarjeta).text.toString()
+                numTarjeta = dialogo.findViewById<TextInputEditText>(R1.id.tvNumTarjeta).text.toString()
+
+                bancoDeposito = dialogo.findViewById<TextInputEditText>(R1.id.tvDeposito).text.toString()
+                numCuentaDeposito = dialogo.findViewById<TextInputEditText>(R1.id.tvNumCuentaDeposito).text.toString()
+                numDeposito = dialogo.findViewById<TextInputEditText>(R1.id.tvNumDeposito).text.toString()
+
+
+
                 CoroutineScope(Dispatchers.IO).launch {
                     pedidosController.actualizarPagoCambioPedido(this@Detallepedido, idpedido,
-                        pagoCliente, cambio
+                        pagoCliente, cambio, pagoEfectivo, pagoCheque, pagoTarjeta, pagoDeposito,
+                        numeroOrden, bancoCheque, numCuentaCheque, numCheque, bancoTarjeta, nombreTarjeta,
+                        numTarjeta, bancoDeposito, numCuentaDeposito, numDeposito
                     )
                 }
+
                 dialogo.dismiss()
                 imprimirRecibo()
             }

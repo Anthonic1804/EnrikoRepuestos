@@ -24,10 +24,36 @@ class PedidosController {
     }
 
     //FUNCION PARA ACTUALIZAR EL PAGO Y EL CAMBIO DEL CLIENTE
-    fun actualizarPagoCambioPedido(context: Context, idpedido: Int, pago:Float, cambio:Float){
+    fun actualizarPagoCambioPedido(context: Context, idpedido: Int, pago:Float, cambio:Float, pagoEfectivo:Float,
+                                   pagoCheque:Float,pagoTarjeta:Float,pagoDeposito:Float, numeroOrden:String,
+                                   bancoCheque:String,numCuentaCheque:String,numCheque:String, bancoTarjeta:String,
+                                   nombreTarjeta:String,numTarjeta:String,bancoDeposito:String,numCuentaDeposito:String,
+                                   numDeposito:String){
         val bd = funciones.getDataBase(context).writableDatabase
+        var orden = ""
+        orden = if(numeroOrden==""){
+            "0"
+        }else{
+            numeroOrden
+        }
+
         try {
-            bd.execSQL("UPDATE pedidos SET pago=$pago, cambio=$cambio WHERE id=$idpedido")
+            bd.execSQL("UPDATE pedidos SET pago=$pago, " +
+                    "cambio=$cambio," +
+                    "pagoEfectivo=$pagoEfectivo," +
+                    "pagoCheque=$pagoCheque," +
+                    "pagoTarjeta=$pagoTarjeta," +
+                    "pagoDeposito=$pagoDeposito," +
+                    "bancoCheque='$bancoCheque'," +
+                    "numCuentaCheque='$numCuentaCheque'," +
+                    "numCheque='$numCheque'," +
+                    "bancoTarjeta='$bancoTarjeta'," +
+                    "nombreTarjeta='$nombreTarjeta'," +
+                    "numTarjeta='$numTarjeta'," +
+                    "bancoDeposito='$bancoDeposito'," +
+                    "numCuentaDeposito='$numCuentaDeposito'," +
+                    "numDeposito='$numDeposito'," +
+                    "numero_orden='$orden' WHERE id=$idpedido")
         }catch (e:Exception){
             throw Exception(e.message)
         }finally {

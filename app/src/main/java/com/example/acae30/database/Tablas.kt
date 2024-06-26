@@ -206,7 +206,22 @@ class Tablas {
                 "Nombre_sucursal VARCHAR(45) NOT NULL DEFAULT ''," +
                 "Tipo_documento VARCHAR(2) NULL DEFAULT 'FC'," +
                 "Tipo_envio INTEGER NOT NULL DEFAULT 0," +
-                "Terminos VARCHAR(25) NOT NULL);"
+                "Terminos VARCHAR(25) NOT NULL," +
+                "pagoEfectivo NUMERIC(20,6) NULL DEFAULT 0," +
+                "pagoCheque NUMERIC(20,6) NULL DEFAULT 0," +
+                "pagoTarjeta NUMERIC(20,6) NULL DEFAULT 0," +
+                "pagoDeposito NUMERIC(20,6) NULL DEFAULT 0," +
+                "bancoCheque VARCHAR(25) NULL DEFAULT ''," +
+                "numCuentaCheque VARCHAR(25) NULL DEFAULT ''," +
+                "numCheque VARCHAR(25) NULL DEFAULT ''," +
+                "bancoTarjeta VARCHAR(25) NULL DEFAULT ''," +
+                "nombreTarjeta VARCHAR(25) NULL DEFAULT ''," +
+                "numTarjeta VARCHAR(25) NULL DEFAULT ''," +
+                "bancoDeposito VARCHAR(25) NULL DEFAULT ''," +
+                "numCuentaDeposito VARCHAR(25) NULL DEFAULT ''," +
+                "numDeposito VARCHAR(25) NULL DEFAULT ''," +
+                "formaPago VARCHAR(25) NULL DEFAULT ''," +
+                "numero_orden VARCHAR(25) DEFAULT '0');"
     }
 
     fun detallePedidos(): String {
