@@ -1451,28 +1451,39 @@ class Detallepedido : AppCompatActivity() {
 
                 formaPagoSeleccionada = parent?.getItemAtPosition(position).toString()
 
-                when(formaPagoSeleccionada){
-                    "TARJETA"->{
-                        lyPagoCheque.visibility = View.GONE
-                        lyPagoDeposito.visibility = View.GONE
-                        lyPagoTarjeta.visibility = View.VISIBLE
-                    }
-                    "CHEQUE" -> {
-                        lyPagoCheque.visibility = View.VISIBLE
-                        lyPagoDeposito.visibility = View.GONE
-                        lyPagoTarjeta.visibility = View.GONE
-                    }
-                    "DEPOSITO A CUENTA" -> {
-                        lyPagoCheque.visibility = View.GONE
-                        lyPagoDeposito.visibility = View.VISIBLE
-                        lyPagoTarjeta.visibility = View.GONE
-                    }
-                    else -> {
-                        lyPagoCheque.visibility = View.GONE
-                        lyPagoDeposito.visibility = View.GONE
-                        lyPagoTarjeta.visibility = View.GONE
+                CoroutineScope(Dispatchers.IO).launch {
+                    when(formaPagoSeleccionada){
+                        "TARJETA"->{
+                            runOnUiThread{
+                                lyPagoCheque.visibility = View.GONE
+                                lyPagoDeposito.visibility = View.GONE
+                                lyPagoTarjeta.visibility = View.VISIBLE
+                            }
+                        }
+                        "CHEQUE" -> {
+                            runOnUiThread{
+                                lyPagoCheque.visibility = View.VISIBLE
+                                lyPagoDeposito.visibility = View.GONE
+                                lyPagoTarjeta.visibility = View.GONE
+                            }
+                        }
+                        "DEPOSITO A CUENTA" -> {
+                            runOnUiThread{
+                                lyPagoCheque.visibility = View.GONE
+                                lyPagoDeposito.visibility = View.VISIBLE
+                                lyPagoTarjeta.visibility = View.GONE
+                            }
+                        }
+                        else -> {
+                            runOnUiThread{
+                                lyPagoCheque.visibility = View.GONE
+                                lyPagoDeposito.visibility = View.GONE
+                                lyPagoTarjeta.visibility = View.GONE
+                            }
+                        }
                     }
                 }
+
             }
             override fun onNothingSelected(p0: AdapterView<*>?) {}
         }
