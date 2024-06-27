@@ -1184,7 +1184,7 @@ class Detallepedido : AppCompatActivity() {
             d.addProperty("Precio_u_iva", data.Precio_u_iva)
             d.addProperty("Cantidad", data.Cantidad)
             d.addProperty("Precio_venta", data.Precio_venta)
-            d.addProperty("Total", data.Total)
+            d.addProperty("Total", data.Total_iva)
             d.addProperty("Total_iva", data.Total_iva)
             d.addProperty("Unidad", data.Unidad)
             d.addProperty("Bonificado", data.Bonificado)
@@ -1509,15 +1509,19 @@ class Detallepedido : AppCompatActivity() {
 
                 when(formaPagoSeleccionada){
                     "TARJETA"->{
+                        formaPagoSeleccionada = "Tarjeta"
                         pagoTarjeta = etPago.text.toString().toFloat()
                     }
                     "CHEQUE" -> {
+                        formaPagoSeleccionada = "Cheque"
                         pagoCheque = etPago.text.toString().toFloat()
                     }
                     "DEPOSITO A CUENTA" -> {
+                        formaPagoSeleccionada = "Depósito a Cta."
                         pagoDeposito = etPago.text.toString().toFloat()
                     }
                     else -> {
+                        formaPagoSeleccionada = "Efectivo"
                         pagoEfectivo = etPago.text.toString().toFloat()
                     }
                 }
@@ -1542,7 +1546,7 @@ class Detallepedido : AppCompatActivity() {
                     pedidosController.actualizarPagoCambioPedido(this@Detallepedido, idpedido,
                         pagoCliente, cambio, pagoEfectivo, pagoCheque, pagoTarjeta, pagoDeposito,
                         numeroOrden, bancoCheque, numCuentaCheque, numCheque, bancoTarjeta, nombreTarjeta,
-                        numTarjeta, bancoDeposito, numCuentaDeposito, numDeposito
+                        numTarjeta, bancoDeposito, numCuentaDeposito, numDeposito, formaPagoSeleccionada
                     )
                 }
 

@@ -28,7 +28,7 @@ class PedidosController {
                                    pagoCheque:Float,pagoTarjeta:Float,pagoDeposito:Float, numeroOrden:String,
                                    bancoCheque:String,numCuentaCheque:String,numCheque:String, bancoTarjeta:String,
                                    nombreTarjeta:String,numTarjeta:String,bancoDeposito:String,numCuentaDeposito:String,
-                                   numDeposito:String){
+                                   numDeposito:String, formaPago:String){
         val bd = funciones.getDataBase(context).writableDatabase
         var orden = ""
         orden = if(numeroOrden==""){
@@ -53,7 +53,8 @@ class PedidosController {
                     "bancoDeposito='$bancoDeposito'," +
                     "numCuentaDeposito='$numCuentaDeposito'," +
                     "numDeposito='$numDeposito'," +
-                    "numero_orden='$orden' WHERE id=$idpedido")
+                    "numero_orden='$orden'," +
+                    "formaPago='$formaPago' WHERE id=$idpedido")
         }catch (e:Exception){
             throw Exception(e.message)
         }finally {
