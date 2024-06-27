@@ -1521,19 +1521,35 @@ class Detallepedido : AppCompatActivity() {
                 when(formaPagoSeleccionada){
                     "TARJETA"->{
                         formaPagoSeleccionada = "Tarjeta"
-                        pagoTarjeta = etPago.text.toString().toFloat()
+                        pagoTarjeta = if(etPago.text.toString() == ""){
+                            0f
+                        }else{
+                            etPago.text.toString().toFloat()
+                        }
                     }
                     "CHEQUE" -> {
                         formaPagoSeleccionada = "Cheque"
-                        pagoCheque = etPago.text.toString().toFloat()
+                        pagoCheque = if(etPago.text.toString() == ""){
+                            0f
+                        }else{
+                            etPago.text.toString().toFloat()
+                        }
                     }
                     "DEPOSITO A CUENTA" -> {
                         formaPagoSeleccionada = "Depósito a Cta."
-                        pagoDeposito = etPago.text.toString().toFloat()
+                        pagoDeposito = if(etPago.text.toString() == ""){
+                            0f
+                        }else{
+                            etPago.text.toString().toFloat()
+                        }
                     }
                     else -> {
                         formaPagoSeleccionada = "Efectivo"
-                        pagoEfectivo = etPago.text.toString().toFloat()
+                        pagoEfectivo = if(etPago.text.toString() == ""){
+                            0f
+                        }else{
+                            etPago.text.toString().toFloat()
+                        }
                     }
                 }
 

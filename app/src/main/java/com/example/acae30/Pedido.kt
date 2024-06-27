@@ -92,7 +92,7 @@ class Pedido : AppCompatActivity() {
     private lateinit var lblMensaje: TextView
     private lateinit var lblTitulo: TextView
 
-    private val requestPermissionLauncher = registerForActivityResult(
+   /* private val requestPermissionLauncher = registerForActivityResult(
         ActivityResultContracts.RequestPermission()
     ){
             isAceptado ->
@@ -101,7 +101,7 @@ class Pedido : AppCompatActivity() {
         }else{
             Toast.makeText(this, "PERMISOS DENEGADOS", Toast.LENGTH_LONG).show()
         }
-    }
+    }*/
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -1013,6 +1013,8 @@ class Pedido : AppCompatActivity() {
         ActivityCompat.requestPermissions(
             this,
             arrayOf(
+                Manifest.permission.WRITE_EXTERNAL_STORAGE,
+                Manifest.permission.READ_EXTERNAL_STORAGE,
                 Manifest.permission.ACCESS_FINE_LOCATION,
                 Manifest.permission.ACCESS_COARSE_LOCATION
             ),  /* Este codigo es para identificar tu request */
@@ -1152,12 +1154,13 @@ class Pedido : AppCompatActivity() {
             bd!!.endTransaction()
             bd.close()
 
-            verificarPermisos(view)
+            generarPDF()
+            //verificarPermisos(view)
         }
     }
 
     //FUNCION PARA VERIFICAR PERMISOS DE CREACION DE DIRECTORIO Y DOCUMENTOS
-    private fun verificarPermisos(view: View) {
+    /*private fun verificarPermisos(view: View) {
         when{
             ContextCompat.checkSelfPermission(
                 this,
@@ -1179,7 +1182,7 @@ class Pedido : AppCompatActivity() {
                 requestPermissionLauncher.launch(Manifest.permission.WRITE_EXTERNAL_STORAGE)
             }
         }
-    }
+    }*/
     //FUNCION PARA GENERAR EL REPORTE EN PDF
     private fun generarPDF() {
         try {
