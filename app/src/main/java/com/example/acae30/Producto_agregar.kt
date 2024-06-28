@@ -700,6 +700,14 @@ class Producto_agregar : AppCompatActivity() {
 
     private fun AddDetallePedido(esPrecioEditado: Boolean, bonificado:Int): Int {
         val base = db!!.writableDatabase
+        var vPrecio = precio
+        var vPrecio_iva = precio_iva
+
+        if(precioIvaPersonalizado > 0){
+            vPrecio = (precioIvaPersonalizado / 1.13).toFloat()
+            vPrecio_iva = precioIvaPersonalizado
+        }
+
         try {
             base.beginTransaction()
             val detalle = ContentValues()
@@ -714,8 +722,8 @@ class Producto_agregar : AppCompatActivity() {
             }
 
             detalle.put("Idunidad", 0)
-            detalle.put("precio", precio)
-            detalle.put("Precio_iva", precio_iva)
+            detalle.put("precio", vPrecio)
+            detalle.put("Precio_iva", vPrecio_iva)
             detalle.put("Precio_oferta", 0.toFloat())
             detalle.put("Total", (txttotal!!.text.toString().toFloat()) / 1.13)
             detalle.put("Total_iva", txttotal!!.text.toString().toFloat())
