@@ -1,15 +1,32 @@
 package com.example.acae30.controllers
 
 import android.content.Context
+import android.content.SharedPreferences
 import android.view.View
+import android.widget.Toast
 import com.example.acae30.Funciones
 import com.example.acae30.modelos.DetallePedido
+import com.example.acae30.modelos.JSONmodels.BusquedaReporteJSON
+import com.example.acae30.modelos.JSONmodels.PedidoDTE
 import com.example.acae30.modelos.Pedidos
+import com.google.gson.Gson
+import org.json.JSONArray
+import org.json.JSONObject
+import java.io.BufferedReader
+import java.io.InputStreamReader
+import java.io.OutputStreamWriter
+import java.io.Reader
+import java.net.HttpURLConnection
+import java.net.URL
+import java.nio.charset.StandardCharsets
 
 class PedidosController {
 
     var funciones = Funciones()
     var clienteController = ClientesController()
+    private lateinit var preferences: SharedPreferences
+    private var instancia = "CONFIG_SERVIDOR"
+
 
     //FUNCION PARA ACTUALIZAR EL TIPO DE ENVIO SELECCIONADO
     fun updateTipoPedido(tipoPedido:Int, idpedido:Int, context: Context){
@@ -111,6 +128,65 @@ class PedidosController {
         }
     }
 
+    //FUNCION PARA OBTENER PEDIDOS NO TRANSMITIDOS
+    fun obtenerPedidosNoTransmitidos(context: Context) :Pedidos?{
+        val db = funciones.getDataBase(context).readableDatabase
+        var pedido : Pedidos? = null
+        try {
+            val cursor = db.rawQuery(
+                "SELECT Id," +
+                        " Id_cliente," +
+                        " Nombre_cliente," +
+                        " Total," +
+                        " Descuento," +
+                        " Enviado," +
+                        " Fecha_enviado," +
+                        " Id_pedido_sistema," +
+                        " Gps," +
+                        " Cerrado," +
+                        " Idvisita," +
+                        " strftime('%d/%m/%Y %H:%M'," +
+                        " fecha_creado) as fecha_creado," +
+                        "Sumas," +
+                        "Iva," +
+                        "Iva_percibido, " +
+                        "pedido_dte, " +
+                        "pedido_dte_error FROM pedidos WHERE Enviado=1 AND pedido_dte=0" +
+                        " order by id desc limit 1",
+                null
+            )
+            if(cursor.count > 0){
+                cursor.moveToFirst()
+                pedido = Pedidos(
+                    cursor.getInt(0),
+                    cursor.getInt(1),
+                    cursor.getString(2),
+                    cursor.getFloat(3),
+                    cursor.getFloat(4),
+                    cursor.getInt(5),
+                    cursor.getString(6),
+                    cursor.getInt(7),
+                    cursor.getString(8),
+                    cursor.getInt(9),
+                    cursor.getInt(10),
+                    cursor.getString(11),
+                    cursor.getFloat(12),
+                    cursor.getFloat(13),
+                    cursor.getFloat(14),
+                    cursor.getInt(15),
+                    cursor.getInt(16)
+                )
+            }
+
+            cursor.close()
+            return pedido
+        }catch (e:Exception){
+            throw Exception("ERROR NO SE ENCONTRARON PEDIDOS -> " + e.message)
+        }finally {
+            db.close()
+        }
+    }
+
     //FUNCION PARA OBTENER INFORMACION DEL PEDIDO
     fun obtenerInformacionPedido(idPedido: Int, context: Context): Pedidos?{
         val base  = funciones.getDataBase(context).readableDatabase
@@ -134,7 +210,9 @@ class PedidosController {
                     cursor.getString(18),
                     cursor.getFloat(6),
                     cursor.getFloat(7),
-                    cursor.getFloat(10)
+                    cursor.getFloat(10),
+                    cursor.getInt(40),
+                    cursor.getInt(41)
                 )
                 cursor.close()
             }
@@ -215,6 +293,19 @@ class PedidosController {
             bd.close()
         }
 
+    }
+
+    //FUNCION PARA ACTUALIZAR EL ESTADO DE TRANSMISION
+    fun actualizarEstadoTransmisionPedido(context: Context, idPedidoServidor:Int, pedido_dte : Int, pedido_dte_error:Int){
+        val bd = funciones.getDataBase(context).writableDatabase
+        try {
+            bd.execSQL("UPDATE pedidos SET pedido_dte=$pedido_dte, pedido_dte_error=$pedido_dte_error " +
+                    "WHERE Id_pedido_sistema = $idPedidoServidor")
+        }catch (e:Exception){
+            throw Exception("ERROR AL ACTUALIZAR EL PEDIDO")
+        }finally {
+            bd.close()
+        }
     }
 
 }

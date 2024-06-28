@@ -3,6 +3,7 @@ package com.example.acae30
 import android.Manifest
 import android.app.Dialog
 import android.content.ContentValues
+import android.content.Context
 import android.content.Intent
 import android.content.SharedPreferences
 import android.content.pm.PackageManager
@@ -23,12 +24,14 @@ import androidx.core.content.ContextCompat
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.example.acae30.controllers.PedidosController
 import com.example.acae30.database.Database
 import com.example.acae30.listas.PedidosAdapter
 import com.example.acae30.modelos.DetallePedido
 import com.example.acae30.modelos.JSONmodels.BusquedaReporteJSON
 import com.example.acae30.modelos.JSONmodels.CabezeraPedidoSend
 import com.example.acae30.modelos.JSONmodels.DatosReporteJSON
+import com.example.acae30.modelos.JSONmodels.PedidoDTE
 import com.example.acae30.modelos.Pedidos
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.google.android.material.snackbar.Snackbar
@@ -46,6 +49,8 @@ import com.itextpdf.text.Paragraph
 import com.itextpdf.text.pdf.PdfPCell
 import com.itextpdf.text.pdf.PdfPTable
 import com.itextpdf.text.pdf.PdfWriter
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
 import org.json.JSONArray
@@ -103,6 +108,8 @@ class Pedido : AppCompatActivity() {
         }
     }*/
 
+    private var pedidosController = PedidosController()
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -140,8 +147,21 @@ class Pedido : AppCompatActivity() {
 
         //sincronizar los datos que no se han enviado
         btnsincronizar!!.setOnClickListener {
-            Toast.makeText(this@Pedido, "FUNCION EN CONSTRUCCION", Toast.LENGTH_SHORT)
-                .show()
+
+            CoroutineScope(Dispatchers.IO).launch {
+                val pedidoDTE = pedidosController.obtenerPedidosNoTransmitidos(this@Pedido)
+                var idPedidoDTE = 0
+                if(pedidoDTE != null)
+                {
+                    idPedidoDTE = pedidoDTE.Id_pedido_sistema!!
+                }
+
+                if (idPedidoDTE > 0) {
+                    obtenerPedidosDTEServidor(idPedidoDTE)
+                }
+            }
+
+            //Toast.makeText(this@Pedido, "FUNCION EN CONSTRUCCION", Toast.LENGTH_SHORT).show()
             /*btnsincronizar!!.isEnabled = false
             if (isConnected()) {
 
@@ -501,7 +521,6 @@ class Pedido : AppCompatActivity() {
         super.onStart()
         //GlobalScope.launch(Dispatchers.IO) {
         this@Pedido.lifecycleScope.launch {
-
             try {
                 val lista = GetPedido()
                 if (lista.size > 0) {
@@ -577,8 +596,9 @@ class Pedido : AppCompatActivity() {
                         " fecha_creado) as fecha_creado," +
                         "Sumas," +
                         "Iva," +
-                        "Iva_percibido " +
-                        "FROM pedidos " +
+                        "Iva_percibido, " +
+                        "pedido_dte, " +
+                        "pedido_dte_error FROM pedidos " +
                         "order by id desc",
                 null
             )
@@ -602,7 +622,9 @@ class Pedido : AppCompatActivity() {
                         cursor.getString(11),
                         cursor.getFloat(12),
                         cursor.getFloat(13),
-                        cursor.getFloat(14)
+                        cursor.getFloat(14),
+                        cursor.getInt(15),
+                        cursor.getInt(16)
                     )
                     lista.add(pedido)
 
@@ -1351,4 +1373,109 @@ class Pedido : AppCompatActivity() {
         }
 
     }
+
+    //FUNCION PARA OBTENER LOS PEDIDOS DESDE EL SERVIDOR
+    private fun obtenerPedidosDTEServidor(Id_pedido:Int) {
+        try {
+            val datos = PedidoDTE(
+                Id_pedido
+            )
+            val objecto =
+                Gson().toJson(datos)
+            val ruta: String = "http://$ip:$puerto/pedido/dte"
+            val url = URL(ruta)
+            with(url.openConnection() as HttpURLConnection) {
+                try {
+                    connectTimeout = 20000
+                    setRequestProperty(
+                        "Content-Type",
+                        "application/json;charset=utf-8"
+                    )
+                    requestMethod = "POST"
+                    val or = OutputStreamWriter(outputStream, StandardCharsets.UTF_8)
+                    or.write(objecto) //SE ESCRIBE EL OBJ JSON
+                    or.flush() //SE ENVIA EL OBJ JSON
+                    when (responseCode) {
+                        200 -> {
+                            BufferedReader(InputStreamReader(inputStream) as Reader?).use {
+                                try {
+                                    val respuesta = StringBuffer()
+                                    var inpuline = it.readLine()
+                                    while (inpuline != null) {
+                                        respuesta.append(inpuline)
+                                        inpuline = it.readLine()
+                                    }
+                                    it.close()
+                                    val res = JSONObject(respuesta.toString())
+                                    if (res.length() > 0) {
+                                        //cargarPedidos(res, view)
+                                        val res_pedido_dte: String = res.getString("pedido_dte")
+                                        val res_pedido_dte_error: String = res.getString("pedido_dte_error")
+                                        var pedido_dte = 0
+                                        var pedido_dte_error = 0
+
+                                        if(res_pedido_dte == "true"){
+                                            pedido_dte = 1
+                                        }
+
+                                        if(res_pedido_dte_error == "true"){
+                                            pedido_dte_error = 1
+                                        }
+
+                                        println("RESPUESTA PEDIDO_DETE: $res_pedido_dte ------- RESPUESTA PEDIDO_DTE_ERROR: $res_pedido_dte_error")
+
+                                        pedidosController.actualizarEstadoTransmisionPedido(this@Pedido, Id_pedido,pedido_dte, pedido_dte_error)
+                                        runOnUiThread {
+                                            actualizarVistaDTE()
+                                        }
+
+                                    } else {
+                                        //runOnUiThread { Toast.makeText(this@Pedido, "NO SE ENCONTRARON PEDIDOS DE ESTE DIA", Toast.LENGTH_LONG).show() }
+                                    }
+                                } catch (e: Exception) {
+                                    throw Exception(e.message)
+                                }
+                            }
+                        }
+
+                        400 -> {
+                            //runOnUiThread { Toast.makeText(this@Pedido, "PARAMETROS ERRONEOS", Toast.LENGTH_LONG).show() }
+                        }
+
+                        404 -> {
+                            //runOnUiThread { Toast.makeText(this@Pedido, "NO SE ENCONTRARON PEDIDOS ENVIADOS", Toast.LENGTH_LONG).show() }
+                        }
+
+                        else -> {
+                            //runOnUiThread { Toast.makeText(this@Pedido, "ERROR DE CONEXION CON EL SERVIDOR", Toast.LENGTH_LONG).show() }
+                        }
+                    }
+                } catch (e: Exception) {
+                    throw Exception(e.message)
+                }
+            }
+        } catch (e: Exception) {
+            throw Exception(e.message)
+        }
+    }
+
+    fun actualizarVistaDTE(){
+        try {
+            val lista = GetPedido()
+            if (lista.size > 0) {
+                ShowList(lista)
+            }
+        } catch (e: Exception) {
+            runOnUiThread {
+                val alert: Snackbar = Snackbar.make(
+                    lienzo!!,
+                    e.message.toString(),
+                    Snackbar.LENGTH_LONG
+                )
+                alert.view.setBackgroundColor(resources.getColor(R.color.moderado))
+                alert.show()
+            }
+        }
+    }
+
 }

@@ -16,6 +16,7 @@ data class Pedidos(
     var Fecha_creado: String?,
     var Suma: Float?,
     var Iva: Float?,
-    var Iva_Percibido: Float?
-
+    var Iva_Percibido: Float?,
+    var pedido_dte: Int?,
+    var pedido_dte_error: Int?
 )

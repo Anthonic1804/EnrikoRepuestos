@@ -221,7 +221,9 @@ class Tablas {
                 "numCuentaDeposito VARCHAR(25) NULL DEFAULT ''," +
                 "numDeposito VARCHAR(25) NULL DEFAULT ''," +
                 "formaPago VARCHAR(25) NULL DEFAULT ''," +
-                "numero_orden VARCHAR(25) DEFAULT '0');"
+                "numero_orden VARCHAR(25) DEFAULT '0'," +
+                "pedido_dte INTEGER DEFAULT 0," +
+                "pedido_dte_error INITEGER DEFAULT 0);"
     }
 
     fun detallePedidos(): String {

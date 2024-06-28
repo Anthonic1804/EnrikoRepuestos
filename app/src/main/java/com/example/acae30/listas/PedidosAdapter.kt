@@ -32,18 +32,31 @@ class PedidosAdapter(
     }//quita la animacion
 
     override fun onBindViewHolder(holder: PedidosAdapter.MyViewHolder, position: Int) {
-        val data = lista.get(position)
+        val data = lista[position]
         holder.txtPedido.text = "PED${data.Id}"
         holder.txtCliente.text = data.Nombre_cliente
         holder.txtTotal.text = "$" + "${String.format("%.4f", data.Total)}"
+
         var estado = "ENVIADO"
         if (data.Enviado == 0) {
             estado = "NO ENVIADO"
             holder.txtEstado.setBackgroundResource(R.drawable.border_status_red)
         }
-
         holder.txtEstado.text = estado
         holder.txtFecha.text = data.Fecha_creado
+
+        var transmitido = "TRANSMITIDO"
+        if(data.pedido_dte == 0){
+            transmitido = "NO TRANSMITIDO"
+            holder.txtTransmitido.setBackgroundResource(R.drawable.border_status_red)
+        }
+
+        if(data.pedido_dte_error == 1 && data.pedido_dte == 0){
+            transmitido = "ERROR DE TRANSMISION"
+            holder.txtTransmitido.setBackgroundResource(R.drawable.border_status_red)
+        }
+
+        holder.txtTransmitido.text = transmitido
 
     }
 
@@ -58,6 +71,7 @@ class PedidosAdapter(
         internal var txtTotal: TextView
         internal var txtEstado: TextView
         internal var txtFecha: TextView
+        internal var txtTransmitido: TextView
 
         init {
             ani = Funciones()
@@ -67,6 +81,7 @@ class PedidosAdapter(
             txtTotal = itemView.findViewById(R.id.txtTotal)
             txtEstado = itemView.findViewById(R.id.txtEnviado)
             txtFecha = itemView.findViewById(R.id.txtFecha)
+            txtTransmitido = itemView.findViewById(R.id.tvTransmitido)
         }
     }
 
