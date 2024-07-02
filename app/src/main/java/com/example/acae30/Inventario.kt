@@ -1,6 +1,7 @@
 package com.example.acae30
 
 import android.app.Activity
+import android.app.Dialog
 import android.content.Context
 import android.content.Intent
 import android.content.SharedPreferences
@@ -9,8 +10,10 @@ import android.view.View
 import android.view.inputmethod.InputMethodManager
 import android.widget.ImageButton
 import android.widget.SearchView
+import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -18,12 +21,14 @@ import androidx.recyclerview.widget.RecyclerView
 import com.example.acae30.controllers.InventarioController
 import com.example.acae30.listas.InventarioAdapter
 import com.example.acae30.modelos.Inventario
+import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.google.zxing.integration.android.IntentIntegrator
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.DelicateCoroutinesApi
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
 
-@Suppress("DEPRECATION")
 class Inventario : AppCompatActivity() {
     private var recicle: RecyclerView? = null
     private var funciones: Funciones? = null
@@ -48,12 +53,21 @@ class Inventario : AppCompatActivity() {
     //VARIABLES PARA SHAREDPREFERENCES
     //private var preferences : SharedPreferences? = null
     private lateinit var preferences: SharedPreferences
-    private var instancia = "CONFIG_SERVIDOR"
+    private val instancia = "CONFIG_SERVIDOR"
     private var productSearch : String? = null
 
     private var inventarioController = InventarioController()
 
     private var FacturaExportacion = false
+    private var idvendedor = 0
+    private var hojaCarga = 0
+
+    private lateinit var tvUpdate : TextView
+    private lateinit var tvCancel : TextView
+    private lateinit var tvTitulo : TextView
+    private lateinit var tvMensaje : TextView
+    private lateinit var alerta : ConstraintLayout
+    private lateinit var btnActualizarInventario: FloatingActionButton
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -62,6 +76,10 @@ class Inventario : AppCompatActivity() {
         setContentView(R.layout.activity_inventario)
         //supportActionBar?.hide()
         busqueda = findViewById(R.id.busquedainv)
+
+        btnActualizarInventario = findViewById(R.id.btnActualizarInventario)
+        alerta = findViewById(R.id.lyInventarioAlerta)
+        preferences = getSharedPreferences(instancia, Context.MODE_PRIVATE)
 
         busquedaProducto = intent.getBooleanExtra("busqueda", false)
         busquedaToken = intent.getBooleanExtra("tokenBusqueda", false)
@@ -73,6 +91,9 @@ class Inventario : AppCompatActivity() {
         codigo = intent.getStringExtra("codigo").toString()
         idapi = intent.getIntExtra("idapi", 0)
         FacturaExportacion = intent.getBooleanExtra("facturaExportacion", false)
+
+        idvendedor = preferences.getInt("Idvendedor", 0)
+        hojaCarga = preferences.getInt("hojaCarga", 0)
 
         println("FACTURA DE EXPORTACION -> $FacturaExportacion")
 
@@ -106,6 +127,40 @@ class Inventario : AppCompatActivity() {
         //CAPTURANDO POSICIONES DE LOS SPINNER
         getSucursalPosition = intent.getIntExtra("sucursalPosition", 0)
 
+        btnActualizarInventario.setOnClickListener {
+            alertaInventario()
+        }
+
+    }
+
+    private fun alertaInventario() {
+        val updateDialog = Dialog(this, R.style.Theme_Dialog)
+        updateDialog.setCancelable(false)
+
+        updateDialog.setContentView(R.layout.dialog_cancelar)
+        tvUpdate = updateDialog.findViewById(R.id.tvUpdate)
+        tvCancel = updateDialog.findViewById(R.id.tvCancel)
+        tvMensaje = updateDialog.findViewById(R.id.tvMensaje)
+        tvTitulo = updateDialog.findViewById(R.id.tvTitulo)
+
+        tvTitulo.text = "INFORMACIÓN"
+        tvMensaje.text = "¿DESEA ACTUALIZAR LA INFORMACION DEL INVENTARIO?"
+        tvUpdate.text = "ACEPTAR"
+
+        tvUpdate.setOnClickListener {
+            updateDialog.dismiss()
+            CoroutineScope(Dispatchers.IO).launch {
+                inventarioController.actualizarInventarioHojaCarga(0, hojaCarga, idvendedor, this@Inventario, alerta!!)
+            }
+            Atras(alerta!!)
+        }
+
+        tvCancel.setOnClickListener {
+
+            updateDialog.dismiss()
+        }
+
+        updateDialog.show()
     }
 
     override fun onStart() {

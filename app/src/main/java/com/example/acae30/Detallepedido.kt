@@ -194,7 +194,7 @@ class Detallepedido : AppCompatActivity() {
 
         //COMPLETANDO SPINNER DOCUMENTO
         val tipoDocumentoAdaptador = ArrayAdapter<String>(this@Detallepedido, android.R.layout.simple_spinner_dropdown_item)
-        tipoDocumentoAdaptador.addAll(listOf("FACTURA", "CREDITO FISCAL", "FACTURA EXPORTACION"))
+        tipoDocumentoAdaptador.addAll(listOf("FACTURA", "CREDITO FISCAL")) //LIMINADO "FACTURA EXPORTACION"
         binding.spDocumento.adapter = tipoDocumentoAdaptador
 
         //COMPLETANDO TVTIPODOCUMENTO
@@ -202,17 +202,20 @@ class Detallepedido : AppCompatActivity() {
             "FC" -> {
                 binding.tvDocumentoSeleccionado.text = getString(R.string.factura)
                 binding.spDocumento.setSelection(0, true)
+                actualizarVistaTotales()
                 actualizarTotales()
             }
             "CF" -> {
                 binding.tvDocumentoSeleccionado.text = getString(R.string.credito_fiscal)
                 binding.spDocumento.setSelection(1, true)
+                actualizarVistaTotales()
                 actualizarTotales()
             }
             "FE" -> {
-                binding.tvDocumentoSeleccionado.text = getString(R.string.factura_exportacion)
-                binding.spDocumento.setSelection(2, true)
-                actualizarTotales()
+                //binding.tvDocumentoSeleccionado.text = getString(R.string.factura_exportacion)
+                //binding.spDocumento.setSelection(2, true)
+                //actualizarVistaTotales()
+                //actualizarTotales()
             }
         }
 
@@ -411,6 +414,8 @@ class Detallepedido : AppCompatActivity() {
                         actualizarTotales()
                     }
                     "FACTURA EXPORTACION" -> {
+                        Toast.makeText(this@Detallepedido, "OPCION EN REVISION", Toast.LENGTH_SHORT).show()
+                        /*
                         pedidosController.updateTipoDocumento("FE", idpedido, this@Detallepedido)
                         tipoDocumento = "FE"
                         FacturaExportacion = true
@@ -419,7 +424,7 @@ class Detallepedido : AppCompatActivity() {
                         pedidosController.actualizarTotalesPedido(this@Detallepedido,idpedido,precioConIVA)
                         actualizarVistaTotales()
 
-                        actualizarTotales()
+                        actualizarTotales()*/
                     }
                 }
             }
@@ -444,6 +449,10 @@ class Detallepedido : AppCompatActivity() {
         }
 
         total = pedidosController.obtenerInformacionPedido(idpedido,this@Detallepedido)?.Total!!
+        val retenido = pedidosController.obtenerInformacionPedido(idpedido,this@Detallepedido)?.Iva_Percibido!!
+        if(retenido > 0){
+            total -= retenido
+        }
         binding.txttotal.text = "$" + "${String.format("%.4f", total)}"
     }
 
@@ -492,6 +501,7 @@ class Detallepedido : AppCompatActivity() {
                         binding.txtSumas.text = "${String.format("%.4f", (total/1.13)/1.01)}"
                         binding.txtIva.text = "${String.format("%.4f", ((total/1.13)*0.13))}"
                         binding.txtIvaPerci.text = "${String.format("%.4f", ((total/1.13)*0.01))}"
+                        binding.txttotal.text = "${String.format("%.4f", (total - (total/1.13)*0.01))}"
                     }else{
                         binding.txtSumas.text = "${String.format("%.4f", (total/1.13))}"
                         binding.txtIva.text = "${String.format("%.4f", ((total/1.13)*0.13))}"
@@ -506,7 +516,6 @@ class Detallepedido : AppCompatActivity() {
                 }
             }
         }
-
         val sumas = binding.txtSumas.text.toString().toFloat()
         val iva = binding.txtIva.text.toString().toFloat()
         val ivaperci = binding.txtIvaPerci.text.toString().toFloat()
@@ -873,7 +882,7 @@ class Detallepedido : AppCompatActivity() {
                 finish()
             }
         }
-        binding.txttotal.text = "$" + "${String.format("%.4f", total)}"
+        //binding.txttotal.text = "$" + "${String.format("%.4f", total)}"
         binding.reciclerdetalle.adapter = adapter
 
     } //muestra el detalle del pedido
@@ -1395,9 +1404,13 @@ class Detallepedido : AppCompatActivity() {
 
         y+= 20f
         paint.textSize = 12f
-        canvas.drawText("IVA/PER:", 50f, y, paint)
+        canvas.drawText("IVA/RET:", 50f, y, paint)
         val perciText = paint.measureText("{${inforPedido.Iva_Percibido}}")
         canvas.drawText("$ ${inforPedido.Iva_Percibido}", canvas.width - perciText - 50f, y, paint)
+
+        if(inforPedido.Iva_Percibido!! > 0){
+            total -= inforPedido.Iva_Percibido!!
+        }
 
         y += 20f
         paint.textSize = 12f // Restaurar el tamaño de letra predeterminado

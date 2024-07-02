@@ -630,4 +630,108 @@ class InventarioController {
         }
     }
 
+    //ACTUALIZAR INFORMACION DE INVENTARIO
+    suspend fun actualizarInventarioHojaCarga(id: Int,  numero: Int, id_vendedor: Int, context: Context, view:View) {
+        preferences = context.getSharedPreferences(instancia, Context.MODE_PRIVATE)
+        val url = funciones.getServidor(preferences.getString("ip", ""), preferences.getInt("puerto", 0).toString())
+
+        try {
+            val datos = HojaCargaJSON(
+                id,
+                numero,
+                id_vendedor
+            )
+            val objecto =
+                Gson().toJson(datos)
+            println(objecto)
+            val ruta: String = url + "inventario/hojacarga"
+            val url = URL(ruta)
+            with(url.openConnection() as HttpURLConnection) {
+                try {
+                    connectTimeout = 20000
+                    setRequestProperty(
+                        "Content-Type",
+                        "application/json;charset=utf-8"
+                    )
+                    requestMethod = "POST"
+                    val or = OutputStreamWriter(outputStream, StandardCharsets.UTF_8)
+                    or.write(objecto) //SE ESCRIBE EL OBJ JSON
+                    or.flush() //SE ENVIA EL OBJ JSON
+                    when (responseCode) {
+                        200 -> {
+                            BufferedReader(InputStreamReader(inputStream) as Reader?).use {
+                                try {
+                                    val respuesta = StringBuffer()
+                                    var inpuline = it.readLine()
+                                    while (inpuline != null) {
+                                        respuesta.append(inpuline)
+                                        inpuline = it.readLine()
+                                    }
+                                    it.close()
+                                    val res = JSONArray(respuesta.toString())
+                                    if (res.length() > 0) {
+                                        println("RESPUESTA DE ACTUALIZACION" + res)
+                                        actualizarInventarioDatabase(res, context, view)
+                                        withContext(Dispatchers.Main){
+                                            Toast.makeText(context,"INFORMACION DE INVENTARIO ACTUALIZADOS", Toast.LENGTH_SHORT).show()
+                                        }
+
+                                    } else {
+                                        //println("ERROR: ERROR NO SE ENCONTRARON DATOS PARA ALMACENAR 222222")
+                                        withContext(Dispatchers.Main){
+                                            Toast.makeText(context,"ERROR: NO SE ENCONTRO LA HOJA DE CARGA", Toast.LENGTH_SHORT).show()
+                                        }
+                                    }
+                                } catch (e: Exception) {
+                                    throw Exception(e.message)
+                                }
+                            }
+                        }
+                        400 -> {
+                            println("ERROR: ERROR AL CARGAR EL INVENTARIO POR HOJA DE CARGA")
+                        }
+
+                        404 -> {
+                            withContext(Dispatchers.Main){
+                                Toast.makeText(context,"ERROR: NO SE ENCONTRO LA HOJA DE CARGA", Toast.LENGTH_SHORT).show()
+                            }
+                        }
+
+                        else -> {
+                            println("ERROR: NO SE LOGRO CONECTAR CON EL SERVIDOR")
+                        }
+                    }
+                } catch (e: Exception) {
+                    throw Exception("ERROR: " + e.message)
+                }
+            }
+        } catch (e: Exception) {
+            throw Exception("ERROR EN LA CONEXION CON EL SERVIDOR" + e.message)
+        }
+    }
+
+    fun actualizarInventarioDatabase(json: JSONArray, context: Context, view:View) {
+        val bd = funciones.getDataBase(context).writableDatabase
+
+        try {
+            bd.beginTransaction()
+            for (i in 0 until json.length()) {
+                val dato = json.getJSONObject(i)
+
+                val idProducto = dato.getInt("id")
+                val precio = funciones.validateJsonIsNullFloat(dato, "precio")
+                val precio_iva = funciones.validateJsonIsNullFloat(dato, "precio_iva")
+
+                println("CODIGO PRODUCTO ACTUALIZAR " + idProducto)
+
+                bd.execSQL("UPDATE inventario SET precio=$precio, precio_iva=$precio_iva WHERE id=$idProducto")
+            }
+            bd.setTransactionSuccessful()
+        } catch (e: Exception) {
+            throw Exception(e.message)
+        } finally {
+            bd!!.endTransaction()
+            bd.close()
+        }
+    }
 }

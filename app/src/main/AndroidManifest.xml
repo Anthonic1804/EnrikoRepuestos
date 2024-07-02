@@ -78,7 +78,8 @@
             android:screenOrientation="portrait" />
         <activity
             android:name=".Inventario"
-            android:screenOrientation="portrait" />
+            android:screenOrientation="portrait"
+            android:theme="@style/AppTheme.NoActionBar"/>
         <activity
             android:name=".Clientes"
             android:screenOrientation="portrait" />
