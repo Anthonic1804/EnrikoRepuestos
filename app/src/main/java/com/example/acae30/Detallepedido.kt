@@ -120,6 +120,9 @@ class Detallepedido : AppCompatActivity() {
     private var enviandoPedido = false
     private var guardandoPedido = false
 
+    private var FacturaExportacion = false
+    private var precioConIVA = true
+
 
     val fecha: String = LocalDate.now()
         .format(DateTimeFormatter.ofPattern("dd MMM yyyy"))
@@ -143,6 +146,7 @@ class Detallepedido : AppCompatActivity() {
         codigo = intento.getStringExtra("codigo").toString()
         idapi = intento.getIntExtra("idapi", 0)
         from = intento.getStringExtra("from").toString()
+        FacturaExportacion = intento.getBooleanExtra("facturaExportacion", false)
 
         db = Database(this)
 
@@ -158,6 +162,8 @@ class Detallepedido : AppCompatActivity() {
 
         //OBTENIENDO LA CATEGORIA DEL CLIENTE
         categoriaCliente = clientesController.obtenerInformacionCliente(this@Detallepedido, idcliente)?.Categoria_cliente.toString()
+
+        total = pedidosController.obtenerInformacionPedido(idpedido,this@Detallepedido)?.Total!!
 
         //DESHABILITAMOS LOS TEXTVIEWS DE INFORMACION ENVIADA
         binding.tvDocumentoSeleccionado.visibility = View.GONE
@@ -196,19 +202,16 @@ class Detallepedido : AppCompatActivity() {
             "FC" -> {
                 binding.tvDocumentoSeleccionado.text = getString(R.string.factura)
                 binding.spDocumento.setSelection(0, true)
-
                 actualizarTotales()
             }
             "CF" -> {
                 binding.tvDocumentoSeleccionado.text = getString(R.string.credito_fiscal)
                 binding.spDocumento.setSelection(1, true)
-
                 actualizarTotales()
             }
             "FE" -> {
                 binding.tvDocumentoSeleccionado.text = getString(R.string.factura_exportacion)
                 binding.spDocumento.setSelection(2, true)
-
                 actualizarTotales()
             }
         }
@@ -273,6 +276,7 @@ class Detallepedido : AppCompatActivity() {
                 intento.putExtra("codigo", codigo)
                 intento.putExtra("idapi", idapi)
                 intento.putExtra("sucursalPosition", getSucursalPosition)
+                intento.putExtra("facturaExportacion", FacturaExportacion)
                 startActivity(intento)
             }
         }
@@ -386,22 +390,61 @@ class Detallepedido : AppCompatActivity() {
                     "FACTURA" -> {
                         pedidosController.updateTipoDocumento("FC", idpedido, this@Detallepedido)
                         tipoDocumento = "FC"
+                        FacturaExportacion = false
+                        precioConIVA = true
+
+                        pedidosController.actualizarTotalesPedido(this@Detallepedido,idpedido,precioConIVA)
+                        actualizarVistaTotales()
+
                         actualizarTotales()
                     }
                     "CREDITO FISCAL" -> {
                         pedidosController.updateTipoDocumento("CF", idpedido, this@Detallepedido)
                         tipoDocumento = "CF"
+                        FacturaExportacion = false
+                        precioConIVA = true
+
+
+                        pedidosController.actualizarTotalesPedido(this@Detallepedido,idpedido,precioConIVA)
+                        actualizarVistaTotales()
+
                         actualizarTotales()
                     }
                     "FACTURA EXPORTACION" -> {
                         pedidosController.updateTipoDocumento("FE", idpedido, this@Detallepedido)
                         tipoDocumento = "FE"
+                        FacturaExportacion = true
+                        precioConIVA = false
+
+                        pedidosController.actualizarTotalesPedido(this@Detallepedido,idpedido,precioConIVA)
+                        actualizarVistaTotales()
+
                         actualizarTotales()
                     }
                 }
             }
             override fun onNothingSelected(p0: AdapterView<*>?) {}
         }
+    }
+
+    private fun actualizarVistaTotales(){
+        CoroutineScope(Dispatchers.IO).launch {
+            try {
+                val lista = pedidosController.obtenerDetallePedido(idpedido, this@Detallepedido)
+                if(lista.size > 0){
+                    runOnUiThread {
+                        ArmarLista(lista)
+                    }
+                }
+            }catch (e: Exception){
+                runOnUiThread {
+                    funciones.mostrarAlerta("NO SE PUEDO CARGAR EL DETALLE DEL PEDIDO", this@Detallepedido, binding.lienzo)
+                }
+            }
+        }
+
+        total = pedidosController.obtenerInformacionPedido(idpedido,this@Detallepedido)?.Total!!
+        binding.txttotal.text = "$" + "${String.format("%.4f", total)}"
     }
 
     //FUNCION PARA COMPLETAR LOS TERMINOS DEL CLIENTE
@@ -825,12 +868,10 @@ class Detallepedido : AppCompatActivity() {
                 intento.putExtra("proviene", "editar")
                 intento.putExtra("total_param", data.Total_iva)
                 intento.putExtra("sucursalPosition", getSucursalPosition)
+                intento.putExtra("facturaExportacion", FacturaExportacion)
                 startActivity(intento)
                 finish()
             }
-        }
-        for (i in lista) {
-            total += i.Total_iva!!
         }
         binding.txttotal.text = "$" + "${String.format("%.4f", total)}"
         binding.reciclerdetalle.adapter = adapter

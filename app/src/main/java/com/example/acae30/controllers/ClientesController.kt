@@ -414,13 +414,21 @@ class ClientesController {
     }
 
     //FUNCION PARA OBTENER EL PRECIO PERSONALIZADO POR ID CLIENTE E ID PRODUCTO
-    fun obtenerPrecioPersoCliente(idCliente: Int, idProducto: Int, context: Context) : Float{
+    fun obtenerPrecioPersoCliente(idCliente: Int, idProducto: Int, context: Context, facExpo: Boolean) : Float{
         preferences = context.getSharedPreferences(instancia, Context.MODE_PRIVATE)
         val base = funciones.getDataBase(context).readableDatabase
         var precioIva = 0f
+        var consulta = ""
+
+        //MODIFICANDO PARA FACTURA DE EXPORTACION
+        consulta = if(facExpo){
+            "SELECT precio_p from cliente_precios WHERE id_cliente=$idCliente AND id_inventario=$idProducto";
+        }else{
+            "SELECT precio_p_iva from cliente_precios WHERE id_cliente=$idCliente AND id_inventario=$idProducto";
+        }
+
         try {
-            val cursor = base.rawQuery("SELECT precio_p_iva from cliente_precios " +
-                    "WHERE id_cliente=$idCliente AND id_inventario=$idProducto", null)
+            val cursor = base.rawQuery(consulta, null)
             if(cursor.count > 0){
                 cursor.moveToFirst()
                 precioIva = cursor.getFloat(0)

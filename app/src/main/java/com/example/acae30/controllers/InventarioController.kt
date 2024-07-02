@@ -30,49 +30,89 @@ class InventarioController {
     private var instancia = "CONFIG_SERVIDOR"
 
     //FUNCION PARA OBTENER INFORMACION DEL PRODUCTO POR ID
-    fun obtenerInformacionProductoPorId(context: Context ,idInventario: Int): Inventario?{
+    fun obtenerInformacionProductoPorId(context: Context ,idInventario: Int, facExpo: Boolean): Inventario?{
         val base = funciones.getDataBase(context).readableDatabase
         var datos: Inventario? = null
         try {
             val cursor = base.rawQuery("SELECT * FROM inventario WHERE Id=$idInventario", null)
             if (cursor.count > 0) {
                 cursor.moveToFirst()
-                datos = Inventario(
-                    cursor.getInt(0),
-                    cursor.getString(1),
-                    cursor.getString(2),
-                    cursor.getInt(3),
-                    cursor.getString(4),
-                    cursor.getString(5),
-                    cursor.getString(6),
-                    cursor.getFloat(7),
-                    cursor.getString(8),
-                    cursor.getInt(9),
-                    cursor.getFloat(10),
-                    cursor.getFloat(11),
-                    cursor.getFloat(12),
-                    cursor.getFloat(13),
-                    cursor.getFloat(14),
-                    cursor.getFloat(15),
-                    cursor.getFloat(16),
-                    cursor.getString(17),
-                    cursor.getString(18),
-                    cursor.getInt(19),
-                    cursor.getString(20),
-                    cursor.getInt(21),
-                    cursor.getString(22),
-                    cursor.getString(23),
-                    cursor.getString(24),
-                    cursor.getString(25),
-                    cursor.getString(26),
-                    cursor.getString(27),
-                    cursor.getInt(28),
-                    cursor.getString(29),
-                    cursor.getFloat(30),
-                    cursor.getDouble(31),
-                    cursor.getInt(32),
-                    cursor.getFloat(33)
-                )
+                if(facExpo){
+                    //FACTURA DE EXPORTACION ACTIVA
+                    datos = Inventario(
+                        cursor.getInt(0),
+                        cursor.getString(1),
+                        cursor.getString(2),
+                        cursor.getInt(3),
+                        cursor.getString(4),
+                        cursor.getString(5),
+                        cursor.getString(6),
+                        cursor.getFloat(7),
+                        cursor.getString(8),
+                        cursor.getInt(9),
+                        cursor.getFloat(10), //COSTO
+                        cursor.getFloat(11), //COSTO_IVA
+                        cursor.getFloat(12),
+                        cursor.getFloat(14), //PRECIO_IVA
+                        cursor.getFloat(14)/1.13F, //PRECIO
+                        cursor.getFloat(15)/1.13F,//PRECIO_U
+                        cursor.getFloat(15),//PRECIO_U_IVA
+                        cursor.getString(17),
+                        cursor.getString(18),
+                        cursor.getInt(19),
+                        cursor.getString(20),
+                        cursor.getInt(21),
+                        cursor.getString(22),
+                        cursor.getString(23),
+                        cursor.getString(24),
+                        cursor.getString(25),
+                        cursor.getString(26),
+                        cursor.getString(27),
+                        cursor.getInt(28),
+                        cursor.getString(29),
+                        cursor.getFloat(30),
+                        cursor.getDouble(31),
+                        cursor.getInt(32),
+                        cursor.getFloat(33)
+                    )
+                }else{
+                    datos = Inventario(
+                        cursor.getInt(0),
+                        cursor.getString(1),
+                        cursor.getString(2),
+                        cursor.getInt(3),
+                        cursor.getString(4),
+                        cursor.getString(5),
+                        cursor.getString(6),
+                        cursor.getFloat(7),
+                        cursor.getString(8),
+                        cursor.getInt(9),
+                        cursor.getFloat(10),
+                        cursor.getFloat(11),
+                        cursor.getFloat(12),
+                        cursor.getFloat(13),
+                        cursor.getFloat(14),
+                        cursor.getFloat(15),
+                        cursor.getFloat(16),
+                        cursor.getString(17),
+                        cursor.getString(18),
+                        cursor.getInt(19),
+                        cursor.getString(20),
+                        cursor.getInt(21),
+                        cursor.getString(22),
+                        cursor.getString(23),
+                        cursor.getString(24),
+                        cursor.getString(25),
+                        cursor.getString(26),
+                        cursor.getString(27),
+                        cursor.getInt(28),
+                        cursor.getString(29),
+                        cursor.getFloat(30),
+                        cursor.getDouble(31),
+                        cursor.getInt(32),
+                        cursor.getFloat(33)
+                    )
+                }
             }
             cursor.close()
         }catch (e:Exception){
@@ -85,7 +125,7 @@ class InventarioController {
     }
 
     //FUNCION PARA OBTENER LAS ESCALAS DE PRECIO POR PRODUCTO
-    fun obtenerEscalaPrecios(context: Context, idInventario: Int): ArrayList<InventarioPrecios>{
+    fun obtenerEscalaPrecios(context: Context, idInventario: Int, facExpo: Boolean): ArrayList<InventarioPrecios>{
         val base = funciones.getDataBase(context).readableDatabase
         val listaEscalas = ArrayList<InventarioPrecios>()
 
@@ -93,23 +133,46 @@ class InventarioController {
             val cursor = base.rawQuery("SELECT * FROM Inventario_precios WHERE id_inventario = '$idInventario'", null)
             if (cursor.count > 0) {
                 cursor.moveToFirst()
-                do {
-                    val escalas = InventarioPrecios(
-                        cursor.getInt(0),
-                        cursor.getInt(1),
-                        cursor.getString(2),
-                        cursor.getString(3),
-                        cursor.getString(4),
-                        cursor.getFloat(5),
-                        cursor.getString(6),
-                        cursor.getFloat(7),
-                        cursor.getFloat(8),
-                        cursor.getFloat(9),
-                        cursor.getFloat(10),
-                        cursor.getInt(11)
-                    )
-                    listaEscalas.add(escalas)
-                } while (cursor.moveToNext())
+
+                if(facExpo){
+                    //ACTIVANDO FACTURA DE EXPORTACION
+                    do {
+                        val escalas = InventarioPrecios(
+                            cursor.getInt(0),
+                            cursor.getInt(1),
+                            cursor.getString(2),
+                            cursor.getString(3),
+                            cursor.getString(4),
+                            cursor.getFloat(5),
+                            cursor.getString(6),
+                            cursor.getFloat(7),
+                            cursor.getFloat(8),
+                            cursor.getFloat(9)/1.13f,
+                            cursor.getFloat(9),
+                            cursor.getInt(11)
+                        )
+                        listaEscalas.add(escalas)
+                    } while (cursor.moveToNext())
+                }else{
+                    //SIN FACTURA DE EXPORTACION
+                    do {
+                        val escalas = InventarioPrecios(
+                            cursor.getInt(0),
+                            cursor.getInt(1),
+                            cursor.getString(2),
+                            cursor.getString(3),
+                            cursor.getString(4),
+                            cursor.getFloat(5),
+                            cursor.getString(6),
+                            cursor.getFloat(7),
+                            cursor.getFloat(8),
+                            cursor.getFloat(9),
+                            cursor.getFloat(10),
+                            cursor.getInt(11)
+                        )
+                        listaEscalas.add(escalas)
+                    } while (cursor.moveToNext())
+                }
                 cursor.close()
             }
         }catch (e:Exception){

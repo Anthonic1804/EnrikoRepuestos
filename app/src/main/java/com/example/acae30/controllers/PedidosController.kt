@@ -1,5 +1,6 @@
 package com.example.acae30.controllers
 
+import android.content.ContentValues
 import android.content.Context
 import android.content.SharedPreferences
 import android.view.View
@@ -303,6 +304,77 @@ class PedidosController {
                     "WHERE Id_pedido_sistema = $idPedidoServidor")
         }catch (e:Exception){
             throw Exception("ERROR AL ACTUALIZAR EL PEDIDO")
+        }finally {
+            bd.close()
+        }
+    }
+
+
+    //ACTUALIZAR TOTALES SEGUN DOCUMENTO
+    fun actualizarTotalesPedido(context: Context, idPedido: Int, precioConIVASeleccionado:Boolean){
+        val bd = funciones.getDataBase(context).writableDatabase
+        preferences = context.getSharedPreferences(instancia, Context.MODE_PRIVATE)
+        val precioConIvaShared = preferences.getBoolean("precioConIva", false)
+        try {
+
+            val cursor = bd.rawQuery("SELECT * FROM detalle_pedidos where id_pedido=$idPedido LIMIT 1", null)
+            if (cursor.count > 0) {
+                if(precioConIvaShared != precioConIVASeleccionado){
+                    if(!precioConIVASeleccionado){
+                        //actualizar quitando iva
+                        bd.execSQL("UPDATE detalle_pedidos SET precio=(precio/1.13), precio_iva=(precio_iva/1.13), " +
+                                "total=cantidad*(precio/1.13), total_iva=cantidad*(precio_iva/1.13) WHERE Id_pedido=$idPedido")
+
+                        actualizarTotalPedido(context, idPedido)
+                        println("SE QUITO IVA")
+                    }else{
+                        //actualiar agregando iva
+                        bd.execSQL("UPDATE detalle_pedidos SET precio=(precio*1.13), precio_iva=(precio_iva*1.13), " +
+                                "total=cantidad*(precio*1.13), total_iva=cantidad*(precio_iva*1.13) WHERE Id_pedido=$idPedido")
+
+                        actualizarTotalPedido(context, idPedido)
+                        println("SE AGREGO IVA")
+                    }
+                    val editor = preferences.edit()
+                    editor.remove("precioConIva")
+                    editor.putBoolean("precioConIva",precioConIVASeleccionado)
+                    editor.apply()
+                }
+            }
+            cursor.close()
+        }catch (e:Exception){
+            throw Exception("ERROR AL ACTUALIZAR LOS PRECIOS CON IVA O SIN IVA -> " + e.message)
+        }finally {
+            bd.close()
+        }
+    }
+
+    //ACTUALIZAR TOTAL DEL PEDIDO
+    private fun actualizarTotalPedido(context: Context, idPedido: Int){
+        val bd = funciones.getDataBase(context).writableDatabase
+        try{
+            val cursor = bd.rawQuery(
+                "SELECT SUM(Total_iva)  FROM detalle_pedidos where Id_pedido=$idPedido",
+                null
+            )
+
+            var total = 0.toFloat()
+            if (cursor.count > 0) {
+                cursor.moveToFirst()
+                total = cursor.getFloat(0)
+                cursor.close()
+                //if(total > 0){
+                val t = ContentValues()
+                t.put("Total", total)
+                bd.update("pedidos", t, "Id=?", arrayOf(idPedido.toString()))
+//                }else{
+//                    throw Exception("Error en el total")
+//                }
+            } else {
+                throw Exception("No se encontro el pedido asociado")
+            }
+        }catch (e:Exception){
+            throw Exception("ERROR AL ACTUALIZAR TOTAL EN PEDIDO -> " + e.message)
         }finally {
             bd.close()
         }

@@ -68,7 +68,7 @@ class Inventariodetalle : AppCompatActivity() {
     private fun cargarInformacionProducto(){
         this@Inventariodetalle.lifecycleScope.launch {
             try {
-                val producto = inventarioController.obtenerInformacionProductoPorId(this@Inventariodetalle ,idinventario)
+                val producto = inventarioController.obtenerInformacionProductoPorId(this@Inventariodetalle ,idinventario, false)
                 with(binding){
                     txtcodigo.text = producto!!.Codigo
                     txtdescripcion.text = producto.descripcion
@@ -85,7 +85,7 @@ class Inventariodetalle : AppCompatActivity() {
     private fun cargarEscalas(){
         this@Inventariodetalle.lifecycleScope.launch {
             try{
-                val lista = inventarioController.obtenerEscalaPrecios(this@Inventariodetalle, idinventario)
+                val lista = inventarioController.obtenerEscalaPrecios(this@Inventariodetalle, idinventario, false)
                 if(lista.size > 0){
                     ArmarLista(lista)
                 }
@@ -113,7 +113,7 @@ class Inventariodetalle : AppCompatActivity() {
         dialogo.setContentView(R.layout.alerta_costo)
         val costoProducto = dialogo.findViewById<TextView>(R.id.txtcosto)
 
-        val producto = inventarioController.obtenerInformacionProductoPorId(this@Inventariodetalle ,idinventario)
+        val producto = inventarioController.obtenerInformacionProductoPorId(this@Inventariodetalle ,idinventario, false)
 
         costoProducto!!.text = String.format("%.4f", producto!!.costo_iva)
 

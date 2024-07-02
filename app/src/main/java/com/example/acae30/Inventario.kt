@@ -53,6 +53,8 @@ class Inventario : AppCompatActivity() {
 
     private var inventarioController = InventarioController()
 
+    private var FacturaExportacion = false
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
 
@@ -70,6 +72,9 @@ class Inventario : AppCompatActivity() {
         idvisita = intent.getIntExtra("visitaid", 0)
         codigo = intent.getStringExtra("codigo").toString()
         idapi = intent.getIntExtra("idapi", 0)
+        FacturaExportacion = intent.getBooleanExtra("facturaExportacion", false)
+
+        println("FACTURA DE EXPORTACION -> $FacturaExportacion")
 
         preferences = getSharedPreferences(instancia, Context.MODE_PRIVATE)
 
@@ -184,6 +189,7 @@ class Inventario : AppCompatActivity() {
             intento.putExtra("idapi", idapi)
             intento.putExtra("from", "visita")
             intento.putExtra("sucursalPosition", getSucursalPosition)
+            intento.putExtra("facturaExportacion", FacturaExportacion)
             startActivity(intento)
         } else {
 
@@ -231,6 +237,7 @@ class Inventario : AppCompatActivity() {
                                     intento.putExtra("proviene", "buscar_producto")
                                     intento.putExtra("total_param", 0.toFloat())
                                     intento.putExtra("sucursalPosition", getSucursalPosition)
+                                    intento.putExtra("facturaExportacion",FacturaExportacion)
                                     startActivity(intento)
                                 }
                             } else {
@@ -279,6 +286,7 @@ class Inventario : AppCompatActivity() {
                                     intento.putExtra("proviene", "buscar_producto")
                                     intento.putExtra("total_param", 0.toFloat())
                                     intento.putExtra("sucursalPosition", getSucursalPosition)
+                                    intento.putExtra("facturaExportacion", FacturaExportacion)
                                     startActivity(intento)
                                 }
                             } else {

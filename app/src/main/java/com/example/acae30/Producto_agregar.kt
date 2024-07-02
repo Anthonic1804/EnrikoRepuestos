@@ -115,6 +115,8 @@ class Producto_agregar : AppCompatActivity() {
     private var bonificacion : Float = 0f
     private lateinit var txtCantBonificados : TextView
 
+    private var FacturaExportacion = false
+
     override fun onCreate(savedInstanceState: Bundle?) {
 
         super.onCreate(savedInstanceState)
@@ -131,6 +133,9 @@ class Producto_agregar : AppCompatActivity() {
         idvisita = intent.getIntExtra("visitaid", 0)
         codigo = intent.getStringExtra("codigo").toString()
         idapi = intent.getIntExtra("idapi", 0)
+
+        FacturaExportacion = intent.getBooleanExtra("facturaExportacion", false)
+        println("FACTURA DE EXPORTACION -> $FacturaExportacion")
 
         preferencias = getSharedPreferences(instancia, Context.MODE_PRIVATE)
         codEmpleado = preferencias!!.getInt("Idvendedor", 0)
@@ -158,7 +163,7 @@ class Producto_agregar : AppCompatActivity() {
         txtcantidad = findViewById(R.id.txtcantidad)
         spprecio = findViewById(R.id.spprecio)
         unidadActual = "UNIDAD"
-        datosProducto = inventarioController.obtenerInformacionProductoPorId(this@Producto_agregar, idproducto!!)
+        datosProducto = inventarioController.obtenerInformacionProductoPorId(this@Producto_agregar, idproducto!!, FacturaExportacion)
         btneditarprecio = findViewById(R.id.btneditarprecio)
 
         proviene = intent.getStringExtra("proviene")
@@ -175,7 +180,7 @@ class Producto_agregar : AppCompatActivity() {
 
         //OBTENIENDO EL PRECIO PERSONALIZADO POR CLIENTE
         precioIvaPersonalizado = clientesController.obtenerPrecioPersoCliente(idcliente!!,
-            idproducto!!, this@Producto_agregar)
+            idproducto!!, this@Producto_agregar, FacturaExportacion)
 
         if(precioIvaPersonalizado > 0){
             precioPersonalizado.visibility = View.VISIBLE
@@ -346,7 +351,7 @@ class Producto_agregar : AppCompatActivity() {
             }
         }//cuando se carga los inventarios
 
-        listPrecios = inventarioController.obtenerEscalaPrecios(this@Producto_agregar, idproducto!!)
+        listPrecios = inventarioController.obtenerEscalaPrecios(this@Producto_agregar, idproducto!!, FacturaExportacion)
 
 
         // ACTUALIZAR EL CAMPO TOTAL AL MODIFICAR LA CANTIDAD
@@ -476,6 +481,7 @@ class Producto_agregar : AppCompatActivity() {
                 intento.putExtra("codigo", codigo)
                 intento.putExtra("idapi", idapi)
                 intento.putExtra("sucursalPosition", getSucursalPosition)
+                intento.putExtra("facturaExportacion", FacturaExportacion)
                 startActivity(intento)
             }
 
@@ -766,6 +772,16 @@ class Producto_agregar : AppCompatActivity() {
         } finally {
             base.endTransaction()
             base.close()
+
+            val editor = preferencias!!.edit()
+            if(FacturaExportacion){
+                editor.putBoolean("precioConIva", false)
+            }else{
+                editor.putBoolean("precioConIva", true)
+            }
+
+            editor.apply()
+
         }
     } //agrega el producto al pedido y actualiza el total
 
@@ -1562,6 +1578,7 @@ class Producto_agregar : AppCompatActivity() {
         intento.putExtra("from", visita)
         intento.putExtra("idapi", idapi)
         intento.putExtra("sucursalPosition", sucursalPosition)
+        intento.putExtra("facturaExportacion",FacturaExportacion)
         startActivity(intento)
         finish()
     }
