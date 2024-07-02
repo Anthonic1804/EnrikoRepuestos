@@ -702,8 +702,9 @@ class Detallepedido : AppCompatActivity() {
     //09/10/2023
     private fun updatePedidoSucursal(idCliente:Int, nombreSucursal: String, idpedidos: Int){
         val db = db!!.writableDatabase
+        var sucursal = nombreSucursal.replace("'", "''", false)
         try {
-            val dataSucursal = db.rawQuery("SELECT * FROM cliente_sucursal WHERE id_cliente=$idCliente and nombre_sucursal like '%$nombreSucursal%'", null)
+            val dataSucursal = db.rawQuery("SELECT * FROM cliente_sucursal WHERE id_cliente=$idCliente and nombre_sucursal like '%$sucursal%'", null)
             val listaSucursales = ArrayList<Sucursales>()
             if(dataSucursal.count > 0){
                 dataSucursal.moveToFirst()
@@ -721,7 +722,7 @@ class Detallepedido : AppCompatActivity() {
                 idSucursal = data.idSucursa.toInt()
                 codigoSucursal = data.codigoSucursal
             }
-            db!!.execSQL("UPDATE pedidos set id_sucursal=$idSucursal, codigo_sucursal='$codigoSucursal', nombre_sucursal='$nombreSucursal' WHERE id=$idpedidos")
+            db!!.execSQL("UPDATE pedidos set id_sucursal=$idSucursal, codigo_sucursal='$codigoSucursal', nombre_sucursal='$sucursal' WHERE id=$idpedidos")
             dataSucursal.close()
 
         }catch (e: Exception) {

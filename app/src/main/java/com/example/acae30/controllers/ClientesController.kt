@@ -244,6 +244,12 @@ class ClientesController {
         val listaClientes = ArrayList<Cliente>()
         var consutaSql: String = ""
 
+        /*
+        * VERIFICAR ESTA CONSULTA
+        * "SELECT * FROM Clientes C " +
+                    "INNER JOIN cliente_sucursal S ON C.id = S.id_cliente" +
+                    " WHERE C.Cliente LIKE '%$busqueda%' OR C.Codigo LIKE '%$busqueda' OR S.codigo_sucursal LIKE '%$busqueda' "*/
+
         consutaSql = if (busqueda != "") {
             "SELECT * FROM Clientes WHERE Cliente LIKE '%$busqueda%' OR Codigo LIKE '%$busqueda'"
         } else {
