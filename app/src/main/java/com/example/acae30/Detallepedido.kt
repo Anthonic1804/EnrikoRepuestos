@@ -1,11 +1,14 @@
 package com.example.acae30
 
-import android.annotation.SuppressLint
 import android.app.Dialog
 import android.content.Context
 import android.content.Intent
 import android.content.SharedPreferences
+import android.graphics.Bitmap
 import android.graphics.Canvas
+import android.graphics.Color
+import android.graphics.Paint
+import android.graphics.RectF
 import android.graphics.pdf.PdfDocument
 import android.os.Bundle
 import android.os.CancellationSignal
@@ -49,6 +52,9 @@ import com.google.android.material.snackbar.Snackbar
 import com.google.android.material.textfield.TextInputEditText
 import com.google.gson.JsonArray
 import com.google.gson.JsonObject
+import com.google.zxing.BarcodeFormat
+import com.google.zxing.WriterException
+import com.google.zxing.qrcode.QRCodeWriter
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -59,12 +65,12 @@ import java.io.FileOutputStream
 import java.io.InputStreamReader
 import java.io.OutputStreamWriter
 import java.io.Reader
-import java.math.BigDecimal
-import java.math.RoundingMode
 import java.net.HttpURLConnection
 import java.net.URL
 import java.nio.charset.StandardCharsets
 import java.time.LocalDate
+import java.time.LocalDateTime
+import java.time.ZonedDateTime
 import java.time.format.DateTimeFormatter
 import java.util.Timer
 import kotlin.concurrent.schedule
@@ -1333,7 +1339,7 @@ class Detallepedido : AppCompatActivity() {
 
         // Paint para el texto
         val paint = TextPaint().apply {
-            textSize = 12f // Tamaño predeterminado para el título y la división
+            textSize = 10f // Tamaño predeterminado para el título y la división
         }
 
         // Draw title
@@ -1346,12 +1352,59 @@ class Detallepedido : AppCompatActivity() {
         canvas.drawText("GIRO: VENTA AL POR MAYOR DE HIELO", 50f, 150f, paint)
 
         // Draw divider line
-        paint.isFakeBoldText = false
+        paint.isFakeBoldText = true
         canvas.drawLine(50f, 160f, canvas.width - 50f, 160f, paint)
+
+        val infoPedido = pedidosController.obtenerInformacionPedido(idpedido, this@Detallepedido)
+        val fecha = inforPedido!!.Fecha_creado?.substring(0, 10)
+        // Formato de entrada
+
+        //COMPROBANTE DE PAGO
+        paint.isFakeBoldText = true
+        canvas.drawText("---- COMPROBANTE DE PAGO ----", 50f, 175f, paint)
+        paint.isFakeBoldText = false
+        canvas.drawText("CODIGO DE GENERACION", 50f, 195f, paint)
+        canvas.drawText("${infoPedido!!.dteCodigoGeneracion}", 50f, 215f, paint)
+        canvas.drawText("NUMERO DE CONTROL", 50f, 235f, paint)
+        canvas.drawText("${infoPedido.dteNumeroControl}", 50f, 255f, paint)
+        canvas.drawText("SELLO DE VALIDACION", 50f, 275f, paint)
+        canvas.drawText("${infoPedido.dteSelloRecibido}", 50f, 295f, paint)
+
+        //ESPACIO PARA EL QR
+        val qrText = "https://webapp.dtes.mh.gob.sv/consultaPublica?ambiente=${infoPedido.dteAmbiente}&codGen=${infoPedido.dteCodigoGeneracion}&fechaEmi=$fecha"
+
+        // Tamaño deseado del QR
+        val qrSize = 150 // Tamaño del lado del QR (cuadrado)
+
+        // Posición donde se dibujará el QR en el Canvas
+        val qrX = 80f // Posición X
+        val qrY = 305f // Posición Y
+
+        // Generar el código QR como un Bitmap
+        val writer = QRCodeWriter()
+        try{
+            val bitMatrix = writer.encode(qrText, BarcodeFormat.QR_CODE, 100,100)
+            val width = bitMatrix.width
+            val height = bitMatrix.height
+            val qrBitmap = Bitmap.createBitmap(width, height, Bitmap.Config.RGB_565)
+            for(x in 0 until width){
+                for(y in 0 until height){
+                    qrBitmap.setPixel(x, y, if (bitMatrix[x,y]) Color.BLACK else Color.WHITE)
+                }
+            }
+
+            // Dibujar el QR en el Canvas en la posición especificada
+            canvas.drawBitmap(qrBitmap, null, RectF(qrX, qrY, qrX + qrSize, qrY + qrSize), null)
+        }catch (e:WriterException){
+            e.printStackTrace()
+        }
+        //ESPACIO PARA EL QR
+        paint.isFakeBoldText = true
+        canvas.drawLine(50f, 470f, canvas.width - 50f, 470f, paint)
 
         // Draw column headers
         val columnWidths = floatArrayOf(20f, 100f, 60f) // Ancho fijo para cada columna
-        val startY = 165f
+        val startY = 480f
         var y = startY
         val columnX = floatArrayOf(
             50f,
@@ -1442,7 +1495,7 @@ class Detallepedido : AppCompatActivity() {
             textSize = 12f
         }
 
-        var ticketHeight = 170f // Altura del título y la división inicialmente
+        var ticketHeight = 455f // Altura del título y la división inicialmente
 
         // Altura de cada fila de datos
         val lista = pedidosController.obtenerDetallePedido(idpedido, this@Detallepedido)
@@ -1455,7 +1508,7 @@ class Detallepedido : AppCompatActivity() {
         }
 
         // Altura del total
-        ticketHeight += 220f
+        ticketHeight += 280f
 
         return ticketHeight
     }

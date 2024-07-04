@@ -175,7 +175,11 @@ class PedidosController {
                     cursor.getFloat(13),
                     cursor.getFloat(14),
                     cursor.getInt(15),
-                    cursor.getInt(16)
+                    cursor.getInt(16),
+                    "",
+                    "",
+                    "",
+                    ""
                 )
             }
 
@@ -213,7 +217,11 @@ class PedidosController {
                     cursor.getFloat(7),
                     cursor.getFloat(10),
                     cursor.getInt(40),
-                    cursor.getInt(41)
+                    cursor.getInt(41),
+                    cursor.getString(42),
+                    cursor.getString(43),
+                    cursor.getString(44),
+                    cursor.getString(45)
                 )
                 cursor.close()
             }
@@ -297,11 +305,13 @@ class PedidosController {
     }
 
     //FUNCION PARA ACTUALIZAR EL ESTADO DE TRANSMISION
-    fun actualizarEstadoTransmisionPedido(context: Context, idPedidoServidor:Int, pedido_dte : Int, pedido_dte_error:Int){
+    fun actualizarEstadoTransmisionPedido(context: Context, idPedidoServidor:Int, pedido_dte : Int, pedido_dte_error:Int,
+                                          dteAmbiente:String, dteCodigoGeneracion:String, dteSelloRecibido:String, dteNumeroControl:String){
         val bd = funciones.getDataBase(context).writableDatabase
         try {
-            bd.execSQL("UPDATE pedidos SET pedido_dte=$pedido_dte, pedido_dte_error=$pedido_dte_error " +
-                    "WHERE Id_pedido_sistema = $idPedidoServidor")
+            bd.execSQL("UPDATE pedidos SET pedido_dte=$pedido_dte, pedido_dte_error=$pedido_dte_error, " +
+                    "dteAmbiente='$dteAmbiente', dteCodigoGeneracion='$dteCodigoGeneracion', dteSelloRecibido='$dteSelloRecibido'," +
+                    "dteNumeroControl='$dteNumeroControl' WHERE Id_pedido_sistema = $idPedidoServidor")
         }catch (e:Exception){
             throw Exception("ERROR AL ACTUALIZAR EL PEDIDO")
         }finally {

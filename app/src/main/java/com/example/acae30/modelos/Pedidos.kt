@@ -18,5 +18,9 @@ data class Pedidos(
     var Iva: Float?,
     var Iva_Percibido: Float?,
     var pedido_dte: Int?,
-    var pedido_dte_error: Int?
+    var pedido_dte_error: Int?,
+    var dteAmbiente:String?,
+    var dteCodigoGeneracion: String?,
+    var dteSelloRecibido: String?,
+    var dteNumeroControl: String?
 )

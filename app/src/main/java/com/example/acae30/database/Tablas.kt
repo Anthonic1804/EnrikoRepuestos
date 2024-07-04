@@ -223,7 +223,11 @@ class Tablas {
                 "formaPago VARCHAR(25) NULL DEFAULT ''," +
                 "numero_orden VARCHAR(25) DEFAULT '0'," +
                 "pedido_dte INTEGER DEFAULT 0," +
-                "pedido_dte_error INITEGER DEFAULT 0);"
+                "pedido_dte_error INITEGER DEFAULT 0," +
+                "dteAmbiente VARCHAR(2) NULL DEFAULT ''," +
+                "dteCodigoGeneracion VARCHAR(50) NULL DEFAULT ''," +
+                "dteSelloRecibido VARCHAR(50) NULL DEFAULT ''," +
+                "dteNumeroControl VARCHAR(50) NULL DEFAULT '');"
     }
 
     fun detallePedidos(): String {

@@ -624,7 +624,11 @@ class Pedido : AppCompatActivity() {
                         cursor.getFloat(13),
                         cursor.getFloat(14),
                         cursor.getInt(15),
-                        cursor.getInt(16)
+                        cursor.getInt(16),
+                        "",
+                        "",
+                        "",
+                        ""
                     )
                     lista.add(pedido)
 
@@ -1411,6 +1415,10 @@ class Pedido : AppCompatActivity() {
                                         //cargarPedidos(res, view)
                                         val res_pedido_dte: String = res.getString("pedido_dte")
                                         val res_pedido_dte_error: String = res.getString("pedido_dte_error")
+                                        val dteAmbiente : String = res.getString("dteAmbiente")
+                                        val dteCodigoGeneracion : String = res.getString("dteCodigoGeneracion")
+                                        val dteSelloRecibido: String = res.getString("dteSelloRecibido")
+                                        val dteNumeroControl: String = res.getString("dteNumeroControl")
                                         var pedido_dte = 0
                                         var pedido_dte_error = 0
 
@@ -1424,7 +1432,8 @@ class Pedido : AppCompatActivity() {
 
                                         println("RESPUESTA PEDIDO_DETE: $res_pedido_dte ------- RESPUESTA PEDIDO_DTE_ERROR: $res_pedido_dte_error")
 
-                                        pedidosController.actualizarEstadoTransmisionPedido(this@Pedido, Id_pedido,pedido_dte, pedido_dte_error)
+                                        pedidosController.actualizarEstadoTransmisionPedido(this@Pedido, Id_pedido,pedido_dte, pedido_dte_error, dteAmbiente, dteCodigoGeneracion,
+                                            dteSelloRecibido, dteNumeroControl)
                                         runOnUiThread {
                                             actualizarVistaDTE()
                                         }

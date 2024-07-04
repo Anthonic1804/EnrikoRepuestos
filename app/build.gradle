@@ -58,6 +58,7 @@ dependencies {
 
     // SCANNER CAMARA
     implementation 'com.journeyapps:zxing-android-embedded:4.1.0'
+    implementation 'com.google.zxing:core:3.4.0'
 
     //LIBRERIA PARA EL USUARIO DE LA SIGNATURE VIEW
     implementation 'com.kyanogen.signatureview:signature-view:1.2'
