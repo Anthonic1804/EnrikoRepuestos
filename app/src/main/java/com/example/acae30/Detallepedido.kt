@@ -60,6 +60,7 @@ import java.io.InputStreamReader
 import java.io.OutputStreamWriter
 import java.io.Reader
 import java.math.BigDecimal
+import java.math.RoundingMode
 import java.net.HttpURLConnection
 import java.net.URL
 import java.nio.charset.StandardCharsets
@@ -130,7 +131,6 @@ class Detallepedido : AppCompatActivity() {
     private lateinit var binding: ActivityDetallepedidoBinding
     private var clienteMosoro = 0
 
-    @SuppressLint("MissingInflatedId")
     override fun onCreate(savedInstanceState: Bundle?) {
 
         super.onCreate(savedInstanceState)
@@ -163,7 +163,8 @@ class Detallepedido : AppCompatActivity() {
         //OBTENIENDO LA CATEGORIA DEL CLIENTE
         categoriaCliente = clientesController.obtenerInformacionCliente(this@Detallepedido, idcliente)?.Categoria_cliente.toString()
 
-        total = pedidosController.obtenerInformacionPedido(idpedido,this@Detallepedido)?.Total!!
+        //total = pedidosController.obtenerInformacionPedido(idpedido,this@Detallepedido)?.Total!!
+        actualizarTotales()
 
         //DESHABILITAMOS LOS TEXTVIEWS DE INFORMACION ENVIADA
         binding.tvDocumentoSeleccionado.visibility = View.GONE
@@ -295,7 +296,7 @@ class Detallepedido : AppCompatActivity() {
                 enviandoPedido = true
 
                 if(pedidoInfo?.Cerrado == 0 && pedidoInfo.Enviado == 0){
-                    alertaPago(total)
+                    alertaPago(binding.txttotal.text.toString().toFloat())
                 }else{
                     verificarConexionEnvio()
                 }
@@ -324,7 +325,7 @@ class Detallepedido : AppCompatActivity() {
         binding.btnguardar.setOnClickListener {
             if (ConfirmarDetallePedido() > 0) {
                 guardandoPedido = true
-                alertaPago(total)
+                alertaPago(binding.txttotal.text.toString().toFloat())
             } else {
                 funciones.mostrarAlerta("ERROR: NO HAY PRODUCTOS AGREGADOS AL PEDIDO", this@Detallepedido, binding.lienzo)
             }
@@ -453,7 +454,7 @@ class Detallepedido : AppCompatActivity() {
         if(retenido > 0){
             total -= retenido
         }
-        binding.txttotal.text = "$" + "${String.format("%.4f", total)}"
+        binding.txttotal.text =  "${String.format("%.2f".format(total))}"
     }
 
     //FUNCION PARA COMPLETAR LOS TERMINOS DEL CLIENTE
@@ -498,20 +499,27 @@ class Detallepedido : AppCompatActivity() {
             when(tipoDocumento) {
                 "CF" -> {
                     if(categoriaCliente == "Gran contribuyente"){
-                        binding.txtSumas.text = "${String.format("%.4f", (total/1.13)/1.01)}"
-                        binding.txtIva.text = "${String.format("%.4f", ((total/1.13)*0.13))}"
-                        binding.txtIvaPerci.text = "${String.format("%.4f", ((total/1.13)*0.01))}"
-                        binding.txttotal.text = "${String.format("%.4f", (total - (total/1.13)*0.01))}"
+                        if((total/1.13f) > 100f){
+                            binding.txtSumas.text = "${String.format("%.2f".format((total/1.13)))}"
+                            binding.txtIva.text = "${String.format("%.2f".format(((total/1.13)*0.13)))}"
+                            binding.txtIvaPerci.text = "${String.format("%.2f".format(((total/1.13)*0.01)))}"
+                            binding.txttotal.text = "${String.format("%.2f".format((total - (total/1.13)*0.01)))}"
+                        }else{
+                            binding.txtSumas.text = "${String.format("%.2f".format((total/1.13)))}"
+                            binding.txtIva.text = "${String.format("%.2f".format(((total/1.13)*0.13)))}"
+                            binding.txtIvaPerci.text = "${String.format("%.2f".format(0f))}"
+                            binding.txttotal.text = "${String.format("%.2f".format(total))}"
+                        }
                     }else{
-                        binding.txtSumas.text = "${String.format("%.4f", (total/1.13))}"
-                        binding.txtIva.text = "${String.format("%.4f", ((total/1.13)*0.13))}"
-                        binding.txtIvaPerci.text = "${String.format("%.4f", 0f)}"
+                        binding.txtSumas.text = "${String.format("%.2f".format((total/1.13)))}"
+                        binding.txtIva.text = "${String.format("%.2f".format(((total/1.13)*0.13)))}"
+                        binding.txtIvaPerci.text = "${String.format("%.2f".format(0f))}"
                     }
                 }
                 else -> {
-                    binding.txtSumas.text = "${String.format("%.4f", total)}"
-                    binding.txtIva.text = "${String.format("%.4f", 0f)}"
-                    binding.txtIvaPerci.text = "${String.format("%.4f", 0f)}"
+                    binding.txtSumas.text = "${String.format("%.2f".format(total))}"
+                    binding.txtIva.text = "${String.format("%.2f".format(0f))}"
+                    binding.txtIvaPerci.text = "${String.format("%.2f".format(0f))}"
 
                 }
             }
@@ -1409,15 +1417,17 @@ class Detallepedido : AppCompatActivity() {
         val perciText = paint.measureText("{${inforPedido.Iva_Percibido}}")
         canvas.drawText("$ ${inforPedido.Iva_Percibido}", canvas.width - perciText - 50f, y, paint)
 
-        if(inforPedido.Iva_Percibido!! > 0){
-            total -= inforPedido.Iva_Percibido!!
-        }
+        /*if((total/1.13f) > 100f){
+            if(inforPedido.Iva_Percibido!! > 0){
+                total -= inforPedido.Iva_Percibido!!
+            }
+        }*/
 
         y += 20f
         paint.textSize = 12f // Restaurar el tamaño de letra predeterminado
         canvas.drawText("TOTAL:", 50f, y, paint)
         val totalTextWidth = paint.measureText("$total")
-        canvas.drawText("$ $total", canvas.width - totalTextWidth - 50f, y, paint)
+        canvas.drawText("$ " + binding.txttotal.text.toString(), canvas.width - totalTextWidth - 50f, y, paint)
 
         // Draw divider line after the table
         canvas.drawLine(50f, y + 20f, canvas.width - 50f, y + 20f, paint)
