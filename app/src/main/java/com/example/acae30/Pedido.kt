@@ -628,6 +628,8 @@ class Pedido : AppCompatActivity() {
                         "",
                         "",
                         "",
+                        "",
+                        "",
                         ""
                     )
                     lista.add(pedido)

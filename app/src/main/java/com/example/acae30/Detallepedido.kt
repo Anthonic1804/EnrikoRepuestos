@@ -612,19 +612,6 @@ class Detallepedido : AppCompatActivity() {
 
     }
 
-    //METODO PARA VERIFICAR SI EL PEDIDO YA FUE CERRADO PARA PODER REDIRECCIONAR
-    //CORRECTAMENTE
-    override fun onResume() {
-        super.onResume()
-        if(enviandoPedido){
-            envioAlerta()
-        }
-
-        if(guardandoPedido){
-            guardarPedido()
-        }
-    }
-
     private fun envioAlerta(){
         val updateDialog = Dialog(this, R.style.Theme_Dialog)
         updateDialog.setCancelable(false)
@@ -848,7 +835,7 @@ class Detallepedido : AppCompatActivity() {
                     binding.btnguardar.visibility = View.GONE
                     binding.imbtnatras.visibility = View.VISIBLE
                     binding.btncancelar.visibility = View.GONE
-                    binding.btnexportar.visibility = View.GONE
+                    binding.btnexportar.visibility = View.VISIBLE
                     binding.spSucursal.visibility = View.GONE
                     binding.sinSucursal.visibility = View.VISIBLE
                 }
@@ -1302,14 +1289,28 @@ class Detallepedido : AppCompatActivity() {
                 try {
                     val os = FileOutputStream(destination?.fileDescriptor)
                     val pdfDocument = PdfDocument()
+                    //VERICIACION PARA LA IMPRESION DE LOS PEDIDOS
+                    val pedido = pedidosController.obtenerInformacionPedido(idpedido,this@Detallepedido)
+                    var medidaTk : Float = 0f
+
+                    medidaTk = if(pedido!!.Enviado == 1 && pedido.pedido_dte == 1){
+                        calcularLargoTicketDTE()
+                    }else{
+                        calcularLargoTicketNotmal()
+                    }
 
                     // Create a page
-                    val pageInfo = PdfDocument.PageInfo.Builder(280, calculateTicketHeight().toInt(), 1).create()
+                    val pageInfo = PdfDocument.PageInfo.Builder(280, medidaTk.toInt(), 1).create()
                     val page = pdfDocument.startPage(pageInfo)
 
                     // Draw the ticket content on the canvas
                     val canvas = page.canvas
-                    crearTicket(canvas)
+
+                    if(pedido.Enviado == 1 && pedido.pedido_dte == 1){
+                        crearTicketDTE(canvas)
+                    }else{
+                        crearTicketNormal(canvas)
+                    }
 
                     pdfDocument.finishPage(page)
                     pdfDocument.writeTo(os)
@@ -1324,8 +1325,8 @@ class Detallepedido : AppCompatActivity() {
         }, null)
     }
 
-    //FUNCION PARA DIBUJAR EL TIKET
-    private fun crearTicket(canvas: Canvas) {
+    //FUNCION PARA DIBUJAR EL TIKET DTE
+    private fun crearTicketDTE(canvas: Canvas) {
 
         val inforPedido = pedidosController.obtenerInformacionPedido(idpedido, this@Detallepedido)
 
@@ -1339,7 +1340,7 @@ class Detallepedido : AppCompatActivity() {
 
         // Paint para el texto
         val paint = TextPaint().apply {
-            textSize = 10f // Tamaño predeterminado para el título y la división
+            textSize = 9f // Tamaño predeterminado para el título y la división
         }
 
         // Draw title
@@ -1357,18 +1358,47 @@ class Detallepedido : AppCompatActivity() {
 
         val infoPedido = pedidosController.obtenerInformacionPedido(idpedido, this@Detallepedido)
         val fecha = inforPedido!!.Fecha_creado?.substring(0, 10)
+        val documento = when(inforPedido!!.Tipo_documento){
+            "CF" -> {
+                "CREDITO FISCAL"
+            }
+            "FC" -> {
+                "FACTURA"
+            }
+            else -> {
+                "FACTURA DE EXPORTACION"
+            }
+        }
         // Formato de entrada
 
         //COMPROBANTE DE PAGO
         paint.isFakeBoldText = true
-        canvas.drawText("---- COMPROBANTE DE PAGO ----", 50f, 175f, paint)
+        canvas.drawText("---- DOCUMENTO TRIBUTARIO ELECTRONICO ----", 50f, 175f, paint)
+
+        paint.isFakeBoldText = true
+        canvas.drawText("TIPO DE DOCUMENTO", 50f, 195f, paint)
         paint.isFakeBoldText = false
-        canvas.drawText("CODIGO DE GENERACION", 50f, 195f, paint)
-        canvas.drawText("${infoPedido!!.dteCodigoGeneracion}", 50f, 215f, paint)
-        canvas.drawText("NUMERO DE CONTROL", 50f, 235f, paint)
-        canvas.drawText("${infoPedido.dteNumeroControl}", 50f, 255f, paint)
-        canvas.drawText("SELLO DE VALIDACION", 50f, 275f, paint)
-        canvas.drawText("${infoPedido.dteSelloRecibido}", 50f, 295f, paint)
+        canvas.drawText("$documento", 50f, 205f, paint)
+
+        paint.isFakeBoldText = true
+        canvas.drawText("FECHA EMISION", 50f, 225f, paint)
+        paint.isFakeBoldText = false
+        canvas.drawText("${inforPedido.Fecha_creado}", 50f, 235f, paint)
+
+        paint.isFakeBoldText = true
+        canvas.drawText("CODIGO DE GENERACION", 50f, 255f, paint)
+        paint.isFakeBoldText = false
+        canvas.drawText("${infoPedido!!.dteCodigoGeneracion}", 50f, 265f, paint)
+
+        paint.isFakeBoldText = true
+        canvas.drawText("NUMERO DE CONTROL", 50f, 285f, paint)
+        paint.isFakeBoldText = false
+        canvas.drawText("${infoPedido.dteNumeroControl}", 50f, 295f, paint)
+
+        paint.isFakeBoldText = true
+        canvas.drawText("SELLO DE VALIDACION", 50f, 315f, paint)
+        paint.isFakeBoldText = false
+        canvas.drawText("${infoPedido.dteSelloRecibido}", 50f, 325f, paint)
 
         //ESPACIO PARA EL QR
         val qrText = "https://webapp.dtes.mh.gob.sv/consultaPublica?ambiente=${infoPedido.dteAmbiente}&codGen=${infoPedido.dteCodigoGeneracion}&fechaEmi=$fecha"
@@ -1378,7 +1408,7 @@ class Detallepedido : AppCompatActivity() {
 
         // Posición donde se dibujará el QR en el Canvas
         val qrX = 80f // Posición X
-        val qrY = 305f // Posición Y
+        val qrY = 345f // Posición Y
 
         // Generar el código QR como un Bitmap
         val writer = QRCodeWriter()
@@ -1400,11 +1430,11 @@ class Detallepedido : AppCompatActivity() {
         }
         //ESPACIO PARA EL QR
         paint.isFakeBoldText = true
-        canvas.drawLine(50f, 470f, canvas.width - 50f, 470f, paint)
+        canvas.drawLine(50f, 495f, canvas.width - 50f, 495f, paint)
 
         // Draw column headers
         val columnWidths = floatArrayOf(20f, 100f, 60f) // Ancho fijo para cada columna
-        val startY = 480f
+        val startY = 515f
         var y = startY
         val columnX = floatArrayOf(
             50f,
@@ -1488,8 +1518,119 @@ class Detallepedido : AppCompatActivity() {
         canvas.drawText("FECHA: $fecha", 50f,  y + 60f, paint)
     }
 
-    //FUNCION PARA CALCULAR EL LARGO DEL TICKET
-    private fun calculateTicketHeight(): Float {
+    //FUNCION PARA DIBUJAR EL TIKET
+    private fun crearTicketNormal(canvas: Canvas) {
+
+        val inforPedido = pedidosController.obtenerInformacionPedido(idpedido, this@Detallepedido)
+
+        // Tamaños de letra específicos para cada columna
+        val textSizeCantidad = 10f
+        val textSizeCodigo = 10f
+        val textSizeTotal = 10f
+
+        // Espacio entre las columnas
+        val columnSpacing = 10f
+
+        // Paint para el texto
+        val paint = TextPaint().apply {
+            textSize = 12f // Tamaño predeterminado para el título y la división
+        }
+
+        // Draw title
+        paint.isFakeBoldText = true
+        canvas.drawText("ESCARRSA, DE C.V", 50f, 50f, paint)
+        canvas.drawText("FINAL AV. PERALTA Y 38A AV. NORTE, BO. LOURDES", 50f, 70f, paint)
+        canvas.drawText("SAN SALVADOR, SAN SALVADOR", 50f, 90f, paint)
+        canvas.drawText("N.R.C : 133843-2", 50f, 110f, paint)
+        canvas.drawText("N.I.T : 0614-300801-101-7", 50f, 130f, paint)
+        canvas.drawText("GIRO: VENTA AL POR MAYOR DE HIELO", 50f, 150f, paint)
+
+        // Draw divider line
+        paint.isFakeBoldText = false
+        canvas.drawLine(50f, 160f, canvas.width - 50f, 160f, paint)
+
+        // Draw column headers
+        val columnWidths = floatArrayOf(20f, 100f, 60f) // Ancho fijo para cada columna
+        val startY = 165f
+        var y = startY
+        val columnX = floatArrayOf(
+            50f,
+            50f + columnWidths[0] + columnSpacing,
+            50f + columnWidths[0] + columnWidths[1] + columnSpacing
+        )
+
+        y += 20f
+        val lista = pedidosController.obtenerDetallePedido(idpedido, this@Detallepedido)
+        var total = 0f
+
+        for (data in lista) {
+            // Draw text in each column with specific text sizes
+            paint.textSize = textSizeCantidad
+            canvas.drawText("${data.Cantidad}", columnX[0] + 5f, y + 25f, paint)
+
+            paint.textSize = textSizeCodigo
+            val descripcionLayout : StaticLayout = if(data.Bonificado!! > 0){
+                StaticLayout(
+                    "${data.Descripcion} - BONIFICADOS: +${data.Bonificado}", paint, columnWidths[1].toInt(),
+                    Layout.Alignment.ALIGN_NORMAL, 1.0f, 0.0f, false
+                )
+            }else{
+                StaticLayout(
+                    data.Descripcion, paint, columnWidths[1].toInt(),
+                    Layout.Alignment.ALIGN_NORMAL, 1.0f, 0.0f, false
+                )
+            }
+            canvas.save()
+            canvas.translate(columnX[1] + 10f, y)
+            descripcionLayout.draw(canvas)
+            canvas.restore()
+
+            paint.textSize = textSizeTotal
+            val totalWidth = paint.measureText("$ ${data.Total_iva}")
+            canvas.drawText("$ ${data.Total_iva}", columnX[2] + columnWidths[2] - totalWidth, y + 15f, paint)
+
+            y += descripcionLayout.height.toFloat() + 20f
+            total += data.Total_iva!!
+        }
+
+        // Draw divider line
+        y+=20
+        paint.isFakeBoldText = false
+        canvas.drawLine(50f, y, canvas.width - 50f, y, paint)
+
+        // Draw total
+        y+= 20f
+        paint.textSize = 12f
+        canvas.drawText("SUBTOTAL:", 50f, y, paint)
+        val subTotalText = paint.measureText("${inforPedido!!.Suma}")
+        canvas.drawText("$ ${inforPedido.Suma}", canvas.width - subTotalText - 50f, y, paint)
+
+        y+= 20f
+        paint.textSize = 12f
+        canvas.drawText("IVA:", 50f, y, paint)
+        val ivaText = paint.measureText("${inforPedido.Iva}")
+        canvas.drawText("$ ${inforPedido.Iva}", canvas.width - ivaText - 50f, y, paint)
+
+        y+= 20f
+        paint.textSize = 12f
+        canvas.drawText("IVA/PER:", 50f, y, paint)
+        val perciText = paint.measureText("{${inforPedido.Iva_Percibido}}")
+        canvas.drawText("$ ${inforPedido.Iva_Percibido}", canvas.width - perciText - 50f, y, paint)
+
+        y += 20f
+        paint.textSize = 12f // Restaurar el tamaño de letra predeterminado
+        canvas.drawText("TOTAL:", 50f, y, paint)
+        val totalTextWidth = paint.measureText("$total")
+        canvas.drawText("$ $total", canvas.width - totalTextWidth - 50f, y, paint)
+
+        // Draw divider line after the table
+        canvas.drawLine(50f, y + 20f, canvas.width - 50f, y + 20f, paint)
+        canvas.drawText("VENDIDO POR: $vendedor", 50f, y + 40f, paint)
+        canvas.drawText("FECHA: $fecha", 50f,  y + 60f, paint)
+    }
+
+    //FUNCION PARA CALCULAR EL LARGO DEL TICKET DTE
+    private fun calcularLargoTicketDTE(): Float {
 
         val paint = TextPaint().apply {
             textSize = 12f
@@ -1509,6 +1650,31 @@ class Detallepedido : AppCompatActivity() {
 
         // Altura del total
         ticketHeight += 280f
+
+        return ticketHeight
+    }
+
+    //FUNCION PARA CALCULAR EL LARGO DEL TICKET NORMAL
+    private fun calcularLargoTicketNotmal(): Float {
+
+        val paint = TextPaint().apply {
+            textSize = 12f
+        }
+
+        var ticketHeight = 170f // Altura del título y la división inicialmente
+
+        // Altura de cada fila de datos
+        val lista = pedidosController.obtenerDetallePedido(idpedido, this@Detallepedido)
+        for (data in lista) {
+            val descripcionLayout = StaticLayout(
+                data.Descripcion, paint, 100,
+                Layout.Alignment.ALIGN_NORMAL, 1.0f, 0.0f, false
+            )
+            ticketHeight += descripcionLayout.height.toFloat() + 20f
+        }
+
+        // Altura del total
+        ticketHeight += 220f
 
         return ticketHeight
     }
@@ -1696,7 +1862,15 @@ class Detallepedido : AppCompatActivity() {
                 }
 
                 dialogo.dismiss()
-                imprimirRecibo()
+                //imprimirRecibo()
+
+                if(enviandoPedido){
+                    envioAlerta()
+                }
+
+                if(guardandoPedido){
+                    guardarPedido()
+                }
             }
         }
 

@@ -179,6 +179,8 @@ class PedidosController {
                     "",
                     "",
                     "",
+                    "",
+                    "",
                     ""
                 )
             }
@@ -221,7 +223,9 @@ class PedidosController {
                     cursor.getString(42),
                     cursor.getString(43),
                     cursor.getString(44),
-                    cursor.getString(45)
+                    cursor.getString(45),
+                    cursor.getString(22),
+                    cursor.getString(24)
                 )
                 cursor.close()
             }
