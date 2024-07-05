@@ -1400,6 +1400,13 @@ class Detallepedido : AppCompatActivity() {
         paint.isFakeBoldText = false
         canvas.drawText("${infoPedido.dteSelloRecibido}", 50f, 325f, paint)
 
+        paint.isFakeBoldText = true
+        canvas.drawText("TERMINOS", 50f, 345f, paint)
+        paint.isFakeBoldText = false
+        canvas.drawText("${infoPedido.Terminos}", 50f, 355f, paint)
+
+
+
         //ESPACIO PARA EL QR
         val qrText = "https://webapp.dtes.mh.gob.sv/consultaPublica?ambiente=${infoPedido.dteAmbiente}&codGen=${infoPedido.dteCodigoGeneracion}&fechaEmi=$fecha"
 

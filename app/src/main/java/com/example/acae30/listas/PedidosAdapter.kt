@@ -35,7 +35,12 @@ class PedidosAdapter(
         val data = lista[position]
         holder.txtPedido.text = "PED${data.Id}"
         holder.txtCliente.text = data.Nombre_cliente
-        holder.txtTotal.text = "$" + "${String.format("%.4f", data.Total)}"
+        var total = data.Total
+        if(data.Iva_Percibido!! > 0f){
+            total = data.Total!! - data.Iva_Percibido!!
+        }
+
+        holder.txtTotal.text = "$" + "${String.format("%.2f".format(total))}"
 
         var estado = "ENVIADO"
         if (data.Enviado == 0) {
