@@ -4,6 +4,7 @@ import android.Manifest
 import android.animation.Animator
 import android.content.Context
 import android.content.Intent
+import android.content.SharedPreferences
 import android.net.ConnectivityManager
 import android.net.NetworkCapabilities
 import android.view.View
@@ -24,6 +25,8 @@ import java.util.Locale
 class Funciones {
 
     private var alert: AlertDialogo? = null
+    private lateinit var preferences: SharedPreferences
+    private var instancia = "CONFIG_SERVIDOR"
 
     //FUNCION PARA OBTENER UN TIMESTAMP
     fun getFechaHoraProceso(): String?{
@@ -196,6 +199,7 @@ class Funciones {
 
     //FUNCION PARA ELIMINAR INFORMACION DE LAS TABLAS PRINCIPALES AL CERRAR SESSION
     fun eliminarInformacion(context: Context){
+        preferences = context.getSharedPreferences(instancia, Context.MODE_PRIVATE)
         val db = getDataBase(context).writableDatabase
         try {
             db.execSQL("DELETE FROM Inventario")
@@ -212,6 +216,10 @@ class Funciones {
         }finally {
             db.close()
         }
+
+        val editor = preferences.edit()
+        editor.remove("hojaCarga")
+        editor.apply()
     }
 
 }

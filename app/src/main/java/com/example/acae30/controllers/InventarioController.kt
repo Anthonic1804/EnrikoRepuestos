@@ -317,7 +317,7 @@ class InventarioController {
     }
 
     //FUNCION PARA ALMACENAR EL INVENTARIO EN SQLITE
-    fun saveInventarioDatabase(json: JSONArray, context: Context, view:View) {
+    fun saveInventarioDatabase(json: JSONArray, context: Context, view:View, numeroHojaCarga:Int) {
         val bd = funciones.getDataBase(context).writableDatabase
 
         preferences = context.getSharedPreferences(instancia, Context.MODE_PRIVATE)
@@ -397,7 +397,7 @@ class InventarioController {
             bd.close()
             if(hojaCarga){
                 CoroutineScope(Dispatchers.IO).launch {
-                    insertarHojaDeCargar(json, context, view)
+                    insertarHojaDeCargar(json, context, view, numeroHojaCarga)
                 }
             }else{
                 funciones.mostrarMensaje("INVENTARIO CARGADO CORRECTAMENTE", context, view)
@@ -456,13 +456,13 @@ class InventarioController {
 
                                             println("INSERTANDO INFORMACION EN TABLA DE INVENTARIO Y PRIMERA HOJA DE CARGA")
                                             //ALMACENANDO INVENTARIO NUEVO
-                                            saveInventarioDatabase(res, context, view)
+                                            saveInventarioDatabase(res, context, view, numero)
 
                                         }else{
                                             //AQUI SE CARGAR SOLO LAS EXISTENCIA DE ACUERDO A LA HOJA DE CARGA
                                             println("INSERTANDO INSERTANDO INFORMACION SOLO EN HOJA DE CARGA Y DETALLE")
                                             //ALMACENANDO INVENTARIO NUEVO
-                                            insertarHojaDeCargar(res, context, view)
+                                            insertarHojaDeCargar(res, context, view, numero)
                                         }
 
                                     } else {
@@ -554,19 +554,18 @@ class InventarioController {
     }
 
     //FUNCION PARA INSERTAR MAESTRO HOJA CARGA
-    private fun insertarHojaDeCargar(json: JSONArray, context: Context, view:View){
+    private fun insertarHojaDeCargar(json: JSONArray, context: Context, view:View, numeroHojaCarga:Int){
         val bd = funciones.getDataBase(context).writableDatabase
         preferences = context.getSharedPreferences(instancia, Context.MODE_PRIVATE)
 
         val idHojaCarga = preferences.getInt("idHojaCarga", 0)
-        val hojaCarga = preferences.getInt("hojaCarga", 0)
         val fechaHojaCarga = funciones.obtenerFecha()
 
         try {
             bd.beginTransaction()
             val data = ContentValues()
             data.put("idHojaCarga", idHojaCarga)
-            data.put("numeroHoja", hojaCarga)
+            data.put("numeroHoja", numeroHojaCarga)
             data.put("Fecha_registro", fechaHojaCarga)
             bd.insert("hoja_carga", null, data)
 
@@ -577,13 +576,13 @@ class InventarioController {
             bd.endTransaction()
             bd.close()
             CoroutineScope(Dispatchers.IO).launch {
-                insertarDetalleHojaCarga(json, context, view)
+                insertarDetalleHojaCarga(json, context, view, numeroHojaCarga)
             }
         }
     }
 
     //FUNCION PARA INSERTAR DETALLE DE HOJA DE CARGA
-    private fun insertarDetalleHojaCarga(json: JSONArray, context: Context, view:View){
+    private fun insertarDetalleHojaCarga(json: JSONArray, context: Context, view:View, numeroHojaCarga: Int){
         val bd = funciones.getDataBase(context).writableDatabase
         preferences = context.getSharedPreferences(instancia, Context.MODE_PRIVATE)
 
@@ -615,6 +614,12 @@ class InventarioController {
             CoroutineScope(Dispatchers.IO).launch {
                 obtenerFechaInventario(context)
             }
+            //REGISTRANDO HOJA DE CARGA ACTIVA
+            println("REGISTRANDO HOJA DE CARGA ACTIVA")
+            val editor = preferences.edit()
+            editor.putInt("hojaCarga", numeroHojaCarga.toInt())
+            editor.apply()
+
             funciones.mostrarMensaje("INVENTARIO CARGADO CORRECTAMENTE", context, view)
         }
 

@@ -7,6 +7,7 @@ import android.content.Intent
 import android.content.SharedPreferences
 import android.os.Bundle
 import android.widget.TextView
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.example.acae30.controllers.ClientesController
 import com.example.acae30.controllers.ConfigController
@@ -36,6 +37,11 @@ class carga_datos : AppCompatActivity() {
     private var clietnesController = ClientesController()
     private var pedidosController = PedidosController()
     private var funciones = Funciones()
+
+    private lateinit var tvUpdate : TextView
+    private lateinit var tvCancel : TextView
+    private lateinit var tvTitulo : TextView
+    private lateinit var tvMensaje : TextView
 
     private lateinit var preferences: SharedPreferences
     private var instancia = "CONFIG_SERVIDOR"
@@ -142,16 +148,16 @@ class carga_datos : AppCompatActivity() {
                 funciones.mostrarAlerta("ERROR EN LA HOJA DE CARGA", this@carga_datos, binding.vistaalerta)
             } else {
 
-                //REGISTRANDO HOJA DE CARGA ACTIVA
-                println("REGISTRANDO HOJA DE CARGA ACTIVA")
-                val editor = preferences.edit()
-                editor.putInt("hojaCarga", numero.toInt())
-                editor.apply()
-
-                CoroutineScope(Dispatchers.IO).launch {
-                    //OBTENIENDO INVENTARIO DESDE HOJA DE CARGA
-                    inventarioController.obtenerInventarioHojaCarga(0, numero.toInt(), idVendedor, this@carga_datos, binding.vistaalerta)
+                val hojaCargaActiva = preferences.getInt("hojaCarga", 0)
+                if(hojaCargaActiva == numero.toInt()){
+                    mensajeRecargarHoja()
+                }else{
+                    CoroutineScope(Dispatchers.IO).launch {
+                        //OBTENIENDO INVENTARIO DESDE HOJA DE CARGA
+                        inventarioController.obtenerInventarioHojaCarga(0, numero.toInt(), idVendedor, this@carga_datos, binding.vistaalerta)
+                    }
                 }
+
                 hojaCargaDialog.dismiss()
             }
         }
@@ -162,6 +168,32 @@ class carga_datos : AppCompatActivity() {
 
         hojaCargaDialog.show()
 
+    }
+
+    private fun mensajeRecargarHoja() {
+        val updateDialog = Dialog(this, R.style.Theme_Dialog)
+        updateDialog.setCancelable(false)
+
+        updateDialog.setContentView(R.layout.dialog_cancelar)
+        tvUpdate = updateDialog.findViewById(R.id.tvUpdate)
+        tvCancel = updateDialog.findViewById(R.id.tvCancel)
+        tvMensaje = updateDialog.findViewById(R.id.tvMensaje)
+        tvTitulo = updateDialog.findViewById(R.id.tvTitulo)
+
+        tvTitulo.text = "INFORMACIÓN"
+        tvMensaje.text = "¿DESEA REALIZAR LA RECARGA DE SU HOJA?"
+        tvUpdate.text = "ACEPTAR"
+
+        tvUpdate.setOnClickListener {
+            Toast.makeText(this@carga_datos, "OPCION EN VERIFICACION", Toast.LENGTH_SHORT).show()
+            updateDialog.dismiss()
+        }
+
+        tvCancel.setOnClickListener {
+            updateDialog.dismiss()
+        }
+
+        updateDialog.show()
     }
 
     //OBTENIENDO SUCURSALES DESDE WEBSERVIS
@@ -423,7 +455,7 @@ class carga_datos : AppCompatActivity() {
 //                                messageAsync("Cargando 50%")
                                 val respuesta = JSONArray(response.toString())
                                 if (respuesta.length() > 0) {
-                                    inventarioController.saveInventarioDatabase(respuesta, this@carga_datos, binding.vistaalerta)
+                                    inventarioController.saveInventarioDatabase(respuesta, this@carga_datos, binding.vistaalerta,0)
                                     //println("DATOS ALMACENADOS CORRECTAMEMENTE")
                                 } else {
                                     throw Exception("Servidor no Devolvio datos")

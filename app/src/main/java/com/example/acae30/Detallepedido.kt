@@ -1239,7 +1239,7 @@ class Detallepedido : AppCompatActivity() {
             d.addProperty("Total", data.Total_iva)
             d.addProperty("Total_iva", data.Total_iva)
             d.addProperty("Unidad", data.Unidad)
-            d.addProperty("Bonificado", data.Bonificado)
+            d.addProperty("Bonificado", data.Bonificado!!.toFloat())
             d.addProperty("Descuento", data.Descuento)
             d.addProperty("Precio_editado", data.Precio_editado)
             d.addProperty("Idunidad", data.Idunidad)
