@@ -9,6 +9,7 @@ import android.os.Bundle
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import androidx.coordinatorlayout.widget.CoordinatorLayout.DispatchChangeEvent
 import com.example.acae30.controllers.ClientesController
 import com.example.acae30.controllers.ConfigController
 import com.example.acae30.controllers.InventarioController
@@ -174,6 +175,8 @@ class carga_datos : AppCompatActivity() {
         val updateDialog = Dialog(this, R.style.Theme_Dialog)
         updateDialog.setCancelable(false)
 
+        val idHojaCarga = preferences.getInt("idHojaCarga", 0)
+
         updateDialog.setContentView(R.layout.dialog_cancelar)
         tvUpdate = updateDialog.findViewById(R.id.tvUpdate)
         tvCancel = updateDialog.findViewById(R.id.tvCancel)
@@ -185,7 +188,10 @@ class carga_datos : AppCompatActivity() {
         tvUpdate.text = "ACEPTAR"
 
         tvUpdate.setOnClickListener {
-            Toast.makeText(this@carga_datos, "OPCION EN VERIFICACION", Toast.LENGTH_SHORT).show()
+            //Toast.makeText(this@carga_datos, "OPCION EN VERIFICACION", Toast.LENGTH_SHORT).show()
+            CoroutineScope(Dispatchers.IO).launch {
+                inventarioController.obtenerHojaRecargas(this@carga_datos,idHojaCarga,binding.vistaalerta)
+            }
             updateDialog.dismiss()
         }
 
@@ -739,6 +745,9 @@ class carga_datos : AppCompatActivity() {
 
                 //AGREGANDO EL CAMPO PARA VERIFICACION DE PERSONA JURIDICA
                 data.put("Persona_juridica", funciones.validate(dato.getString("persona_juridica")))
+
+                //VALIDANDO EL DTEGIRO ALMACENADO EN EL SERVIDOR
+                data.put("dteGiro", funciones.validate(dato.getString("dteGiro")))
 
                 bd.insert("clientes", null, data)
                 contador += talla

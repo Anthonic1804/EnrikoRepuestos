@@ -129,7 +129,7 @@ class PedidosController {
         }
     }
 
-    //FUNCION PARA OBTENER PEDIDOS NO TRANSMITIDOS
+    //FUNCION PARA OBTENER PEDIDOS NO TRANSMITIDOS EN SQLITE
     fun obtenerPedidosNoTransmitidos(context: Context) :Pedidos?{
         val db = funciones.getDataBase(context).readableDatabase
         var pedido : Pedidos? = null
@@ -181,6 +181,7 @@ class PedidosController {
                     "",
                     "",
                     "",
+                    "",
                     ""
                 )
             }
@@ -225,7 +226,8 @@ class PedidosController {
                     cursor.getString(44),
                     cursor.getString(45),
                     cursor.getString(22),
-                    cursor.getString(24)
+                    cursor.getString(24),
+                    cursor.getString(21)
                 )
                 cursor.close()
             }
@@ -310,12 +312,14 @@ class PedidosController {
 
     //FUNCION PARA ACTUALIZAR EL ESTADO DE TRANSMISION
     fun actualizarEstadoTransmisionPedido(context: Context, idPedidoServidor:Int, pedido_dte : Int, pedido_dte_error:Int,
-                                          dteAmbiente:String, dteCodigoGeneracion:String, dteSelloRecibido:String, dteNumeroControl:String){
+                                          dteAmbiente:String, dteCodigoGeneracion:String, dteSelloRecibido:String, dteNumeroControl:String,
+                                          idDocTransmitido: Int){
         val bd = funciones.getDataBase(context).writableDatabase
         try {
             bd.execSQL("UPDATE pedidos SET pedido_dte=$pedido_dte, pedido_dte_error=$pedido_dte_error, " +
                     "dteAmbiente='$dteAmbiente', dteCodigoGeneracion='$dteCodigoGeneracion', dteSelloRecibido='$dteSelloRecibido'," +
-                    "dteNumeroControl='$dteNumeroControl' WHERE Id_pedido_sistema = $idPedidoServidor")
+                    "dteNumeroControl='$dteNumeroControl', idDocTransmitido=$idDocTransmitido " +
+                    "WHERE Id_pedido_sistema = $idPedidoServidor")
         }catch (e:Exception){
             throw Exception("ERROR AL ACTUALIZAR EL PEDIDO")
         }finally {

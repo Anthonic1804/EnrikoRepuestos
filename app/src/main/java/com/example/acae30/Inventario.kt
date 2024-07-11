@@ -170,6 +170,7 @@ class Inventario : AppCompatActivity() {
         //EN BUSQUEDA DE PEDIDO
         if(idcliente != 0){
             scanner!!.visibility = View.GONE
+            btnActualizarInventario.visibility = View.GONE
         }
 
         //SETEA LA BUSQUEDA DEL SEARCHVIEW

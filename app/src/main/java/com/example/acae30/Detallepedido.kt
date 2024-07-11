@@ -33,6 +33,7 @@ import android.widget.LinearLayout
 import android.widget.Spinner
 import android.widget.TextView
 import android.widget.Toast
+import androidx.annotation.ColorInt
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -53,7 +54,9 @@ import com.google.android.material.textfield.TextInputEditText
 import com.google.gson.JsonArray
 import com.google.gson.JsonObject
 import com.google.zxing.BarcodeFormat
+import com.google.zxing.MultiFormatWriter
 import com.google.zxing.WriterException
+import com.google.zxing.oned.Code128Writer
 import com.google.zxing.qrcode.QRCodeWriter
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -1328,7 +1331,8 @@ class Detallepedido : AppCompatActivity() {
     //FUNCION PARA DIBUJAR EL TIKET DTE
     private fun crearTicketDTE(canvas: Canvas) {
 
-        val inforPedido = pedidosController.obtenerInformacionPedido(idpedido, this@Detallepedido)
+        val infoPedido = pedidosController.obtenerInformacionPedido(idpedido, this@Detallepedido)
+        val infoCliente = clientesController.obtenerInformacionCliente(this@Detallepedido, idcliente)
 
         // Tamaños de letra específicos para cada columna
         val textSizeCantidad = 10f
@@ -1352,13 +1356,46 @@ class Detallepedido : AppCompatActivity() {
         canvas.drawText("N.I.T : 0614-300801-101-7", 50f, 130f, paint)
         canvas.drawText("GIRO: VENTA AL POR MAYOR DE HIELO", 50f, 150f, paint)
 
-        // Draw divider line
+        //DATOS DEL CLIENTE
         paint.isFakeBoldText = true
         canvas.drawLine(50f, 160f, canvas.width - 50f, 160f, paint)
 
-        val infoPedido = pedidosController.obtenerInformacionPedido(idpedido, this@Detallepedido)
-        val fecha = inforPedido!!.Fecha_creado?.substring(0, 10)
-        val documento = when(inforPedido!!.Tipo_documento){
+        paint.isFakeBoldText = true
+        canvas.drawText("---- DATOS DEL CLIENTE ----", 50f, 175f, paint)
+
+        paint.isFakeBoldText = true
+        canvas.drawText("NOMBRE DEL CLIENTE", 50f, 195f, paint)
+        paint.isFakeBoldText = false
+        canvas.drawText("${infoPedido!!.Nombre_cliente}", 50f, 205f, paint)
+
+        paint.isFakeBoldText = true
+        canvas.drawText("N.I.T / D.U.I", 50f, 225f, paint)
+        paint.isFakeBoldText = false
+        canvas.drawText("${infoCliente!!.Dui}  ${infoCliente.Nit}", 50f, 235f, paint)
+
+        paint.isFakeBoldText = true
+        canvas.drawText("N.R.C", 50f, 255f, paint)
+        paint.isFakeBoldText = false
+        canvas.drawText("${infoCliente.Nrc}", 50f, 265f, paint)
+
+        paint.isFakeBoldText = true
+        canvas.drawText("NOMBRE SUCURSAL", 50f, 285f, paint)
+        paint.isFakeBoldText = false
+        canvas.drawText("${infoPedido.Nombre_sucursal}", 50f, 295f, paint)
+
+        paint.isFakeBoldText = true
+        canvas.drawText("ACTIVIDAD ECONOMICA", 50f, 315f, paint)
+        paint.isFakeBoldText = false
+        canvas.drawText("${infoCliente.dteGiro}", 50f, 325f, paint)
+
+        //FIN DATOS DEL CLIENTE
+
+        // Draw divider line
+        paint.isFakeBoldText = true
+        canvas.drawLine(50f, 345f, canvas.width - 50f, 345f, paint)
+
+        val fecha = infoPedido.Fecha_creado?.substring(0, 10)
+        val documento = when(infoPedido.Tipo_documento){
             "CF" -> {
                 "CREDITO FISCAL"
             }
@@ -1373,37 +1410,37 @@ class Detallepedido : AppCompatActivity() {
 
         //COMPROBANTE DE PAGO
         paint.isFakeBoldText = true
-        canvas.drawText("---- DOCUMENTO TRIBUTARIO ELECTRONICO ----", 50f, 175f, paint)
+        canvas.drawText("---- DOCUMENTO TRIBUTARIO ELECTRONICO ----", 50f, 365f, paint)
 
         paint.isFakeBoldText = true
-        canvas.drawText("TIPO DE DOCUMENTO", 50f, 195f, paint)
+        canvas.drawText("TIPO DE DOCUMENTO", 50f, 385f, paint)
         paint.isFakeBoldText = false
-        canvas.drawText("$documento", 50f, 205f, paint)
+        canvas.drawText("$documento", 50f, 395f, paint)
 
         paint.isFakeBoldText = true
-        canvas.drawText("FECHA EMISION", 50f, 225f, paint)
+        canvas.drawText("FECHA EMISION", 50f, 415f, paint)
         paint.isFakeBoldText = false
-        canvas.drawText("${inforPedido.Fecha_creado}", 50f, 235f, paint)
+        canvas.drawText("${infoPedido.Fecha_creado}", 50f, 425f, paint)
 
         paint.isFakeBoldText = true
-        canvas.drawText("CODIGO DE GENERACION", 50f, 255f, paint)
+        canvas.drawText("CODIGO DE GENERACION", 50f, 445f, paint)
         paint.isFakeBoldText = false
-        canvas.drawText("${infoPedido!!.dteCodigoGeneracion}", 50f, 265f, paint)
+        canvas.drawText("${infoPedido.dteCodigoGeneracion}", 50f, 455f, paint)
 
         paint.isFakeBoldText = true
-        canvas.drawText("NUMERO DE CONTROL", 50f, 285f, paint)
+        canvas.drawText("NUMERO DE CONTROL", 50f, 475f, paint)
         paint.isFakeBoldText = false
-        canvas.drawText("${infoPedido.dteNumeroControl}", 50f, 295f, paint)
+        canvas.drawText("${infoPedido.dteNumeroControl}", 50f, 485f, paint)
 
         paint.isFakeBoldText = true
-        canvas.drawText("SELLO DE VALIDACION", 50f, 315f, paint)
+        canvas.drawText("SELLO DE VALIDACION", 50f, 505f, paint)
         paint.isFakeBoldText = false
-        canvas.drawText("${infoPedido.dteSelloRecibido}", 50f, 325f, paint)
+        canvas.drawText("${infoPedido.dteSelloRecibido}", 50f, 515f, paint)
 
         paint.isFakeBoldText = true
-        canvas.drawText("TERMINOS", 50f, 345f, paint)
+        canvas.drawText("TERMINOS", 50f, 535f, paint)
         paint.isFakeBoldText = false
-        canvas.drawText("${infoPedido.Terminos}", 50f, 355f, paint)
+        canvas.drawText("${infoPedido.Terminos}", 50f, 545f, paint)
 
 
 
@@ -1415,7 +1452,7 @@ class Detallepedido : AppCompatActivity() {
 
         // Posición donde se dibujará el QR en el Canvas
         val qrX = 80f // Posición X
-        val qrY = 345f // Posición Y
+        val qrY = 560f // Posición Y
 
         // Generar el código QR como un Bitmap
         val writer = QRCodeWriter()
@@ -1437,11 +1474,11 @@ class Detallepedido : AppCompatActivity() {
         }
         //ESPACIO PARA EL QR
         paint.isFakeBoldText = true
-        canvas.drawLine(50f, 495f, canvas.width - 50f, 495f, paint)
+        canvas.drawLine(50f, 725f, canvas.width - 50f, 725f, paint)
 
         // Draw column headers
         val columnWidths = floatArrayOf(20f, 100f, 60f) // Ancho fijo para cada columna
-        val startY = 515f
+        val startY = 740f
         var y = startY
         val columnX = floatArrayOf(
             50f,
@@ -1454,21 +1491,37 @@ class Detallepedido : AppCompatActivity() {
         var total = 0f
 
         for (data in lista) {
+            val infoProducto = inventarioController.obtenerInformacionProductoPorId(this@Detallepedido, data.Id_producto!!,false)
+
             // Draw text in each column with specific text sizes
             paint.textSize = textSizeCantidad
             canvas.drawText("${data.Cantidad}", columnX[0] + 5f, y + 25f, paint)
 
             paint.textSize = textSizeCodigo
             val descripcionLayout : StaticLayout = if(data.Bonificado!! > 0){
-                StaticLayout(
-                    "${data.Descripcion} - BONIFICADOS: +${data.Bonificado}", paint, columnWidths[1].toInt(),
-                    Layout.Alignment.ALIGN_NORMAL, 1.0f, 0.0f, false
-                )
+                if(idcliente == 13128){
+                    StaticLayout(
+                         "${infoProducto!!.codigo_de_barra}\n ${data.Descripcion} - BONIFICADOS: +${data.Bonificado}", paint, columnWidths[1].toInt(),
+                        Layout.Alignment.ALIGN_NORMAL, 1.0f, 0.0f, false
+                    )
+                }else{
+                    StaticLayout(
+                        "${data.Descripcion} - BONIFICADOS: +${data.Bonificado}", paint, columnWidths[1].toInt(),
+                        Layout.Alignment.ALIGN_NORMAL, 1.0f, 0.0f, false
+                    )
+                }
             }else{
-                StaticLayout(
-                    data.Descripcion, paint, columnWidths[1].toInt(),
-                    Layout.Alignment.ALIGN_NORMAL, 1.0f, 0.0f, false
-                )
+                if(idcliente == 13128){
+                    StaticLayout(
+                        "${infoProducto!!.codigo_de_barra} \n ${data.Descripcion}", paint, columnWidths[1].toInt(),
+                        Layout.Alignment.ALIGN_NORMAL, 1.0f, 0.0f, false
+                    )
+                }else{
+                    StaticLayout(
+                        data.Descripcion, paint, columnWidths[1].toInt(),
+                        Layout.Alignment.ALIGN_NORMAL, 1.0f, 0.0f, false
+                    )
+                }
             }
             canvas.save()
             canvas.translate(columnX[1] + 10f, y)
@@ -1478,6 +1531,7 @@ class Detallepedido : AppCompatActivity() {
             paint.textSize = textSizeTotal
             val totalWidth = paint.measureText("$ ${data.Total_iva}")
             canvas.drawText("$ ${data.Total_iva}", columnX[2] + columnWidths[2] - totalWidth, y + 15f, paint)
+
 
             y += descripcionLayout.height.toFloat() + 20f
             total += data.Total_iva!!
@@ -1492,26 +1546,20 @@ class Detallepedido : AppCompatActivity() {
         y+= 20f
         paint.textSize = 12f
         canvas.drawText("SUBTOTAL:", 50f, y, paint)
-        val subTotalText = paint.measureText("${inforPedido!!.Suma}")
-        canvas.drawText("$ ${inforPedido.Suma}", canvas.width - subTotalText - 50f, y, paint)
+        val subTotalText = paint.measureText("${infoPedido.Suma}")
+        canvas.drawText("$ ${infoPedido.Suma}", canvas.width - subTotalText - 50f, y, paint)
 
         y+= 20f
         paint.textSize = 12f
         canvas.drawText("IVA:", 50f, y, paint)
-        val ivaText = paint.measureText("${inforPedido.Iva}")
-        canvas.drawText("$ ${inforPedido.Iva}", canvas.width - ivaText - 50f, y, paint)
+        val ivaText = paint.measureText("${infoPedido.Iva}")
+        canvas.drawText("$ ${infoPedido.Iva}", canvas.width - ivaText - 50f, y, paint)
 
         y+= 20f
         paint.textSize = 12f
         canvas.drawText("IVA/RET:", 50f, y, paint)
-        val perciText = paint.measureText("{${inforPedido.Iva_Percibido}}")
-        canvas.drawText("$ ${inforPedido.Iva_Percibido}", canvas.width - perciText - 50f, y, paint)
-
-        /*if((total/1.13f) > 100f){
-            if(inforPedido.Iva_Percibido!! > 0){
-                total -= inforPedido.Iva_Percibido!!
-            }
-        }*/
+        val perciText = paint.measureText("{${infoPedido.Iva_Percibido}}")
+        canvas.drawText("$ ${infoPedido.Iva_Percibido}", canvas.width - perciText - 50f, y, paint)
 
         y += 20f
         paint.textSize = 12f // Restaurar el tamaño de letra predeterminado
@@ -1528,7 +1576,7 @@ class Detallepedido : AppCompatActivity() {
     //FUNCION PARA DIBUJAR EL TIKET
     private fun crearTicketNormal(canvas: Canvas) {
 
-        val inforPedido = pedidosController.obtenerInformacionPedido(idpedido, this@Detallepedido)
+        val infoPedido = pedidosController.obtenerInformacionPedido(idpedido, this@Detallepedido)
 
         // Tamaños de letra específicos para cada columna
         val textSizeCantidad = 10f
@@ -1605,30 +1653,35 @@ class Detallepedido : AppCompatActivity() {
         paint.isFakeBoldText = false
         canvas.drawLine(50f, y, canvas.width - 50f, y, paint)
 
+        // Draw divider line
+        y+=20
+        paint.isFakeBoldText = false
+        canvas.drawLine(50f, y, canvas.width - 50f, y, paint)
+
         // Draw total
         y+= 20f
         paint.textSize = 12f
         canvas.drawText("SUBTOTAL:", 50f, y, paint)
-        val subTotalText = paint.measureText("${inforPedido!!.Suma}")
-        canvas.drawText("$ ${inforPedido.Suma}", canvas.width - subTotalText - 50f, y, paint)
+        val subTotalText = paint.measureText("${infoPedido!!.Suma}")
+        canvas.drawText("$ ${infoPedido.Suma}", canvas.width - subTotalText - 50f, y, paint)
 
         y+= 20f
         paint.textSize = 12f
         canvas.drawText("IVA:", 50f, y, paint)
-        val ivaText = paint.measureText("${inforPedido.Iva}")
-        canvas.drawText("$ ${inforPedido.Iva}", canvas.width - ivaText - 50f, y, paint)
+        val ivaText = paint.measureText("${infoPedido.Iva}")
+        canvas.drawText("$ ${infoPedido.Iva}", canvas.width - ivaText - 50f, y, paint)
 
         y+= 20f
         paint.textSize = 12f
-        canvas.drawText("IVA/PER:", 50f, y, paint)
-        val perciText = paint.measureText("{${inforPedido.Iva_Percibido}}")
-        canvas.drawText("$ ${inforPedido.Iva_Percibido}", canvas.width - perciText - 50f, y, paint)
+        canvas.drawText("IVA/RET:", 50f, y, paint)
+        val perciText = paint.measureText("{${infoPedido.Iva_Percibido}}")
+        canvas.drawText("$ ${infoPedido.Iva_Percibido}", canvas.width - perciText - 50f, y, paint)
 
         y += 20f
         paint.textSize = 12f // Restaurar el tamaño de letra predeterminado
         canvas.drawText("TOTAL:", 50f, y, paint)
         val totalTextWidth = paint.measureText("$total")
-        canvas.drawText("$ $total", canvas.width - totalTextWidth - 50f, y, paint)
+        canvas.drawText("$ " + binding.txttotal.text.toString(), canvas.width - totalTextWidth - 50f, y, paint)
 
         // Draw divider line after the table
         canvas.drawLine(50f, y + 20f, canvas.width - 50f, y + 20f, paint)
@@ -1643,7 +1696,7 @@ class Detallepedido : AppCompatActivity() {
             textSize = 12f
         }
 
-        var ticketHeight = 455f // Altura del título y la división inicialmente
+        var ticketHeight = 740f // Altura del título y la división inicialmente
 
         // Altura de cada fila de datos
         val lista = pedidosController.obtenerDetallePedido(idpedido, this@Detallepedido)

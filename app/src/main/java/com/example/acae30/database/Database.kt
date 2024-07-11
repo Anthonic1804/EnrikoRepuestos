@@ -27,6 +27,7 @@ class Database(context: Context) : SQLiteOpenHelper(
         db?.execSQL(tbl.virtualInventario()) //TABLA FTS4 VIRTUAL INVENTARIO
         db?.execSQL(tbl.hojaCarga())//TBL HOJA DE CARGA MAESTRO
         db?.execSQL(tbl.hojaCargaDetalle())//TBL HOJA DE CARGA DETALLE
+        db?.execSQL(tbl.hojaDetalleRecargas())
         db?.execSQL(tbl.pedidos())
         db?.execSQL(tbl.cuentas())
         db?.execSQL(tbl.visitas())

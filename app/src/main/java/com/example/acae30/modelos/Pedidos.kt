@@ -24,5 +24,6 @@ data class Pedidos(
     var dteSelloRecibido: String?,
     var dteNumeroControl: String?,
     var Tipo_documento: String?,
-    var Terminos: String?
+    var Terminos: String?,
+    var Nombre_sucursal: String?
 )

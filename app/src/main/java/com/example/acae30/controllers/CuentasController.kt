@@ -47,7 +47,8 @@ class CuentasController {
                         consulta.getString(24),
                         consulta.getFloat(25),
                         consulta.getInt(27),
-                        consulta.getString(28)
+                        consulta.getString(28),
+                        ""
                     )
                     lista.add(listado)
 
@@ -107,7 +108,8 @@ class CuentasController {
                         consulta.getString(24),
                         consulta.getFloat(25),
                         consulta.getInt(26),
-                        consulta.getString(28)
+                        consulta.getString(28),
+                        ""
                     )
                     lista.add(listado)
 

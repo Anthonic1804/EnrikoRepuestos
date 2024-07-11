@@ -9,6 +9,7 @@ import com.example.acae30.Funciones
 import com.example.acae30.modelos.Inventario
 import com.example.acae30.modelos.InventarioPrecios
 import com.example.acae30.modelos.JSONmodels.HojaCargaJSON
+import com.example.acae30.modelos.JSONmodels.HojaRecargasJSON
 import com.google.gson.Gson
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -73,7 +74,8 @@ class InventarioController {
                         cursor.getFloat(30),
                         cursor.getDouble(31),
                         cursor.getInt(32),
-                        cursor.getFloat(33)
+                        cursor.getFloat(33),
+                        cursor.getString(34)
                     )
                 }else{
                     datos = Inventario(
@@ -110,7 +112,8 @@ class InventarioController {
                         cursor.getFloat(30),
                         cursor.getDouble(31),
                         cursor.getInt(32),
-                        cursor.getFloat(33)
+                        cursor.getFloat(33),
+                        cursor.getString(34)
                     )
                 }
             }
@@ -235,7 +238,8 @@ class InventarioController {
                         cursor.getFloat(30),
                         cursor.getDouble(31),
                         cursor.getInt(32),
-                        cursor.getFloat(33)
+                        cursor.getFloat(33),
+                        cursor.getString(34)
                     )
                     lista.add(arreglo)
                 } while (cursor.moveToNext())
@@ -331,6 +335,7 @@ class InventarioController {
                 val data = ContentValues()
                 data.put("Id", dato.getInt("id"))
                 data.put("Codigo", funciones.validateJsonIsnullString(dato, "codigo"))
+                data.put("codigo_de_barra", funciones.validateJsonIsnullString(dato, "codigo_de_barra"))
                 data.put("Tipo", funciones.validateJsonIsnullString(dato, "tipo"))
                 data.put("Id_linea", funciones.validateJsonIsNullInt(dato, "id_linea"))
                 data.put("Linea", funciones.validateJsonIsnullString(dato, "linea"))
@@ -546,6 +551,7 @@ class InventarioController {
             bd.execSQL("DELETE FROM Inventario")
             bd.execSQL("DELETE FROM hoja_carga")
             bd.execSQL("DELETE FROM hoja_carga_detalle")
+            bd.execSQL("DELETE FROM hoja_detalle_recargas")
         }catch (e: Exception){
             throw Exception("ERROR LA ELIMINAR EL INVENTARIO -> " + e.message)
         }finally {
@@ -632,6 +638,8 @@ class InventarioController {
             bd.execSQL("UPDATE inventario SET Existencia=(Existencia + $cantidad) WHERE id=$id")
         }catch (e:Exception){
             throw Exception("ERROR AL ACTULIZAR LA EXISTENCIA DEL INVENTARIO  -> " + e.message)
+        }finally {
+            bd.close()
         }
     }
 
@@ -715,7 +723,7 @@ class InventarioController {
         }
     }
 
-    fun actualizarInventarioDatabase(json: JSONArray, context: Context, view:View) {
+    private fun actualizarInventarioDatabase(json: JSONArray, context: Context, view:View) {
         val bd = funciones.getDataBase(context).writableDatabase
 
         try {
@@ -737,6 +745,152 @@ class InventarioController {
         } finally {
             bd!!.endTransaction()
             bd.close()
+        }
+    }
+
+    //FUNCION PARA OBTENER DATOS EN LA TABLA DE REACARGAS DE LA HOJA DE CARGA
+    suspend fun obtenerHojaRecargas(context: Context, idHojaCarga:Int, view:View) {
+        preferences = context.getSharedPreferences(instancia, Context.MODE_PRIVATE)
+        val url = funciones.getServidor(preferences.getString("ip", ""), preferences.getInt("puerto", 0).toString())
+
+        try {
+            val datos = HojaRecargasJSON(
+                idHojaCarga
+            )
+            val objecto =
+                Gson().toJson(datos)
+            println(objecto)
+            val ruta: String = url + "inventario/hojarecarga"
+            val url = URL(ruta)
+            with(url.openConnection() as HttpURLConnection) {
+                try {
+                    connectTimeout = 20000
+                    setRequestProperty(
+                        "Content-Type",
+                        "application/json;charset=utf-8"
+                    )
+                    requestMethod = "POST"
+                    val or = OutputStreamWriter(outputStream, StandardCharsets.UTF_8)
+                    or.write(objecto) //SE ESCRIBE EL OBJ JSON
+                    or.flush() //SE ENVIA EL OBJ JSON
+                    when (responseCode) {
+                        200 -> {
+                            BufferedReader(InputStreamReader(inputStream) as Reader?).use {
+                                try {
+                                    val respuesta = StringBuffer()
+                                    var inpuline = it.readLine()
+                                    while (inpuline != null) {
+                                        respuesta.append(inpuline)
+                                        inpuline = it.readLine()
+                                    }
+                                    it.close()
+                                    val res = JSONArray(respuesta.toString())
+                                    if (res.length() > 0) {
+                                        println(res)
+                                        //INSERTANDO LAS RECARGAS ENCONTRADAS
+                                        insertarHojaRecargas(res, context, view)
+                                    } else {
+                                        //println("ERROR: ERROR NO SE ENCONTRARON DATOS PARA ALMACENAR 222222")
+                                        withContext(Dispatchers.Main){
+                                            Toast.makeText(context,"ERROR: NO SE ENCONTRARON RECARGAS PARA SU HOJA", Toast.LENGTH_SHORT).show()
+                                        }
+                                    }
+                                } catch (e: Exception) {
+                                    throw Exception(e.message)
+                                }
+                            }
+                        }
+                        400 -> {
+                            println("ERROR: ERROR AL CARGAR EL INVENTARIO POR HOJA DE CARGA")
+                        }
+
+                        404 -> {
+                            withContext(Dispatchers.Main){
+                                Toast.makeText(context,"ERROR: NO SE ENCONTRARON RECARGAS PARA SU HOJA", Toast.LENGTH_SHORT).show()
+                            }
+                        }
+
+                        else -> {
+                            println("ERROR: NO SE LOGRO CONECTAR CON EL SERVIDOR")
+                        }
+                    }
+                } catch (e: Exception) {
+                    throw Exception("ERROR: " + e.message)
+                }
+            }
+        } catch (e: Exception) {
+            throw Exception("ERROR EN LA CONEXION CON EL SERVIDOR" + e.message)
+        }
+    }
+
+    //INSERTANDO EN TBL RECARGAS
+    private suspend fun insertarHojaRecargas(json: JSONArray, context: Context, view:View){
+        val bd = funciones.getDataBase(context).writableDatabase
+        preferences = context.getSharedPreferences(instancia, Context.MODE_PRIVATE)
+        var hojaRecargada = 0
+
+        try {
+
+            for (i in 0 until json.length()) {
+                val dato = json.getJSONObject(i)
+                val id = dato.getInt("id")
+                val id_hoja = dato.getInt("id_hoja")
+                val id_producto = dato.getInt("id_producto")
+                val codigo = funciones.validateJsonIsnullString(dato, "codigo_producto")
+                val cantidad = funciones.validateJsonIsNullFloat(dato, "salida")
+
+                try {
+                    val cursor = bd.rawQuery("SELECT * FROM hoja_detalle_recargas WHERE id=$id AND recargado=1", null)
+                    if(cursor.count == 0){
+
+                        //INSERTANDO RECARGA
+                        bd.execSQL("INSERT INTO hoja_detalle_recargas(id, id_hoja, id_producto, codigo_producto, cantidad) VALUES(" +
+                                "$id, $id_hoja, $id_producto, '$codigo', $cantidad)")
+
+                        //ACTUALIZANDO EXISTENCIAS
+                        CoroutineScope(Dispatchers.IO).launch {
+                            actualizarExistenciasInventario(context, cantidad, id_producto)
+                        }
+
+                        //ACTUALIZANDO REGISTRO YA CARGADO
+                        CoroutineScope(Dispatchers.IO).launch {
+                            actualizarRegistrodeRecargas(context, id)
+                        }
+
+                        hojaRecargada = 1
+                    }
+                    cursor.close()
+                }catch (e:Exception){
+                    throw Exception("Error al realizar la busqueda en las recargas")
+                }
+
+            }
+
+            if(hojaRecargada == 1){
+                withContext(Dispatchers.Main){
+                    Toast.makeText(context,"SU HOJA HA SIDO RECARGADA CORRECTAMENTE", Toast.LENGTH_SHORT).show()
+                }
+            }else{
+                withContext(Dispatchers.Main){
+                    Toast.makeText(context,"NO HAY RECARGAS PARA SU HOJA", Toast.LENGTH_SHORT).show()
+                }
+            }
+        }catch (e:Exception){
+            throw Exception("ERROR AL INSERTAR HOJA DE CARGA DETALLE -> " + e.message)
+        }finally {
+            bd.close()
+        }
+    }
+
+    //FUNCION PARA ACTUALIZAR REGISTRO DE RECARGAS
+    private fun actualizarRegistrodeRecargas(context: Context, id:Int){
+        val db = funciones.getDataBase(context).writableDatabase
+        try {
+            db.execSQL("UPDATE hoja_detalle_recargas SET recargado=1 WHERE id=$id")
+        }catch (e:Exception){
+            throw Exception("Error al actualizar el registro de recargas -> " + e.message)
+        }finally {
+            db.close()
         }
     }
 }

@@ -28,6 +28,7 @@ data class Cliente (
     var Ultima_venta:String?,
     var Aporte_mensual:Float?,
     var Firmar_pagare_app:Int?,
-    var Persona_juridica:String?
+    var Persona_juridica:String?,
+    var dteGiro: String?
 
 )

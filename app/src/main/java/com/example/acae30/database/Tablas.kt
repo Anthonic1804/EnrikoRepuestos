@@ -32,7 +32,8 @@ class Tablas {
                 "Aporte_mensual NUMERIC(20,2)  NULL," +
                 "Fecha_inventario TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL," +
                 "Firmar_pagare_app INTEGER NOT NULL DEFAULT 0," +
-                "Persona_juridica VARCHAR(10) NOT NULL DEFAULT 'N'" +
+                "Persona_juridica VARCHAR(10) NOT NULL DEFAULT 'N'," +
+                "dteGiro VARCHAR(100) NOT NULL DEFAULT ''" +
                 ");"
     } //tabla cliente
 
@@ -99,7 +100,8 @@ class Tablas {
                 "Desc_automatico NUMERIC(20,6)," +
                 "Bonificado NUMERIC(20,6)," +
                 "Id_rubro INTEGER," +
-                "Existencia_u NUMERIC(20,6))"
+                "Existencia_u NUMERIC(20,6)," +
+                "codigo_de_barra VARCHAR(25) NOT NULL DEFAULT '')"
     } //tabla inventario
 
     fun inventarioPrecios(): String {
@@ -156,6 +158,18 @@ class Tablas {
                 "Codigo_inventario VARCHAR(25) NOT NULL," +
                 "Cantidad NUMERIC(20,6) NOT NULL DEFAULT O)"
     }
+
+    //CREANDO TABLA HOJA DETALLE CARGAS
+    fun hojaDetalleRecargas():String{
+        return "CREATE TABLE hoja_detalle_recargas(" +
+                "id INTEGER NOT NULL DEFAULT 0," +
+                "id_hoja INTEGER NOT NULL DEFAULT 0," +
+                "id_producto INTEGET NOT NULL DEFAULT 0," +
+                "codigo_producto VARCHAR(25) NOT NULL," +
+                "cantidad NUMERIC(20,6) NOT NULL DEFAULT 0," +
+                "recargado INTEGER NOT NULL DEFAULT 0)"
+    }
+
 
     //CREANDO LA TABLA EMPLEADOS
     fun empleados(): String {
@@ -223,11 +237,12 @@ class Tablas {
                 "formaPago VARCHAR(25) NULL DEFAULT ''," +
                 "numero_orden VARCHAR(25) DEFAULT '0'," +
                 "pedido_dte INTEGER DEFAULT 0," +
-                "pedido_dte_error INITEGER DEFAULT 0," +
+                "pedido_dte_error INTEGER DEFAULT 0," +
                 "dteAmbiente VARCHAR(2) NULL DEFAULT ''," +
                 "dteCodigoGeneracion VARCHAR(50) NULL DEFAULT ''," +
                 "dteSelloRecibido VARCHAR(50) NULL DEFAULT ''," +
-                "dteNumeroControl VARCHAR(50) NULL DEFAULT '');"
+                "dteNumeroControl VARCHAR(50) NULL DEFAULT ''," +
+                "idDocTransmitido INTEGER NOT NULL DEFAULT 0);"
     }
 
     fun detallePedidos(): String {

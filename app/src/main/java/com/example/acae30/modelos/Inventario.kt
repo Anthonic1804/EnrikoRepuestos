@@ -34,5 +34,6 @@ data class Inventario (
     var Desc_autotamtico:Float?,
     var Bonificado: Double?,
     var Id_rubro:Int?,
-    var Existencia_u:Float
+    var Existencia_u:Float,
+    var codigo_de_barra: String
 )
