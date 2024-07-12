@@ -1442,19 +1442,22 @@ class Detallepedido : AppCompatActivity() {
         paint.isFakeBoldText = false
         canvas.drawText("${infoPedido.Terminos}", 50f, 545f, paint)
 
-
-
         //ESPACIO PARA EL QR
+        //ENLACE CON HACIENDA
         val qrText = "https://webapp.dtes.mh.gob.sv/consultaPublica?ambiente=${infoPedido.dteAmbiente}&codGen=${infoPedido.dteCodigoGeneracion}&fechaEmi=$fecha"
 
-        // Tamaño deseado del QR
-        val qrSize = 150 // Tamaño del lado del QR (cuadrado)
+        //ENLACE PARA ESCARRSA
+        val qrEscarrsa = "https://dte-sismantec.com/DTEEscarrsa/ventas_view.php?editid1=${infoPedido.dteCodigoGeneracion}"
 
+        paint.isFakeBoldText = true
+        canvas.drawText("-- VERIFICACION CON HACIENDA --", 50f, 565f, paint)
+
+        val qrSize = 150 // Tamaño del lado del QR (cuadrado)
         // Posición donde se dibujará el QR en el Canvas
         val qrX = 80f // Posición X
-        val qrY = 560f // Posición Y
+        val qrY = 575f // Posición Y
 
-        // Generar el código QR como un Bitmap
+        // GENERAR EL QR PARA HACIENDA
         val writer = QRCodeWriter()
         try{
             val bitMatrix = writer.encode(qrText, BarcodeFormat.QR_CODE, 100,100)
@@ -1472,13 +1475,42 @@ class Detallepedido : AppCompatActivity() {
         }catch (e:WriterException){
             e.printStackTrace()
         }
+
+
+        paint.isFakeBoldText = true
+        canvas.drawText("-- VERIFICACION CON ESCARRSA --", 50f, 745f, paint)
+
+        val qrSize2 = 150 // Tamaño del lado del QR (cuadrado)
+        // Posición donde se dibujará el QR en el Canvas
+        val qrX2 = 80f // Posición X
+        val qrY2 = 755f // Posición Y
+
+        // GENERAR EL QR PARA ESCARRSA
+        val writer2 = QRCodeWriter()
+        try{
+            val bitMatrix = writer2.encode(qrEscarrsa, BarcodeFormat.QR_CODE, 100,100)
+            val width = bitMatrix.width
+            val height = bitMatrix.height
+            val qrBitmap = Bitmap.createBitmap(width, height, Bitmap.Config.RGB_565)
+            for(x in 0 until width){
+                for(y in 0 until height){
+                    qrBitmap.setPixel(x, y, if (bitMatrix[x,y]) Color.BLACK else Color.WHITE)
+                }
+            }
+
+            // Dibujar el QR en el Canvas en la posición especificada
+            canvas.drawBitmap(qrBitmap, null, RectF(qrX2, qrY2, qrX2 + qrSize2, qrY2 + qrSize2), null)
+        }catch (e:WriterException){
+            e.printStackTrace()
+        }
+
         //ESPACIO PARA EL QR
         paint.isFakeBoldText = true
-        canvas.drawLine(50f, 725f, canvas.width - 50f, 725f, paint)
+        canvas.drawLine(50f, 905f, canvas.width - 50f, 905f, paint)
 
         // Draw column headers
         val columnWidths = floatArrayOf(20f, 100f, 60f) // Ancho fijo para cada columna
-        val startY = 740f
+        val startY = 915f
         var y = startY
         val columnX = floatArrayOf(
             50f,
@@ -1696,7 +1728,7 @@ class Detallepedido : AppCompatActivity() {
             textSize = 12f
         }
 
-        var ticketHeight = 740f // Altura del título y la división inicialmente
+        var ticketHeight = 900f // Altura del título y la división inicialmente
 
         // Altura de cada fila de datos
         val lista = pedidosController.obtenerDetallePedido(idpedido, this@Detallepedido)
