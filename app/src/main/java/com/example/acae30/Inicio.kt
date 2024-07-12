@@ -193,13 +193,13 @@ class Inicio : AppCompatActivity(), NavigationView.OnNavigationItemSelectedListe
         dialogo.setContentView(R.layout.alert_cerrar_sesion_usuario)
         dialogo.findViewById<Button>(R.id.btncerrar).setOnClickListener {
             //FUNCION PARA ALIMINAR LA INFORMACION DE TABLAS MAESTRAS
-            CoroutineScope(Dispatchers.IO).launch {
+            /*CoroutineScope(Dispatchers.IO).launch {
                 funciones!!.eliminarInformacion(this@Inicio)
             }
 
             val editor = preferencias!!.edit()
             editor.putString("fechaInventario", "NULL")
-            editor.apply()
+            editor.apply()*/
 
             updateSesionServer()
             cerrarSesion()
