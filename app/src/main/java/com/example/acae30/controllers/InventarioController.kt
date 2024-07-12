@@ -473,7 +473,7 @@ class InventarioController {
                                     } else {
                                         //println("ERROR: ERROR NO SE ENCONTRARON DATOS PARA ALMACENAR 222222")
                                         withContext(Dispatchers.Main){
-                                            Toast.makeText(context,"ERROR: NO SE ENCONTRO LA HOJA DE CARGA", Toast.LENGTH_SHORT).show()
+                                            funciones.mensaje(context, "ERROR: NO SE ENCONTRO LA HOJA DE CARGA")
                                         }
                                     }
                                 } catch (e: Exception) {
@@ -487,7 +487,7 @@ class InventarioController {
 
                         404 -> {
                             withContext(Dispatchers.Main){
-                                Toast.makeText(context,"ERROR: NO SE ENCONTRO LA HOJA DE CARGA", Toast.LENGTH_SHORT).show()
+                                funciones.mensaje(context, "ERROR: NO SE ENCONTRO LA HOJA DE CARGA")
                             }
                         }
 
@@ -588,7 +588,7 @@ class InventarioController {
     }
 
     //FUNCION PARA INSERTAR DETALLE DE HOJA DE CARGA
-    private fun insertarDetalleHojaCarga(json: JSONArray, context: Context, view:View, numeroHojaCarga: Int){
+    private suspend fun insertarDetalleHojaCarga(json: JSONArray, context: Context, view:View, numeroHojaCarga: Int){
         val bd = funciones.getDataBase(context).writableDatabase
         preferences = context.getSharedPreferences(instancia, Context.MODE_PRIVATE)
 
@@ -626,7 +626,10 @@ class InventarioController {
             editor.putInt("hojaCarga", numeroHojaCarga.toInt())
             editor.apply()
 
-            funciones.mostrarMensaje("INVENTARIO CARGADO CORRECTAMENTE", context, view)
+            //funciones.mostrarMensaje("INVENTARIO CARGADO CORRECTAMENTE", context, view)
+            withContext(Dispatchers.Main){
+                funciones.mensaje(context, "INVENTARIO CARGADO CORRECTAMENTE")
+            }
         }
 
     }
@@ -792,7 +795,8 @@ class InventarioController {
                                     } else {
                                         //println("ERROR: ERROR NO SE ENCONTRARON DATOS PARA ALMACENAR 222222")
                                         withContext(Dispatchers.Main){
-                                            Toast.makeText(context,"ERROR: NO SE ENCONTRARON RECARGAS PARA SU HOJA", Toast.LENGTH_SHORT).show()
+                                            funciones.mensaje(context, "NO SE ENCONTRARON RECARGAS PARA SU HOJA")
+                                            //Toast.makeText(context,"ERROR: NO SE ENCONTRARON RECARGAS PARA SU HOJA", Toast.LENGTH_SHORT).show()
                                         }
                                     }
                                 } catch (e: Exception) {
@@ -806,7 +810,8 @@ class InventarioController {
 
                         404 -> {
                             withContext(Dispatchers.Main){
-                                Toast.makeText(context,"ERROR: NO SE ENCONTRARON RECARGAS PARA SU HOJA", Toast.LENGTH_SHORT).show()
+                                funciones.mensaje(context, "NO SE ENCONTRARON RECARGAS PARA SU HOJA")
+                                //Toast.makeText(context,"ERROR: NO SE ENCONTRARON RECARGAS PARA SU HOJA", Toast.LENGTH_SHORT).show()
                             }
                         }
 
@@ -868,11 +873,11 @@ class InventarioController {
 
             if(hojaRecargada == 1){
                 withContext(Dispatchers.Main){
-                    Toast.makeText(context,"SU HOJA HA SIDO RECARGADA CORRECTAMENTE", Toast.LENGTH_SHORT).show()
+                    funciones.mensaje(context, "SU HOJA HA SIDO RECARGADA CORRECTAMENTE")
                 }
             }else{
                 withContext(Dispatchers.Main){
-                    Toast.makeText(context,"NO HAY RECARGAS PARA SU HOJA", Toast.LENGTH_SHORT).show()
+                    funciones.mensaje(context,"NO HAY RECARGAS PARA SU HOJA")
                 }
             }
         }catch (e:Exception){

@@ -171,6 +171,7 @@ class carga_datos : AppCompatActivity() {
 
     }
 
+    //FUNCION PARA MOSTRAR EL DIALOG DE RECARGA DE HOJA
     private fun mensajeRecargarHoja() {
         val updateDialog = Dialog(this, R.style.Theme_Dialog)
         updateDialog.setCancelable(false)

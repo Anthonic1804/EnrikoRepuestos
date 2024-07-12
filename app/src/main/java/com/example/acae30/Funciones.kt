@@ -9,7 +9,9 @@ import android.net.ConnectivityManager
 import android.net.NetworkCapabilities
 import android.view.View
 import android.view.ViewAnimationUtils
+import android.widget.Toast
 import androidx.annotation.RequiresPermission
+import androidx.appcompat.app.AlertDialog
 import androidx.core.content.ContextCompat
 import com.example.acae30.database.Database
 import com.google.android.material.snackbar.Snackbar
@@ -220,6 +222,21 @@ class Funciones {
         val editor = preferences.edit()
         editor.remove("hojaCarga")
         editor.apply()
+    }
+
+    //FUNCION DE MENSAJES DE ERROR Y CONFIRMACION
+    fun mensaje(context: Context, mensaje: String){
+        val dialog = AlertDialog.Builder(context)
+            .setTitle("INFORMACION")
+            .setMessage(mensaje)
+            .setPositiveButton("ACEPTAR") { view, _ ->
+                view.dismiss()
+            }
+            .setCancelable(false)
+            .setIcon(R.drawable.ic_information)
+            .create()
+
+        dialog.show()
     }
 
 }
