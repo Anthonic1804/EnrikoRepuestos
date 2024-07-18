@@ -33,7 +33,15 @@ class Tablas {
                 "Fecha_inventario TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL," +
                 "Firmar_pagare_app INTEGER NOT NULL DEFAULT 0," +
                 "Persona_juridica VARCHAR(10) NOT NULL DEFAULT 'N'," +
-                "dteGiro VARCHAR(100) NOT NULL DEFAULT ''" +
+                "dteGiro VARCHAR(100) NOT NULL DEFAULT ''," +
+                "Ruta VARCHAR(50) NOT NULL DEFAULT ''," +
+                "DTEDireccion VARCHAR(200) NOT NULL DEFAULT ''," +
+                "DTECodDepto VARCHAR(10) NOT NULL DEFAULT ''," +
+                "DTECodMunicipio VARCHAR(10) NOT NULL DEFAULT ''," +
+                "DTECodPais VARCHAR(10) NOT NULL DEFAULT ''," +
+                "DTEPais VARCHAR(50) NOT NULL DEFAULT ''," +
+                "DTECorreo VARCHAR(100) NOT NULL DEFAULT ''," +
+                "DTETelefono VARCHAR(25) NOT NULL DEFAULT ''" +
                 ");"
     } //tabla cliente
 
@@ -51,7 +59,15 @@ class Tablas {
                 "telefono_1 VARCHAR(15) NULL," +
                 "telefono_2 VARCHAR(15) NULL," +
                 "correo_sucursal VARCHAR(100) NULL," +
-                "contacto_sucursal VARCHAR(50))"
+                "contacto_sucursal VARCHAR(50)," +
+                "Id_ruta INTEGER NOT NULL DEFAULT 0," +
+                "Ruta VARCHAR(50) NOT NULL DEFAULT ''," +
+                "DTECodDepto VARCHAR(10) NOT NULL DEFAULT ''," +
+                "DTECodMunicipio VARCHAR(10) NOT NULL DEFAULT ''," +
+                "DTECodPais VARCHAR(10) NOT NULL DEFAULT ''," +
+                "DTEPais VARCHAR(50) NOT NULL DEFAULT ''," +
+                "DTECorreo VARCHAR(100) NOT NULL DEFAULT ''" +
+                ");"
     }
 
     //CREANDO TABLA PARA PRECIO PESONALIZADOS POR CLIENTE
@@ -242,7 +258,17 @@ class Tablas {
                 "dteCodigoGeneracion VARCHAR(50) NULL DEFAULT ''," +
                 "dteSelloRecibido VARCHAR(50) NULL DEFAULT ''," +
                 "dteNumeroControl VARCHAR(50) NULL DEFAULT ''," +
-                "idDocTransmitido INTEGER NOT NULL DEFAULT 0);"
+                "idDocTransmitido INTEGER NOT NULL DEFAULT 0," +
+                "Id_ruta INTEGER NOT NULL DEFAULT 0," +
+                "Ruta VARCHAR(50) NOT NULL DEFAULT ''," +
+                "DTEDireccion VARCHAR(200) NOT NULL DEFAULT ''," +
+                "DTECodDepto VARCHAR(10) NOT NULL DEFAULT ''," +
+                "DTECodMunicipio VARCHAR(10) NOT NULL DEFAULT ''," +
+                "DTECodPais VARCHAR(10) NOT NULL DEFAULT ''," +
+                "DTEPais VARCHAR(50) NOT NULL DEFAULT ''," +
+                "DTECorreo VARCHAR(100) NOT NULL DEFAULT ''," +
+                "DTETelefono VARCHAR(25) NOT NULL DEFAULT ''" +
+                ");"
     }
 
     fun detallePedidos(): String {
@@ -263,6 +289,7 @@ class Tablas {
                 "Precio_editado VARCHAR(10) DEFAULT '' NOT NULL," +
                 "Id_talla INTEGER NOT NULL DEFAULT 0," +
                 "Id_Inventario_Precios INTEGER NOT NULL DEFAULT 0," +
+                "Codigo_de_barra VARCHAR(50) NOT NULL DEFAULT ''," +
                 "FOREIGN KEY(Id_pedido) REFERENCES pedidos(Id_pedido)" +
                 ")"
     } //tabla detalle pedidos
@@ -289,7 +316,8 @@ class Tablas {
                     "detalle_pedidos.bonificado," +
                     "detalle_pedidos.descuento," +
                     "detalle_pedidos.precio_editado," +
-                    "detalle_pedidos.idunidad " +
+                    "detalle_pedidos.idunidad," +
+                    "detalle_pedidos.Codigo_de_barra " +
                 "FROM detalle_pedidos " +
                 "INNER JOIN inventario " +
                 "ON inventario.Id = detalle_pedidos.Id_producto;"

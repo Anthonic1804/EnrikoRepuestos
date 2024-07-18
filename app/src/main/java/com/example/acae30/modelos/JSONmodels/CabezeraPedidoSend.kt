@@ -35,5 +35,17 @@ data class CabezeraPedidoSend (
     var numCuentaDeposito : String?,
     var numDeposito : String?,
     var formaPago: String?,
+
+    //DATOS DTE Y RUTA
+    var idRuta: Int?,
+    var ruta : String?,
+    var dteDireccion : String?,
+    var dteCodDepto : String?,
+    var dteCodMunicipio : String?,
+    var dteCodPais : String?,
+    var dtePais : String?,
+    var dteCorreo : String?,
+    var dteTelefono : String?,
+
     var detalle:ArrayList<DetallePedido>?
 )

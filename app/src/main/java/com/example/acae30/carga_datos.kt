@@ -345,13 +345,21 @@ class carga_datos : AppCompatActivity() {
                 valor.put("Id_cliente", dato.getInt("id_cliente"))
                 valor.put("codigo_sucursal", funciones.validateJsonIsnullString(dato, "codigo_sucursal"))
                 valor.put("nombre_sucursal", funciones.validateJsonIsnullString(dato, "nombre_sucursal"))
-                valor.put("direccion_sucursal", funciones.validateJsonIsnullString(dato, "direccion"))
-                valor.put("municipio_sucursal", funciones.validateJsonIsnullString(dato, "municipio"))
-                valor.put("depto_sucursal", funciones.validateJsonIsnullString(dato, "departamento"))
-                valor.put("telefono_1", funciones.validateJsonIsnullString(dato, "telefono1"))
+                valor.put("direccion_sucursal", funciones.validateJsonIsnullString(dato, "dteDireccion"))//DATO DTE
+                valor.put("municipio_sucursal", funciones.validateJsonIsnullString(dato, "municipio"))//DATO DTE
+                valor.put("depto_sucursal", funciones.validateJsonIsnullString(dato, "departamento"))//DATO DTE
+                valor.put("telefono_1", funciones.validateJsonIsnullString(dato, "dteTelefono"))//DATO DTE
                 valor.put("telefono_2", funciones.validateJsonIsnullString(dato, "telefono2"))
                 valor.put("correo_sucursal", funciones.validateJsonIsnullString(dato, "correo"))
                 valor.put("contacto_sucursal", funciones.validateJsonIsnullString(dato, "contacto"))
+
+                //ARGEGANDO DATOS PENDIENTE Y DTE DE LA SUCURSAL
+                valor.put("Id_ruta", dato.getInt("id_ruta"))
+                valor.put("Ruta", funciones.validateJsonIsnullString(dato, "ruta"))
+                valor.put("DTECodDepto", funciones.validateJsonIsnullString(dato, "dteCodDepto"))
+                valor.put("DTECodMunicipio", funciones.validateJsonIsnullString(dato, "dteCodMunicipio"))
+                valor.put("DTECodPais", funciones.validateJsonIsnullString(dato, "dteCodPais"))
+                valor.put("DTEPais", funciones.validateJsonIsnullString(dato, "dtePais"))
 
                 bd.insert("cliente_sucursal", null, valor)
                 contador += talla
@@ -749,6 +757,16 @@ class carga_datos : AppCompatActivity() {
 
                 //VALIDANDO EL DTEGIRO ALMACENADO EN EL SERVIDOR
                 data.put("dteGiro", funciones.validate(dato.getString("dteGiro")))
+                data.put("Ruta", funciones.validate(dato.getString("ruta")))
+
+                data.put("Ruta", funciones.validate(dato.getString("ruta")))
+                data.put("DTECodDepto", funciones.validate(dato.getString("dteCodDepto")))
+                data.put("DTECodMunicipio", funciones.validate(dato.getString("dteCodMunicipio")))
+                data.put("DTECodPais", funciones.validate(dato.getString("dteCodPais")))
+                data.put("DTEDireccion", funciones.validate(dato.getString("dteDireccion")))
+                data.put("DTEPais", funciones.validate(dato.getString("dtePais")))
+                data.put("DTETelefono", funciones.validate(dato.getString("dteTelefono")))
+                data.put("DTECorreo", funciones.validate(dato.getString("dteCorreo")))
 
                 bd.insert("clientes", null, data)
                 contador += talla

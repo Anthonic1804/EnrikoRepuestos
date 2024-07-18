@@ -293,6 +293,7 @@ class Pedido : AppCompatActivity() {
                         "",
                         "",
                         "",
+                        "",
                         ""
                     )
                     lista.add(pedido)
@@ -449,6 +450,15 @@ class Pedido : AppCompatActivity() {
                     pedido.getString(36),
                     pedido.getString(37),
                     pedido.getString(38),
+                    pedido.getInt(47),
+                    pedido.getString(48),
+                    pedido.getString(49),
+                    pedido.getString(50),
+                    pedido.getString(51),
+                    pedido.getString(52),
+                    pedido.getString(53),
+                    pedido.getString(54),
+                    pedido.getString(55),
                     null
 
                 )
@@ -480,7 +490,8 @@ class Pedido : AppCompatActivity() {
                             cdetalle.getInt(17),
                             cdetalle.getFloat(18),
                             cdetalle.getString(19),
-                            cdetalle.getInt(20)
+                            cdetalle.getInt(20),
+                            cdetalle.getString(21)
                         )
                         list.add(detalle)
                     } while (cdetalle.moveToNext())

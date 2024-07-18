@@ -21,5 +21,6 @@ data class DetallePedido(
     var Bonificado: Int?,
     var Descuento: Float?,
     var Precio_editado: String?,
-    var Idunidad: Int?
+    var Idunidad: Int?,
+    var Codigo_de_barra: String?
 )

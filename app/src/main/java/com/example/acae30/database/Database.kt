@@ -44,11 +44,14 @@ class Database(context: Context) : SQLiteOpenHelper(
     override fun onUpgrade(db: SQLiteDatabase?, oldVersion: Int, newVersion: Int) {
         //ESTO SE VERIFICARA CADA VEZ QUE SE ACTUALICE LA APP
         // SE DEBERA CAMBIAR ESTA INFORMACION
-        /*if(oldVersion < newVersion){
-            //db?.execSQL(tbl!!.Empleados()) //CREANDO LA TABLA EMPLEADOS
-            //db?.execSQL(tbl!!.Token()) //CREANDO LA TABLA TOKEN
-            //db?.execSQL(tbl!!.VentasTemp())
-            //db?.execSQL(tbl!!.VentasDetalleTemp())
-        }*/
+        if(oldVersion < newVersion){
+            //ACTUALIZADO TBL CLIENTE_SUCURSAL
+            /*db?.execSQL("ALTER TABLE cliente_sucursal ADD COLUMN Id_ruta INTEGER NOT NULL DEFAULT 0")
+            db?.execSQL("ALTER TABLE cliente_sucursal ADD COLUMN Ruta VARCHAR(50) NOT NULL DEFAULT ''")
+            db?.execSQL("ALTER TABLE cliente_sucursal ADD COLUMN DTECodDepto VARCHAR(10) NOT NULL DEFAULT ''")
+            db?.execSQL("ALTER TABLE cliente_sucursal ADD COLUMN DTECodMunicipio VARCHAR(10) NOT NULL DEFAULT ''")
+            db?.execSQL("ALTER TABLE cliente_sucursal ADD COLUMN DTECodPais VARCHAR(10) NOT NULL DEFAULT ''")
+            db?.execSQL("ALTER TABLE cliente_sucursal ADD COLUMN DTEPais VARCHAR(50) NOT NULL DEFAULT ''")*/
+        }
     }
 }

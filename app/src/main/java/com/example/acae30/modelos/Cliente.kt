@@ -29,6 +29,14 @@ data class Cliente (
     var Aporte_mensual:Float?,
     var Firmar_pagare_app:Int?,
     var Persona_juridica:String?,
-    var dteGiro: String?
+    var dteGiro: String?,
+    var Ruta: String?,
+    var DTEDireccion: String,
+    var DTECodDepto: String,
+    var DTECodMunicipio: String,
+    var DTECodPais: String,
+    var DTEPais: String,
+    var DTECorreo: String,
+    var DTETelefono: String
 
 )

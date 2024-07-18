@@ -689,6 +689,7 @@ class Producto_agregar : AppCompatActivity() {
             }
 
             detalle.put("Id_Inventario_Precios", idEscala)
+            detalle.put("Codigo_de_barra", datosProducto!!.codigo_de_barra)
 
             val idpedidodetalle = base.insert("detalle_pedidos", null, detalle)
 
@@ -767,7 +768,8 @@ class Producto_agregar : AppCompatActivity() {
                     cursor.getInt(17),
                     cursor.getFloat(18),
                     cursor.getString(19),
-                    cursor.getInt(20)
+                    cursor.getInt(20),
+                    cursor.getString(21)
                 )
 
                 cursor.close()

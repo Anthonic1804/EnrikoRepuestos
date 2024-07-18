@@ -45,7 +45,9 @@ import com.example.acae30.controllers.VisitaController
 import com.example.acae30.database.Database
 import com.example.acae30.databinding.ActivityDetallepedidoBinding
 import com.example.acae30.listas.PedidoDetalleAdapter
+import com.example.acae30.modelos.Cliente
 import com.example.acae30.modelos.DetallePedido
+import com.example.acae30.modelos.InformacionSucursal
 import com.example.acae30.modelos.JSONmodels.CabezeraPedidoSend
 import com.example.acae30.modelos.Sucursales
 import com.example.acae30.modelos.dataPedidos
@@ -86,6 +88,16 @@ class Detallepedido : AppCompatActivity() {
     private var idSucursal: Int? = null
     private var codigoSucursal: String? = null
     private var nombreSucursalPedido: String? = ""
+    private var Id_ruta: Int? = 0
+    private var Ruta: String? = ""
+    private var DTEDireccion: String? = ""
+    private var DTECodDepto: String? = ""
+    private var DTECodMunicipio: String? = ""
+    private var DTECodPais: String? = ""
+    private var DTEPais: String? = ""
+    private var DTECorreo: String? = ""
+    private var DTETelefono: String? = ""
+
     private var pedidoEnviado: Boolean = false
     private var getSucursalPosition: Int? = null
     private var tipoEnvio: Int? = null
@@ -133,6 +145,8 @@ class Detallepedido : AppCompatActivity() {
     private var FacturaExportacion = false
     private var precioConIVA = true
 
+    private lateinit var infoSucursal : InformacionSucursal
+    private lateinit var infoCliente : Cliente
 
     val fecha: String = LocalDate.now()
         .format(DateTimeFormatter.ofPattern("dd MMM yyyy"))
@@ -708,26 +722,63 @@ class Detallepedido : AppCompatActivity() {
         val db = db!!.writableDatabase
         var sucursal = nombreSucursal.replace("'", "''", false)
         try {
-            val dataSucursal = db.rawQuery("SELECT * FROM cliente_sucursal WHERE id_cliente=$idCliente and nombre_sucursal like '%$sucursal%'", null)
-            val listaSucursales = ArrayList<Sucursales>()
-            if(dataSucursal.count > 0){
-                dataSucursal.moveToFirst()
+            val cursor = db.rawQuery("SELECT Id, id_cliente, codigo_sucursal, nombre_sucursal, direccion_sucursal, " +
+                    "municipio_sucursal, depto_sucursal, telefono_1, correo_sucursal, " +
+                    "Id_ruta, Ruta, DTECodDepto, DTECodMunicipio, DTECodPais, DTEPais  FROM cliente_sucursal " +
+                    "WHERE id_cliente=$idCliente and nombre_sucursal like '%$sucursal%'", null)
+            //val cursor = db.rawQuery("SELECT * FROM cliente_sucursal WHERE id_cliente=$idCliente and nombre_sucursal like '%$sucursal%'", null)
+            val listaSucursales = ArrayList<InformacionSucursal>()
+            if(cursor.count > 0){
+                cursor.moveToFirst()
                 do{
-                    val data = Sucursales(
-                        dataSucursal.getString(0),
-                        dataSucursal.getString(2),
-                        dataSucursal.getString(3)
+                    val data = InformacionSucursal(
+                        cursor.getInt(0),
+                        cursor.getInt(1),
+                        cursor.getString(2),
+                        cursor.getString(3),
+                        cursor.getString(4),
+                        cursor.getString(5),
+                        cursor.getString(6),
+                        cursor.getString(7),
+                        cursor.getString(8),
+                        cursor.getInt(9),
+                        cursor.getString(10),
+                        cursor.getString(11),
+                        cursor.getString(12),
+                        cursor.getString(13),
+                        cursor.getString(14)
                     )
                     listaSucursales.add(data)
-                }while (dataSucursal.moveToNext())
+                }while (cursor.moveToNext())
             }
 
             for (data in listaSucursales) {
-                idSucursal = data.idSucursa.toInt()
+                idSucursal = data.id
                 codigoSucursal = data.codigoSucursal
+                Id_ruta = data.idRuta
+                Ruta = data.ruta
+                DTEDireccion = data.dteDireccion
+                DTECodDepto = data.dteCodDepto
+                DTECodMunicipio = data.dteCodMunicipio
+                DTECodPais = data.dteCodPais
+                DTEPais = data.dtePais
+                DTECorreo = data.dteCorreo
+                DTETelefono = data.dteTelefono
             }
-            db!!.execSQL("UPDATE pedidos set id_sucursal=$idSucursal, codigo_sucursal='$codigoSucursal', nombre_sucursal='$sucursal' WHERE id=$idpedidos")
-            dataSucursal.close()
+            db!!.execSQL("UPDATE pedidos set id_sucursal=$idSucursal, " +
+                    "codigo_sucursal='$codigoSucursal', " +
+                    "nombre_sucursal='$sucursal'," +
+                    "Id_ruta = $Id_ruta," +
+                    "Ruta = '$Ruta'," +
+                    "DTEDireccion = '$DTEDireccion'," +
+                    "DTECodDepto = '$DTECodDepto'," +
+                    "DTECodMunicipio = '$DTECodMunicipio'," +
+                    "DTECodPais = '$DTECodPais'," +
+                    "DTEPais = '$DTEPais'," +
+                    "DTECorreo = '$DTECorreo'," +
+                    "DTETelefono = '$DTETelefono' " +
+                    "WHERE id=$idpedidos")
+            cursor.close()
 
         }catch (e: Exception) {
             throw Exception(e.message)
@@ -989,6 +1040,15 @@ class Detallepedido : AppCompatActivity() {
                     pedido.getString(36),
                     pedido.getString(37),
                     pedido.getString(38),
+                    pedido.getInt(47),
+                    pedido.getString(48),
+                    pedido.getString(49),
+                    pedido.getString(50),
+                    pedido.getString(51),
+                    pedido.getString(52),
+                    pedido.getString(53),
+                    pedido.getString(54),
+                    pedido.getString(55),
                     null
                 )
                 pedido.close()
@@ -1019,7 +1079,8 @@ class Detallepedido : AppCompatActivity() {
                             cdetalle.getInt(17),
                             cdetalle.getFloat(18),
                             cdetalle.getString(19),
-                            cdetalle.getInt(20)
+                            cdetalle.getInt(20),
+                            cdetalle.getString(21)
                         )
                         list.add(detalle)
                     } while (cdetalle.moveToNext())
@@ -1042,7 +1103,7 @@ class Detallepedido : AppCompatActivity() {
             val objecto = convertToJson(pedido, idpedido) //convertimos a json el objecto pedido
             val ruta: String = "http://$ip:$puerto/pedido" //ruta para enviar el pedido
 
-            //println("JSON GENERADO: /n $objecto")
+            println("JSON GENERADO: /n $objecto")
             //val ruta="http://192.168.0.103:53272/pedido"
             val url = URL(ruta)
             with(url.openConnection() as HttpURLConnection) {
@@ -1221,15 +1282,29 @@ class Detallepedido : AppCompatActivity() {
         json.addProperty("Deposito_cuenta", pedido.numCuentaDeposito)
         json.addProperty("Deposito_numero", pedido.numDeposito)
 
+        //AGREGANDO LA INFORMACION DE DTE Y RUTA
+        json.addProperty("Id_ruta", pedido.idRuta)
+        json.addProperty("Ruta", pedido.ruta)
+        json.addProperty("DTEDireccion", pedido.dteDireccion)
+        json.addProperty("DTETelefono", pedido.dteTelefono)
+        json.addProperty("DTECorreo",pedido.dteCorreo )
+        json.addProperty("DTECodDepto", pedido.dteCodDepto)
+        json.addProperty("DTECodMunicipio", pedido.dteCodMunicipio)
+        json.addProperty("DTECodPais", pedido.dteCodPais)
+        json.addProperty("DTEPais", pedido.dtePais)
+        //json.addProperty("DTEGiro", infoCliente!!.dteGiro)
+
         //se ordena la cabezera
         val detalle = JsonArray()
         for (i in 0..(pedido.detalle!!.size - 1)) {
             val data = pedido.detalle!!.get(i)
             val d = JsonObject()
+
             d.addProperty("Id", data.Id)
             d.addProperty("Id_pedido", data.Id_pedido)
             d.addProperty("Id_producto", data.Id_producto)
             d.addProperty("Codigo", data.Codigo)
+            d.addProperty("Codigo_de_barra", data.Codigo_de_barra)
             d.addProperty("Descripcion", data.Descripcion)
             d.addProperty("Costo", data.Costo)
             d.addProperty("Costo_iva", data.Costo_iva)
@@ -1379,20 +1454,25 @@ class Detallepedido : AppCompatActivity() {
         canvas.drawText("${infoCliente.Nrc}", 50f, 265f, paint)
 
         paint.isFakeBoldText = true
-        canvas.drawText("NOMBRE SUCURSAL", 50f, 285f, paint)
+        canvas.drawText("ACTIVIDAD ECONOMICA", 50f, 285f, paint)
         paint.isFakeBoldText = false
-        canvas.drawText("${infoPedido.Nombre_sucursal}", 50f, 295f, paint)
+        canvas.drawText("${infoCliente.dteGiro}", 50f, 295f, paint)
 
         paint.isFakeBoldText = true
-        canvas.drawText("ACTIVIDAD ECONOMICA", 50f, 315f, paint)
+        canvas.drawText("NOMBRE SUCURSAL", 50f, 315f, paint)
         paint.isFakeBoldText = false
-        canvas.drawText("${infoCliente.dteGiro}", 50f, 325f, paint)
+        canvas.drawText("${infoPedido.Nombre_sucursal}", 50f, 325f, paint)
+
+        paint.isFakeBoldText = true
+        canvas.drawText("DIRECCION SUCURSAL", 50f, 345f, paint)
+        paint.isFakeBoldText = false
+        canvas.drawText("${infoPedido.Sucursal_Direccion}", 50f, 355f, paint)
 
         //FIN DATOS DEL CLIENTE
 
         // Draw divider line
         paint.isFakeBoldText = true
-        canvas.drawLine(50f, 345f, canvas.width - 50f, 345f, paint)
+        canvas.drawLine(50f, 365f, canvas.width - 50f, 365f, paint)
 
         val fecha = infoPedido.Fecha_creado?.substring(0, 10)
         val documento = when(infoPedido.Tipo_documento){
@@ -1410,37 +1490,37 @@ class Detallepedido : AppCompatActivity() {
 
         //COMPROBANTE DE PAGO
         paint.isFakeBoldText = true
-        canvas.drawText("---- DOCUMENTO TRIBUTARIO ELECTRONICO ----", 50f, 365f, paint)
+        canvas.drawText("---- DOCUMENTO TRIBUTARIO ELECTRONICO ----", 50f, 385f, paint)
 
         paint.isFakeBoldText = true
-        canvas.drawText("TIPO DE DOCUMENTO", 50f, 385f, paint)
+        canvas.drawText("TIPO DE DOCUMENTO", 50f, 405f, paint)
         paint.isFakeBoldText = false
-        canvas.drawText("$documento", 50f, 395f, paint)
+        canvas.drawText("$documento", 50f, 415f, paint)
 
         paint.isFakeBoldText = true
-        canvas.drawText("FECHA EMISION", 50f, 415f, paint)
+        canvas.drawText("FECHA EMISION", 50f, 435f, paint)
         paint.isFakeBoldText = false
-        canvas.drawText("${infoPedido.Fecha_creado}", 50f, 425f, paint)
+        canvas.drawText("${infoPedido.Fecha_creado}", 50f, 445f, paint)
 
         paint.isFakeBoldText = true
-        canvas.drawText("CODIGO DE GENERACION", 50f, 445f, paint)
+        canvas.drawText("CODIGO DE GENERACION", 50f, 465f, paint)
         paint.isFakeBoldText = false
-        canvas.drawText("${infoPedido.dteCodigoGeneracion}", 50f, 455f, paint)
+        canvas.drawText("${infoPedido.dteCodigoGeneracion}", 50f, 475f, paint)
 
         paint.isFakeBoldText = true
-        canvas.drawText("NUMERO DE CONTROL", 50f, 475f, paint)
+        canvas.drawText("NUMERO DE CONTROL", 50f, 495f, paint)
         paint.isFakeBoldText = false
-        canvas.drawText("${infoPedido.dteNumeroControl}", 50f, 485f, paint)
+        canvas.drawText("${infoPedido.dteNumeroControl}", 50f, 505f, paint)
 
         paint.isFakeBoldText = true
-        canvas.drawText("SELLO DE VALIDACION", 50f, 505f, paint)
+        canvas.drawText("SELLO DE VALIDACION", 50f, 525f, paint)
         paint.isFakeBoldText = false
-        canvas.drawText("${infoPedido.dteSelloRecibido}", 50f, 515f, paint)
+        canvas.drawText("${infoPedido.dteSelloRecibido}", 50f, 535f, paint)
 
         paint.isFakeBoldText = true
-        canvas.drawText("TERMINOS", 50f, 535f, paint)
+        canvas.drawText("TERMINOS", 50f, 555f, paint)
         paint.isFakeBoldText = false
-        canvas.drawText("${infoPedido.Terminos}", 50f, 545f, paint)
+        canvas.drawText("${infoPedido.Terminos}", 50f, 565f, paint)
 
         //ESPACIO PARA EL QR
         //ENLACE CON HACIENDA
@@ -1450,12 +1530,12 @@ class Detallepedido : AppCompatActivity() {
         val qrEscarrsa = "https://dte-sismantec.com/DTEEscarrsa/ventas_view.php?editid1=${infoPedido.dteCodigoGeneracion}"
 
         paint.isFakeBoldText = true
-        canvas.drawText("-- VERIFICACION CON HACIENDA --", 50f, 565f, paint)
+        canvas.drawText("-- VERIFICACION CON HACIENDA --", 50f, 575f, paint)
 
         val qrSize = 150 // Tamaño del lado del QR (cuadrado)
         // Posición donde se dibujará el QR en el Canvas
         val qrX = 80f // Posición X
-        val qrY = 575f // Posición Y
+        val qrY = 585f // Posición Y
 
         // GENERAR EL QR PARA HACIENDA
         val writer = QRCodeWriter()

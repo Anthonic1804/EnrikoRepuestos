@@ -182,6 +182,7 @@ class PedidosController {
                     "",
                     "",
                     "",
+                    "",
                     ""
                 )
             }
@@ -227,7 +228,8 @@ class PedidosController {
                     cursor.getString(45),
                     cursor.getString(22),
                     cursor.getString(24),
-                    cursor.getString(21)
+                    cursor.getString(21),
+                    cursor.getString(49)
                 )
                 cursor.close()
             }
@@ -269,7 +271,8 @@ class PedidosController {
                         cdetalle.getInt(17),
                         cdetalle.getFloat(18),
                         cdetalle.getString(19),
-                        cdetalle.getInt(20)
+                        cdetalle.getInt(20),
+                        cdetalle.getString(21)
                     )
                     lista.add(detalle)
                 } while (cdetalle.moveToNext())
