@@ -22,7 +22,7 @@
         <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:minHeight="170dp"
+            android:minHeight="150dp"
             android:padding="5dp">
 
             <de.hdodenhof.circleimageview.CircleImageView
@@ -143,6 +143,7 @@
                 android:textAlignment="center"
                 android:textColor="@color/colorAccent"
                 android:textStyle="bold"
+                android:visibility="gone"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toEndOf="@+id/imgPencil"
                 app:layout_constraintTop_toBottomOf="@+id/txtEnviado"
