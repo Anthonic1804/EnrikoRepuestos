@@ -1708,11 +1708,12 @@ class Detallepedido : AppCompatActivity() {
         val canvasWidth = canvas.width.toFloat()
         val paint2 = Paint().apply {
             isFakeBoldText = true
-            textSize = 12f // Ajusta el tamaño del texto según sea necesario
+            textSize = 14f // Ajusta el tamaño del texto según sea necesario
             textAlign = Paint.Align.CENTER
         }
 
         val texts = listOf(
+            "ENRICO REPUESTOS",
             "J&D IMPORTACION Y VENTAS S.A DE C.V",
             "AV. MASFERRER NORTE, APTO. 15 C.",
             "URB. RES ANTIBES",
@@ -1735,50 +1736,50 @@ class Detallepedido : AppCompatActivity() {
 
         // Draw divider line
         paint.isFakeBoldText = false
-        canvas.drawLine(50f, 160f, canvas.width - 50f, 160f, paint)
+        canvas.drawLine(50f, 185f, canvas.width - 50f, 185f, paint)
 
         paint.isFakeBoldText = true
-        canvas.drawText("---- DATOS DEL CLIENTE ----", 50f, 175f, paint)
+        canvas.drawText("---- DATOS DEL CLIENTE ----", 50f, 200f, paint)
 
         paint.isFakeBoldText = true
-        canvas.drawText("NOMBRE DEL CLIENTE", 50f, 195f, paint)
+        canvas.drawText("NOMBRE DEL CLIENTE", 50f, 215f, paint)
         paint.isFakeBoldText = false
-        canvas.drawText("${infoPedido!!.Nombre_cliente}", 50f, 210f, paint)
+        canvas.drawText("${infoPedido!!.Nombre_cliente}", 50f, 230f, paint)
 
         paint.isFakeBoldText = true
-        canvas.drawText("N.I.T / D.U.I", 50f, 225f, paint)
+        canvas.drawText("N.I.T / D.U.I", 50f, 245f, paint)
         paint.isFakeBoldText = false
-        canvas.drawText("${infoCliente!!.Dui}  ${infoCliente.Nit}", 50f, 240f, paint)
+        canvas.drawText("${infoCliente!!.Dui}  ${infoCliente.Nit}", 50f, 260f, paint)
 
         paint.isFakeBoldText = true
-        canvas.drawText("N.R.C", 50f, 255f, paint)
+        canvas.drawText("N.R.C", 50f, 275f, paint)
         paint.isFakeBoldText = false
-        canvas.drawText("${infoCliente.Nrc}", 50f, 270f, paint)
+        canvas.drawText("${infoCliente.Nrc}", 50f, 290f, paint)
 
         paint.isFakeBoldText = true
-        canvas.drawText("ACTIVIDAD ECONOMICA", 50f, 285f, paint)
+        canvas.drawText("ACTIVIDAD ECONOMICA", 50f, 305f, paint)
         paint.isFakeBoldText = false
-        canvas.drawText("${infoCliente.dteGiro}", 50f, 300f, paint)
+        canvas.drawText("${infoCliente.dteGiro}", 50f, 320f, paint)
 
         paint.isFakeBoldText = true
-        canvas.drawText("NOMBRE SUCURSAL", 50f, 315f, paint)
+        canvas.drawText("NOMBRE SUCURSAL", 50f, 335f, paint)
         paint.isFakeBoldText = false
-        canvas.drawText("${infoPedido.Nombre_sucursal}", 50f, 330f, paint)
+        canvas.drawText("${infoPedido.Nombre_sucursal}", 50f, 350f, paint)
 
         paint.isFakeBoldText = true
-        canvas.drawText("DIRECCION", 50f, 345f, paint)
+        canvas.drawText("DIRECCION", 50f, 365f, paint)
         paint.isFakeBoldText = false
-        canvas.drawText("${infoPedido.Sucursal_Direccion}", 50f, 360f, paint)
+        canvas.drawText("${infoPedido.Sucursal_Direccion}", 50f, 380f, paint)
 
         //FIN DATOS DEL CLIENTE
 
         // Draw divider line
         paint.isFakeBoldText = false
-        canvas.drawLine(50f, 370f, canvas.width - 50f, 370f, paint)
+        canvas.drawLine(50f, 390f, canvas.width - 50f, 390f, paint)
 
         // Draw column headers
         val columnWidths = floatArrayOf(20f, 100f, 60f) // Ancho fijo para cada columna
-        val startY = 385f
+        val startY = 400f
         var y = startY
         val columnX = floatArrayOf(
             50f,
@@ -1888,7 +1889,7 @@ class Detallepedido : AppCompatActivity() {
             textSize = 12f
         }
 
-        var ticketHeight = 360f // Altura del título y la división inicialmente
+        var ticketHeight = 385f // Altura del título y la división inicialmente
 
         // Altura de cada fila de datos
         val lista = pedidosController.obtenerDetallePedido(idpedido, this@Detallepedido)
