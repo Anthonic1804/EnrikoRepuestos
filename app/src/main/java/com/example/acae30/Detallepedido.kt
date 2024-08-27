@@ -1715,9 +1715,8 @@ class Detallepedido : AppCompatActivity() {
         val texts = listOf(
             "ENRICO REPUESTOS",
             "J&D IMPORTACION Y VENTAS S.A DE C.V",
-            "AV. MASFERRER NORTE, APTO. 15 C.",
-            "URB. RES ANTIBES",
-            "SAN SALVADOR, SAN SALVADOR",
+            "COL. SANTA RITA, PASAJE 33, CASA 72,",
+            "CIUDAD DELGADO, SAN SALVADOR",
             "N.R.C : 335730-6",
             "N.I.T : 0614-161023-109-2",
             "VENTA DE PARTES, PIEZAS ",
@@ -1759,7 +1758,7 @@ class Detallepedido : AppCompatActivity() {
         paint.isFakeBoldText = true
         canvas.drawText("ACTIVIDAD ECONOMICA", 50f, 305f, paint)
         paint.isFakeBoldText = false
-        canvas.drawText("${infoCliente.dteGiro}", 50f, 320f, paint)
+        canvas.drawText("${infoCliente.Giro}", 50f, 320f, paint)
 
         paint.isFakeBoldText = true
         canvas.drawText("NOMBRE SUCURSAL", 50f, 335f, paint)
@@ -1769,7 +1768,7 @@ class Detallepedido : AppCompatActivity() {
         paint.isFakeBoldText = true
         canvas.drawText("DIRECCION", 50f, 365f, paint)
         paint.isFakeBoldText = false
-        canvas.drawText("${infoPedido.Sucursal_Direccion}", 50f, 380f, paint)
+        canvas.drawText("${infoCliente.Direccion}", 50f, 380f, paint)
 
         //FIN DATOS DEL CLIENTE
 
