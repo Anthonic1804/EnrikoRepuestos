@@ -1715,7 +1715,7 @@ class Detallepedido : AppCompatActivity() {
         val texts = listOf(
             "ENRICO REPUESTOS",
             "J&D IMPORTACION Y VENTAS S.A DE C.V",
-            "COL. SANTA RITA, PASAJE 33, CASA 72,",
+            "COL. SANTA RITA, PASAJE 33, CASA 74,",
             "CIUDAD DELGADO, SAN SALVADOR",
             "N.R.C : 335730-6",
             "N.I.T : 0614-161023-109-2",

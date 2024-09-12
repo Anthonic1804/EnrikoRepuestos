@@ -194,7 +194,8 @@ class InventarioController {
         var query: String = ""
 
         query = if(busqueda != ""){
-            "SELECT * FROM inventario WHERE Id IN (SELECT docid FROM virtualinventario WHERE virtualinventario MATCH '$busqueda') LIMIT 60"
+            //"SELECT * FROM inventario WHERE Id IN (SELECT docid FROM virtualinventario WHERE virtualinventario MATCH '$busqueda') LIMIT 60"
+            "SELECT * FROM INVENTARIO WHERE Codigo LIKE '%$busqueda%' OR Descripcion LIKE '%$busqueda%' LIMIT 60"
         }else{
             "SELECT * FROM inventario limit 60"
         }
